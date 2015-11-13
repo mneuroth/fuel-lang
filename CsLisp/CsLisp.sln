@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsLisp", "CsLisp.csproj", "{988693BD-974C-4391-8C48-CF294C32CF24}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086F5F10-E21B-40D2-99FE-C90067CCF331} = {086F5F10-E21B-40D2-99FE-C90067CCF331}
+		{217CDF21-2707-4F51-B0DF-AF2B57794DC8} = {217CDF21-2707-4F51-B0DF-AF2B57794DC8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsLispUnitTests", "CsLispUnitTests\CsLispUnitTests.csproj", "{D2516D48-8BAD-46EA-80A1-AB7763B99EF4}"
 EndProject

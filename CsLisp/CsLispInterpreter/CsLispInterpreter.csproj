@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LispCompilerInterface.cs" />
     <Compile Include="LispDebuggerInterface.cs" />
     <Compile Include="LispEnvironment.cs" />
     <Compile Include="LispException.cs" />

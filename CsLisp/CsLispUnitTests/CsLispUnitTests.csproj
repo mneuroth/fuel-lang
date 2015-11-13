@@ -65,6 +65,10 @@
       <Project>{217cdf21-2707-4f51-b0df-af2b57794dc8}</Project>
       <Name>CsLispCompiler</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CsLispDebugger\CsLispDebugger.csproj">
+      <Project>{086f5f10-e21b-40d2-99fe-c90067ccf331}</Project>
+      <Name>CsLispDebugger</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CsLispInterpreter\CsLispInterpreter.csproj">
       <Project>{0b260217-8e2e-4739-b446-489db70aae83}</Project>
       <Name>CsLispInterpreter</Name>

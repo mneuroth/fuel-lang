@@ -13,7 +13,7 @@ namespace CsLisp
     /// The compiler module for FUEL. 
     /// Compiles a Lisp program into a C# program.
     /// </summary>
-    public class LispCompiler
+    public class LispCompiler : ILispCompiler
     {
         #region public methods 
 
@@ -22,7 +22,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="code">The lisp code.</param>
         /// <returns>The C# code packed into a LispVariant</returns>
-        public static LispVariant CompileToCsCode(string code)
+        public /*static*/ LispVariant CompileToCsCode(string code)
         {
             var globalScope = LispEnvironment.CreateDefaultScope();
             var ast = LispParser.Parse(code, globalScope);
@@ -44,7 +44,7 @@ namespace CsLisp
         /// <param name="outputFileName">Name of the output file.</param>
         /// <param name="debug">if set to <c>true</c> use debug option for C# compiler.</param>
         /// <returns></returns>
-        public static CompilerResults CompileCsCodeToAssembly(string csCode, string outputFileName, bool debug = false)
+        public /*static*/ CompilerResults CompileCsCodeToAssembly(string csCode, string outputFileName, bool debug = false)
         {
             var codeProvider = new CSharpCodeProvider();
             var parameters = new CompilerParameters();
@@ -66,7 +66,7 @@ namespace CsLisp
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="exeFileName">Name of the executable file.</param>
         /// <returns></returns>
-        public static LispVariant CompileToExe(string lispCode, string exeFileName)
+        public /*static*/ LispVariant CompileToExe(string lispCode, string exeFileName)
         {
             var csCode = CompileToCsCode(lispCode);
             var exeResult = CompileCsCodeToAssembly(csCode.StringValue, exeFileName);

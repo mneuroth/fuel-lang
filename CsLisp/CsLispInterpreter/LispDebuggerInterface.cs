@@ -13,7 +13,8 @@ namespace CsLisp
         /// </summary>
         /// <param name="initialTopScope">The initial top scope.</param>
         /// <param name="currentAst">The current ast.</param>
-        void InteractiveLoop(LispScope initialTopScope, IList<object> currentAst = null);
+        /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
+        void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false);
 
         /// <summary>
         /// Verifies if the current execution position needes a break,
@@ -23,5 +24,12 @@ namespace CsLisp
         /// <param name="posInfosOfCurrentAstItem">The position infos of current ast item.</param>
         /// <returns>True if a break is needed</returns>
         bool NeedsBreak(LispScope scope, Tuple<int, int> posInfosOfCurrentAstItem);
+
+        /// <summary>
+        /// Loop of the debugger.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        /// <returns>Value of the last expression</returns>
+        LispVariant DebuggerLoop(string[] args);
     }
 }
