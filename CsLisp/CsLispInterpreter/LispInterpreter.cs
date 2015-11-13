@@ -60,44 +60,30 @@ namespace CsLisp
             bool? isSpecialForm = null;
             foreach (var elem in astAsList)
             {
-                if (isSpecialForm != null && (bool)isSpecialForm)
+                if ((isSpecialForm != null && (bool)isSpecialForm) || !IsSymbol(elem))
                 {
                     astWithResolvedValues.Add(elem);
                 }
                 else
                 {
-                    bool isSymbol = false;
-                    if (elem is LispVariant)
+                    var name = elem.ToString();
+                    LispScope foundClosureScope;
+                    // first try to resolve in local scope
+                    if (scope != null && scope.ContainsKey(name))
                     {
-                        var variant = (LispVariant)elem;
-                        isSymbol = variant.IsSymbol;
+                        astWithResolvedValues.Add(scope[name]);
                     }
-
-                    if (isSymbol)
+                        // then try to resolve in closure chain scope(s)
+                    else if (IsInClosureChain(name, scope, out foundClosureScope))
                     {
-                        var name = elem.ToString();
-                        LispScope foundClosureScope;
-                        // first try to resolve in local scope
-                        if (scope != null && scope.ContainsKey(name))
-                        {
-                            astWithResolvedValues.Add(scope[name]);
-                        }
-                            // then try to resolve in closure chain scope(s)
-                        else if (IsInClosureChain(name, scope, out foundClosureScope))
-                        {
-                            astWithResolvedValues.Add(foundClosureScope[name]);
-                        }
-                            // then try to resolve in global scope
-                        else if (scope != null &&
-                                 scope.GlobalScope != null &&
-                                 scope.GlobalScope.ContainsKey(name))
-                        {
-                            astWithResolvedValues.Add(scope.GlobalScope[name]);
-                        }
-                        else
-                        {
-                            astWithResolvedValues.Add(elem);
-                        }
+                        astWithResolvedValues.Add(foundClosureScope[name]);
+                    }
+                        // then try to resolve in global scope
+                    else if (scope != null &&
+                                scope.GlobalScope != null &&
+                                scope.GlobalScope.ContainsKey(name))
+                    {
+                        astWithResolvedValues.Add(scope.GlobalScope[name]);
                     }
                     else
                     {
@@ -196,19 +182,41 @@ namespace CsLisp
                     var args = new List<object>(astAsList);
                     args.RemoveAt(0);
 
-                    fcn.Function(args.ToArray(), globalScope);
-                    return ast;
+                    var macroEvalResult = fcn.Function(args.ToArray(), globalScope);
+                    return macroEvalResult != null ? macroEvalResult : ast;
                 }
             }
 
-// TODO --> maybe expand macros here --> now macros are functions which where evaluated in EvalAst-step after expansion !!!
-// TODO --> expand macro and return evaluated expression...
+            // process macro expansion
+            if (LispEnvironment.IsMacro(astAsList.First(), globalScope))
+            {
+                var macro = LispEnvironment.GetMacro(astAsList.First(), globalScope);
+                if (macro is LispMacroExpand)
+                {
+                    var macroExpand = (LispMacroExpand)macro;
+                    var expression = macroExpand.Expression.ToArray();
+
+                    int i = 1;
+                    foreach(var formalParameter in macroExpand.FormalParameters)
+                    {
+                        // replace formal parameters with actual parameters
+                        LispVariant value = EvalAst(astAsList[i], globalScope);
+                        expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression);
+                        i++;
+                    }
+
+                    expression = EvalAst(expression, globalScope).ListValue.ToArray();
+                    // replace ast with expression !
+                    return expression;
+                }
+            }
 
             var expandedAst = new List<object>();
-            // Expand recursively 
+            // Expand recursively and handle enumarations (make them flat !)
             foreach (var elem in astAsList)
             {
-                expandedAst.Add(ExpandMacros(elem, globalScope));
+                var expandResult = ExpandMacros(elem, globalScope);
+                expandedAst.Add(expandResult);                    
             }
 
             return expandedAst;
@@ -217,6 +225,33 @@ namespace CsLisp
         #endregion
 
         #region private methods
+
+        private static object[] RepaceSymbolWithValueInExpression(LispVariant symbol, LispVariant symbolValue, object[] expression)
+        {
+            for (int i = 0; i < expression.Length; i++)
+            {
+                if (symbol.Equals(expression[i]))
+                {
+                    expression[i] = symbolValue;
+                }
+                else if (LispEnvironment.IsExpression(expression[i]))
+                {
+                    expression[i] = new LispVariant(RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(expression[i]).ToArray()));
+                }
+            }
+            return expression;
+        }
+
+        private static bool IsSymbol(object elem)
+        {
+            bool isSymbol = false;
+            if (elem is LispVariant)
+            {
+                var variant = (LispVariant)elem;
+                isSymbol = variant.IsSymbol;
+            }
+            return isSymbol;
+        }
 
         private static LispVariant EvaluateMacro(object function, IEnumerable<object> rawExpression, LispScope globalScope)
         {

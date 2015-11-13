@@ -175,6 +175,33 @@ namespace CsLisp
     }
 
     /// <summary>
+    /// Class to hold informations about macro expansions
+    /// </summary>
+    public class LispMacroExpand : Tuple<IEnumerable<object>, IEnumerable<object>>
+    {
+        public IEnumerable<object> FormalParameters
+        {
+            get
+            {
+                return Item1;
+            }
+        }
+
+        public IEnumerable<object> Expression
+        {
+            get
+            {
+                return Item2;
+            }
+        }
+
+        public LispMacroExpand(IEnumerable<object> parameters, IEnumerable<object> expression)
+            : base(parameters, expression)
+        {     
+        }
+    }
+
+    /// <summary>
     /// Wrapper for an environment function or special form.
     /// </summary>
     public struct LispFunctionWrapper
@@ -282,13 +309,14 @@ namespace CsLisp
         private const string MapFcn = "map";
         private const string ReduceFcn = "reduce";
         private const string DefineMacro = "define-macro";
-        //private const string DefineMacroExpand = "define-macro-expand";
+        private const string DefineMacroExpand = "define-macro-expand";
         private const string Lambda = "lambda";
         private const string Macros = MetaTag + "macros" + MetaTag;
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
             
         public const string Apply = "apply";
+        public const string Eval = "eval";
         public const string Quote = "quote";
         public const string Quasiquote = "quasiquote";
 
@@ -319,6 +347,25 @@ namespace CsLisp
             return null;
         }
 
+        public static bool IsExpression(object item)
+        {
+            return (item is LispVariant && ((LispVariant)item).IsList) ||
+                   (item is IEnumerable<object>);
+        }
+
+        public static IEnumerable<object> GetExpression(object item)
+        {
+            if (item is LispVariant && ((LispVariant)item).IsList)
+            {
+                return ((LispVariant)item).ListValue;
+            }
+            if (item is IEnumerable<object>)
+            {
+                return (IEnumerable<object>)item;
+            }
+            return new object[0];
+        }
+
         public static LispScope CreateDefaultScope()
         {
             var scope = new LispScope(MainScope);
@@ -336,7 +383,7 @@ namespace CsLisp
             scope["gettrace"] = CreateFunction(GetTracePrint);
 
             // access to .NET
-            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name)");
+            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count");
             scope["call"] = CreateFunction(CallNative, "(call native-obj|class-name [method-name [args...]]|[args...])");    // call native function
             // Macro: (register-native full-class-name lisp-name) --> erzeugt konstruktoren und zugriffsmethoden fuer klasse
             // --> (lisp-name-create args)
@@ -345,6 +392,7 @@ namespace CsLisp
             // interpreter functions
             scope["type"] = CreateFunction(GetType);
             scope["nop"] = CreateFunction(Nop);
+            scope["return"] = CreateFunction(Return);
             scope["print"] = CreateFunction(Print);
 
             scope["string"] = CreateFunction(Addition);
@@ -376,9 +424,12 @@ namespace CsLisp
             scope["first"] = CreateFunction(First);
             scope["rest"] = CreateFunction(Rest);
             scope["nth"] = CreateFunction(Nth);
+            scope["append"] = CreateFunction(Append);
+// TODO --> cons --> (cons 1 (list 2 3)) --> (1 2 3)
             scope["sym"] = CreateFunction(Sym);
 
             scope[Apply] = CreateFunction(ApplyFcn);
+            scope[Eval] = CreateFunction(EvalFcn);
 
             // special forms
             scope["and"] = CreateFunction(and_form, isSpecialForm: true);
@@ -387,7 +438,9 @@ namespace CsLisp
             scope[Gdef] = CreateFunction(gdef_form, isSpecialForm: true);
             scope[Setf] = CreateFunction(setf_form, isSpecialForm: true);
             scope[DefineMacro] = CreateFunction(definemacro_form, isSpecialForm: true, isEvalInExpand: true);
-            //scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
+            scope["macro-expand"] = CreateFunction(macroexpand_form, isSpecialForm: true, isEvalInExpand: true);
+            scope["macro-expand-flat"] = CreateFunction(macroexpandflat_form, isSpecialForm: true, isEvalInExpand: true);
+            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
             scope[Quote] = CreateFunction(quote_form, isSpecialForm: true);
             scope[Quasiquote] = CreateFunction(quasiquote_form, isSpecialForm: true);
             scope[If] = CreateFunction(if_form, isSpecialForm: true);
@@ -462,6 +515,11 @@ namespace CsLisp
         public static LispVariant Nop(object[] args, LispScope scope)
         {
             return new LispVariant();
+        }
+
+        public static LispVariant Return(object[] args, LispScope scope)
+        {
+            return new LispVariant(args[0]);
         }
 
         public static LispVariant GetType(object[] args, LispScope scope)
@@ -621,11 +679,25 @@ namespace CsLisp
             return new LispVariant(elements.ElementAt(index));
         }
 
+        public static LispVariant Append(object[] args, LispScope scope)
+        {
+            var result = new LispVariant(LispType.List, new List<object>());
+            foreach (var listElement in args)
+            {
+                var lst = ((LispVariant)listElement).ListValue;
+                foreach (var item in lst)
+                {
+                    result.Add(item);                    
+                }
+            }
+            return result;
+        }
+
         public static LispVariant Sym(object[] args, LispScope scope)
         {
             CheckArgs("sym", 1, args, scope);
 
-            var symbol = ((LispVariant)args[0]).ToString();
+            var symbol = args[0].ToString();
             return new LispVariant(LispType.Symbol, symbol);
         }
 
@@ -641,6 +713,17 @@ namespace CsLisp
             }
 
             var result = fcn.FunctionValue.Function(evaluatedArgs, scope);
+            return result;
+        }
+
+        public static LispVariant EvalFcn(object[] args, LispScope scope)
+        {
+            CheckArgs("eval", 1, args, scope);
+
+            // convert LispVariant.List --> object[] needed for evaluation
+            var variant = (LispVariant)args[0];
+            object[] code = variant.ListValue.ToArray();
+            var result = LispInterpreter.EvalAst(code, scope);
             return result;
         }
 
@@ -717,36 +800,63 @@ namespace CsLisp
                 macros[args[0].ToString()] = args[1];
             }
 
-            return new LispVariant();
+            return null;
         }
 
-// TODO --> implementieren --> dynamisch code erzeugen und in den Ast einhaengen !
-        //private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
-        //{
-        //    CheckArgs(DefineMacroExpand, 2, args, scope);
+        // TODO --> implementieren --> dynamisch code erzeugen und in den Ast einhaengen !
+        // (define-macro-expand name (args) (expression))
+        private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
+        {
+            CheckArgs(DefineMacroExpand, 3, args, scope);
 
-        //    var macros = scope.GlobalScope[Macros] as LispScope;
-        //    if (macros != null)
-        //    {
-        //        macros[args[0].ToString()] = args[1];
-        //    }
+            var macros = scope.GlobalScope[Macros] as LispScope;
+            if (macros != null)
+            {
+                macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), GetExpression(args[2]));
+            }
 
-        //    return new LispVariant();
-        //}
+            return null;
+        }
+
+// TODO --> ggf. entfernen
+        private static LispVariant macroexpand_form(object[] args, LispScope scope)
+        {
+            CheckArgs(DefineMacro, 1, args, scope);
+
+            return LispInterpreter.EvalAst(args[0], scope);
+        }
+
+// TODO --> ggf. entfernen
+        private static LispVariant macroexpandflat_form(object[] args, LispScope scope)
+        {
+            var result = macroexpand_form(args, scope);
+
+            //if (result is IEnumerable<object>)
+            {
+                var resultList = new List<object>();
+                foreach (var item in GetExpression(result))
+                {
+                    resultList.Add(item);
+                }
+                return new LispVariant(resultList.ToArray());
+            }
+
+            return result;
+        }
 
         public static LispVariant quote_form(object[] args, LispScope scope)
         {
-            CheckArgs("quote", 1, args, scope);
+            CheckArgs(Quote, 1, args, scope);
 
             return new LispVariant(args[0]);
         }
 
         public static LispVariant quasiquote_form(object[] args, LispScope scope)
         {
-            CheckArgs("quasiquote", 1, args, scope);
+            CheckArgs(Quasiquote, 1, args, scope);
 
             // unquote elements of list if needed
-            var lst = (IEnumerable<object>)args[0];
+            var lst = GetExpression(args[0]);
             var ret = new List<object>();
             foreach (var elem in lst)
             {
@@ -770,7 +880,7 @@ namespace CsLisp
 
         public static LispVariant if_form(object[] args, LispScope scope)
         {
-            CheckArgs("if", 3, args, scope);
+            CheckArgs(If, 3, args, scope);
 
             var passed = LispInterpreter.EvalAst(args[0], scope).BoolValue;
             return LispInterpreter.EvalAst(passed ? args[1] : args[2], scope);
@@ -778,7 +888,7 @@ namespace CsLisp
 
         public static LispVariant while_form(object[] args, LispScope scope)
         {
-            CheckArgs("while", 2, args, scope);
+            CheckArgs(While, 2, args, scope);
 
             var result = new LispVariant();
             var condition = LispInterpreter.EvalAst(args[0], scope);
@@ -817,7 +927,8 @@ namespace CsLisp
                     localScope.PushNextScope(childScope);
 
                     var i = 0;
-                    foreach (var arg in (IEnumerable<object>)args[0])
+                    IEnumerable<object> argsEnum = args[0] is LispVariant ? ((LispVariant)args[0]).ListValue : GetExpression(args[0]);
+                    foreach (var arg in argsEnum)
                     {
                         childScope[arg.ToString()] = localArgs[i];
                         i++;
@@ -930,7 +1041,7 @@ namespace CsLisp
         {
             var nativeObjOrClassName = ((LispVariant)args[0]);
 
-            Type nativeClass = null;
+            Type nativeClass;
             if (nativeObjOrClassName.IsString || nativeObjOrClassName.IsSymbol)
             {
                 nativeClass = Type.GetType(nativeObjOrClassName.ToString());
@@ -941,7 +1052,7 @@ namespace CsLisp
             }
 
             MethodInfo[] methods = nativeClass.GetMethods();
-            var result = methods.Where(elem => elem.IsPublic).Select(elem => elem.Name).ToList();
+            var result = methods.Where(elem => elem.IsPublic).Select(elem => new List<object> { elem.Name, elem.GetParameters().Count() }).ToList();
 
             return new LispVariant(result);
         }
@@ -1055,7 +1166,7 @@ namespace CsLisp
         {
             if (arg0 is object[])
             {
-                return (IEnumerable<object>)arg0;
+                return GetExpression(arg0);
             }
             var function = (LispVariant)arg0;
             if (!function.IsList)

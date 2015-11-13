@@ -71,6 +71,27 @@ namespace CsLispUnitTests
         }
 
         [TestMethod]
+        public void Test_DefWithNil()
+        {
+            LispVariant result = Lisp.Eval("(do (def a nil) (print a))");
+            Assert.AreEqual("NIL", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Eval1()
+        {
+            LispVariant result = Lisp.Eval("(eval (list 'def 'x 43))");
+            Assert.AreEqual(43, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Eval2()
+        {
+            LispVariant result = Lisp.Eval("(eval '(def x 456))");
+            Assert.AreEqual(456, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_While1()
         {
             LispVariant result = Lisp.Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))");
@@ -117,6 +138,13 @@ namespace CsLispUnitTests
         {
             LispVariant result = Lisp.Eval("(len '(1 2 3))");
             Assert.AreEqual(3, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_ListAppend()
+        {
+            LispVariant result = Lisp.Eval("(append (list 4 54 3) (list 7 9))");
+            Assert.AreEqual("(4, 54, 3, 7, 9)", result.ToString());
         }
 
         [TestMethod]
@@ -210,6 +238,13 @@ namespace CsLispUnitTests
         public void Test_Macros1()
         {
             LispVariant result = Lisp.Eval("(do (define-macro blub (lambda (x y) (print x y))) (print (quote (1 2 3))) (blub 3 4))");
+            Assert.AreEqual("3 4", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Macros2()
+        {
+            LispVariant result = Lisp.Eval("(do (define-macro-expand blub (x y) '(print x y)) (print (quote (1 2 3))) (blub 3 4))");
             Assert.AreEqual("3 4", result.ToString());
         }
 
@@ -309,6 +344,13 @@ namespace CsLispUnitTests
         {
             LispVariant result = Lisp.Eval("(do (defn addConst (x a) (+ x a)) (def add2 (lambda (x) (addConst x 2))) (print (addConst 8 2)) (print (add2 4)))");
             Assert.AreEqual(6, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Return1()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f (x) (return (+ x x))) (print (f 7)))");
+            Assert.AreEqual(14, result.ToInt());
         }
 
         [TestMethod]
@@ -483,10 +525,27 @@ http://www.mobiflip.de/asus-zenbook-ux303lb-testbericht/
         //    }            
         //}
 
+        // TODO --> flaches expandieren ?
+        //var lstResult = expandResult as IEnumerable<object>;
+        //if (lstResult == null)
+        //{
+        //    var variant = expandResult as LispVariant;
+        //    if (variant != null && variant.IsList)
+        //    {
+        //        lstResult = variant.ListValue;
+        //    }
+        //}
+        //if (lstResult != null)
+        //{
+        //    foreach (var item in lstResult)
+        //    {
+        //        expandedAst.Add(item);
+        //    }
+        //}
+        //else
+
         // csc /debug+ simplebench.cs ..\..\CsLispDll\LispVariant.cs ..\..\CsLispDll\LispToken.cs ..\..\CsLispDll\LispEnvironment.cs ..\..\CsLispDll\LispException.cs ..\..\CsLispDll\LispInterpreter.cs ..\..\CsLispDll\LispDebuggerInterface.cs
         // csc /debug+ simplebench.cs /reference:cslispinterpreter.dll
-
-        
 
         // TODO:
         // source code sauberer und kompakter machen (falls moeglich)
@@ -495,6 +554,8 @@ http://www.mobiflip.de/asus-zenbook-ux303lb-testbericht/
         // unit test: abdeckung verbessern
         // unit test: compiler modus testen
         // unit test: gdef, gdefn, nop, sym
+
+        // module implementieren, z. B. fuer foreach, etc. runtime lib...
 
         // closure fuer compiler modus implementieren --> siehe ClosoureChain
 
