@@ -1,0 +1,1 @@
+zip -r fuel-lang.zip *.sln *.csproj *.cs *.cl *.config *.bat *.sh CsLispInterpreter/*.cs CsLispInterpreter/Properties/*.cs CsLispInterpreter/*.csproj CsLispDebugger/*.cs CsLispDebugger/Properties/*.cs CsLispDebugger/*.csproj CsLispCompiler/*.cs CsLispCompiler/Properties/*.cs CsLispCompiler/*.csproj CsLispUnitTests/*.cs CsLispUnitTests/Properties/*.cs CsLispUnitTests/*.csproj 
