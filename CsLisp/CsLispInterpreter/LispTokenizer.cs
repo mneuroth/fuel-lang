@@ -34,7 +34,6 @@ namespace CsLisp
                 currentTokenStartPos = pos+1;
             };
 
-            //foreach (char ch in code)
             for (int i = 0; i < code.Length; i++)
             {
                 char ch = code[i];

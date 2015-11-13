@@ -21,6 +21,7 @@ namespace CsLisp
         True = 10,
         False = 11,
         Comment = 12,
+        Nil = 13,
     }
 
     /// <summary>
@@ -183,6 +184,11 @@ namespace CsLisp
                 Type = LispTokenType.False;
                 Value = false;
             }
+            else if (text.Equals("nil"))
+            {
+                Type = LispTokenType.Nil;
+                Value = null;
+            }
             else if (text.StartsWith(";"))
             {
                 Type = LispTokenType.Comment;
@@ -218,6 +224,10 @@ namespace CsLisp
         /// </returns>
         public override string ToString()
         {
+            if (Type == LispTokenType.Nil)
+            {
+                return "NIL";
+            }
             return Value.ToString();
         }
 

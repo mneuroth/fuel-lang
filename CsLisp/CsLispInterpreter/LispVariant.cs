@@ -10,15 +10,16 @@ namespace CsLisp
     public enum LispType
     {
         Undefined = 0,
-        Bool = 1,
-        Int = 2,
-        Double = 3,
-        String = 4,
-        List = 5,
-        Function = 6,
-        Symbol = 7,
-        NativeObject = 8,
-        //Array = 9,
+        Nil = 1,
+        Bool = 2,
+        Int = 3,
+        Double = 4,
+        String = 5,
+        List = 6,
+        Function = 7,
+        Symbol = 8,
+        NativeObject = 9,
+        //Array = 10,
         Error = 999
     }
 
@@ -55,6 +56,11 @@ namespace CsLisp
         public LispType Type { get; set; }
 
         public LispToken Token { get; private set; }
+
+        public bool IsNil
+        {
+            get { return Type == LispType.Nil; }
+        }
 
         public bool IsError
         {
@@ -154,6 +160,10 @@ namespace CsLisp
             : this(TypeOf(token.Value), token.Value, unQuoted)
         {
             Token = token;
+            if (token.Type == LispTokenType.Nil)
+            {
+                Type = LispType.Nil;
+            }
             if (token.Type == LispTokenType.Symbol)
             {
                 Type = LispType.Symbol;
@@ -352,6 +362,10 @@ namespace CsLisp
             {
                 return BoolValue ? "#t" : "#f";
             }
+            if (IsNil)
+            {
+                return "NIL";
+            }
             if (IsList)
             {
                 string ret = string.Empty;
@@ -391,6 +405,15 @@ namespace CsLisp
         #endregion
 
         #region Operations
+
+        public override bool Equals(object other)
+        {
+            if (other is LispVariant)
+            {
+                return Value.Equals(((LispVariant)other).Value);                
+            }
+            return false;
+        }
 
         public void Add(object value)
         {
@@ -616,7 +639,7 @@ namespace CsLisp
         private Exception CreateInvalidCastException(string name, string msg = "no")
         {
             var exception = new InvalidCastException(string.Format("{0} {1}", msg, name));
-            exception.Data[LispUtils.LineNo] = Token.LineNo;
+            exception.Data[LispUtils.LineNo] = Token != null ? Token.LineNo : -1;
             return exception;
         }
 
