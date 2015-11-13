@@ -94,7 +94,7 @@ namespace CsLisp
 
         public bool IsList
         {
-            get { return Type == LispType.List; }
+            get { return Type == LispType.List || Type == LispType.Nil; }
         }
 
         public bool IsFunction
@@ -200,6 +200,11 @@ namespace CsLisp
         {
             get
             {
+                // Nil is an empty list () !
+                if (Type == LispType.Nil)
+                {
+                    return new object[0];
+                }
                 if (Type != LispType.List)
                 {
                     throw CreateInvalidCastException("list");

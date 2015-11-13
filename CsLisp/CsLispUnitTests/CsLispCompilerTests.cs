@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CsLisp;
 
 namespace LispUnitTests
@@ -12,9 +11,10 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Compiler()
         {
+            var compiler = new LispCompiler();
             var code = "(print \"Hello world!\")";
-            var result = LispCompiler.CompileToCsCode(code);
-            LispCompiler.CompileCsCodeToAssembly(result.StringValue, CompilerOutputFileName);
+            var result = compiler.CompileToCsCode(code);
+            compiler.CompileCsCodeToAssembly(result.StringValue, CompilerOutputFileName);
             Assert.IsTrue(result.StringValue.Length > 0);
             //Assert.IsTrue(File.Exists(CompilerOutputFileName));
         }

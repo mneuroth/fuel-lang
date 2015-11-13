@@ -32,7 +32,18 @@ namespace CsLisp
 
         #region constructor
 
-        private LispDebugger(List<LispBreakpointInfo> breakpoints = null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LispDebugger"/> class.
+        /// </summary>
+        /// <remarks>
+        /// Public constructor needed for dynamic loading in fuel.exe.
+        /// </remarks>
+        public LispDebugger()
+            : this(null)
+        {            
+        }
+
+        private LispDebugger(List<LispBreakpointInfo> breakpoints)
         {
             IsProgramStop = true;
             IsStopStepFcn = (scope) => true;
@@ -42,63 +53,6 @@ namespace CsLisp
         #endregion
 
         #region public methods
-
-        /// <summary>
-        /// Loop of the debugger.
-        /// </summary>
-        /// <param name="args">The arguments.</param>
-        /// <returns>Value of the last expression</returns>
-        public static LispVariant DebuggerLoop(string[] args)
-        {
-            LispVariant result = null;
-            var bRestart = true;
-            var breakpoints = new List<LispBreakpointInfo>();
-            while (bRestart)
-            {
-                var script = LispUtils.ReadFile(LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault());
-                // if no valid script file name is given, try to use string as script
-                if (script == String.Empty && args.Length > 1)
-                {
-                    script = args[1].Trim(new[] { '"' });
-                }
-
-                var globalScope = LispEnvironment.CreateDefaultScope();
-                var debugger = new LispDebugger(breakpoints);
-                globalScope.Debugger = debugger;
-                debugger.SourceCode = script;
-
-                try
-                {
-                    result = Lisp.Eval(script, globalScope);
-                }
-                catch (LispStopDebuggerException)
-                {
-                    bRestart = false;
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine("Exception: {0}", exception);
-                    int? currentLineNo = exception.Data.Contains(LispUtils.LineNo) ? (int?)exception.Data[LispUtils.LineNo] : null;
-                    bRestart = InteractiveLoop(debugger, globalScope, currentLineNo, startedFromMain: true);                    
-                }
-
-                breakpoints = debugger.Breakpoints;
-
-                if (bRestart)
-                {
-                    Console.WriteLine("restart program");
-
-                    // process empty script --> just start interactive loop
-                    if (result == null)
-                    {
-                        bRestart = InteractiveLoop(debugger, globalScope, startedFromMain: true);
-                    }
-                }
-
-                globalScope.Debugger = null;
-            }
-            return result;
-        }
 
         /// <summary>
         /// Processing of the interactive loop of the debugger.
@@ -125,7 +79,7 @@ namespace CsLisp
             {
                 Console.Write(debugger != null ? DbgPrompt : Prompt);
 
-                string cmd = Console.ReadLine();
+                var cmd = Console.ReadLine();
                 cmd = cmd != null ? cmd.Trim() : null;
 
                 if (cmd == null || cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
@@ -244,7 +198,7 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public void InteractiveLoop(LispScope initialTopScope, IList<object> currentAst = null)
+        public void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false)
         {
             int? currentLineNo = null;
             if (currentAst != null)
@@ -252,7 +206,7 @@ namespace CsLisp
                 currentLineNo = LispInterpreter.GetPosInfo(currentAst[0]).Item2;
                 Console.WriteLine("--> " + currentAst[0] + " " + LispInterpreter.GetPosInfoString(currentAst[0]));
             }
-            InteractiveLoop(this, initialTopScope, currentLineNo);
+            InteractiveLoop(this, initialTopScope, currentLineNo, startedFromMain);
         }
 
         /// <summary>
@@ -266,6 +220,63 @@ namespace CsLisp
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Loop of the debugger.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        /// <returns>Value of the last expression</returns>
+        public LispVariant DebuggerLoop(string[] args)
+        {
+            LispVariant result = null;
+            var bRestart = true;
+            var breakpoints = new List<LispBreakpointInfo>();
+            while (bRestart)
+            {
+                var script = LispUtils.ReadFile(LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault());
+                // if no valid script file name is given, try to use string as script
+                if (script == String.Empty && args.Length > 1)
+                {
+                    script = args[1].Trim(new[] { '"' });
+                }
+
+                var globalScope = LispEnvironment.CreateDefaultScope();
+                var debugger = new LispDebugger(breakpoints);
+                globalScope.Debugger = debugger;
+                debugger.SourceCode = script;
+
+                try
+                {
+                    result = Lisp.Eval(script, globalScope);
+                }
+                catch (LispStopDebuggerException)
+                {
+                    bRestart = false;
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine("Exception: {0}", exception);
+                    int? currentLineNo = exception.Data.Contains(LispUtils.LineNo) ? (int?)exception.Data[LispUtils.LineNo] : null;
+                    bRestart = InteractiveLoop(debugger, globalScope, currentLineNo, startedFromMain: true);
+                }
+
+                breakpoints = debugger.Breakpoints;
+
+                if (bRestart)
+                {
+                    Console.WriteLine("restart program");
+
+                    // process empty script --> just start interactive loop
+                    if (result == null)
+                    {
+                        bRestart = InteractiveLoop(debugger, globalScope, startedFromMain: true);
+                    }
+                }
+
+                globalScope.Debugger = null;
+            }
+            return result;
         }
 
         #endregion
@@ -461,9 +472,9 @@ namespace CsLisp
             Console.WriteLine("  about             : show informations about this interpreter");
             Console.WriteLine("  (c)ode            : show the program code");
             Console.WriteLine("  stac(k)           : show the current call stack");
-            Console.WriteLine("  (u)shift          : go one step up in call stack");
+            Console.WriteLine("  (u)p              : go one step up in call stack");
             Console.WriteLine("  (d)own            : go one step down in call stack");
-            Console.WriteLine("  (r)un             : execute program");
+            Console.WriteLine("  (r)un             : execute the program");
             Console.WriteLine("  (s)tep            : step into function");
             Console.WriteLine("  o(v)er            : step over function");
             Console.WriteLine("  (o)ut             : step out of function");

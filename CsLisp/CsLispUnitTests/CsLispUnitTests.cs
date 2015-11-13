@@ -363,15 +363,50 @@ namespace CsLispUnitTests
         [TestMethod]
         public void Test_Apply1()
         {
-            LispVariant result = Lisp.Eval("(apply (lambda (x) (print \"hello\" x)) 55)");
+            LispVariant result = Lisp.Eval("(apply (lambda (x) (print \"hello\" x)) '(55))");
             Assert.AreEqual("hello 55", result.ToString());
         }
 
         [TestMethod]
         public void Test_Apply2()
         {
-            LispVariant result = Lisp.Eval("(do (def f (lambda (x) (+ x x))) (apply f 5))");
+            LispVariant result = Lisp.Eval("(do (def f (lambda (x) (+ x x))) (apply f '(5)))");
             Assert.AreEqual(10, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Apply3()
+        {
+            LispVariant result = Lisp.Eval("(do (def f '+) (apply f '(5 6 7)))");
+            Assert.AreEqual(18, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Cons1()
+        {
+            LispVariant result = Lisp.Eval("(cons 1 2)");
+            Assert.AreEqual("(1, 2)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Cons2()
+        {
+            LispVariant result = Lisp.Eval("(cons 1 '(2 3 4))");
+            Assert.AreEqual("(1, 2, 3, 4)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Cons3()
+        {
+            LispVariant result = Lisp.Eval("(cons 12)");
+            Assert.AreEqual("(12)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Cons4()
+        {
+            LispVariant result = Lisp.Eval("(cons)");
+            Assert.AreEqual("()", result.ToString());
         }
 
         [TestMethod]
@@ -567,8 +602,8 @@ http://www.mobiflip.de/asus-zenbook-ux303lb-testbericht/
         //http://stackoverflow.com/questions/11501697/programmatically-call-c-sharp-compiler-to-compile-c-sharp-code
 
         // Name? --> LispInfo ggf. umbenennen?
-        // environment: file io implementieren
-        // environment: math funktionen implementieren
+        // environment: file io implementieren --> makros fuer File class verwenden
+        // environment: math funktionen implementieren --> makros verwenden
         // environment: hoehere Datentypen wie array/dyn-liste und map implementieren
 
         // native calls verbessern --> type mapping implementieren --> ggf. reflection optimieren --> lambda zurueckgeben?
@@ -619,6 +654,7 @@ http://www.mobiflip.de/asus-zenbook-ux303lb-testbericht/
         // debugger commands: stepout, step over, step into, callstack up/down
         // breakpoints angeben
         // lamba mit closures testen
+        // harte referenzen entfernen: compiler und ggf. debugger
 
         /*
                     //LispVariant variant = args[0] as LispVariant;

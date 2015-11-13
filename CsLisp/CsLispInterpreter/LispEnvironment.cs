@@ -420,9 +420,12 @@ namespace CsLisp
             scope["list"] = CreateFunction(CreateList);
             scope[MapFcn] = CreateFunction(Map, "(map func list)");
             scope[ReduceFcn] = CreateFunction(Reduce, "(reduce func list initial)");
+            scope["cons"] = CreateFunction(Cons);
             scope["len"] = CreateFunction(Length);
             scope["first"] = CreateFunction(First);
+            scope["car"] = CreateFunction(First);
             scope["rest"] = CreateFunction(Rest);
+            scope["cdr"] = CreateFunction(Rest);
             scope["nth"] = CreateFunction(Nth);
             scope["append"] = CreateFunction(Append);
 // TODO --> cons --> (cons 1 (list 2 3)) --> (1 2 3)
@@ -646,6 +649,31 @@ namespace CsLisp
             return result;
         }
 
+        public static LispVariant Cons(object[] args, LispScope scope)
+        {
+            var result = new LispVariant(LispType.List, new List<object>());
+            if (args.Length > 0)
+            {
+                result.Add(args[0]);                
+            }
+            if (args.Length > 1)
+            {
+                var item2 = (LispVariant)args[1];
+                if (item2.IsList)
+                {
+                    foreach (var item in item2.ListValue)
+                    {
+                        result.Add(item);
+                    }
+                }
+                else
+                {
+                    result.Add(args[1]);                    
+                }
+            }
+            return result;
+        }
+
         public static LispVariant Length(object[] args, LispScope scope)
         {
             CheckArgs("len", 1, args, scope);
@@ -704,16 +732,34 @@ namespace CsLisp
         // used also for processing macros !
         public static LispVariant ApplyFcn(object[] args, LispScope scope)
         {
-            var fcn = (LispVariant)args[0];
+            CheckArgs(Apply, 2, args, scope);
 
-            var evaluatedArgs = new object[args.Length - 1];
-            for (int i = 0; i < evaluatedArgs.Length; i++)
+            var fcn = LispInterpreter.EvalAst(args[0], scope);
+            if (fcn.IsList)
             {
-                evaluatedArgs[i] = LispInterpreter.EvalAst(args[i + 1], scope);
+                fcn = LispInterpreter.EvalAst(fcn, scope);
+                if (!fcn.IsFunction)
+                {
+                    return fcn;
+                }
             }
 
-            var result = fcn.FunctionValue.Function(evaluatedArgs, scope);
-            return result;
+            var arguments = (LispVariant)args[1];
+
+            if (arguments.IsList)
+            {
+                var argumentsArray = arguments.ListValue.ToArray();
+                var evaluatedArgs = new object[argumentsArray.Length];
+                for (int i = 0; i < evaluatedArgs.Length; i++)
+                {
+                    evaluatedArgs[i] = LispInterpreter.EvalAst(argumentsArray[i], scope);
+                }
+
+                var result = fcn.FunctionValue.Function(evaluatedArgs, scope);
+                return result;
+            }
+
+            throw new LispException("expected list as arguments in apply");
         }
 
         public static LispVariant EvalFcn(object[] args, LispScope scope)

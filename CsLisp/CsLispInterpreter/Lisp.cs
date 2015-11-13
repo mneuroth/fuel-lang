@@ -42,7 +42,7 @@ namespace CsLisp
         public const string Version = "v0.99.1";
         public const string Platform = ".NET/C#";
 
-        public const string Date = "30.10.2015";
+        public const string Date = "11.11.2015";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Info = Name + " is a fast usable embeddable lisp interpreter";
