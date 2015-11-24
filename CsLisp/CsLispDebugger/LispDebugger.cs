@@ -405,12 +405,12 @@ namespace CsLisp
                 else
                 {
                     Console.WriteLine("Really delete all breakpoints? (y/n)");
-                    ConsoleKeyInfo key;
+					string answer;
                     do
                     {
-                        key = Console.ReadKey();
-                    } while (char.ToUpper(key.KeyChar) != 'Y' && char.ToUpper(key.KeyChar) != 'N');
-                    if (char.ToUpper(key.KeyChar) == 'Y')
+						answer = Console.ReadLine().ToUpper();
+					} while (!(answer == "Y" || answer == "N" || answer == "YES" || answer == "NO"));
+					if (answer == "Y" || answer == "YES")
                     {
                         debugger.ClearAllBreakpoints();
                     }
