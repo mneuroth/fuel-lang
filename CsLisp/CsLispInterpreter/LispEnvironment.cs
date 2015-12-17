@@ -752,7 +752,8 @@ namespace CsLisp
                 var evaluatedArgs = new object[argumentsArray.Length];
                 for (int i = 0; i < evaluatedArgs.Length; i++)
                 {
-                    evaluatedArgs[i] = LispInterpreter.EvalAst(argumentsArray[i], scope);
+                    // apply is no special form --> arguments are already evaluated !
+                    evaluatedArgs[i] = argumentsArray[i]; // old: LispInterpreter.EvalAst(argumentsArray[i], scope);
                 }
 
                 var result = fcn.FunctionValue.Function(evaluatedArgs, scope);
