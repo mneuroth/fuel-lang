@@ -232,6 +232,7 @@ namespace CsLisp
             }
 
             // process macro expansion
+// TODO --> auch fuer die Parameter die macros expandieren !
             if (LispEnvironment.IsMacro(astAsList.First(), globalScope))
             {
                 var macro = LispEnvironment.GetMacro(astAsList.First(), globalScope);
@@ -250,6 +251,8 @@ namespace CsLisp
                     }
 
                     //TODO working gulp: 
+// TODO working gulp --> rekursives Makro Expandieren unterstuetzen !!!
+
 // TODO --> lokalen Scope fuer macro ausfuehrung anlegen
 // TODO --> im code definierte funktionen sind bei expandierung der Macros noch nicht bekannt !!!
                     //var expressionRet = EvalAst(expression, globalScope).ListValue.ToArray();
