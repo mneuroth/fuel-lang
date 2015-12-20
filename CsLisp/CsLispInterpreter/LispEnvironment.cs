@@ -320,6 +320,9 @@ namespace CsLisp
         public const string Quote = "quote";
         public const string Quasiquote = "quasiquote";
 
+        public const string Sym = "sym";
+        public const string Str = "str";
+
         private const string BadArgumentCount = "bad argument count in ";
 
         #endregion
@@ -428,8 +431,8 @@ namespace CsLisp
             scope["cdr"] = CreateFunction(Rest);
             scope["nth"] = CreateFunction(Nth);
             scope["append"] = CreateFunction(Append);
-// TODO --> cons --> (cons 1 (list 2 3)) --> (1 2 3)
-            scope["sym"] = CreateFunction(Sym);
+            scope[Sym] = CreateFunction(Symbol);
+            scope[Str] = CreateFunction(ConvertToString);
 
             scope[Apply] = CreateFunction(ApplyFcn);
             scope[Eval] = CreateFunction(EvalFcn);
@@ -721,12 +724,20 @@ namespace CsLisp
             return result;
         }
 
-        public static LispVariant Sym(object[] args, LispScope scope)
+        public static LispVariant Symbol(object[] args, LispScope scope)
         {
-            CheckArgs("sym", 1, args, scope);
+            CheckArgs(Sym, 1, args, scope);
 
             var symbol = args[0].ToString();
             return new LispVariant(LispType.Symbol, symbol);
+        }
+
+        public static LispVariant ConvertToString(object[] args, LispScope scope)
+        {
+            CheckArgs(Str, 1, args, scope);
+
+            var value = args[0].ToString();
+            return new LispVariant(LispType.String, value);
         }
 
         // used also for processing macros !
@@ -749,14 +760,15 @@ namespace CsLisp
             if (arguments.IsList)
             {
                 var argumentsArray = arguments.ListValue.ToArray();
-                var evaluatedArgs = new object[argumentsArray.Length];
-                for (int i = 0; i < evaluatedArgs.Length; i++)
-                {
-                    // apply is no special form --> arguments are already evaluated !
-                    evaluatedArgs[i] = argumentsArray[i]; // old: LispInterpreter.EvalAst(argumentsArray[i], scope);
-                }
+                //var evaluatedArgs = new object[argumentsArray.Length];
+                //for (int i = 0; i < evaluatedArgs.Length; i++)
+                //{
+                //    // apply is no special form --> arguments are already evaluated !
+                //    evaluatedArgs[i] = argumentsArray[i]; // old: LispInterpreter.EvalAst(argumentsArray[i], scope);
+                //}
 
-                var result = fcn.FunctionValue.Function(evaluatedArgs, scope);
+                //var result = fcn.FunctionValue.Function(evaluatedArgs, scope);
+                var result = fcn.FunctionValue.Function(argumentsArray, scope);
                 return result;
             }
 
