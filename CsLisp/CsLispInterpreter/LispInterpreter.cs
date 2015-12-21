@@ -217,7 +217,8 @@ namespace CsLisp
             {
                 return ast;
             }
-            var functionName = astAsList.First().ToString();
+            var function = astAsList.First();
+            var functionName = function.ToString();
             if (globalScope != null && globalScope.ContainsKey(functionName))
             {
                 var fcn = ((LispVariant)globalScope[functionName]).FunctionValue;
@@ -232,10 +233,9 @@ namespace CsLisp
             }
 
             // process macro expansion
-// TODO --> auch fuer die Parameter die macros expandieren !
-            if (LispEnvironment.IsMacro(astAsList.First(), globalScope))
+            if (LispEnvironment.IsMacro(function, globalScope))
             {
-                var macro = LispEnvironment.GetMacro(astAsList.First(), globalScope);
+                var macro = LispEnvironment.GetMacro(function, globalScope);
                 if (macro is LispMacroExpand)
                 {
                     var macroExpand = (LispMacroExpand)macro;
@@ -252,11 +252,17 @@ namespace CsLisp
 
                     //TODO working gulp: 
 // TODO working gulp --> rekursives Makro Expandieren unterstuetzen !!!
-
-// TODO --> lokalen Scope fuer macro ausfuehrung anlegen
 // TODO --> im code definierte funktionen sind bei expandierung der Macros noch nicht bekannt !!!
-                    //var expressionRet = EvalAst(expression, globalScope).ListValue.ToArray();
-                    var expressionRet = expression;
+
+                    // create local scope for macro execution
+                    var macroScope = new LispScope("macro_scope", globalScope);
+                    globalScope.PushNextScope(macroScope);
+
+                    var expressionRet = EvalAst(expression, macroScope).ListValue.ToArray();
+                    //TEST only: var expressionRet = expression;
+
+                    globalScope.PopNextScope();
+
                     // replace ast with expression !
                     return expressionRet;
                 }

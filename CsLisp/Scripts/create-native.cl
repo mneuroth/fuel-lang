@@ -1,4 +1,5 @@
 (do
+    
   (defn f (x) 
      (do
         (gdefn g (x)
@@ -109,26 +110,28 @@
 	  )
   )
   
+  ;; Macro --> code waehrend compilier/parse phase ausfuehren/evaluieren und resultat der evaluation als code interpretieren
+  
   ;; create list of symbols: (call obj methodName p1 p2 p3 p4)
-  (define-macro-expand create-call (methodName argCount)
+  (defn create-call (methodName argCount)
       (do
-         (def result (list))
-         (setf result (append result (list 'call)))
-         (setf result (append result (list 'obj)))
-         (setf result (append result (list (str methodName))))
+         (def _result (list))
+         (setf _result (append _result (list 'call)))
+         (setf _result (append _result (list 'obj)))
+         (setf _result (append _result (list (str methodName))))
          (def i 0)
          (while (< i argCount)
            (do 
-             (setf result (append result (list (+ "p" (string i)))))
+             (setf _result (append _result (list (+ "p" (string i)))))
   			 (setf i (+ i 1))
            )
          )
-         (return result)
+         (return _result)
       )
   )
 
   ;; create list of symbols count=4 --> (p1 p2 p3 p4)
-  (define-macro-expand arg-list (argCount)
+  (defn arg-list (argCount)
      (do
          (def result (list))
          (def i 0)
@@ -143,11 +146,10 @@
   )
 
   ;; create list of symbols count=4 --> (obj p1 p2 p3 p4)
-  (define-macro-expand obj-arg-list (argCount)
+  (defn obj-arg-list (argCount)
      (do
          (def result (list))
          (setf result (append result (list 'obj)))
-;; TODO --> intra macro aufruf, geht das ?    --> ExpandMacros muss rekursiv erfolgen...      
          (setf result (append result (arg-list argCount)))
          (return result)
      )
@@ -168,34 +170,30 @@
 			     (def methodArgsCount (nth 1 methodNameAndArgCount))
 			     (print "create method=" methodName methodCount (make-args-string methodArgsCount))
 
-				 (if (= methodArgsCount 0)
-				   (gdefn (sym (string lisp-name "-" methodName)) (this) (call this methodName)) 
-				   (nop))
-				 (if (> methodArgsCount 0)
-				   (gdefn 
-					  (sym (string lisp-name "-" methodName))        ; function name
-						;(macro-expand (make-args methodArgsCount))   ; formal arguments
-						(arg-list methodArgsCount)   ; formal arguments
-; todo --> list flach klopfen !
-                          ; make something like: (call obj "Function-Name" argument1 argument2 ...)
-						  (create-call methodName methodArgCount)      ; code
-						  ;(call (append (list this methodName) (macro-expand (make-args-no-this methodArgsCount))))      ; code
-		           )
-				   ;(gdefn (sym (string lisp-name "-" methodName)) (this p1) (call this methodName p1)) 
-				   (nop))  			     
+;;				 (if (= methodArgsCount 0)
+;;				   (gdefn 
+;;                       (sym (string lisp-name "-" methodName))      ; function name
+;;                       (this)                                       ; formal arguments
+;;                       (call this methodName))                      ; code
+;;				   (nop))  ; else
+				 (if (>= methodArgsCount 0)
+                   (do
+  				     (gdefn 
+					    (sym (string lisp-name "-" methodName))     ; function name
+                        (obj-arg-list methodArgsCount)              ; formal arguments
+                        ; make something like: (call obj "Function-Name" argument1 argument2 ...)
+				        (create-call methodName methodArgsCount)    ; code
+		             )                   
+                   )
+				   (nop)) ; else
 			   )
 			))
         )     
   )
   
-;;  (define-macro-expand create_method (name blub) 
-;;    (do
-;;        ()
-;;    )
-;;  )
-
   (defn test_macro (x lisp-name methodName methodArgsCount) 
      (do
+         
         (gdefn macro_fcn (x)
             (* x x x)
         )
@@ -204,19 +202,18 @@
 		  (sym (string lisp-name "-" methodName))          
           (a b c)
           (+ a b c)
-;;			(macro-expand (make-args methodArgsCount))      
-;;			(call (append (list this methodName) (macro-expand (make-args-no-this methodArgsCount))))  
         )
        
         (print "test_macro" x)
-        (print List-blub 1 2 3)
-        (print (List-blub 1 2 3))
      )  
   )
 
   (print "test macro...")
   (test_macro 7 "List" "blub" 3)
+        (print List-blub 1 2 3)
+        (print (List-blub 1 2 3))
   (print "done.")
+  
 ;;  (print (make-args-string 8))
 ;;  (def s1 "blub")
 ;;  (def s2 "hallo")
@@ -228,6 +225,7 @@
 ;;  (print (f 5))
 ;;  (print (g 4))
 ;;  (print "try macro...")
+
   (gdefn (sym (string "create-" "ListX")) () (call "System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]"))
   (print "....")
   (create-native "List" "System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]")
@@ -240,15 +238,16 @@
   (call obj "Add" 5)
   (call obj "Add" 6)
   (print "added elements phase 1")
-  (print (arg-list 8))
-  (print (create-call "test" 4))
+;  (print (arg-list 8))
+;  (print (create-call "test" 4))
 ;;TODO  
-  (print (obj-arg-list 8))
-;;^^  (List-Add obj 7)
-;;  (print "added elements")
-;;  (List-get_Count obj)
+;  (print (obj-arg-list 8))
+  (List-Add obj 7)
+  (print "added elements")
+  (List-get_Count obj)
 ;;  (print "added elements #2")
 ;;  (print (call obj "get_Count"))
 ;;  (print "(2)")
 ;;  (print obj)
+
 )

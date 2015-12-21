@@ -862,7 +862,7 @@ namespace CsLisp
             return null;
         }
 
-        // TODO --> implementieren --> dynamisch code erzeugen und in den Ast einhaengen !
+// TODO --> implementieren --> dynamisch code erzeugen und in den Ast einhaengen !
         // (define-macro-expand name (args) (expression))
         private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
         {
@@ -871,7 +871,8 @@ namespace CsLisp
             var macros = scope.GlobalScope[Macros] as LispScope;
             if (macros != null)
             {
-                macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), GetExpression(args[2]));
+                // allow macros in macros --> recursive call for ExpandMacros()
+                macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), LispInterpreter.ExpandMacros(GetExpression(args[2]), scope) as IEnumerable<object>);
             }
 
             return null;
@@ -977,7 +978,7 @@ namespace CsLisp
 
         public static LispVariant fn_form(object[] args, LispScope scope)
         {
-            var name = scope.UserData != null ? scope.UserData.ToString() : AnonymousScope;
+            string name = scope.UserData != null ? scope.UserData.ToString() : AnonymousScope;
 
             Func<object[], LispScope, LispVariant> fcn =
                 (localArgs, localScope) =>
@@ -1251,7 +1252,7 @@ namespace CsLisp
             CheckArgs(name, 3, args, scope);
 
             var fn = ((LispVariant)scope.GlobalScope[Fn]).FunctionValue;
-            scope.UserData = args[0].ToString();
+            scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
             var resFn = fn.Function(new[] { args[1], args[2] }, scope);
             scope.UserData = null;
 
