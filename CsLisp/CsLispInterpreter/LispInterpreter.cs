@@ -293,7 +293,12 @@ namespace CsLisp
                 }
                 else if (LispEnvironment.IsExpression(expression[i]))
                 {
-                    expression[i] = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(expression[i]).ToArray());
+// TODO working gulp --> hier wird aus LispVariant.List --> object[] --> bei (x) nicht durchfuehren wenn es 
+                    IEnumerable<object> temp = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(expression[i]).ToArray());
+                    if (expression[i] != temp)
+                    {
+                        expression[i] = temp.ToArray();
+                    }
                 }
             }
             return expression;
