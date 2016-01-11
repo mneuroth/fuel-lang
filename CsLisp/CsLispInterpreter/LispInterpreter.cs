@@ -190,6 +190,7 @@ namespace CsLisp
             {
                 var needEvaluation = (astWithResolvedValues[i] is IEnumerable<object>) &&
                                      !functionWrapper.IsSpecialForm;
+// TODO gulp --> hier ggf. object[] in LispValue.List umwandlen? bei quote arguments
                 arguments[i - 1] = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
             }
 

@@ -379,6 +379,8 @@ namespace CsLisp
             scope[Traceon] = false;
 
             // infrastructure functions
+            scope["fuel"] = CreateFunction(Fuel);
+            scope["copyright"] = CreateFunction(Copyright);
             scope["help"] = CreateFunction(Help);
             scope["break"] = CreateFunction(Break);
             scope["vars"] = CreateFunction(Vars);
@@ -464,6 +466,20 @@ namespace CsLisp
         #endregion
 
         #region functions: infrastructure and debugging
+
+        private static LispVariant Fuel(object[] args, LispScope scope)
+        {
+            var text = new StringBuilder();
+            text.Append(string.Format("fuel version {0} from {1}", Lisp.Version, Lisp.Date));
+            return new LispVariant(text.ToString());
+        }
+
+        private static LispVariant Copyright(object[] args, LispScope scope)
+        {
+            var text = new StringBuilder();
+            text.Append(string.Format("Copyright: {0} {1}", Lisp.License, Lisp.LicenseUrl));
+            return new LispVariant(text.ToString());
+        }
 
         private static LispVariant Help(object[] args, LispScope scope)
         {
