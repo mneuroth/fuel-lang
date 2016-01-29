@@ -1,4 +1,6 @@
 (do
+
+  ;(import fuellib)
     
   (defn f (x) 
      (do
@@ -24,6 +26,21 @@
 		 )
 	   )
 	 )
+  )
+  
+  (define-macro foreach-macro
+      (lambda (container fcn) 
+        (do 
+    	   (def i 0)
+    	   (def max (len container))
+    	   (while (< i max)
+    	     (do 
+    		   (apply fcn (list (nth i container)))
+    		   (setf i (+ i 1))
+    		 )
+    	   )        
+        )
+      )
   )
 
   (defn make-args-string (count) 
@@ -163,7 +180,8 @@
 			
 			(def methods (native-methods full-class-name))
 			(print "length=" (len methods))
-			(foreach methods (lambda (methodNameAndArgCount) 
+;; TODO gulp --> hier geht anscheinend etwas mit dem Stack daneben, die Variable methods ist im foreach-macro NICHT mehr auf dem Stack wo sie sein sollte !!!            
+			(foreach-macro methods (lambda (methodNameAndArgCount) 
 			   (do 
                  (print "arg=" methodNameAndArgCount)  
 			     (def methodName (first methodNameAndArgCount))

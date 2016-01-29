@@ -162,7 +162,6 @@ namespace CsLisp
                 astAsList = ((IEnumerable<object>)ast).ToList();                
             }
 
-
             if (astAsList.Count == 0)
             {
                 return new LispVariant(LispType.Nil);
@@ -239,14 +238,25 @@ namespace CsLisp
                 if (macro is LispMacroExpand)
                 {
                     var macroExpand = (LispMacroExpand)macro;
-                    var expression = macroExpand.Expression.ToArray();
+                    var expression = macroExpand.Expression/*.ToArray()*/;
 
                     int i = 1;
                     foreach(var formalParameter in macroExpand.FormalParameters)
                     {
                         // replace formal parameters with actual parameters
                         LispVariant value = EvalAst(astAsList[i], globalScope);
-                        expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression);
+                        bool replacedAnything = false;
+                        expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression, ref replacedAnything);
+                        // the followint code is not needed anymore, because the 
+                        // LispVariant.ToString() was imprived for nicer printing of expressions
+                        // 
+                        //if (replacedAnything)
+                        //{
+                        //    // needed for nice dumping of expressions, 
+                        //    // ReplaceSymbolWithValueInExpression() transformates parts of the expression into List<object> elements
+                        //    // but may be LisVariant.List elements or object[] !
+                        //    expression = NormalizeToLists(expression);                            
+                        //}
                         i++;
                     }
 
@@ -259,7 +269,6 @@ namespace CsLisp
                     globalScope.PushNextScope(macroScope);
 
                     var expressionRet = EvalAst(expression, macroScope).ListValue.ToArray();
-                    //TEST only: var expressionRet = expression;
 
                     globalScope.PopNextScope();
 
@@ -283,20 +292,43 @@ namespace CsLisp
 
         #region private methods
 
-        private static object[] RepaceSymbolWithValueInExpression(LispVariant symbol, LispVariant symbolValue, object[] expression)
+        ///// <summary>
+        ///// Normalizes to lists. Replaces all LispVariant-Lists with List{object}
+        ///// </summary>
+        ///// <param name="expression">The expression.</param>
+        ///// <returns></returns>
+        //private static IEnumerable<object> NormalizeToLists(IEnumerable<object> expression)
+        //{
+        //    LispVariant symbol = new LispVariant("_");
+        //    LispVariant replace = new LispVariant("_");
+        //    bool ignore = false;
+        //    return RepaceSymbolWithValueInExpression(symbol, replace, expression, ref ignore);
+        //}
+
+        private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, LispVariant symbolValue, IEnumerable<object> expression, ref bool replacedAnything)
         {
-            for (int i = 0; i < expression.Length; i++)
+            var ret = new List<object>();
+            foreach(var elem in expression)
             {
-                if (symbol.Equals(expression[i]))
+                // is the current element the symbol which should be replaced? --> Yes
+                if (symbol.SymbolCompare(elem))
                 {
-                    expression[i] = symbolValue;
+                    ret.Add(symbolValue);
+                    replacedAnything = true;
                 }
-                else if (LispEnvironment.IsExpression(expression[i]))
+                // is it an expression? --> recursive call
+                else if (LispEnvironment.IsExpression(elem))
                 {
-                    expression[i] = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(expression[i]).ToArray());
+                    IEnumerable<object> temp = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(elem)/*.ToArray()*/, ref replacedAnything);
+                    ret.Add(temp);
+                }
+                // current element is not the symbol which should by replaced !
+                else
+                {
+                    ret.Add(elem);
                 }
             }
-            return expression;
+            return ret;
         }
 
         private static bool IsSymbol(object elem)

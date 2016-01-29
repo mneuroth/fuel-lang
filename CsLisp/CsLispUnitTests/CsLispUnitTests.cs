@@ -1,4 +1,5 @@
 ﻿using System;
+using LispUnitTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CsLisp;
 
@@ -116,7 +117,7 @@ namespace CsLispUnitTests
         public void Test_AddLists()
         {
             LispVariant result = Lisp.Eval("(+ '(1 2 3) '(\"hello\" 2.3 42))");
-            Assert.AreEqual("(1, 2, 3, hello, 2.3, 42)", result.ToString());
+            Assert.AreEqual("(1 2 3 hello 2.3 42)", result.ToString());
         }
 
         [TestMethod]
@@ -130,7 +131,7 @@ namespace CsLispUnitTests
         public void Test_ListRest()
         {
             LispVariant result = Lisp.Eval("(rest '(1 2 3))");
-            Assert.AreEqual("(2, 3)", result.ToString());
+            Assert.AreEqual("(2 3)", result.ToString());
         }
 
         [TestMethod]
@@ -144,42 +145,42 @@ namespace CsLispUnitTests
         public void Test_ListAppend()
         {
             LispVariant result = Lisp.Eval("(append (list 4 54 3) (list 7 9))");
-            Assert.AreEqual("(4, 54, 3, 7, 9)", result.ToString());
+            Assert.AreEqual("(4 54 3 7 9)", result.ToString());
         }
 
         [TestMethod]
         public void Test_LogicalOperators()
         {
             LispVariant result = Lisp.Eval("(list (and #t #f) (and #t #t) (or #t #f) (or #f #f) (or #t #f #t))");
-            Assert.AreEqual("(#f, #t, #t, #f, #t)", result.ToString());
+            Assert.AreEqual("(#f #t #t #f #t)", result.ToString());
         }
 
         [TestMethod]
         public void Test_CompareOperators1()
         {
             LispVariant result = Lisp.Eval("(list (= 1 2) (= 4 4) (== \"blub\" \"blub\") (== #t #f) (equal 3 4))");
-            Assert.AreEqual("(#f, #t, #t, #f, #f)", result.ToString());
+            Assert.AreEqual("(#f #t #t #f #f)", result.ToString());
         }
 
         [TestMethod]
         public void Test_CompareOperators2()
         {
             LispVariant result = Lisp.Eval("(list (< 1 2) (< 4 1) (> 5 2) (> 1 3) (> 4.0 4.0))");
-            Assert.AreEqual("(#t, #f, #t, #f, #f)", result.ToString());
+            Assert.AreEqual("(#t #f #t #f #f)", result.ToString());
         }
 
         [TestMethod]
         public void Test_CompareOperators3()
         {
             LispVariant result = Lisp.Eval("(list (<= 1 2) (<= 4 1) (>= 5 2) (>= 1 3) (>= 4.0 4.0) (<= 42 42))");
-            Assert.AreEqual("(#t, #f, #t, #f, #t, #t)", result.ToString());
+            Assert.AreEqual("(#t #f #t #f #t #t)", result.ToString());
         }
 
         [TestMethod]
         public void Test_Not()
         {
             LispVariant result = Lisp.Eval("(list (! #t) (not #t) (not #f) (! #f))");
-            Assert.AreEqual("(#f, #f, #t, #t)", result.ToString());
+            Assert.AreEqual("(#f #f #t #t)", result.ToString());
         }
 
         [TestMethod]
@@ -259,7 +260,7 @@ namespace CsLispUnitTests
         public void Test_Quasiquote2()
         {
             LispVariant result = Lisp.Eval("(do (def a 42) (print `(1 2 3 ,a)))");
-            Assert.AreEqual("(1, 2, 3, 42)", result.ToString());
+            Assert.AreEqual("(1 2 3 42)", result.ToString());
         }
 
         [TestMethod]
@@ -287,7 +288,7 @@ namespace CsLispUnitTests
         public void Test_Map()
         {
             LispVariant result = Lisp.Eval("(map (lambda (x) (+ x 1)) '(1 2 3))");
-            Assert.AreEqual("(2, 3, 4)", result.ToString());
+            Assert.AreEqual("(2 3 4)", result.ToString());
         }
 
         [TestMethod]
@@ -385,14 +386,14 @@ namespace CsLispUnitTests
         public void Test_Cons1()
         {
             LispVariant result = Lisp.Eval("(cons 1 2)");
-            Assert.AreEqual("(1, 2)", result.ToString());
+            Assert.AreEqual("(1 2)", result.ToString());
         }
 
         [TestMethod]
         public void Test_Cons2()
         {
             LispVariant result = Lisp.Eval("(cons 1 '(2 3 4))");
-            Assert.AreEqual("(1, 2, 3, 4)", result.ToString());
+            Assert.AreEqual("(1 2 3 4)", result.ToString());
         }
 
         [TestMethod]
@@ -408,6 +409,31 @@ namespace CsLispUnitTests
             LispVariant result = Lisp.Eval("(cons)");
             Assert.AreEqual("()", result.ToString());
         }
+
+        [TestMethod]
+        public void Test_Nop()
+        {
+            LispVariant result = Lisp.Eval("(nop)");
+            Assert.IsTrue(result.IsUndefined);
+        }
+
+        [TestMethod]
+        public void Test_Symbol()
+        {
+            LispVariant result = Lisp.Eval("(sym a)");
+            Assert.IsTrue(result.IsSymbol);
+            Assert.AreEqual("a", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_Str()
+        {
+            LispVariant result = Lisp.Eval("(str abc)");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("abc", result.StringValue);
+        }
+
+        #region expected errors
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
@@ -486,6 +512,10 @@ namespace CsLispUnitTests
             LispVariant result = Lisp.Eval("(if #t 1 2 3)");
         }
 
+        #endregion
+
+        #region interpreter internals
+
         [TestMethod]
         public void Test_LispVariantToString()
         {
@@ -509,6 +539,97 @@ namespace CsLispUnitTests
             string s = token.ToString();
             Assert.AreEqual("(", s);
         }
+
+        #endregion
+
+        #region infrastructure and debugging
+
+        [TestMethod]
+        public void Test_Vars()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (def a 4) (def b \"asdf\") (vars))");
+                Assert.IsTrue(result.IsUndefined);
+
+                string s = cr.ToString().Trim();
+                Assert.AreEqual(true, s.Contains("a --> 4"));
+                Assert.AreEqual(true, s.Contains("b --> asdf"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_Fuel()
+        {
+            LispVariant result = Lisp.Eval("(fuel)");
+            Assert.IsTrue(result.IsString);
+            Assert.IsTrue(result.StringValue.Contains("fuel version"));
+        }
+
+        [TestMethod]
+        public void Test_Copyright()
+        {
+            LispVariant result = Lisp.Eval("(copyright)");
+            Assert.IsTrue(result.IsString);
+            Assert.IsTrue(result.StringValue.Contains("Copyright: MIT-License"));
+        }
+
+        [TestMethod]
+        public void Test_Help()
+        {
+            LispVariant result = Lisp.Eval("(help)");
+            Assert.IsTrue(result.IsString);
+            Assert.IsTrue(result.StringValue.Contains("available functions:"));
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_Import()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 2 3) (lambda (x) (print x))))");
+                Assert.IsTrue(result.IsInt);
+                Assert.AreEqual(3, result.IntValue);
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("1"));
+                Assert.IsTrue(s.Contains("2"));
+                Assert.IsTrue(s.Contains("3"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_Import2()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (foreach '(1 2 3) (lambda (x) (print x))))");
+                Assert.IsTrue(result.IsInt);
+                Assert.AreEqual(3, result.IntValue);
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("1"));
+                Assert.IsTrue(s.Contains("2"));
+                Assert.IsTrue(s.Contains("3"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_Break()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(break)");
+                Assert.IsTrue(result.IsUndefined);
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("no debugger support"));
+            }            
+        }
+
+        #endregion
 
         /*
 mindia: pfade beim film erzeugen mit "" versehen, wegen leerzeichen im pfad !

@@ -203,7 +203,7 @@ namespace CsLisp
                 // Nil is an empty list () !
                 if (Type == LispType.Nil)
                 {
-                    return new object[0];
+                    return new List<object>();
                 }
                 if (Type != LispType.List)
                 {
@@ -373,6 +373,7 @@ namespace CsLisp
             }
             if (IsList)
             {
+                /*
                 string ret = string.Empty;
                 foreach (var elem in ListValue)
                 {
@@ -383,6 +384,8 @@ namespace CsLisp
                     ret += elem.ToString();
                 }
                 return "("+ret+")";
+                */
+                return ExpandContainerToString(ListValue);
             }
             if (IsFunction)
             {
@@ -407,10 +410,44 @@ namespace CsLisp
             return "?";
         }
 
+        private static string ExpandContainerToString(object maybeContainer)
+        {
+            string ret = string.Empty;
+
+            if (maybeContainer is IEnumerable<object>)
+            {
+                var container = (IEnumerable<object>)maybeContainer;
+                foreach (var item in container)
+                {
+                    if (ret.Length > 0)
+                    {
+                        ret += " ";
+                    }
+                    ret += ExpandContainerToString(item);
+                }
+                ret = "(" + ret + ")";
+            }
+            else
+            {
+                ret += maybeContainer.ToString();
+            }
+
+            return ret;
+        }
+
         #endregion
 
-        #region Operations
+        public bool SymbolCompare(object other)
+        {
+            if (other is LispVariant)
+            {
+                return Value.Equals(((LispVariant)other).Value);
+            }
+            return false;
+        }
 
+        #region Operations
+        /*
         public override bool Equals(object other)
         {
             if (other is LispVariant)
@@ -419,7 +456,33 @@ namespace CsLisp
             }
             return false;
         }
+        */
+        /*
+        protected bool Equals(LispVariant other)
+        {
+            return IsUnQuoted == other.IsUnQuoted && Equals(Value, other.Value) && Type == other.Type && Equals(Token, other.Token);
+        }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((LispVariant)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = (int)IsUnQuoted;
+                hashCode = (hashCode * 397) ^ (Value != null ? Value.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (int)Type;
+                hashCode = (hashCode * 397) ^ (Token != null ? Token.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+        */
         public void Add(object value)
         {
             if (Type != LispType.List)

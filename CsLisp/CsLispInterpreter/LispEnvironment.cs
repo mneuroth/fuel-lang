@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -366,7 +367,7 @@ namespace CsLisp
             {
                 return (IEnumerable<object>)item;
             }
-            return new object[0];
+            return new List<object>();
         }
 
         public static LispScope CreateDefaultScope()
@@ -379,11 +380,14 @@ namespace CsLisp
             scope[Traceon] = false;
 
             // infrastructure functions
+            scope["fuel"] = CreateFunction(Fuel);
+            scope["copyright"] = CreateFunction(Copyright);
             scope["help"] = CreateFunction(Help);
             scope["break"] = CreateFunction(Break);
             scope["vars"] = CreateFunction(Vars);
             scope["trace"] = CreateFunction(TracePrint);
             scope["gettrace"] = CreateFunction(GetTracePrint);
+            scope["import"] = CreateFunction(Import);
 
             // access to .NET
             scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count");
@@ -465,6 +469,20 @@ namespace CsLisp
 
         #region functions: infrastructure and debugging
 
+        private static LispVariant Fuel(object[] args, LispScope scope)
+        {
+            var text = new StringBuilder();
+            text.Append(string.Format("fuel version {0} from {1}", Lisp.Version, Lisp.Date));
+            return new LispVariant(text.ToString());
+        }
+
+        private static LispVariant Copyright(object[] args, LispScope scope)
+        {
+            var text = new StringBuilder();
+            text.Append(string.Format("Copyright: {0} {1}", Lisp.License, Lisp.LicenseUrl));
+            return new LispVariant(text.ToString());
+        }
+
         private static LispVariant Help(object[] args, LispScope scope)
         {
             var helpText = new StringBuilder();
@@ -512,6 +530,51 @@ namespace CsLisp
         {
             var buffer = (StringBuilder)scope[Tracebuffer];
             return new LispVariant(buffer.ToString());
+        }
+
+        private static LispVariant Import(object[] args, LispScope scope)
+        {
+            foreach (var module in args)
+            {
+                string code = string.Empty;
+                string orgFileName = ((LispVariant)module).StringValue;
+                string fileName = orgFileName;
+                if (!File.Exists(fileName))
+                {
+                    // try default path Library\modulename.fuel
+                    fileName = ".\\Library\\" + orgFileName;
+                    fileName = AddFileExtensionIfNeeded(fileName);
+                    if (!File.Exists(fileName))
+                    {
+                        fileName = AppDomain.CurrentDomain.BaseDirectory + "\\Library\\" + orgFileName;
+                        fileName = AddFileExtensionIfNeeded(fileName);
+                    }
+                }
+                if (File.Exists(fileName))
+                {
+                    code = File.ReadAllText(fileName);
+                }
+                else
+                {
+                    Console.WriteLine("WARNING: Library {0} not found!", orgFileName);
+                }
+                if (!string.IsNullOrEmpty(code))
+                {
+                    Lisp.Eval(code, scope.GlobalScope);                    
+                }
+            }
+            return new LispVariant();
+        }
+
+        private static string AddFileExtensionIfNeeded(string fileName)
+        {
+            const string EXTENSION = ".fuel";
+
+            if (!fileName.EndsWith(EXTENSION))
+            {
+                fileName += EXTENSION;
+            }
+            return fileName;
         }
 
         #endregion
@@ -901,7 +964,7 @@ namespace CsLisp
                 return new LispVariant(resultList.ToArray());
             }
 
-            return result;
+            //return result;
         }
 
         public static LispVariant quote_form(object[] args, LispScope scope)

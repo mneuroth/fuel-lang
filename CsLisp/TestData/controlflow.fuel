@@ -1,0 +1,24 @@
+(do
+    (defn f (x) (+ x x))
+    
+    (def g (fn (x) (* x 2)))
+    
+    (print "hello world !")
+    (def a 1)
+    (if (> a 2)
+       (print "then")
+       (print "else")
+    )
+    (setf a 4)
+    (print '(1 a 3) a)
+    (print `(1 ,a 3) a)
+    (print (f 4))
+    (print (g 42))
+    
+    (while (< a 10)
+        (do
+            (print a)
+            (setf a (+ a 1))
+        )
+    )
+)

@@ -1,0 +1,5 @@
+(do
+    (import fuellib)
+
+    (foreach '(1 2 3) (lambda (x) (print x)))
+)

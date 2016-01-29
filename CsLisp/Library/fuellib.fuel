@@ -1,0 +1,16 @@
+;;====================================
+;; standard library for fuel language
+;;====================================
+
+  (defn foreach (container fcn) 
+     (do 
+	   (def i 0)
+	   (def max (len container))
+	   (while (< i max)
+	     (do 
+		   (apply fcn (list (nth i container)))
+		   (setf i (+ i 1))
+		 )
+	   )
+	 )
+  )
