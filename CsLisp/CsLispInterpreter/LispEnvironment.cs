@@ -542,11 +542,11 @@ namespace CsLisp
                 if (!File.Exists(fileName))
                 {
                     // try default path Library\modulename.fuel
-                    fileName = ".\\Library\\" + orgFileName;
+					fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
                     fileName = AddFileExtensionIfNeeded(fileName);
                     if (!File.Exists(fileName))
                     {
-                        fileName = AppDomain.CurrentDomain.BaseDirectory + "\\Library\\" + orgFileName;
+						fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
                         fileName = AddFileExtensionIfNeeded(fileName);
                     }
                 }
@@ -556,7 +556,7 @@ namespace CsLisp
                 }
                 else
                 {
-                    Console.WriteLine("WARNING: Library {0} not found!", orgFileName);
+					Console.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgFileName, fileName);
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
