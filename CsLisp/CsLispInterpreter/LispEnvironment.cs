@@ -542,11 +542,11 @@ namespace CsLisp
                 if (!File.Exists(fileName))
                 {
                     // try default path Library\modulename.fuel
-					fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
+                    fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
                     fileName = AddFileExtensionIfNeeded(fileName);
                     if (!File.Exists(fileName))
                     {
-						fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
+                        fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
                         fileName = AddFileExtensionIfNeeded(fileName);
                     }
                 }
@@ -556,7 +556,7 @@ namespace CsLisp
                 }
                 else
                 {
-					Console.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgFileName, fileName);
+                    Console.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgFileName, fileName);
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
@@ -1332,8 +1332,9 @@ namespace CsLisp
             {
                 throw new LispException("Symbol expected" + GetPositionOfPreviousTokenForSymbol(symbol, scope), symbol.Token.LineNo);
             }
-            scopeToSet[symbol.ToString()] = LispInterpreter.EvalAst(args[1], scope);
-            return new LispVariant(args[1]);
+            var value = LispInterpreter.EvalAst(args[1], scope);
+            scopeToSet[symbol.ToString()] = value;
+            return new LispVariant(value);
         }
 
         private static LispVariant EvalArgIfNeeded(object arg, LispScope scope)
