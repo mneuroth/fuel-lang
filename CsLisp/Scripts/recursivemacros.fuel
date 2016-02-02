@@ -1,0 +1,43 @@
+(do
+  (define-macro-expand foreach-macro
+        (container fcn) 
+        (do 
+    	   (def i 0)
+    	   (def max (len container))
+    	   (while (< i max)
+    	     (do 
+    		   (apply fcn (list (nth i container)))
+    		   (setf i (+ i 1))
+    		 )
+    	   )        
+        )
+  )
+
+  (define-macro-expand first-macro
+        (a b) 
+        (do 
+    	   (def i 1)
+           (+ a b i)
+        )
+  )
+  
+  (define-macro-expand second-macro
+        (x y) 
+        (do 
+           (def container (list 1 2 3 4))
+           (foreach-macro container (lambda (xx) 
+             (do 
+; TODO --> hier funktioniert die Ersetzung von x nicht !!! da wir uns in einem lambda befinden... :-( warum ist das lambda im expandedAst schon evaluiert !!!???                 
+                 (print xx x)
+             ))
+           ) 
+           (* x y (first-macro x y))
+        )
+  )
+  
+  (def n (first-macro 2 3))
+  (print n)  
+  (def m (second-macro 4 3))
+  (print m)  
+  
+)

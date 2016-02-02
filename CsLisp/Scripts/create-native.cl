@@ -28,8 +28,8 @@
 	 )
   )
   
-  (define-macro foreach-macro
-      (lambda (container fcn) 
+  (define-macro-expand foreach-macro
+        (container fcn) 
         (do 
     	   (def i 0)
     	   (def max (len container))
@@ -40,7 +40,6 @@
     		 )
     	   )        
         )
-      )
   )
 
   (defn make-args-string (count) 

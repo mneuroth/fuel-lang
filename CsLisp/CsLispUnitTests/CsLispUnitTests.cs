@@ -243,10 +243,35 @@ namespace CsLispUnitTests
         }
 
         [TestMethod]
-        public void Test_Macros2()
+        public void Test_MacrosExpand1()
         {
-            LispVariant result = Lisp.Eval("(do (define-macro-expand blub (x y) '(print x y)) (print (quote (1 2 3))) (blub 3 4))");
+            LispVariant result = Lisp.Eval("(do (define-macro-expand blub (x y) (print x y)) (print (quote (1 2 3))) (blub 3 4))");
             Assert.AreEqual("3 4", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_MacrosExpand2()
+        {
+            const string MacroExpandScript = @"(do
+  (define-macro-expand first-macro
+        (a b) 
+        (do 
+    	   (def i 1)
+           (+ a b i)
+        )
+  )
+  
+  (define-macro-expand second-macro
+        (x y) 
+        (do 
+           (* x y (first-macro x y))
+        )
+  )
+  
+  (def m (second-macro 4 3))
+)";
+            LispVariant result = Lisp.Eval(MacroExpandScript);
+            Assert.AreEqual("96", result.ToString());
         }
 
         [TestMethod]

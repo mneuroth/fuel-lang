@@ -244,10 +244,21 @@ namespace CsLisp
                     foreach(var formalParameter in macroExpand.FormalParameters)
                     {
                         // replace formal parameters with actual parameters
-                        LispVariant value = EvalAst(astAsList[i], globalScope);
-                        bool replacedAnything = false;
-                        expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression, ref replacedAnything);
-                        // the followint code is not needed anymore, because the 
+
+                        // do not evaluate if a list (s-expression) is given !
+                        //if (LispEnvironment.IsExpression(astAsList[i]))
+                        //{
+                        //    bool replacedAnything = false;
+                        //    //expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression, ref replacedAnything);
+                        //}
+                        //else
+                        //{
+// TODO working: do not replace anything with values, just replace macro expressions !
+                            LispVariant value = EvalAst(astAsList[i], globalScope);
+                            bool replacedAnything = false;
+                            expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression, ref replacedAnything);
+                        //}
+                        // the following code is not needed anymore, because the 
                         // LispVariant.ToString() was imprived for nicer printing of expressions
                         // 
                         //if (replacedAnything)
@@ -264,16 +275,19 @@ namespace CsLisp
 // TODO working gulp --> rekursives Makro Expandieren unterstuetzen !!!
 // TODO --> im code definierte funktionen sind bei expandierung der Macros noch nicht bekannt !!!
 
-                    // create local scope for macro execution
-                    var macroScope = new LispScope("macro_scope", globalScope);
-                    globalScope.PushNextScope(macroScope);
+                    return expression;
 
-                    var expressionRet = EvalAst(expression, macroScope).ListValue.ToArray();
+                    //// create local scope for macro execution
+                    //var macroScope = new LispScope("macro_scope", globalScope);
+                    //globalScope.PushNextScope(macroScope);
 
-                    globalScope.PopNextScope();
+                    //var res = EvalAst(expression, macroScope);
+                    //var expressionRet = res.IsList ? res.ListValue.ToArray() : new object[] {res.Value};
 
-                    // replace ast with expression !
-                    return expressionRet;
+                    //globalScope.PopNextScope();
+
+                    //// replace ast with expression !
+                    //return expressionRet;
                 }
             }
 
