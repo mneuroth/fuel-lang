@@ -940,7 +940,9 @@ namespace CsLisp
                 macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), result as IEnumerable<object>);
             }
 
-            return new LispVariant(result);
+            object[] ret = new object[] { args[0], args[1], result };
+            //return ret;
+            return new LispVariant(ret);
             //return null; // TODO gulp working replace macro new LispVariant(result);
         }
 
