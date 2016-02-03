@@ -931,14 +931,17 @@ namespace CsLisp
         {
             CheckArgs(DefineMacroExpand, 3, args, scope);
 
+            object result = null;
             var macros = scope.GlobalScope[Macros] as LispScope;
             if (macros != null)
             {
                 // allow macros in macros --> recursive call for ExpandMacros()
-                macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), LispInterpreter.ExpandMacros(GetExpression(args[2]), scope) as IEnumerable<object>);
+                result = LispInterpreter.ExpandMacros(GetExpression(args[2]), scope);
+                macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), result as IEnumerable<object>);
             }
 
-            return null;
+            return new LispVariant(result);
+            //return null; // TODO gulp working replace macro new LispVariant(result);
         }
 
 // TODO --> ggf. entfernen

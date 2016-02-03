@@ -67,6 +67,8 @@ namespace CsLisp
             var globalScope = scope ?? LispEnvironment.CreateDefaultScope();
             var ast = LispParser.Parse(lispCode, globalScope);
             var expandedAst = LispInterpreter.ExpandMacros(ast, globalScope);
+// TODO --> sind #macros# am global scope ueberhaupt noch notwendig mit dem ast replace mechanismus?
+// TODO --> probleme mit functions parameter auf dem stack bei ast replace mechanismus
             var result = LispInterpreter.EvalAst(expandedAst, globalScope);
             globalScope.Finished = true; // needed for debugging support                
             return result;

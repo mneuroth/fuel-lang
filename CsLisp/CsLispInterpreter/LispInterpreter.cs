@@ -205,40 +205,55 @@ namespace CsLisp
 
         public static object ExpandMacros(object ast, LispScope globalScope)
         {
+            object result = ast;
+            bool anyMacroReplaced;
+            do
+            {
+                anyMacroReplaced = false;
+                result = ExpandMacros(result, globalScope, ref anyMacroReplaced);
+            } while (anyMacroReplaced);
+            return result;
+        }
+
+        public static object ExpandMacros(object ast, LispScope globalScope, ref bool anyMacroReplaced)
+        {
             if (ast == null || ast is LispVariant)
             {
                 return ast;
             }
 
-            // process define-macro statements ==> add macro to global scope
             var astAsList = ((IEnumerable<object>)ast).ToList();
             if (astAsList.Count == 0)
             {
                 return ast;
             }
+
+            // process define-macro statements ==> call special form, this will add macro to global scope as side effect
             var function = astAsList.First();
             var functionName = function.ToString();
             if (globalScope != null && globalScope.ContainsKey(functionName))
             {
                 var fcn = ((LispVariant)globalScope[functionName]).FunctionValue;
+// TODO --> braucht man wirklich IsEvalInExpand, wenn macros ausschliesslich expandiert (ersetzt) werden?
                 if (fcn.IsEvalInExpand)
                 {
                     var args = new List<object>(astAsList);
                     args.RemoveAt(0);
 
-                    var macroEvalResult = fcn.Function(args.ToArray(), globalScope);
-                    return macroEvalResult != null ? macroEvalResult : ast;
+// TODO --> replace current macro code with (recursivly) replaced macro code after evaluation
+                    LispVariant macroEvalResult = fcn.Function(args.ToArray(), globalScope);
+                    return macroEvalResult != null ? macroEvalResult.ListValue : ast;
                 }
             }
 
-            // process macro expansion
+            // process macro expansion in an expression which calls a macro
             if (LispEnvironment.IsMacro(function, globalScope))
             {
                 var macro = LispEnvironment.GetMacro(function, globalScope);
                 if (macro is LispMacroExpand)
                 {
                     var macroExpand = (LispMacroExpand)macro;
-                    var expression = macroExpand.Expression/*.ToArray()*/;
+                    var expression = macroExpand.Expression;
 
                     int i = 1;
                     foreach(var formalParameter in macroExpand.FormalParameters)
@@ -254,10 +269,14 @@ namespace CsLisp
                         //else
                         //{
 // TODO working: do not replace anything with values, just replace macro expressions !
-                            LispVariant value = EvalAst(astAsList[i], globalScope);
-                            bool replacedAnything = false;
-                            expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression, ref replacedAnything);
-                        //}
+                            LispVariant value = new LispVariant(astAsList[i]); 
+                            //LispVariant value = EvalAst(astAsList[i], globalScope);
+                            //bool replacedAnything = false;
+                            expression = RepaceSymbolWithValueInExpression((LispVariant) formalParameter, value, expression, ref anyMacroReplaced);
+
+                            //LispVariant value2 = EvalAst(astAsList[i], globalScope);
+                            //expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value2, expression, ref replacedAnything);
+                            //}
                         // the following code is not needed anymore, because the 
                         // LispVariant.ToString() was imprived for nicer printing of expressions
                         // 

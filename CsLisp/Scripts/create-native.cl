@@ -186,6 +186,7 @@
 			     (def methodName (first methodNameAndArgCount))
 			     (def methodArgsCount (nth 1 methodNameAndArgCount))
 			     (print "create method=" methodName methodCount (make-args-string methodArgsCount))
+                 (print "-->" (obj-arg-list methodArgsCount))
 
 ;;				 (if (= methodArgsCount 0)
 ;;				   (gdefn 
@@ -197,7 +198,9 @@
                    (do
   				     (gdefn 
 					    (sym (string lisp-name "-" methodName))     ; function name
-                        (obj-arg-list methodArgsCount)              ; formal arguments
+                        ; make something like: (obj argument1 argument2 ...)
+;; TODO gulp --> hier muss die argument liste als makro expandiert werden !!! im makro, d. h. obj-arg-list als makro definieren ?!
+                        (obj-arg-list methodArgsCount)              ; formal arguments                        
                         ; make something like: (call obj "Function-Name" argument1 argument2 ...)
 				        (create-call methodName methodArgsCount)    ; code
 		             )                   
@@ -254,12 +257,14 @@
   (print "try add...")
   (call obj "Add" 5)
   (call obj "Add" 6)
+  (print (call obj "Count"))
   (print "added elements phase 1")
 ;  (print (arg-list 8))
 ;  (print (create-call "test" 4))
 ;;TODO  
 ;  (print (obj-arg-list 8))
   (List-Add obj 7)
+  (print (call obj "Count"))
   (print "added elements")
   (List-get_Count obj)
 ;;  (print "added elements #2")
