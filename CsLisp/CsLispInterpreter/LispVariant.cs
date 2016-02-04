@@ -55,6 +55,8 @@ namespace CsLisp
 
         public LispType Type { get; set; }
 
+        public string TypeString { get { return Type.ToString(); } }
+
         public LispToken Token { get; private set; }
 
         public bool IsNil

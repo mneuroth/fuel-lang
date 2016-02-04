@@ -399,6 +399,7 @@ namespace CsLisp
 
             // interpreter functions
             scope["type"] = CreateFunction(GetType);
+            scope["typestr"] = CreateFunction(GetTypeString);
             scope["nop"] = CreateFunction(Nop);
             scope["return"] = CreateFunction(Return);
             scope["print"] = CreateFunction(Print);
@@ -599,6 +600,14 @@ namespace CsLisp
 
             var item = ((LispVariant)args[0]);
             return new LispVariant((int)item.Type);
+        }
+
+        public static LispVariant GetTypeString(object[] args, LispScope scope)
+        {
+            CheckArgs("typestr", 1, args, scope);
+
+            var item = ((LispVariant)args[0]);
+            return new LispVariant(item.TypeString);
         }
 
         public static LispVariant Print(object[] args, LispScope scope)
