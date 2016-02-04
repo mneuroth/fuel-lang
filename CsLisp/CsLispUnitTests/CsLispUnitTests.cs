@@ -570,6 +570,54 @@ namespace CsLispUnitTests
         #region infrastructure and debugging
 
         [TestMethod]
+        public void Test_Type1()
+        {
+            LispVariant result = Lisp.Eval("(type 7)");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(3, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Type2()
+        {
+            LispVariant result = Lisp.Eval("(type #f)");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(2, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Type3()
+        {
+            LispVariant result = Lisp.Eval("(type '(2 3 1))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(6, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Type4()
+        {
+            LispVariant result = Lisp.Eval("(type aSymbol)");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(8, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Type5()
+        {
+            LispVariant result = Lisp.Eval("(type \"a string\")");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(5, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_TypeStr()
+        {
+            LispVariant result = Lisp.Eval("(typestr 1.23)");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("Double", result.Value.ToString());
+        }
+
+        [TestMethod]
         public void Test_Vars()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -613,14 +661,14 @@ namespace CsLispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 2 3) (lambda (x) (print x))))");
+                LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (print x))))");
                 Assert.IsTrue(result.IsInt);
                 Assert.AreEqual(3, result.IntValue);
 
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("1"));
-                Assert.IsTrue(s.Contains("2"));
-                Assert.IsTrue(s.Contains("3"));
+                Assert.IsTrue(s.Contains("7"));
+                Assert.IsTrue(s.Contains("7"));
             }
         }
 
@@ -630,14 +678,30 @@ namespace CsLispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import fuellib) (foreach '(1 2 3) (lambda (x) (print x))))");
+                LispVariant result = Lisp.Eval("(do (import fuellib) (foreach '(1 4 6) (lambda (x) (print x))))");
                 Assert.IsTrue(result.IsInt);
-                Assert.AreEqual(3, result.IntValue);
+                Assert.AreEqual(3, result.IntValue);    // is last value of internal loop variable in foreach
 
+                // test results
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("1"));
+                Assert.IsTrue(s.Contains("4"));
+                Assert.IsTrue(s.Contains("6"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_CreateNative()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (create-native \"List\" \"System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]\") (def obj (create-List)) (List-Add obj 7) (call obj \"Add\" 5) (print (List-get_Count obj)))");
+                Assert.IsTrue(result.IsString);
+                Assert.AreEqual("2", result.Value.ToString());
+
+                string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("2"));
-                Assert.IsTrue(s.Contains("3"));
             }
         }
 
