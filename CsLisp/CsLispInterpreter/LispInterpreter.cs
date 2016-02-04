@@ -168,9 +168,26 @@ namespace CsLisp
             }
 
             // is this function a macro ==> evaluate the macro... and return
+// TODO test macros...
             if (LispEnvironment.IsMacro(astAsList.First(), scope.GlobalScope))
             {
-                return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
+                // ignore definition of macros in evaluation step
+                //return new LispVariant();
+                ////return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
+
+                var macro = LispEnvironment.GetMacro(astAsList.First(), scope.GlobalScope);
+                // evaluate macro:
+                if (macro is IEnumerable<object>)
+                {
+                    var expression = EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
+                    return expression;
+                }
+                // expand macro:
+                if (macro is LispMacroExpand)
+                {
+                    return new LispVariant();
+                }
+                throw new Exception("blub");
             }
 
             // resolve values via local and global scope
@@ -250,6 +267,14 @@ namespace CsLisp
             if (LispEnvironment.IsMacro(function, globalScope))
             {
                 var macro = LispEnvironment.GetMacro(function, globalScope);
+                // evaluate macro:
+//                if (macro is IEnumerable<object>)
+//                {
+//// TODO ---> nur evaluieren im recursiven expandmacro aufruf !!! unschön !!!
+//                    var expression = EvaluateMacro(function, astAsList, globalScope);
+//                    return expression;
+//                }
+                // expand macro:
                 if (macro is LispMacroExpand)
                 {
                     var macroExpand = (LispMacroExpand)macro;

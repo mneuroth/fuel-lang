@@ -318,6 +318,7 @@ namespace CsLisp
             
         public const string Apply = "apply";
         public const string Eval = "eval";
+        public const string EvalStr = "evalstr";
         public const string Quote = "quote";
         public const string Quasiquote = "quasiquote";
 
@@ -440,6 +441,7 @@ namespace CsLisp
 
             scope[Apply] = CreateFunction(ApplyFcn);
             scope[Eval] = CreateFunction(EvalFcn);
+            scope[EvalStr] = CreateFunction(EvalStrFcn);
 
             // special forms
             scope["and"] = CreateFunction(and_form, isSpecialForm: true);
@@ -601,23 +603,16 @@ namespace CsLisp
 
         public static LispVariant Print(object[] args, LispScope scope)
         {
-            var text = String.Empty;
-            foreach (var item in args)
-            {
-                if (text.Length > 0)
-                {
-                    text += " ";
-                }
-                text += item;
-            }
-            if (scope.ContainsKey(Traceon) && (bool)scope[Traceon])
-            {
-                var buffer = (StringBuilder)scope[Tracebuffer];
-                buffer.Append(text);
-            }
+            var text = GetStringRepresentation(args, scope);
             Console.WriteLine(text);
             return new LispVariant(text);
         }
+
+        //public static LispVariant StringFcn(object[] args, LispScope scope)
+        //{
+        //    var text = GetStringRepresentation(args, scope, string.Empty);
+        //    return new LispVariant(text);
+        //}
 
         public static LispVariant Addition(object[] args, LispScope scope)
         {
@@ -849,6 +844,15 @@ namespace CsLisp
             return result;
         }
 
+        public static LispVariant EvalStrFcn(object[] args, LispScope scope)
+        {
+            CheckArgs("evalstr", 1, args, scope);
+
+            var variant = (LispVariant)args[0];
+            var result = Lisp.Eval(variant.Value.ToString(), scope);
+            return result;
+        }
+
         #endregion
 
         #region special forms
@@ -940,7 +944,7 @@ namespace CsLisp
                 macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), result as IEnumerable<object>);
             }
 
-            object[] ret = new object[] { args[0], args[1], result };
+            List<object> ret = new List<object>() { args[0], args[1], result };
             //return ret;
             return new LispVariant(ret);
             //return null; // TODO gulp working replace macro new LispVariant(result);
@@ -1161,7 +1165,7 @@ namespace CsLisp
                         return new LispVariant(result);
                     }
                 }
-                throw new LispException("Bad method for class " + methodName, nativeObjOrClassName.Token.LineNo);
+                throw new LispException("Bad method for class " + methodName, nativeObjOrClassName.Token!=null ? nativeObjOrClassName.Token.LineNo : -1);
             }
         }
 
@@ -1333,7 +1337,7 @@ namespace CsLisp
             CheckArgs(name, 2, args, scope);
 
             var symbol = EvalArgIfNeeded(args[0], scope);
-            if (!symbol.IsSymbol)
+            if (!(symbol.IsSymbol || symbol.IsString))
             {
                 throw new LispException("Symbol expected" + GetPositionOfPreviousTokenForSymbol(symbol, scope), symbol.Token.LineNo);
             }
@@ -1345,6 +1349,25 @@ namespace CsLisp
         private static LispVariant EvalArgIfNeeded(object arg, LispScope scope)
         {
             return (arg is IEnumerable<object>) ? LispInterpreter.EvalAst(arg, scope) : (LispVariant)arg;
+        }
+
+        private static string GetStringRepresentation(object[] args, LispScope scope, string separator = " ")
+        {
+            var text = String.Empty;
+            foreach (var item in args)
+            {
+                if (text.Length > 0)
+                {
+                    text += separator;
+                }
+                text += item;
+            }
+            if (scope.ContainsKey(Traceon) && (bool)scope[Traceon])
+            {
+                var buffer = (StringBuilder)scope[Tracebuffer];
+                buffer.Append(text);
+            }
+            return text;
         }
 
         #endregion
