@@ -280,26 +280,26 @@
 ;; Unterscheidung: Macros zur Laufzeit (evaluate) oder zur Compilezeit (expand)
   ;; letzteres ist etwas komplizierter, da man auch zur compile/parse zeit den Interpreter zur verfügung stellen muss...
   
-  (defn create-native (lisp-name full-class-name) 
-        (do
-            ; inspect class and generate for all public properties and methods method stubs
-            (gdefn (sym (string "create-" lisp-name)) () (call full-class-name))
-			
-			(def methodInfos (native-methods full-class-name))
-			(foreach methodInfos 
-               (lambda (methodNameAndArgCount) 
-    			   (do 
-    			     (def methodName (first methodNameAndArgCount))
-    			     (def methodArgsCount (nth 1 methodNameAndArgCount))
-                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") methodName methodArgsCount))
-                     (eval method-expr)
-                     ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
-                     ;(evalstr method)
-    			   )
-			   )
-			)
-        )     
-  )
+;;  (defn create-native (lisp-name full-class-name) 
+;;        (do
+;;            ; inspect class and generate for all public properties and methods method stubs
+;;            (gdefn (sym (string "create-" lisp-name)) () (call full-class-name))
+;;			
+;;			(def methodInfos (native-methods full-class-name))
+;;			(foreach methodInfos 
+;;               (lambda (methodNameAndArgCount) 
+;;    			   (do 
+;;    			     (def methodName (first methodNameAndArgCount))
+;;    			     (def methodArgsCount (nth 1 methodNameAndArgCount))
+;;                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") methodName methodArgsCount))
+;;                     (eval method-expr)
+;;                     ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
+;;                     ;(evalstr method)
+;;    			   )
+;;			   )
+;;			)
+;;        )     
+;;  )
 
 ;; =======================================================================================
   

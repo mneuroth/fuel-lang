@@ -1,7 +1,7 @@
 ;;====================================
 ;; standard library for fuel language
 ;;====================================
-
+(do
   (defn foreach (container fcn) 
      (do 
 	   (def i 0)
@@ -14,3 +14,81 @@
 	   )
 	 )
   )
+
+  ;; create list of symbols count=4 --> (p1 p2 p3 p4)
+  (defn arg-list-expression (argcount)
+     (do
+         (def result (list))
+         (def i 0)
+         (while (< i argcount)
+           (do 
+             (setf result (append result (list (sym (+ "p" (string i))))))
+  			 (setf i (+ i 1))
+           )
+         )
+         (return result)
+     )
+  )
+
+  ;; create list of symbols count=4 --> (obj p1 p2 p3 p4)
+  (defn obj-arg-list-expression-expression (argcount)
+     (do
+         (def result (list))
+         (setf result (append result (list 'obj)))
+         (setf result (append result (arg-list-expression argcount)))
+         (return result)
+     )
+  )
+  
+  ;; create list of symbols: (call obj methodname p1 p2 p3 p4)
+  (defn create-call-expression (methodname argcount)
+      (do
+         (def _result (list))
+         (setf _result (append _result (list 'call)))
+         (setf _result (append _result (list 'obj)))
+         (setf _result (append _result (list (sym methodname))))
+         (def i 0)
+         (while (< i argcount)
+           (do 
+             (setf _result (append _result (list (sym (+ "p" (string i))))))
+  			 (setf i (+ i 1))
+           )
+         )
+         (return _result)
+      )
+  )
+
+  ; returns something like (gdef name (p1 p2 ...) (<code>))
+  (defn create-native-method-expression (lisp-prefix name argcount) 
+      (do 
+          (def code (list))
+          (setf code (append code (list 'gdefn)))
+          (setf code (append code (list (string lisp-prefix name))))
+          (setf code (append code (list (obj-arg-list-expression-expression argcount))))
+          (setf code (append code (list (create-call-expression name argcount))))
+          (return code)
+      )
+  )
+  
+  (defn create-native (lisp-name full-class-name) 
+        (do
+            ; inspect class and generate for all public properties and methods method stubs
+            (gdefn (sym (string "create-" lisp-name)) () (call full-class-name))
+			
+			(def methodInfos (native-methods full-class-name))
+			(foreach methodInfos 
+               (lambda (methodNameAndArgCount) 
+    			   (do 
+    			     (def methodName (first methodNameAndArgCount))
+    			     (def methodArgsCount (nth 1 methodNameAndArgCount))
+                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") methodName methodArgsCount))
+                     (eval method-expr)
+                     ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
+                     ;(evalstr method)
+    			   )
+			   )
+			)
+        )     
+  )
+  
+)
