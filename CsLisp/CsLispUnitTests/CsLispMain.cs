@@ -56,6 +56,51 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"..\..\..\Scripts\simple.fuel")]
+        public void Test_MainFile()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new string[] { "simple.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.StartsWith("hello world !"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Scripts\error.fuel")]
+        public void Test_MainFileError()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new string[] { "error.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Error executing script"));
+                Assert.IsTrue(s.Contains("printx"));
+                Assert.IsTrue(s.Contains("not found"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Scripts\error.fuel")]
+        public void Test_MainFileErrorDetailed()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new string[] { "-l", "error.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Error executing script"));
+                Assert.IsTrue(s.Contains("printx"));
+                Assert.IsTrue(s.Contains("not found"));
+                Assert.IsTrue(s.Contains("Callstack"));
+                Assert.IsTrue(s.Contains("Exception in"));
+            }
+        }
+
+        [TestMethod]
         public void Test_MainHelp()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())

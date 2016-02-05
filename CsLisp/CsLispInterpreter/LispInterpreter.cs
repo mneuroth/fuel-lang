@@ -187,7 +187,7 @@ namespace CsLisp
                 {
                     return new LispVariant();
                 }
-                throw new Exception("blub");
+                throw new Exception("Unexpected macro modus!");
             }
 
             // resolve values via local and global scope

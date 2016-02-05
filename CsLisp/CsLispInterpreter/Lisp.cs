@@ -40,7 +40,7 @@ namespace CsLisp
 
         public const string Name = "FUEL(isp)";
         public const string Version = "v0.99.1";
-        public const string Date = "4.2.2016";
+        public const string Date = "5.2.2016";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";
@@ -80,8 +80,9 @@ namespace CsLisp
         /// </summary>
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="scope">The scope.</param>
-        /// <returns></returns>
-        public static LispVariant SaveEval(string lispCode, LispScope scope = null)
+        /// <param name="verboseDebugOutput">if set to <c>true</c> [verbose debug output].</param>
+        /// <returns>The result</returns>
+        public static LispVariant SaveEval(string lispCode, LispScope scope = null, bool verboseDebugOutput = false)
         {
             LispVariant result;
             try
@@ -90,7 +91,12 @@ namespace CsLisp
             }
             catch (Exception exc)
             {
-                Console.WriteLine("Exception in eval(): {0}", exc);
+                Console.WriteLine("\nError executing script.\n\n{0}", exc.Message);
+                if (verboseDebugOutput)
+                {
+                    Console.WriteLine("\nCallstack:");
+                    Console.WriteLine("Exception in eval(): {0}", exc);
+                }
                 result = LispVariant.CreateErrorValue(exc.Message);
             }
             return result;

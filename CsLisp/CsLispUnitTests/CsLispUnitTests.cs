@@ -93,6 +93,13 @@ namespace CsLispUnitTests
         }
 
         [TestMethod]
+        public void Test_EvalStr()
+        {
+            LispVariant result = Lisp.Eval("(evalstr \"(def x 456)\")");
+            Assert.AreEqual(456, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_While1()
         {
             LispVariant result = Lisp.Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))");
