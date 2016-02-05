@@ -2,6 +2,8 @@
 ;; standard library for fuel language
 ;;====================================
 (do
+    
+  ;; foreach looop  
   (defn foreach (container fcn) 
      (do 
 	   (def i 0)
@@ -58,7 +60,7 @@
       )
   )
 
-  ; returns something like (gdef name (p1 p2 ...) (<code>))
+  ;; create something like (gdef name (obj p1 p2 ...) (<code>))
   (defn create-native-method-expression (lisp-prefix name argcount) 
       (do 
           (def code (list))
@@ -70,6 +72,7 @@
       )
   )
   
+  ;; create lisp functions for a native class  
   (defn create-native (lisp-name full-class-name) 
         (do
             ; inspect class and generate for all public properties and methods method stubs
