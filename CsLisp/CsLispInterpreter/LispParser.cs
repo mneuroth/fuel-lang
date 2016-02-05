@@ -24,7 +24,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="code">The code.</param>
         /// <param name="scope">The scope.</param>
-        /// <returns></returns>
+        /// <returns>Abstract syntax tree as container</returns>
         public static IEnumerable<object> Parse(string code, LispScope scope = null)
         {
             List<object> parseResult = null;

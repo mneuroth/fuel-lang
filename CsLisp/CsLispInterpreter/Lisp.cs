@@ -67,8 +67,6 @@ namespace CsLisp
             var globalScope = scope ?? LispEnvironment.CreateDefaultScope();
             var ast = LispParser.Parse(lispCode, globalScope);
             var expandedAst = LispInterpreter.ExpandMacros(ast, globalScope);
-// TODO --> sind #macros# am global scope ueberhaupt noch notwendig mit dem ast replace mechanismus?
-// TODO --> probleme mit functions parameter auf dem stack bei ast replace mechanismus
             var result = LispInterpreter.EvalAst(expandedAst, globalScope);
             globalScope.Finished = true; // needed for debugging support                
             return result;
@@ -80,9 +78,9 @@ namespace CsLisp
         /// </summary>
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="scope">The scope.</param>
-        /// <param name="verboseDebugOutput">if set to <c>true</c> [verbose debug output].</param>
+        /// <param name="verboseErrorOutput">if set to <c>true</c> [verbose error output].</param>
         /// <returns>The result</returns>
-        public static LispVariant SaveEval(string lispCode, LispScope scope = null, bool verboseDebugOutput = false)
+        public static LispVariant SaveEval(string lispCode, LispScope scope = null, bool verboseErrorOutput = false)
         {
             LispVariant result;
             try
@@ -92,7 +90,7 @@ namespace CsLisp
             catch (Exception exc)
             {
                 Console.WriteLine("\nError executing script.\n\n{0}", exc.Message);
-                if (verboseDebugOutput)
+                if (verboseErrorOutput)
                 {
                     Console.WriteLine("\nCallstack:");
                     Console.WriteLine("Exception in eval(): {0}", exc);

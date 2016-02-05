@@ -43,7 +43,7 @@ namespace CsLisp
         /// <param name="csCode">The cs code.</param>
         /// <param name="outputFileName">Name of the output file.</param>
         /// <param name="debug">if set to <c>true</c> use debug option for C# compiler.</param>
-        /// <returns></returns>
+        /// <returns>Compiler result</returns>
         public /*static*/ CompilerResults CompileCsCodeToAssembly(string csCode, string outputFileName, bool debug = false)
         {
             var codeProvider = new CSharpCodeProvider();
@@ -65,7 +65,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="exeFileName">Name of the executable file.</param>
-        /// <returns></returns>
+        /// <returns>True if no error has occured</returns>
         public /*static*/ LispVariant CompileToExe(string lispCode, string exeFileName)
         {
             var csCode = CompileToCsCode(lispCode);

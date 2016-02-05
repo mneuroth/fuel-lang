@@ -22,7 +22,7 @@ namespace CsLisp
             var compile = false;
             var showCompileOutput = false;
             var measureTime = false;
-            var lengthyDebugginOutput = false;
+            var lengthyErrorOutput = false;
             var result = new LispVariant();
             var startTickCount = Environment.TickCount;
             var debugger = TryGetDebugger();
@@ -43,7 +43,7 @@ namespace CsLisp
             }
             if (args.Contains("-l"))
             {
-                lengthyDebugginOutput = true;
+                lengthyErrorOutput = true;
             }
             if (args.Contains("-e"))
             {
@@ -94,7 +94,7 @@ namespace CsLisp
                     }
                     else
                     {
-                        result = Lisp.SaveEval(script, verboseDebugOutput: lengthyDebugginOutput);
+                        result = Lisp.SaveEval(script, verboseErrorOutput: lengthyErrorOutput);
                     }
                 }
             }
@@ -123,7 +123,7 @@ namespace CsLisp
             Console.WriteLine("  -e \"script\" : execute given script");
             Console.WriteLine("  -m          : measure execution time");
             Console.WriteLine("  -t          : enable tracing");
-            Console.WriteLine("  -l          : lengthy debugging output");
+            Console.WriteLine("  -l          : lengthy error output");
             if (TryGetDebugger() != null)
             {
                 Console.WriteLine("  -i          : interactive shell");
