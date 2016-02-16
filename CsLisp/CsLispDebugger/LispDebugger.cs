@@ -113,6 +113,7 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
+// TODO bei up und down die currentLineNo und das module anpassen !
                     ShowSourceCode(debugger, currentLineNo);
                 }
                 else if (cmd.StartsWith("list") || cmd.StartsWith("t"))
@@ -257,7 +258,9 @@ namespace CsLisp
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine("Exception: {0}", exception);
+                    Console.WriteLine("\nException: {0}", exception);
+                    string stackInfo = exception.Data.Contains(LispUtils.StackInfo) ? (string)exception.Data[LispUtils.StackInfo] : string.Empty;
+                    Console.WriteLine("\nStack:\n{0}", stackInfo);
                     int? currentLineNo = exception.Data.Contains(LispUtils.LineNo) ? (int?)exception.Data[LispUtils.LineNo] : null;
                     bRestart = InteractiveLoop(debugger, globalScope, currentLineNo, startedFromMain: true);
                 }
@@ -506,15 +509,6 @@ namespace CsLisp
         }
 
         #endregion
-    }
-
-    // ********************************************************************
-    internal class LispStopDebuggerException : LispException
-    {
-        internal LispStopDebuggerException(string text = "")
-            : base(text)
-        {
-        }
     }
 
     // ********************************************************************

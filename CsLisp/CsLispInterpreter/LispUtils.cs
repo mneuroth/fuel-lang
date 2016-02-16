@@ -20,6 +20,11 @@ namespace CsLisp
         public const string ModuleName = "ModuleName";
 
         /// <summary>
+        /// Constant to transport a stack info in exception
+        /// </summary>
+        public const string StackInfo = "StackInfo";
+
+        /// <summary>
         /// Show the version of this FUEL interpreter.
         /// </summary>
         public static void ShowVersion()

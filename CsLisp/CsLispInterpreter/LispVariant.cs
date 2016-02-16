@@ -40,7 +40,7 @@ namespace CsLisp
     {
         #region constants
 
-        private const string CanNotConvertTo = "can not convert to ";
+        private const string CanNotConvertTo = "can not convert {0} to {1}";
         private const string NoOperatorForTypes = "no {0} operator for types {1} and {2}";
 
         #endregion
@@ -708,7 +708,7 @@ namespace CsLisp
 
         private Exception CreateInvalidCastException(string name, string msg = "no")
         {
-            var exception = new InvalidCastException(string.Format("{0} {1}", msg, name));
+            var exception = new InvalidCastException(string.Format(msg, StringValue, name));
             exception.Data[LispUtils.LineNo] = Token != null ? Token.LineNo : -1;
             return exception;
         }
