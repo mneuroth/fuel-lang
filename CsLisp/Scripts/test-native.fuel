@@ -1,0 +1,8 @@
+(do 
+  (import fuellib) 
+  (create-native "List" "System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]") 
+  (def obj (create-List)) 
+  (List-Add obj 7) 
+  (call obj "Add" 5)   
+  (print (List-get_Count obj))
+)
