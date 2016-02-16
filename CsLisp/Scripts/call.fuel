@@ -1,0 +1,11 @@
+(do
+    (defn f (x) 
+	   (+ x 1)
+	)
+
+    (defn g (x) 
+	   (* x x (f x))
+	)
+
+	(print (g 4))
+)
