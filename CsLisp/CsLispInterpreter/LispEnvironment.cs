@@ -142,15 +142,24 @@ namespace CsLisp
 
         public void DumpStack(int currentLevel = -1)
         {
+            string stackInfo = DumpStackToString(currentLevel);
+            Console.WriteLine(stackInfo);
+        }
+
+        public string DumpStackToString(int currentLevel = -1)
+        {
+            string ret = string.Empty;
             LispScope current = this;
             int i = GetCallStackSize();
             do
             {
                 string currentItem = currentLevel == i ? "-->" : "   ";
-                Console.WriteLine("{0,3}{1,5} {2} module= {3}", currentItem, i, current.Name, current.ModuleName);
+
+                ret += string.Format("{0,3}{1,5} {2} module= {3}\n", currentItem, i, current.Name, current.ModuleName);
                 current = current.Previous;
                 i--;
             } while (current != null);
+            return ret;
         }
 
         public void DumpVars()
@@ -576,7 +585,9 @@ namespace CsLisp
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
-                    Lisp.Eval(code, scope.GlobalScope, fileName);                    
+                    var finished = scope.GlobalScope.Finished;
+                    Lisp.Eval(code, scope.GlobalScope, fileName);
+                    scope.GlobalScope.Finished = finished;
                 }
             }
             return new LispVariant();
@@ -1072,13 +1083,16 @@ namespace CsLisp
 
         public static LispVariant fn_form(object[] args, LispScope scope)
         {
-            string name = scope.UserData != null ? scope.UserData.ToString() : AnonymousScope;
+// TODO --> Item2 wird wohl doch nicht mehr benoetigt --> rueckbau !
+            Tuple<string, LispToken> info = (Tuple<string, LispToken>)scope.UserData;
+            string name = ((info != null) && (info.Item1 != null)) ? info.Item1 : AnonymousScope;
             string moduleName = scope.ModuleName;
             
             Func<object[], LispScope, LispVariant> fcn =
                 (localArgs, localScope) =>
                 {
 // TODO line number at scope !?
+//                    var tok = scope.GetPreviousToken(scope.GetPreviousToken(((LispVariant)((IEnumerable<object>)args[0]).First()).Token));
                     var childScope = new LispScope(name, localScope.GlobalScope, moduleName);
                     localScope.PushNextScope(childScope);
 
@@ -1093,12 +1107,36 @@ namespace CsLisp
                     // save the current call stack to resolve variables in closures
                     childScope.ClosureChain = scope;
 
-                    var ret = LispInterpreter.EvalAst(args[1], childScope);
+
+                    LispVariant ret = null;
+                    try
+                    {
+                        ret = LispInterpreter.EvalAst(args[1], childScope);
+                    }
+                    catch (LispStopDebuggerException)
+                    {
+                        // forward a debugger stop exception to stop the debugger loop
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        // add the stack info to the exception
+                        ex.Data[LispUtils.StackInfo] = childScope.DumpStackToString();
+
+                        Console.WriteLine(ex);
+
+                        var debugger = scope.GlobalScope.Debugger;
+                        if (debugger != null)
+                        {
+                            debugger.InteractiveLoop(initialTopScope: childScope, currentAst: (IList<object>)(args[1]) /*new List<object> { info.Item2 }*/ );
+                        }
+
+                        throw;
+                    }
                     localScope.PopNextScope();
                     return ret;
                 };
 
-// TODO --> modulName an Funktion setzen, fuer fehlermeldung...
             return new LispVariant(CreateFunction(fcn, isBuiltin: false, moduleName: scope.ModuleName));
         }
 
@@ -1344,14 +1382,24 @@ namespace CsLisp
             return variant != null && variant.IsList ? variant.ListValue : null;
         }
 
+        private static LispToken GetTokenFrom(object item)
+        {
+            if (item is LispVariant)
+            {
+                return ((LispVariant)item).Token;
+            }
+            return null;
+        }
+
         private static LispVariant defn_form_helper(object[] args, LispScope scope, string name)
         {
             CheckArgs(name, 3, args, scope);
 
-// TODO --> hier kann auch direkt fn_form aufgerufen werdne !?
+// TODO --> hier kann auch direkt fn_form aufgerufen werden !?
             var fn = ((LispVariant)scope.GlobalScope[Fn]).FunctionValue;
-            scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
-       string pos = GetPositionOfPreviousTokenForSymbol(args[0], scope);
+            LispToken fcnNameToken = GetTokenFrom(args[0]);
+            scope.UserData = new Tuple<string, LispToken>(EvalArgIfNeeded(args[0], scope).ToString(), fcnNameToken);
+//       string pos = GetPositionOfPreviousTokenForSymbol(args[0], scope);
             var resFn = fn.Function(new[] { args[1], args[2] }, scope);
             scope.UserData = null;
 
