@@ -199,4 +199,5 @@ namespace CsLisp
     // - debuggen: anzeige module und line no in stack
     // - debuggen: anzeige des korrekten codes, falls module geladen ist
     // - debuggen: set breakpoints in andren modulen realisieren
+    // - debuggen: up/down sollte auch den --> Zeiger anpassen
 }
