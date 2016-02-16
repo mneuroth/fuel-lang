@@ -40,7 +40,7 @@ namespace CsLisp
 
         public const string Name = "FUEL(isp)";
         public const string Version = "v0.99.1";
-        public const string Date = "5.2.2016";
+        public const string Date = "9.2.2016";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";
@@ -60,11 +60,13 @@ namespace CsLisp
         /// </summary>
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="scope">The scope.</param>
-        /// <returns></returns>
-        public static LispVariant Eval(string lispCode, LispScope scope = null)
+        /// <param name="moduleName">The module name and path.</param>
+        /// <returns>The result of the script evaluation</returns>
+        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null)
         {
             // first create global scope, needed for macro expanding
             var globalScope = scope ?? LispEnvironment.CreateDefaultScope();
+            globalScope.ModuleName = moduleName;
             var ast = LispParser.Parse(lispCode, globalScope);
             var expandedAst = LispInterpreter.ExpandMacros(ast, globalScope);
             var result = LispInterpreter.EvalAst(expandedAst, globalScope);
@@ -78,22 +80,23 @@ namespace CsLisp
         /// </summary>
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="scope">The scope.</param>
+        /// <param name="moduleName">The current module name.</param>
         /// <param name="verboseErrorOutput">if set to <c>true</c> [verbose error output].</param>
         /// <returns>The result</returns>
-        public static LispVariant SaveEval(string lispCode, LispScope scope = null, bool verboseErrorOutput = false)
+        public static LispVariant SaveEval(string lispCode, LispScope scope = null, string moduleName = null, bool verboseErrorOutput = false)
         {
             LispVariant result;
             try
             {
-                result = Eval(lispCode, scope);
+                result = Eval(lispCode, scope, moduleName);
             }
             catch (Exception exc)
             {
-                Console.WriteLine("\nError executing script.\n\n{0}", exc.Message);
+                Console.WriteLine("\nError executing script.\n\n{0} data={1}", exc.Message, exc.Data[LispUtils.ModuleName]);
                 if (verboseErrorOutput)
                 {
                     Console.WriteLine("\nCallstack:");
-                    Console.WriteLine("Exception in eval(): {0}", exc);
+                    Console.WriteLine("Exception in eval(): {0} \ndata={1}", exc, exc.Data);
                 }
                 result = LispVariant.CreateErrorValue(exc.Message);
             }

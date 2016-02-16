@@ -94,7 +94,7 @@ namespace CsLisp
                     }
                     else
                     {
-                        result = Lisp.SaveEval(script, verboseErrorOutput: lengthyErrorOutput);
+                        result = Lisp.SaveEval(script, moduleName: fileName, verboseErrorOutput: lengthyErrorOutput);
                     }
                 }
             }
@@ -192,4 +192,11 @@ namespace CsLisp
 
         #endregion
     }
+
+
+    // TODO:
+    // - debuggen: run funktioniert nicht in errorinmodule.fuel
+    // - debuggen: anzeige module und line no in stack
+    // - debuggen: anzeige des korrekten codes, falls module geladen ist
+    // - debuggen: set breakpoints in andren modulen realisieren
 }

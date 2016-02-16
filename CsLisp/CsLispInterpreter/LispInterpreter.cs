@@ -84,7 +84,7 @@ namespace CsLisp
                     {
                         if (!compile)
                         {
-                            throw new LispException("Method \"" + first + "\" not found (" + GetPosInfoString(first) + ")!");
+                            throw new LispException("Function \"" + first + "\" not found (" + GetPosInfoString(first) + ")!", moduleName: scope.ModuleName);
                         }
                     }
                     isSpecialForm = firstElem.IsSpecialForm;

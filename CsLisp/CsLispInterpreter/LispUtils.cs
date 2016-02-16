@@ -9,7 +9,15 @@ namespace CsLisp
     /// </summary>
     public class LispUtils
     {
+        /// <summary>
+        /// Constant to transport line number info in exception
+        /// </summary>
         public const string LineNo = "LineNo";
+
+        /// <summary>
+        /// Constant to transport module name and path info in exception
+        /// </summary>
+        public const string ModuleName = "ModuleName";
 
         /// <summary>
         /// Show the version of this FUEL interpreter.

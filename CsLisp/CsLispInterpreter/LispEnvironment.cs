@@ -48,6 +48,14 @@ namespace CsLisp
         public LispScope ClosureChain { get; set; }
 
         /// <summary>
+        /// Gets or sets the current module name and path.
+        /// </summary>
+        /// <value>
+        /// The module name and path.
+        /// </value>
+        public string ModuleName { get; set; }
+
+        /// <summary>
         /// Gets or sets user data.
         /// Needed for debugging support --> set function name to LispScope
         /// </summary>
@@ -79,10 +87,12 @@ namespace CsLisp
         /// </summary>
         /// <param name="fcnName">Name of the FCN.</param>
         /// <param name="globalScope">The global scope.</param>
-        public LispScope(string fcnName = "", LispScope globalScope = null)
+        /// <param name="moduleName">The current module name for the scope.</param>
+        public LispScope(string fcnName = "", LispScope globalScope = null, string moduleName = null)
         {
             Name = fcnName;
             GlobalScope = globalScope ?? this;
+            ModuleName = moduleName;
         }
 
         #endregion
@@ -137,7 +147,7 @@ namespace CsLisp
             do
             {
                 string currentItem = currentLevel == i ? "-->" : "   ";
-                Console.WriteLine("{0,3}{1,5} {2}", currentItem, i, current.Name);
+                Console.WriteLine("{0,3}{1,5} {2} module= {3}", currentItem, i, current.Name, current.ModuleName);
                 current = current.Previous;
                 i--;
             } while (current != null);
@@ -213,6 +223,8 @@ namespace CsLisp
 
         public string Signature { get; private set; }
 
+        public string ModuleName { get; private set; }
+
         public bool IsBuiltin { get; private set; }
 
         public bool IsSpecialForm { get; private set; }
@@ -223,63 +235,64 @@ namespace CsLisp
 
         #region constroctor(s)
 
-        public LispFunctionWrapper(Func<object[], LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
+        public LispFunctionWrapper(Func<object[], LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
             : this()
         {
             Function = func;
             Signature = signature;
+            ModuleName = ModuleName;
             IsBuiltin = isBuiltin;
             IsSpecialForm = isSpecialForm;
             IsEvalInExpand = isEvalInExpand;
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
+        public LispFunctionWrapper(Func<LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
             : this((args, scope) => func((LispVariant)(args[0]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
             : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
             : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
-            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
-            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
-            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
-            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
-            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
-            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), (LispVariant)(args[8]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), (LispVariant)(args[8]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
         {
         }
 
-        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false)
-            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), (LispVariant)(args[8]), (LispVariant)(args[9]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand)
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), (LispVariant)(args[8]), (LispVariant)(args[9]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
         {
         }
 
@@ -563,7 +576,7 @@ namespace CsLisp
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
-                    Lisp.Eval(code, scope.GlobalScope);                    
+                    Lisp.Eval(code, scope.GlobalScope, fileName);                    
                 }
             }
             return new LispVariant();
@@ -1060,11 +1073,13 @@ namespace CsLisp
         public static LispVariant fn_form(object[] args, LispScope scope)
         {
             string name = scope.UserData != null ? scope.UserData.ToString() : AnonymousScope;
-
+            string moduleName = scope.ModuleName;
+            
             Func<object[], LispScope, LispVariant> fcn =
                 (localArgs, localScope) =>
                 {
-                    var childScope = new LispScope(name, localScope.GlobalScope);
+// TODO line number at scope !?
+                    var childScope = new LispScope(name, localScope.GlobalScope, moduleName);
                     localScope.PushNextScope(childScope);
 
                     var i = 0;
@@ -1083,7 +1098,8 @@ namespace CsLisp
                     return ret;
                 };
 
-            return new LispVariant(CreateFunction(fcn, isBuiltin: false));
+// TODO --> modulName an Funktion setzen, fuer fehlermeldung...
+            return new LispVariant(CreateFunction(fcn, isBuiltin: false, moduleName: scope.ModuleName));
         }
 
         public static LispVariant defn_form(object[] args, LispScope scope)
@@ -1267,9 +1283,9 @@ namespace CsLisp
             return result;
         }
 
-        private static object CreateFunction(Func<object[], LispScope, LispVariant> func, string signature = null, bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false)
+        private static object CreateFunction(Func<object[], LispScope, LispVariant> func, string signature = null, bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
         {
-            return new LispVariant(new LispFunctionWrapper(func, signature, isBuiltin, isSpecialForm, isEvalInExpand));
+            return new LispVariant(new LispFunctionWrapper(func, signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
         }
 
         private static string GetPositionOfPreviousTokenForSymbol(object symbol, LispScope scope)
@@ -1332,8 +1348,10 @@ namespace CsLisp
         {
             CheckArgs(name, 3, args, scope);
 
+// TODO --> hier kann auch direkt fn_form aufgerufen werdne !?
             var fn = ((LispVariant)scope.GlobalScope[Fn]).FunctionValue;
             scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
+       string pos = GetPositionOfPreviousTokenForSymbol(args[0], scope);
             var resFn = fn.Function(new[] { args[1], args[2] }, scope);
             scope.UserData = null;
 

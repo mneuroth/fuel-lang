@@ -234,7 +234,8 @@ namespace CsLisp
             var breakpoints = new List<LispBreakpointInfo>();
             while (bRestart)
             {
-                var script = LispUtils.ReadFile(LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault());
+                var fileName = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
+                var script = LispUtils.ReadFile(fileName);
                 // if no valid script file name is given, try to use string as script
                 if (script == String.Empty && args.Length > 1)
                 {
@@ -248,7 +249,7 @@ namespace CsLisp
 
                 try
                 {
-                    result = Lisp.Eval(script, globalScope);
+                    result = Lisp.Eval(script, globalScope, fileName);
                 }
                 catch (LispStopDebuggerException)
                 {

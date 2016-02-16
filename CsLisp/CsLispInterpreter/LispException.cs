@@ -12,10 +12,12 @@ namespace CsLisp
         /// </summary>
         /// <param name="text">The text.</param>
         /// <param name="lineNo">The line no.</param>
-        public LispException(string text, int? lineNo = null)
+        /// <param name="moduleName">The module name and path.</param>
+        public LispException(string text, int? lineNo = null, string moduleName = null)
             : base(text)
         {
             Data[LispUtils.LineNo] = lineNo;
+            Data[LispUtils.ModuleName] = moduleName;
         }
     }
 }
