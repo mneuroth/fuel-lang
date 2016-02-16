@@ -20,7 +20,7 @@ namespace CsLisp
 
         #region properties
 
-        private string SourceCode { get; set; }
+        //private string SourceCode { get; set; }
 
         private bool IsProgramStop { get; set; }
 
@@ -114,7 +114,9 @@ namespace CsLisp
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
 // TODO bei up und down die currentLineNo und das module anpassen !
-                    ShowSourceCode(debugger, currentLineNo);
+                    var currentModuleName = currentScope.ModuleName;
+                    var script = LispUtils.ReadFile(currentModuleName);
+                    ShowSourceCode(debugger, script, currentLineNo);
                 }
                 else if (cmd.StartsWith("list") || cmd.StartsWith("t"))
                 {
@@ -246,7 +248,7 @@ namespace CsLisp
                 var globalScope = LispEnvironment.CreateDefaultScope();
                 var debugger = new LispDebugger(breakpoints);
                 globalScope.Debugger = debugger;
-                debugger.SourceCode = script;
+                //debugger.SourceCode = script;
 
                 try
                 {
@@ -297,7 +299,7 @@ namespace CsLisp
                     {
                         try
                         {
-                            LispVariant result = EvalCondition(breakpoint.Condition, scope);
+                            LispVariant result = Lisp.Eval(breakpoint.Condition, scope, updateFinishedFlag: false);
                             return result.BoolValue;
                         }
                         catch
@@ -379,11 +381,11 @@ namespace CsLisp
             }
         }
 
-        private static void ShowSourceCode(LispDebugger debugger, int? currentLineNo)
+        private static void ShowSourceCode(LispDebugger debugger, string sourceCode, int? currentLineNo)
         {
             if (debugger != null)
             {
-                string[] sourceCodeLines = debugger.SourceCode.Split('\n');
+                string[] sourceCodeLines = sourceCode.Split('\n');
                 for (int i = 0; i < sourceCodeLines.Length; i++)
                 {
                     string breakMark = debugger.HasBreakpointAt(i + 1) ? "B " : "  ";
@@ -456,14 +458,6 @@ namespace CsLisp
                 bStop = true;
             }
             return bStop;
-        }
-
-        private static LispVariant EvalCondition(string lispCode, LispScope scope)
-        {
-            var finished = scope.Finished;
-            var result = Lisp.Eval(lispCode, scope);
-            scope.Finished = finished;
-            return result;
         }
 
         private static void ShowInteractiveCmds()

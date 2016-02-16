@@ -585,9 +585,7 @@ namespace CsLisp
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
-                    var finished = scope.GlobalScope.Finished;
-                    Lisp.Eval(code, scope.GlobalScope, fileName);
-                    scope.GlobalScope.Finished = finished;
+                    Lisp.Eval(code, scope.GlobalScope, fileName, updateFinishedFlag: false);
                 }
             }
             return new LispVariant();

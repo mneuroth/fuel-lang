@@ -61,8 +61,9 @@ namespace CsLisp
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="scope">The scope.</param>
         /// <param name="moduleName">The module name and path.</param>
+        /// <param name="updateFinishedFlag">Flag which indicates request to update the finished flag at the scop.</param>
         /// <returns>The result of the script evaluation</returns>
-        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null)
+        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool updateFinishedFlag = true)
         {
             // first create global scope, needed for macro expanding
             var globalScope = scope ?? LispEnvironment.CreateDefaultScope();
@@ -70,7 +71,10 @@ namespace CsLisp
             var ast = LispParser.Parse(lispCode, globalScope);
             var expandedAst = LispInterpreter.ExpandMacros(ast, globalScope);
             var result = LispInterpreter.EvalAst(expandedAst, globalScope);
-            globalScope.Finished = true; // needed for debugging support                
+            if (updateFinishedFlag)
+            {
+                globalScope.Finished = true; // needed for debugging support                
+            }
             return result;
         }
 

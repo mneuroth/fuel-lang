@@ -200,4 +200,5 @@ namespace CsLisp
     // - debuggen: anzeige des korrekten codes, falls module geladen ist
     // - debuggen: set breakpoints in andren modulen realisieren
     // - debuggen: up/down sollte auch den --> Zeiger anpassen
+    // - ist LispScope.Finished und LispScope.SourceCode noch notwendig? 
 }
