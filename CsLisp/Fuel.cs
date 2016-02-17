@@ -212,4 +212,5 @@ namespace CsLisp
     // - debuggen: show loaded module names 
     // - debzggen: funcs befehl um module erweitern
     // - stdlib um list<object> erweitern, damit man immer mit listen arbeiten kann
+    // - debugger: v (step over) funktioniert nicht so wie erwartet --> haengt bei quote
 }

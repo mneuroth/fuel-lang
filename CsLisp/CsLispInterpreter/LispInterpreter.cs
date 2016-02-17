@@ -84,7 +84,7 @@ namespace CsLisp
                     {
                         if (!compile)
                         {
-                            throw new LispException("Method \"" + first + "\" not found (" + GetPosInfoString(first) + ")!");
+                            throw new LispException("Function \"" + first + "\" not found (" + GetPosInfoString(first) + ")!", moduleName: scope.ModuleName);
                         }
                     }
                     isSpecialForm = firstElem.IsSpecialForm;
@@ -176,7 +176,25 @@ namespace CsLisp
             // is this function a macro ==> evaluate the macro... and return
             if (LispEnvironment.IsMacro(astAsList.First(), scope.GlobalScope))
             {
-                return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
+                // ignore definition of macros in evaluation step
+                //return new LispVariant();
+                ////return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
+
+// TODO --> macro behandlung a) oder b) ?
+                var macro = LispEnvironment.GetMacro(astAsList.First(), scope.GlobalScope);
+                // evaluate macro:
+                if (macro is IEnumerable<object>)
+                {
+                    var expression = EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
+                    return expression;
+                }
+                // expand macro:
+                if (macro is LispMacroExpand)
+                {
+                    return new LispVariant();
+                }
+                throw new Exception("Unexpected macro modus!");
+                //b) return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
             }
 
             // resolve values via local and global scope

@@ -603,10 +603,7 @@ namespace CsLisp
                     var importScope = new LispScope("import "+fileName, scope.GlobalScope, fileName);
                     scope.PushNextScope(importScope);
 
-// gulp
-                    //var currentModuleName = scope.GlobalScope.ModuleName; 
                     result = Lisp.Eval(code, importScope, fileName, updateFinishedFlag: false);
-                    //scope.GlobalScope.ModuleName = currentModuleName;
 
                     // merge new module into modules dictionary
                     importScope.ToList().ForEach(x => ((LispScope)scope.GlobalScope[Modules]).Add(x.Key, x.Value));
