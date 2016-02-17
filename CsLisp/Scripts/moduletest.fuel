@@ -1,0 +1,14 @@
+(do
+
+  (print "start")
+
+  (import fuellib)
+
+  (def container '(1 2 3 4))
+
+  (foreach container (lambda (x) 
+	(print x (* x x)))
+  )
+
+  (print "done.")
+)
