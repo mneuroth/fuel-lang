@@ -20,8 +20,6 @@ namespace CsLisp
 
         #region properties
 
-        //private string SourceCode { get; set; }
-
         private bool IsProgramStop { get; set; }
 
         private Func<LispScope, bool> IsStopStepFcn { get; set; }
@@ -59,11 +57,12 @@ namespace CsLisp
         /// </summary>
         /// <param name="debugger">The debugger.</param>
         /// <param name="initialTopScope">The initial top scope.</param>
-        /// <param name="currentAst">The current ast.</param>
         /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
+        /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>Value of the last expression</returns>
+        /// <exception cref="LispStopDebuggerException"></exception>
         /// <exception cref="CsLisp.LispStopDebuggerException"></exception>
-        public static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, int? currentLineNo = null, bool startedFromMain = false)
+        public static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, bool startedFromMain = false, bool tracing = false)
         {
             startedFromMain = !startedFromMain ? debugger == null : startedFromMain;
             if (debugger == null)
@@ -71,6 +70,11 @@ namespace CsLisp
                 debugger = new LispDebugger();
             }
             var globalScope = initialTopScope != null ? initialTopScope.GlobalScope : LispEnvironment.CreateDefaultScope();
+            // do not switch off tracing if already enabled
+            if (!globalScope.Tracing)
+            {
+                globalScope.Tracing = tracing;                
+            }
             var topScope = initialTopScope != null ? initialTopScope : globalScope;
             var currentScope = topScope;
             var bStop = false;
@@ -113,10 +117,8 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
-// TODO bei up und down die currentLineNo und das module anpassen !
-                    var currentModuleName = currentScope.ModuleName;
-                    var script = LispUtils.ReadFile(currentModuleName);
-                    ShowSourceCode(debugger, script, currentLineNo);
+                    var script = LispUtils.ReadFile(currentScope.ModuleName);
+                    ShowSourceCode(debugger, script, currentScope.LineNumber);
                 }
                 else if (cmd.StartsWith("list") || cmd.StartsWith("t"))
                 {
@@ -201,15 +203,16 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false)
+        public void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false, bool tracing = false)
         {
             int? currentLineNo = null;
             if (currentAst != null)
             {
+// TODO --> ist diese extraktion der lineno noch notwendig, wird doch nun am scope gesetzt?
                 currentLineNo = LispInterpreter.GetPosInfo(currentAst[0]).Item2;
                 Console.WriteLine("--> " + currentAst[0] + " " + LispInterpreter.GetPosInfoString(currentAst[0]));
             }
-            InteractiveLoop(this, initialTopScope, currentLineNo, startedFromMain);
+            InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
         }
 
         /// <summary>
@@ -229,8 +232,9 @@ namespace CsLisp
         /// Loop of the debugger.
         /// </summary>
         /// <param name="args">The arguments.</param>
+        /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>Value of the last expression</returns>
-        public LispVariant DebuggerLoop(string[] args)
+        public LispVariant DebuggerLoop(string[] args, bool tracing = false)
         {
             LispVariant result = null;
             var bRestart = true;
@@ -248,11 +252,10 @@ namespace CsLisp
                 var globalScope = LispEnvironment.CreateDefaultScope();
                 var debugger = new LispDebugger(breakpoints);
                 globalScope.Debugger = debugger;
-                //debugger.SourceCode = script;
 
                 try
                 {
-                    result = Lisp.Eval(script, globalScope, fileName);
+                    result = Lisp.Eval(script, globalScope, fileName, tracing: tracing);
                 }
                 catch (LispStopDebuggerException)
                 {
@@ -264,7 +267,8 @@ namespace CsLisp
                     string stackInfo = exception.Data.Contains(LispUtils.StackInfo) ? (string)exception.Data[LispUtils.StackInfo] : string.Empty;
                     Console.WriteLine("\nStack:\n{0}", stackInfo);
                     int? currentLineNo = exception.Data.Contains(LispUtils.LineNo) ? (int?)exception.Data[LispUtils.LineNo] : null;
-                    bRestart = InteractiveLoop(debugger, globalScope, currentLineNo, startedFromMain: true);
+// TODO --> wofuer braucht man hier die line no --> ggf. auch in LispUtils.LineNo loeschen?
+                    bRestart = InteractiveLoop(debugger, globalScope, startedFromMain: true);
                 }
 
                 breakpoints = debugger.Breakpoints;

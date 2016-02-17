@@ -84,7 +84,7 @@ namespace CsLisp
                     {
                         if (!compile)
                         {
-                            throw new LispException("Function \"" + first + "\" not found (" + GetPosInfoString(first) + ")!", moduleName: scope.ModuleName);
+                            throw new LispException("Method \"" + first + "\" not found (" + GetPosInfoString(first) + ")!");
                         }
                     }
                     isSpecialForm = firstElem.IsSpecialForm;
@@ -122,6 +122,12 @@ namespace CsLisp
                      scope.GlobalScope.ContainsKey(name))
             {
                 result = scope.GlobalScope[name];
+            }
+            // then try to resolve in scope of loaded modules
+            else if (scope != null &&
+                     LispEnvironment.IsInModules(name, scope.GlobalScope))
+            {
+                result = LispEnvironment.GetFunctionInModules(name, scope.GlobalScope);
             }
             else
             {
@@ -168,26 +174,9 @@ namespace CsLisp
             }
 
             // is this function a macro ==> evaluate the macro... and return
-// TODO test macros...
             if (LispEnvironment.IsMacro(astAsList.First(), scope.GlobalScope))
             {
-                // ignore definition of macros in evaluation step
-                //return new LispVariant();
-                ////return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
-
-                var macro = LispEnvironment.GetMacro(astAsList.First(), scope.GlobalScope);
-                // evaluate macro:
-                if (macro is IEnumerable<object>)
-                {
-                    var expression = EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
-                    return expression;
-                }
-                // expand macro:
-                if (macro is LispMacroExpand)
-                {
-                    return new LispVariant();
-                }
-                throw new Exception("Unexpected macro modus!");
+                return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
             }
 
             // resolve values via local and global scope
@@ -198,7 +187,12 @@ namespace CsLisp
 
             // normal evaluation...
             LispFunctionWrapper functionWrapper = ((LispVariant)function).FunctionValue;
-// TODO --> hier ggf. funktion tracen (zum Debuggen)...
+
+            // trace current function (if tracing is enabled)
+            if (scope.GlobalScope.Tracing)
+            {
+                Console.WriteLine("--> {0}", astAsList.First());
+            }
 
             // evaluate arguments, but allow recursive lists
             var arguments = new object[astWithResolvedValues.Count - 1];
@@ -208,6 +202,10 @@ namespace CsLisp
                                      !functionWrapper.IsSpecialForm;
                 arguments[i - 1] = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
             }
+
+            // for debugging: update the current line number at the current scope
+            var currentToken = ((LispVariant)(astAsList.First())).Token;
+            scope.LineNumber = currentToken != null ? currentToken.LineNo : -2;
 
             // debugger processing
             var debugger = scope.GlobalScope.Debugger;
@@ -267,14 +265,6 @@ namespace CsLisp
             if (LispEnvironment.IsMacro(function, globalScope))
             {
                 var macro = LispEnvironment.GetMacro(function, globalScope);
-                // evaluate macro:
-//                if (macro is IEnumerable<object>)
-//                {
-//// TODO ---> nur evaluieren im recursiven expandmacro aufruf !!! unschön !!!
-//                    var expression = EvaluateMacro(function, astAsList, globalScope);
-//                    return expression;
-//                }
-                // expand macro:
                 if (macro is LispMacroExpand)
                 {
                     var macroExpand = (LispMacroExpand)macro;

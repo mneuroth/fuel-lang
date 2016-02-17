@@ -19,6 +19,7 @@ namespace CsLisp
             }
 
             var doNotLoadFiles = false;
+            var trace = false;
             var compile = false;
             var showCompileOutput = false;
             var measureTime = false;
@@ -51,18 +52,22 @@ namespace CsLisp
                 result = Lisp.Eval(script);
                 doNotLoadFiles = true;
             }
+            if (args.Contains("-t"))
+            {
+                trace = true;
+            }
             if (debugger != null)
             {
                 if (args.Contains("-i"))
                 {
                     InteractiveLoopHeader();
-                    debugger.InteractiveLoop(startedFromMain:true);
+                    debugger.InteractiveLoop(startedFromMain:true, tracing: trace);
                     doNotLoadFiles = true;
                 }
                 if (args.Contains("-d"))
                 {
                     InteractiveLoopHeader();
-                    result = debugger.DebuggerLoop(args);
+                    result = debugger.DebuggerLoop(args, tracing: trace);
                     doNotLoadFiles = true;
                 }                
             }
@@ -94,12 +99,12 @@ namespace CsLisp
                     }
                     else
                     {
-                        result = Lisp.SaveEval(script, moduleName: fileName, verboseErrorOutput: lengthyErrorOutput);
+                        result = Lisp.SaveEval(script, moduleName: fileName, verboseErrorOutput: lengthyErrorOutput, tracing: trace);
                     }
                 }
             }
 
-            if (args.Contains("-t"))
+            if (trace)
             {
                 Console.WriteLine("Result=" + result);
             }
@@ -195,11 +200,16 @@ namespace CsLisp
 
 
     // TODO:
-    // - debuggen: run funktioniert nicht in errorinmodule.fuel
-    // - debuggen: anzeige module und line no in stack
-    // - debuggen: anzeige des korrekten codes, falls module geladen ist
+    // (- debuggen: run funktioniert nicht in errorinmodule.fuel
+    // ((- debuggen: anzeige module und line no in stack
+    // (- debuggen: anzeige des korrekten codes, falls module geladen ist
     // - debuggen: set breakpoints in andren modulen realisieren
-    // - debuggen: up/down sollte auch den --> Zeiger anpassen
+    // (- debuggen: up/down sollte auch den --> Zeiger anpassen
     // - ist LispScope.Finished und LispScope.SourceCode noch notwendig? 
     // - debuggen: set next statement realisieren?
+    // - bug: step out funktioniert anscheinend bei modulen nicht ganz korrekt
+    // (- ggf. module als eigenen Scope implementieren --> ###modules###
+    // - debuggen: show loaded module names 
+    // - debzggen: funcs befehl um module erweitern
+    // - stdlib um list<object> erweitern, damit man immer mit listen arbeiten kann
 }

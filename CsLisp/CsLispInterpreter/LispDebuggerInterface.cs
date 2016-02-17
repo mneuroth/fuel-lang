@@ -14,7 +14,8 @@ namespace CsLisp
         /// <param name="initialTopScope">The initial top scope.</param>
         /// <param name="currentAst">The current ast.</param>
         /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
-        void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false);
+        /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
+        void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false, bool tracing = false);
 
         /// <summary>
         /// Verifies if the current execution position needes a break,
@@ -29,7 +30,8 @@ namespace CsLisp
         /// Loop of the debugger.
         /// </summary>
         /// <param name="args">The arguments.</param>
+        /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>Value of the last expression</returns>
-        LispVariant DebuggerLoop(string[] args);
+        LispVariant DebuggerLoop(string[] args, bool tracing = false);
     }
 }
