@@ -20,6 +20,11 @@ namespace CsLisp
         public ILispDebugger Debugger { get; set; }
 
         /// <summary>
+        /// Gets and sets the tracing modus.
+        /// </summary>
+        public bool Tracing { get; set; }
+
+        /// <summary>
         /// Has program execution finished?
         /// </summary>
         public bool Finished { get; set; }
@@ -54,6 +59,11 @@ namespace CsLisp
         /// The module name and path.
         /// </value>
         public string ModuleName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current line number.
+        /// </summary>
+        public int LineNumber { get; set; }
 
         /// <summary>
         /// Gets or sets user data.
@@ -93,6 +103,7 @@ namespace CsLisp
             Name = fcnName;
             GlobalScope = globalScope ?? this;
             ModuleName = moduleName;
+            LineNumber = -1;
         }
 
         #endregion
@@ -155,7 +166,7 @@ namespace CsLisp
             {
                 string currentItem = currentLevel == i ? "-->" : "   ";
 
-                ret += string.Format("{0,3}{1,5} {2} module= {3}\n", currentItem, i, current.Name, current.ModuleName);
+                ret += string.Format("{0,3}{1,5} {2} lineno={3} module={4}\n", currentItem, i, current.Name, current.LineNumber, current.ModuleName);
                 current = current.Previous;
                 i--;
             } while (current != null);
@@ -170,6 +181,7 @@ namespace CsLisp
         public void DumpFunctions()
         {
             Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin);
+// TODO --> dump also module functions and maybe macros !?
         }
 
         #endregion
@@ -334,6 +346,7 @@ namespace CsLisp
         private const string DefineMacro = "define-macro";
         private const string DefineMacroExpand = "define-macro-expand";
         private const string Lambda = "lambda";
+        private const string Modules = MetaTag + "modules" + MetaTag;
         private const string Macros = MetaTag + "macros" + MetaTag;
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
@@ -353,25 +366,24 @@ namespace CsLisp
 
         #region public methods of environment
 
+        public static bool IsInModules(object funcName, LispScope globalScope)
+        {
+            return ExistsItem(funcName, globalScope, Modules);
+        }
+
+        public static object GetFunctionInModules(object funcName, LispScope globalScope)
+        {
+            return QueryItem(funcName, globalScope, Modules);            
+        }
+
         public static bool IsMacro(object funcName, LispScope globalScope)
         {
-            if (globalScope != null &&
-                globalScope.ContainsKey(Macros))
-            {
-                return ((LispScope)globalScope[Macros]).ContainsKey(funcName.ToString());
-            }
-            return false;
+            return ExistsItem(funcName, globalScope, Macros);
         }
 
         public static object GetMacro(object funcName, LispScope globalScope)
         {
-            if (globalScope != null &&
-                globalScope.ContainsKey(Macros) &&
-                ((LispScope)globalScope[Macros]).ContainsKey(funcName.ToString()))
-            {
-                return ((LispScope)globalScope[Macros])[funcName.ToString()];
-            }
-            return null;
+            return QueryItem(funcName, globalScope, Macros);
         }
 
         public static bool IsExpression(object item)
@@ -398,6 +410,7 @@ namespace CsLisp
             var scope = new LispScope(MainScope);
 
             // meta information fields
+            scope[Modules] = new LispScope(Modules, scope);
             scope[Macros] = new LispScope(Macros, scope);
             scope[Tracebuffer] = new StringBuilder();
             scope[Traceon] = false;
@@ -559,19 +572,21 @@ namespace CsLisp
 
         private static LispVariant Import(object[] args, LispScope scope)
         {
+            LispVariant result = new LispVariant();
+
             foreach (var module in args)
             {
                 string code = string.Empty;
-                string orgFileName = ((LispVariant)module).StringValue;
-                string fileName = orgFileName;
+                string orgModuleFileName = ((LispVariant)module).StringValue;
+                string fileName = orgModuleFileName;
                 if (!File.Exists(fileName))
                 {
                     // try default path Library\modulename.fuel
-                    fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
+                    fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
                     fileName = AddFileExtensionIfNeeded(fileName);
                     if (!File.Exists(fileName))
                     {
-                        fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgFileName;
+                        fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
                         fileName = AddFileExtensionIfNeeded(fileName);
                     }
                 }
@@ -581,16 +596,26 @@ namespace CsLisp
                 }
                 else
                 {
-                    Console.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgFileName, fileName);
+                    Console.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
-                    var currentModuleName = scope.GlobalScope.ModuleName; 
-                    Lisp.Eval(code, scope.GlobalScope, fileName, updateFinishedFlag: false);
-                    scope.GlobalScope.ModuleName = currentModuleName;
+                    var importScope = new LispScope("import "+fileName, scope.GlobalScope, fileName);
+                    scope.PushNextScope(importScope);
+
+// gulp
+                    //var currentModuleName = scope.GlobalScope.ModuleName; 
+                    result = Lisp.Eval(code, importScope, fileName, updateFinishedFlag: false);
+                    //scope.GlobalScope.ModuleName = currentModuleName;
+
+                    // merge new module into modules dictionary
+                    importScope.ToList().ForEach(x => ((LispScope)scope.GlobalScope[Modules]).Add(x.Key, x.Value));
+
+                    scope.PopNextScope();
+
                 }
             }
-            return new LispVariant();
+            return result;
         }
 
         private static string AddFileExtensionIfNeeded(string fileName)
@@ -979,8 +1004,8 @@ namespace CsLisp
 
             List<object> ret = new List<object>() { args[0], args[1], result };
             //return ret;
-            return new LispVariant(ret);
-            //return null; // TODO gulp working replace macro new LispVariant(result);
+            //return new LispVariant(ret);
+            return null; // TODO gulp working replace macro new LispVariant(result);
         }
 
 // TODO --> ggf. entfernen
@@ -1083,16 +1108,12 @@ namespace CsLisp
 
         public static LispVariant fn_form(object[] args, LispScope scope)
         {
-// TODO --> Item2 wird wohl doch nicht mehr benoetigt --> rueckbau !
-            Tuple<string, LispToken> info = (Tuple<string, LispToken>)scope.UserData;
-            string name = ((info != null) && (info.Item1 != null)) ? info.Item1 : AnonymousScope;
+            string name = (string)scope.UserData;
             string moduleName = scope.ModuleName;
             
             Func<object[], LispScope, LispVariant> fcn =
                 (localArgs, localScope) =>
                 {
-// TODO line number at scope !?
-//                    var tok = scope.GetPreviousToken(scope.GetPreviousToken(((LispVariant)((IEnumerable<object>)args[0]).First()).Token));
                     var childScope = new LispScope(name, localScope.GlobalScope, moduleName);
                     localScope.PushNextScope(childScope);
 
@@ -1107,7 +1128,6 @@ namespace CsLisp
                     // save the current call stack to resolve variables in closures
                     childScope.ClosureChain = scope;
 
-
                     LispVariant ret = null;
                     try
                     {
@@ -1120,14 +1140,15 @@ namespace CsLisp
                     }
                     catch (Exception ex)
                     {
-                        // add the stack info to the exception
+                        // add the stack info and module name to the data of the exception
                         ex.Data[LispUtils.StackInfo] = childScope.DumpStackToString();
-
-                        Console.WriteLine(ex);
+                        ex.Data[LispUtils.ModuleName] = childScope.ModuleName;
 
                         var debugger = scope.GlobalScope.Debugger;
                         if (debugger != null)
                         {
+                            Console.WriteLine(ex);
+
                             debugger.InteractiveLoop(initialTopScope: childScope, currentAst: (IList<object>)(args[1]) /*new List<object> { info.Item2 }*/ );
                         }
 
@@ -1189,7 +1210,7 @@ namespace CsLisp
                 if (nativeClass != null)
                 {
                     ConstructorInfo constructor = nativeClass.GetConstructor(new Type[0]);
-                    //TODO: ConstructorInfo[] constructors = nativeClass.GetConstructors();
+//TODO: ConstructorInfo[] constructors = nativeClass.GetConstructors();
 
                     if (constructor != null)
                     {
@@ -1395,11 +1416,8 @@ namespace CsLisp
         {
             CheckArgs(name, 3, args, scope);
 
-// TODO --> hier kann auch direkt fn_form aufgerufen werden !?
             var fn = ((LispVariant)scope.GlobalScope[Fn]).FunctionValue;
-            LispToken fcnNameToken = GetTokenFrom(args[0]);
-            scope.UserData = new Tuple<string, LispToken>(EvalArgIfNeeded(args[0], scope).ToString(), fcnNameToken);
-//       string pos = GetPositionOfPreviousTokenForSymbol(args[0], scope);
+            scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
             var resFn = fn.Function(new[] { args[1], args[2] }, scope);
             scope.UserData = null;
 
@@ -1443,6 +1461,27 @@ namespace CsLisp
                 buffer.Append(text);
             }
             return text;
+        }
+
+        private static object QueryItem(object funcName, LispScope globalScope, string key)
+        {
+            if (globalScope != null &&
+                globalScope.ContainsKey(key) &&
+                ((LispScope)globalScope[key]).ContainsKey(funcName.ToString()))
+            {
+                return ((LispScope)globalScope[key])[funcName.ToString()];
+            }
+            return null;
+        }
+
+        private static bool ExistsItem(object funcName, LispScope globalScope, string key)
+        {
+            if (globalScope != null &&
+                globalScope.ContainsKey(key))
+            {
+                return ((LispScope)globalScope[key]).ContainsKey(funcName.ToString());
+            }
+            return false;
         }
 
         #endregion
