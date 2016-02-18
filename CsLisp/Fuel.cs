@@ -206,11 +206,15 @@ namespace CsLisp
     // - debuggen: set breakpoints in andren modulen realisieren
     // (- debuggen: up/down sollte auch den --> Zeiger anpassen
     // - ist LispScope.Finished und LispScope.SourceCode noch notwendig? 
+    // - Makro Behandlung aufraeumen
+    // - Quellcode aufraeumen
     // - debuggen: set next statement realisieren?
     // - bug: step out funktioniert anscheinend bei modulen nicht ganz korrekt
     // (- ggf. module als eigenen Scope implementieren --> ###modules###
     // - debuggen: show loaded module names 
-    // - debzggen: funcs befehl um module erweitern
+    // - debuggen: funcs befehl um module erweitern und anzeige von funktionen in modulen
     // - stdlib um list<object> erweitern, damit man immer mit listen arbeiten kann
-    // - debugger: v (step over) funktioniert nicht so wie erwartet --> haengt bei quote
+    // (- debugger: v (step over) funktioniert nicht so wie erwartet --> haengt bei quote
+    // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
+    // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
 }

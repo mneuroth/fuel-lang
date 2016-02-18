@@ -180,15 +180,26 @@ namespace CsLisp
 
         public void DumpFunctions()
         {
-            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin);
+            Dump(v => v.IsFunction, v => " : module="+v.FunctionValue.ModuleName);
 // TODO --> dump also module functions and maybe macros !?
+        }
+
+        public void DumpBuiltinFunctions()
+        {
+            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin);
+        }
+
+        public void DumpModules()
+        {
+// TODO --> ueber alle funktionen gehen und alle module namen sammeln und anzeigen
+            Console.WriteLine(this[LispEnvironment.Modules]);
         }
 
         #endregion
 
         #region private methods
 
-        private void Dump(Func<LispVariant, bool> select)
+        private void Dump(Func<LispVariant, bool> select, Func<LispVariant, string> show = null)
         {
             foreach (var key in Keys)
             {
@@ -197,10 +208,12 @@ namespace CsLisp
                     var value = (LispVariant)this[key];
                     if (select(value))
                     {
-                        Console.WriteLine("{0,15} --> {1,-45} : {2}", key, value, value.Type);
+                        string info = show != null ? show(value) : string.Empty;
+                        Console.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value, value.Type, info);
                     }
                 }
             }
+// TODO --> hier ggf. die Module-Funktionen auch loopen...
         }
 
         #endregion
@@ -261,7 +274,7 @@ namespace CsLisp
         {
             Function = func;
             Signature = signature;
-            ModuleName = ModuleName;
+            ModuleName = moduleName;
             IsBuiltin = isBuiltin;
             IsSpecialForm = isSpecialForm;
             IsEvalInExpand = isEvalInExpand;
@@ -327,6 +340,9 @@ namespace CsLisp
     {
         #region constants
 
+
+        public const string Builtin = "<builtin>";
+
         public const string MetaTag = "###";
 
         private const string MainScope = "<main>";
@@ -346,11 +362,12 @@ namespace CsLisp
         private const string DefineMacro = "define-macro";
         private const string DefineMacroExpand = "define-macro-expand";
         private const string Lambda = "lambda";
-        private const string Modules = MetaTag + "modules" + MetaTag;
         private const string Macros = MetaTag + "macros" + MetaTag;
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
-            
+
+        public const string Modules = MetaTag + "modules" + MetaTag;
+
         public const string Apply = "apply";
         public const string Eval = "eval";
         public const string EvalStr = "evalstr";
@@ -1339,7 +1356,7 @@ namespace CsLisp
             return result;
         }
 
-        private static object CreateFunction(Func<object[], LispScope, LispVariant> func, string signature = null, bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+        private static object CreateFunction(Func<object[], LispScope, LispVariant> func, string signature = null, bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = Builtin)
         {
             return new LispVariant(new LispFunctionWrapper(func, signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
         }

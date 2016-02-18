@@ -223,7 +223,7 @@ namespace CsLisp
 
             // for debugging: update the current line number at the current scope
             var currentToken = ((LispVariant)(astAsList.First())).Token;
-            scope.LineNumber = currentToken != null ? currentToken.LineNo : -2;
+            scope.LineNumber = currentToken != null ? currentToken.LineNo : scope.LineNumber;
 
             // debugger processing
             var debugger = scope.GlobalScope.Debugger;

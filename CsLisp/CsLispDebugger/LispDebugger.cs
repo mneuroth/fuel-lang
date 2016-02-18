@@ -107,6 +107,14 @@ namespace CsLisp
                 {
                     globalScope.DumpFunctions();
                 }
+                else if (cmd.Equals("builtins"))
+                {
+                    globalScope.DumpBuiltinFunctions();
+                }
+                else if (cmd.Equals("modules"))
+                {
+                    globalScope.DumpModules();
+                }
                 else if (cmd.StartsWith("clear"))
                 {
                     ClearBreakpoints(debugger, cmd);
@@ -126,7 +134,7 @@ namespace CsLisp
                 }
                 else if (cmd.StartsWith("break ") || cmd.StartsWith("b "))
                 {
-                    AddBreakpoint(debugger, cmd);
+                    AddBreakpoint(debugger, cmd, currentScope.ModuleName);
                 }
                 else if (cmd.Equals("up") || cmd.StartsWith("u"))
                 {
@@ -205,12 +213,9 @@ namespace CsLisp
         /// </summary>
         public void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false, bool tracing = false)
         {
-            int? currentLineNo = null;
             if (currentAst != null)
             {
-// TODO --> ist diese extraktion der lineno noch notwendig, wird doch nun am scope gesetzt?
-                currentLineNo = LispInterpreter.GetPosInfo(currentAst[0]).Item2;
-                Console.WriteLine("--> " + currentAst[0] + " " + LispInterpreter.GetPosInfoString(currentAst[0]));
+                Console.WriteLine("--> " + currentAst[0] + " line=" + initialTopScope.LineNumber + " " + LispInterpreter.GetPosInfoString(currentAst[0]));
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
         }
@@ -297,6 +302,7 @@ namespace CsLisp
         {
             foreach (var breakpoint in Breakpoints)
             {
+                bool isSameModule = IsSameModule(breakpoint.ModuleName, scope != null ? scope.ModuleName : null);
                 if (lineNo == breakpoint.LineNo)
                 {
                     if (breakpoint.Condition.Length > 0 && scope != null)
@@ -318,14 +324,28 @@ namespace CsLisp
             return false;
         }
 
+        private static bool IsSameModule(string moduleName1, string moduleName2)
+        {
+            // if one module name is not set --> handle as same module
+            if (string.IsNullOrEmpty(moduleName1) || string.IsNullOrEmpty(moduleName2))
+            {
+                return true;
+            }
+// TODO gulp
+//moduletest.fuel == .\Library\fuellib.fuel
+//moduletest.fuel == moduletest.fuel
+            Console.WriteLine("{0} == {1}", moduleName1, moduleName2);
+            return false;
+        }
+
         private bool HasBreakpointAt(int lineNo)
         {
             return HitsBreakpoint(lineNo, null);
         }
 
-        private void AddBreakpoint(int lineNo, string condition)
+        private void AddBreakpoint(int lineNo, string moduleName, string condition)
         {
-            var newItem = new LispBreakpointInfo(lineNo, condition);
+            var newItem = new LispBreakpointInfo(lineNo, moduleName, condition);
             int index = Breakpoints.FindIndex(elem => elem.LineNo == lineNo);
             if (index >= 0)
             {
@@ -362,13 +382,15 @@ namespace CsLisp
 
         private void DoStepOver(LispScope currentScope)
         {
-            IsStopStepFcn = (scope) => currentScope.GetCallStackSize() >= scope.GetCallStackSize();
+            int currentCallStackSize = currentScope.GetCallStackSize();
+            IsStopStepFcn = (scope) => currentCallStackSize >= scope.GetCallStackSize();
             IsProgramStop = true;
         }
 
         private void DoStepOut(LispScope currentScope)
         {
-            IsStopStepFcn = (scope) => currentScope.GetCallStackSize() - 1 >= scope.GetCallStackSize();
+            int currentCallStackSize = currentScope.GetCallStackSize();
+            IsStopStepFcn = (scope) => currentCallStackSize - 1 >= scope.GetCallStackSize();
             IsProgramStop = true;
         }
 
@@ -379,9 +401,12 @@ namespace CsLisp
 
         private void ShowBreakpoints()
         {
+            Console.WriteLine("Breakpoints:");
+            int no = 1;
             foreach (var breakpoint in Breakpoints)
             {
-                Console.WriteLine("line {0,-5} condition: {1}", breakpoint.LineNo, breakpoint.Condition);
+                Console.WriteLine("#{0,-3} line={1,-5} module={2,-25} condition={3}", no, breakpoint.LineNo, breakpoint.ModuleName, breakpoint.Condition);
+                no++;
             }
         }
 
@@ -428,30 +453,47 @@ namespace CsLisp
             }
         }
 
-        private static void AddBreakpoint(LispDebugger debugger, string cmd)
+        /// <summary>
+        /// Adds a breakpoint.
+        /// Possible command strings after break:
+        /// break 7             --&gt; breakpoint with just one line number in the current module
+        /// break 7:modulename  --&gt; breakpoint with line number and module name
+        /// break 7 condition   --&gt; breakpoint with line number and condition
+        /// break 7:modulename condition --&gt; breakpoint with line number, module name and condition
+        /// </summary>
+        /// <param name="debugger">The debugger.</param>
+        /// <param name="cmd">The command.</param>
+        /// <param name="currentModuleName">Name of the current module.</param>
+        private static void AddBreakpoint(LispDebugger debugger, string cmd, string currentModuleName)
         {
+            bool added = false;
             if (debugger != null)
             {
                 string rest = cmd.Substring(cmd.IndexOf(" ", StringComparison.Ordinal)).Trim();
                 string[] cmdArgs = rest.Split(' ');
                 int indexRest = rest.IndexOf(" ", StringComparison.Ordinal);
-                if (indexRest >= 0)
+                rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : String.Empty;
+                if (cmdArgs.Length > 0)
                 {
-                    rest = rest.Substring(indexRest).Trim();
+                    string moduleName = currentModuleName;
+                    string lineNumberString = cmdArgs[0];
+                    int posModuleSeparator = cmdArgs[0].IndexOf(":", StringComparison.Ordinal);
+                    if (posModuleSeparator >= 0)
+                    {
+                        moduleName = cmdArgs[0].Substring(posModuleSeparator+1);
+                        lineNumberString = cmdArgs[0].Substring(0, posModuleSeparator);
+                    }
+                    Tuple<bool, int> val = ConvertToInt(lineNumberString);
+                    if (val.Item1)
+                    {
+                        debugger.AddBreakpoint(val.Item2, moduleName, rest.Length > 0 ? rest : String.Empty);
+                        added = true;
+                    }
                 }
-                else
-                {
-                    rest = String.Empty;
-                }
-                Tuple<bool, int> val = ConvertToInt(cmdArgs[0]);
-                if (val.Item1)
-                {
-                    debugger.AddBreakpoint(val.Item2, rest.Length > 0 ? rest : String.Empty);
-                }
-                else
-                {
-                    Console.WriteLine("Warning: no breakpoint set or modified");
-                }
+            }
+            if(!added)
+            {
+                Console.WriteLine("Warning: no breakpoint set or modified");
             }
         }
 
@@ -469,24 +511,26 @@ namespace CsLisp
             Console.WriteLine();
             Console.WriteLine("help for interactive loop:");
             Console.WriteLine();
-            Console.WriteLine("  (h)elp            : show this help");
-            Console.WriteLine("  version           : show of this interpreter");
-            Console.WriteLine("  about             : show informations about this interpreter");
-            Console.WriteLine("  (c)ode            : show the program code");
-            Console.WriteLine("  stac(k)           : show the current call stack");
-            Console.WriteLine("  (u)p              : go one step up in call stack");
-            Console.WriteLine("  (d)own            : go one step down in call stack");
-            Console.WriteLine("  (r)un             : execute the program");
-            Console.WriteLine("  (s)tep            : step into function");
-            Console.WriteLine("  o(v)er            : step over function");
-            Console.WriteLine("  (o)ut             : step out of function");
-            Console.WriteLine("  (b)reak no [cond] : set a breakpoint in line no with condition cond");
-            Console.WriteLine("  clear [no]        : clears a breakpoint in line no or clears all");
-            Console.WriteLine("  lis(t)            : shows all breakpoints");
-            Console.WriteLine("  restart           : restart program");
-            Console.WriteLine("  (l)ocals          : show all local variables of current scope");
-            Console.WriteLine("  (g)lobals         : show all global variables");
-            Console.WriteLine("  funcs             : show all available (buit-in) functions");
+            Console.WriteLine("  (h)elp                     : show this help");
+            Console.WriteLine("  version                    : show of this interpreter");
+            Console.WriteLine("  about                      : show informations about this interpreter");
+            Console.WriteLine("  (c)ode                     : show the program code");
+            Console.WriteLine("  stac(k)                    : show the current call stack");
+            Console.WriteLine("  (u)p                       : go one step up in call stack");
+            Console.WriteLine("  (d)own                     : go one step down in call stack");
+            Console.WriteLine("  (r)un                      : execute the program");
+            Console.WriteLine("  (s)tep                     : step into function");
+            Console.WriteLine("  o(v)er                     : step over function");
+            Console.WriteLine("  (o)ut                      : step out of function");
+            Console.WriteLine("  (b)reak no[:module] [cond] : set a breakpoint in line no with condition cond");
+            Console.WriteLine("  clear [no]                 : clears a breakpoint in line no or clears all");
+            Console.WriteLine("  lis(t)                     : shows all breakpoints");
+            Console.WriteLine("  restart                    : restart program");
+            Console.WriteLine("  (l)ocals                   : show all local variables of current scope");
+            Console.WriteLine("  (g)lobals                  : show all global variables");
+            Console.WriteLine("  modules                    : show all available modules");
+            Console.WriteLine("  builtins                   : show all builtin functions");
+            Console.WriteLine("  funcs                      : show all available functions");
             Console.WriteLine("  exit              : exit the interactive loop");
             Console.WriteLine();
         }
@@ -512,14 +556,17 @@ namespace CsLisp
     // ********************************************************************
     internal struct LispBreakpointInfo
     {
-        internal LispBreakpointInfo(int lineNo, string condition)
+        internal LispBreakpointInfo(int lineNo, string moduleName, string condition)
             : this()
         {
             LineNo = lineNo;
+            ModuleName = moduleName;
             Condition = condition;
         }
 
         internal int LineNo { get; set; }
+
+        internal string ModuleName { get; set; }
 
         internal string Condition { get; set; }
     }
