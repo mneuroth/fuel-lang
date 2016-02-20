@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace CsLisp
 {
@@ -30,8 +31,10 @@ namespace CsLisp
         /// Loop of the debugger.
         /// </summary>
         /// <param name="args">The arguments.</param>
+        /// <param name="output">The output stream.</param>
+        /// <param name="input">The input stream.</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>Value of the last expression</returns>
-        LispVariant DebuggerLoop(string[] args, bool tracing = false);
+        LispVariant DebuggerLoop(string[] args, TextWriter output, TextReader input, bool tracing = false);
     }
 }

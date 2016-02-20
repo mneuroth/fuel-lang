@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CsLisp;
 
@@ -9,32 +9,51 @@ namespace LispUnitTests
     // see: http://stackoverflow.com/questions/4884043/how-to-write-to-console-out-during-execution-of-an-mstest-test
     internal class ConsoleRedirector : IDisposable
     {
-        private StringWriter _consoleOutput = new StringWriter();
+        private StringWriter _consoleOutput;
 
-        private StringReader _ConsoleInput = null;
+        private StringReader _consoleInput;
 
         private TextWriter _originalConsoleOutput;
 
         private TextReader _originalConsoleInput;
 
-        public ConsoleRedirector(string input = "")
+        private TestContext _context;
+
+        private StringBuilder _stringBuilder;
+
+        public ConsoleRedirector(string input = "", TestContext context = null)
         {
-            _ConsoleInput = new StringReader(input);
+            _context = context;
+            _stringBuilder = new StringBuilder("");
+            _consoleOutput = new StringWriter(_stringBuilder);           
+            _consoleInput = new StringReader(input);
             _originalConsoleOutput = Console.Out;
             _originalConsoleInput = Console.In;
             Console.SetOut(_consoleOutput);
-            Console.SetIn(_ConsoleInput);
+            Console.SetIn(_consoleInput);
+            if (_context != null)
+            {
+                _context.WriteLine("Init !!!!! {0} <--> {1} ### {2}", _originalConsoleOutput, _consoleOutput, _consoleInput);
+            }
         }
         public void Dispose()
         {
+            if (_context != null)
+            {
+                _context.WriteLine("Dispose !!!!! {0} <--> {1} ### {2}", _originalConsoleOutput, _consoleOutput, _consoleInput);
+            }
             Console.SetOut(_originalConsoleOutput);
             Console.SetIn(_originalConsoleInput);
-            Console.Write(ToString());
+            Console.WriteLine(ToString());
             _consoleOutput.Dispose();
-            _ConsoleInput.Dispose();
+            _consoleInput.Dispose();
         }
         public override string ToString()
         {
+            if (_context != null)
+            {
+                _context.WriteLine("ToString() !!!!! {0} xxx", _consoleOutput);
+            }
             _consoleOutput.Flush();
             return _consoleOutput.ToString();
         }
@@ -43,10 +62,16 @@ namespace LispUnitTests
     [TestClass]
     public class CsLispMain
     {
+        /// <summary>
+        /// Gets or sets the test context which provides
+        /// information about and functionality for the current test run.
+        /// </summary>
+        public TestContext TestContext { get; set; }
+
         [TestMethod]
         public void Test_Main()
         {
-            using (ConsoleRedirector cr = new ConsoleRedirector())
+            using (ConsoleRedirector cr = new ConsoleRedirector(context: TestContext))
             {
                 var args = new string[0];
                 Fuel.Main(args);
@@ -61,7 +86,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                var args = new string[] { "simple.fuel" };
+                var args = new[] { "simple.fuel" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.StartsWith("hello world !"));
@@ -74,7 +99,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                var args = new string[] { "error.fuel" };
+                var args = new[] { "error.fuel" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Error executing script"));
@@ -89,7 +114,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                var args = new string[] { "-l", "error.fuel" };
+                var args = new[] { "-l", "error.fuel" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Error executing script"));
@@ -105,7 +130,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                var args = new[] {"-h"};
+                var args = new[] { "-h" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.StartsWith(Lisp.Name));
@@ -140,7 +165,7 @@ namespace LispUnitTests
         [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
         public void Test_Compile()
         {
-            using (ConsoleRedirector cr = new ConsoleRedirector())
+            using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
             {
                 var args = new[] { "-c", "simple.fuel" };
                 Fuel.Main(args);
@@ -152,7 +177,7 @@ namespace LispUnitTests
         [DeploymentItem(@"..\..\..\TestData\controlflow.fuel")]
         public void Test_Compile2()
         {
-            using (ConsoleRedirector cr = new ConsoleRedirector())
+            using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
             {
                 var args = new[] { "-c", "controlflow.fuel" };
                 Fuel.Main(args);
@@ -164,7 +189,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_MainInteractive()
         {
-            using (ConsoleRedirector cr = new ConsoleRedirector("help\nq\n"))
+            using (ConsoleRedirector cr = new ConsoleRedirector("help\nq\n", context: TestContext))
             {
                 var args = new[] { "-i" };
                 Fuel.Main(args);
@@ -178,39 +203,91 @@ namespace LispUnitTests
                 }
                 else
                 {
-                    Assert.IsTrue(true);
+                    Assert.IsTrue(false);
                 }
             }
         }
 
+//        [TestMethod]
+//        [Ignore]
+//        public void Test_MainDebuggerExecuteOrg()
+//        {
+//            using (ConsoleRedirector cr = new ConsoleRedirector("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\n\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n"))
+//            {
+//                const string script = @"(do 
+//(def a 42) 
+//(print (+ 1 2)) 
+//(print (* 3 4 5)))";
+
+//                TestContext.WriteLine("Hello world org !!!!!!!!!!!!!!");
+
+//                var args = new[] { "-d", /*"-e",*/ script };
+//                Fuel.Main(args);
+//                string s = cr.ToString().Trim();
+//                TestContext.WriteLine("Result=" + s);
+//// TODO: strange behaviour: in debug ok in run mode --> error ? string is empty ?
+//                // but only if compile tests are enabled !!!???
+//                if (s.Length > 0)
+//                {
+//                    Assert.IsTrue(s.Contains("DBG>"));
+//                    Assert.IsTrue(s.Contains("Type \"help\" for informations."));
+//                    Assert.IsTrue(s.Contains("--> do line=1 pos=1 line=1"));
+//                    Assert.IsTrue(s.Contains("help for interactive loop:")); // help
+//                    Assert.IsTrue(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
+//                    Assert.IsTrue(s.Contains("-->    1 <main> lineno=3 module=command-line")); // stack
+//                    Assert.IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
+//                    Assert.IsTrue(s.Contains("(def a 42)")); // code
+//                    Assert.IsTrue(s.Contains("print --> function <unknown>                       : Function  : module=<builtin>")); // funcs                    
+//                }
+//                else
+//                {
+//                    Assert.IsTrue(false);
+//                }
+//            }
+//        }
+
         [TestMethod]
         public void Test_MainDebuggerExecute()
         {
-            using (ConsoleRedirector cr = new ConsoleRedirector("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\n\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n"))
+            //using (ConsoleRedirector cr = new ConsoleRedirector("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\n\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n"))
             {
-                var args = new[] { "-d", "(do\n (def a 42)\n(print (+ 1 2))\n(print (* 3 4 5)))" };
-                Fuel.Main(args);
-                string s = cr.ToString().Trim();
-                // TODO: strange behaviour: in debug ok in run mode --> error ? string is empty ?
+                const string script = @"(do 
+(def a 42) 
+(print (+ 1 2)) 
+(print (* 3 4 5)))";
+
+                TestContext.WriteLine("Hello world !!!!!!!!!!!!!!");
+
+                var input = new StringReader("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\n\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n");
+                var output = new StringWriter();
+
+                var args = new[] { "-d", /*"-e",*/ script };
+                Fuel.Main(args, output, input);
+                output.Flush();
+                StringBuilder result = output.GetStringBuilder();
+                TestContext.WriteLine("Result="+result.ToString());
+                string s = result.ToString(); // output.ToString().Trim();
+// TODO: strange behaviour: in debug ok in run mode --> error ? string is empty ?
                 // but only if compile tests are enabled !!!???
                 if (s.Length > 0)
                 {
                     Assert.IsTrue(s.Contains("DBG>"));
                     Assert.IsTrue(s.Contains("Type \"help\" for informations."));
-                    Assert.IsTrue(s.Contains("--> do pos=1 line=1"));
+                    Assert.IsTrue(s.Contains("--> do line=1 pos=1 line=1"));
                     Assert.IsTrue(s.Contains("help for interactive loop:")); // help
-                    Assert.IsTrue(s.Contains("line 4     condition: (= a 42)")); // list
-                    Assert.IsTrue(s.Contains("-->    1 <main>")); // stack
-                    Assert.IsTrue(s.Contains("a --> 42                                            : Int"));
-                        // locals / globals                               
+                    Assert.IsTrue(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
+                    Assert.IsTrue(s.Contains("-->    1 <main> lineno=3 module=command-line")); // stack
+                    Assert.IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
                     Assert.IsTrue(s.Contains("(def a 42)")); // code
-                    Assert.IsTrue(s.Contains("print --> function <unknown>                            : Function"));
-                        // funcs                    
+                    Assert.IsTrue(s.Contains("print --> function <unknown>                       : Function  : module=<builtin>")); // funcs                    
                 }
                 else
                 {
-                    Assert.IsTrue(true);
+                    Assert.IsTrue(false);
                 }
+
+                input.Close();
+                output.Close();
             }
         }
     }

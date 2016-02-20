@@ -88,6 +88,22 @@ namespace CsLisp
         /// <value> The global scope. </value>
         public LispScope GlobalScope { get; private set; }
 
+        /// <summary>
+        /// Gets the output stream.
+        /// </summary>
+        /// <value>
+        /// The output.
+        /// </value>
+        public TextWriter Output { get; set; }
+
+        /// <summary>
+        /// Gets the input stream.
+        /// </summary>
+        /// <value>
+        /// The input.
+        /// </value>
+        public TextReader Input { get; set; }
+
         #endregion
 
         #region constructor
@@ -104,6 +120,8 @@ namespace CsLisp
             GlobalScope = globalScope ?? this;
             ModuleName = moduleName;
             LineNumber = -1;
+            Input = Console.In;
+            Output = Console.Out;
         }
 
         #endregion
@@ -154,7 +172,7 @@ namespace CsLisp
         public void DumpStack(int currentLevel = -1)
         {
             string stackInfo = DumpStackToString(currentLevel);
-            Console.WriteLine(stackInfo);
+            Output.WriteLine(stackInfo);
         }
 
         public string DumpStackToString(int currentLevel = -1)
@@ -192,7 +210,7 @@ namespace CsLisp
         public void DumpModules()
         {
 // TODO --> ueber alle funktionen gehen und alle module namen sammeln und anzeigen
-            Console.WriteLine(this[LispEnvironment.Modules]);
+            Output.WriteLine(this[LispEnvironment.Modules]);
         }
 
         #endregion
@@ -209,7 +227,7 @@ namespace CsLisp
                     if (select(value))
                     {
                         string info = show != null ? show(value) : string.Empty;
-                        Console.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value, value.Type, info);
+                        Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value, value.Type, info);
                     }
                 }
             }
@@ -547,13 +565,13 @@ namespace CsLisp
                 string s = cmd+"\n";
                 helpText.Append(s);
             }
-            Console.WriteLine(helpText.ToString());
+            scope.GlobalScope.Output.WriteLine(helpText.ToString());
             return new LispVariant(helpText.ToString());
         }
 
         private static LispVariant Break(object[] args, LispScope scope)
         {
-            Console.WriteLine("break -> call stack:");
+            scope.GlobalScope.Output.WriteLine("break -> call stack:");
             scope.DumpStack(scope.GetCallStackSize());
             var debugger = scope.GlobalScope.Debugger;
             if (debugger != null)
@@ -562,14 +580,14 @@ namespace CsLisp
             }
             else
             {
-                Console.WriteLine("Warning: can not break, because no debugger support availabe!");
+                scope.GlobalScope.Output.WriteLine("Warning: can not break, because no debugger support availabe!");
             }
             return new LispVariant();
         }
 
         private static LispVariant Vars(object[] args, LispScope scope)
         {
-            Console.WriteLine("variables:");
+            scope.GlobalScope.Output.WriteLine("variables:");
             scope.DumpVars();
             return new LispVariant();
         }
@@ -613,7 +631,7 @@ namespace CsLisp
                 }
                 else
                 {
-                    Console.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+                    scope.GlobalScope.Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
@@ -676,7 +694,7 @@ namespace CsLisp
         public static LispVariant Print(object[] args, LispScope scope)
         {
             var text = GetStringRepresentation(args, scope);
-            Console.WriteLine(text);
+            scope.GlobalScope.Output.WriteLine(text);
             return new LispVariant(text);
         }
 
@@ -1161,7 +1179,7 @@ namespace CsLisp
                         var debugger = scope.GlobalScope.Debugger;
                         if (debugger != null)
                         {
-                            Console.WriteLine(ex);
+                            scope.GlobalScope.Output.WriteLine(ex);
 
                             debugger.InteractiveLoop(initialTopScope: childScope, currentAst: (IList<object>)(args[1]) /*new List<object> { info.Item2 }*/ );
                         }

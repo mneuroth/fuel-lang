@@ -209,7 +209,7 @@ namespace CsLisp
             // trace current function (if tracing is enabled)
             if (scope.GlobalScope.Tracing)
             {
-                Console.WriteLine("--> {0}", astAsList.First());
+                scope.GlobalScope.Output.WriteLine("--> {0}", astAsList.First());
             }
 
             // evaluate arguments, but allow recursive lists

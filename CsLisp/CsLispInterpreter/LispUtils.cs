@@ -27,21 +27,23 @@ namespace CsLisp
         /// <summary>
         /// Show the version of this FUEL interpreter.
         /// </summary>
-        public static void ShowVersion()
+        /// <param name="output">The output stream.</param>
+        public static void ShowVersion(TextWriter output)
         {
-            Console.WriteLine();
-            Console.WriteLine(Lisp.Name + " " + Lisp.Version + " (for " + Lisp.Platform + ") from " + Lisp.Date + ", " + Lisp.Copyright);
-            Console.WriteLine();
+            output.WriteLine();
+            output.WriteLine(Lisp.Name + " " + Lisp.Version + " (for " + Lisp.Platform + ") from " + Lisp.Date + ", " + Lisp.Copyright);
+            output.WriteLine();
         }
 
         /// <summary>
         /// Show informations about this FUEL interperter.
         /// </summary>
-        public static void ShowAbout()
+        /// <param name="output">The output stream.</param>
+        public static void ShowAbout(TextWriter output)
         {
-            ShowVersion();
-            Console.WriteLine(Lisp.Info);
-            Console.WriteLine();
+            ShowVersion(output);
+            output.WriteLine(Lisp.Info);
+            output.WriteLine();
         }
 
         /// <summary>
@@ -56,13 +58,22 @@ namespace CsLisp
         }
 
         /// <summary>
-        /// Reads a file.
+        /// Reads a file or returns an empty string.
         /// </summary>
         /// <param name="fileName">Name of the file.</param>
         /// <returns>Content of the file as string</returns>
-        public static string ReadFile(string fileName)
+        public static string ReadFileOrEmptyString(string fileName)
         {
-            return File.Exists(fileName) ? File.ReadAllText(fileName) : String.Empty;
+            bool exists;
+            try
+            {
+                exists = File.Exists(fileName);
+            }
+            catch (ArgumentException)
+            {
+                exists = false;
+            }
+            return  exists ? File.ReadAllText(fileName) : string.Empty;
         }
     }
 

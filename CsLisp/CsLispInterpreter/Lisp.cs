@@ -40,7 +40,7 @@ namespace CsLisp
 
         public const string Name = "FUEL(isp)";
         public const string Version = "v0.99.1";
-        public const string Date = "18.2.2016";
+        public const string Date = "19.2.2016";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";
@@ -85,21 +85,20 @@ namespace CsLisp
         /// All exceptions will be filtered and an error value will be returned.
         /// </summary>
         /// <param name="lispCode">The lisp code.</param>
-        /// <param name="scope">The scope.</param>
         /// <param name="moduleName">The current module name.</param>
         /// <param name="verboseErrorOutput">if set to <c>true</c> [verbose error output].</param>
         /// <param name="tracing">if set to <c>true</c> [tracing].</param>
         /// <returns>The result</returns>
-        public static LispVariant SaveEval(string lispCode, LispScope scope = null, string moduleName = null, bool verboseErrorOutput = false, bool tracing = false)
+        public static LispVariant SaveEval(string lispCode, string moduleName = null, bool verboseErrorOutput = false, bool tracing = false)
         {
             LispVariant result;
             try
             {
-                result = Eval(lispCode, scope, moduleName, tracing: tracing);
+                result = Eval(lispCode, scope: null, moduleName: moduleName, tracing: tracing);
             }
             catch (Exception exc)
             {
-                Console.WriteLine("\nError executing script.\n\n{0} module={1}", exc.Message, exc.Data[LispUtils.ModuleName]);
+                Console.WriteLine("\nError executing script.\n\n{0} line={1} module={2}", exc.Message, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.ModuleName]);
                 Console.WriteLine("\nCallstack:\n{0}", exc.Data[LispUtils.StackInfo]);
                 if (verboseErrorOutput)
                 {

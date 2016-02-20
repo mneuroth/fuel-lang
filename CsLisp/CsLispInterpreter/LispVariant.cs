@@ -716,7 +716,7 @@ namespace CsLisp
         static private Exception CreateInvalidOperationException(string operation, LispVariant l, LispVariant r)
         {
             var exception = new InvalidCastException(String.Format(NoOperatorForTypes, operation, l.Type, r.Type));
-            exception.Data[LispUtils.LineNo] = (l.Token != null ? l.Token.LineNo : (int?)null);
+            exception.Data[LispUtils.LineNo] = l.Token != null ? l.Token.LineNo : -1;
             return exception;
         }
 

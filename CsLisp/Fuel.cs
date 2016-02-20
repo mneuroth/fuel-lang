@@ -12,9 +12,14 @@ namespace CsLisp
     {
         public static void Main(string[] args)
         {
+            Main(args, Console.Out, Console.In);
+        }
+
+        public static void Main(string[] args, TextWriter output, TextReader input)
+        {
             if (args.Length == 0)
             {
-                Usage();
+                Usage(output);
                 return;
             }
 
@@ -34,12 +39,12 @@ namespace CsLisp
             }
             if (args.Contains("-v"))
             {
-                Console.WriteLine(Lisp.Version);
+                output.WriteLine(Lisp.Version);
                 return;
             }
             if (args.Contains("-h"))
             {
-                Usage();
+                Usage(output);
                 return;
             }
             if (args.Contains("-l"))
@@ -56,21 +61,25 @@ namespace CsLisp
             {
                 trace = true;
             }
+
+            // handle options for debugger
             if (debugger != null)
-            {
+            {                
                 if (args.Contains("-i"))
                 {
-                    InteractiveLoopHeader();
+                    InteractiveLoopHeader(output);
                     debugger.InteractiveLoop(startedFromMain:true, tracing: trace);
                     doNotLoadFiles = true;
                 }
                 if (args.Contains("-d"))
                 {
-                    InteractiveLoopHeader();
-                    result = debugger.DebuggerLoop(args, tracing: trace);
+                    InteractiveLoopHeader(output);
+                    result = debugger.DebuggerLoop(args, output, input, tracing: trace);
                     doNotLoadFiles = true;
                 }                
             }
+
+            // handle options for compiler
             if (args.Contains("-c"))
             {
                 compile = true;
@@ -86,7 +95,7 @@ namespace CsLisp
 
                 foreach (var fileName in scriptFiles)
                 {
-                    var script = LispUtils.ReadFile(fileName);
+                    var script = LispUtils.ReadFileOrEmptyString(fileName);
                     ILispCompiler compiler = TryGetCompiler();
                     if (compile && compiler != null)
                     {
@@ -95,7 +104,7 @@ namespace CsLisp
                     else if (showCompileOutput && compiler != null)
                     {
                         result = compiler.CompileToCsCode(script);
-                        Console.WriteLine(result.StringValue);
+                        output.WriteLine(result.StringValue);
                     }
                     else
                     {
@@ -106,57 +115,57 @@ namespace CsLisp
 
             if (trace)
             {
-                Console.WriteLine("Result=" + result);
+                output.WriteLine("Result=" + result);
             }
             if (measureTime)
             {
-                Console.WriteLine("Execution time = {0} s", (Environment.TickCount - startTickCount) * 0.001);
+                output.WriteLine("Execution time = {0} s", (Environment.TickCount - startTickCount) * 0.001);
             }
         }
 
         #region private methods
 
-        private static void Usage()
+        private static void Usage(TextWriter output)
         {
-            LispUtils.ShowAbout();
-            Console.WriteLine("usage:");
-            Console.WriteLine(">" + Lisp.ProgramName + " [options] [script_file_name]");
-            Console.WriteLine();
-            Console.WriteLine("options:");
-            Console.WriteLine("  -v          : show version");
-            Console.WriteLine("  -h          : show help");
-            Console.WriteLine("  -e \"script\" : execute given script");
-            Console.WriteLine("  -m          : measure execution time");
-            Console.WriteLine("  -t          : enable tracing");
-            Console.WriteLine("  -l          : lengthy error output");
+            LispUtils.ShowAbout(output);
+            output.WriteLine("usage:");
+            output.WriteLine(">" + Lisp.ProgramName + " [options] [script_file_name]");
+            output.WriteLine();
+            output.WriteLine("options:");
+            output.WriteLine("  -v          : show version");
+            output.WriteLine("  -h          : show help");
+            output.WriteLine("  -e \"script\" : execute given script");
+            output.WriteLine("  -m          : measure execution time");
+            output.WriteLine("  -t          : enable tracing");
+            output.WriteLine("  -l          : lengthy error output");
             if (TryGetDebugger() != null)
             {
-                Console.WriteLine("  -i          : interactive shell");
-                Console.WriteLine("  -d          : start debugger");
+                output.WriteLine("  -i          : interactive shell");
+                output.WriteLine("  -d          : start debugger");
             }
             else
             {
-                Console.WriteLine();
-                Console.WriteLine("Info: no debugger support installed !");
+                output.WriteLine();
+                output.WriteLine("Info: no debugger support installed !");
             }
             if (TryGetCompiler() != null)
             {
-                Console.WriteLine("  -c          : compile program");
-                Console.WriteLine("  -s          : show C# compiler output");
+                output.WriteLine("  -c          : compile program");
+                output.WriteLine("  -s          : show C# compiler output");
             }
             else
             {
-                Console.WriteLine();
-                Console.WriteLine("Info: no compiler support installed !");                
+                output.WriteLine();
+                output.WriteLine("Info: no compiler support installed !");                
             }
-            Console.WriteLine();
+            output.WriteLine();
         }
 
-        private static void InteractiveLoopHeader()
+        private static void InteractiveLoopHeader(TextWriter output)
         {
-            LispUtils.ShowVersion();
-            Console.WriteLine("Type \"help\" for informations.");
-            Console.WriteLine();
+            LispUtils.ShowVersion(output);
+            output.WriteLine("Type \"help\" for informations.");
+            output.WriteLine();
         }
 
         private static ILispCompiler TryGetCompiler()
@@ -203,7 +212,7 @@ namespace CsLisp
     // (- debuggen: run funktioniert nicht in errorinmodule.fuel
     // ((- debuggen: anzeige module und line no in stack
     // (- debuggen: anzeige des korrekten codes, falls module geladen ist
-    // - debuggen: set breakpoints in andren modulen realisieren
+    // ((- debuggen: set breakpoints in andren modulen realisieren
     // (- debuggen: up/down sollte auch den --> Zeiger anpassen
     // - ist LispScope.Finished und LispScope.SourceCode noch notwendig? 
     // - Makro Behandlung aufraeumen
@@ -217,4 +226,6 @@ namespace CsLisp
     // (- debugger: v (step over) funktioniert nicht so wie erwartet --> haengt bei quote
     // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
     // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
+    // - setf macro implementieren...
+    // - out funktioniert aus import module nicht korrekt...
 }
