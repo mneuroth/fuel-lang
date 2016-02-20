@@ -9,6 +9,8 @@ namespace CsLisp
     /// </summary>
     public class LispUtils
     {
+        #region constants
+
         /// <summary>
         /// Constant to transport line number info in exception
         /// </summary>
@@ -23,6 +25,13 @@ namespace CsLisp
         /// Constant to transport a stack info in exception
         /// </summary>
         public const string StackInfo = "StackInfo";
+
+        /// <summary>
+        /// Constant for the command line module
+        /// </summary>
+        public const string CommandLineModule = "command-line";
+
+        #endregion
 
         /// <summary>
         /// Show the version of this FUEL interpreter.

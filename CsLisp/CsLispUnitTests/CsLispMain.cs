@@ -261,7 +261,7 @@ namespace LispUnitTests
                 var input = new StringReader("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\n\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n");
                 var output = new StringWriter();
 
-                var args = new[] { "-d", /*"-e",*/ script };
+                var args = new[] { "-d", "-e", script };
                 Fuel.Main(args, output, input);
                 output.Flush();
                 StringBuilder result = output.GetStringBuilder();

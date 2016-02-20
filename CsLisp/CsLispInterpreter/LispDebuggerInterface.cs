@@ -28,13 +28,14 @@ namespace CsLisp
         bool NeedsBreak(LispScope scope, Tuple<int, int> posInfosOfCurrentAstItem);
 
         /// <summary>
-        /// Loop of the debugger.
+        /// Enters the loop of the debugger.
         /// </summary>
-        /// <param name="args">The arguments.</param>
+        /// <param name="script">The script.</param>
+        /// <param name="moduleName">The module name.</param>
         /// <param name="output">The output stream.</param>
         /// <param name="input">The input stream.</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>Value of the last expression</returns>
-        LispVariant DebuggerLoop(string[] args, TextWriter output, TextReader input, bool tracing = false);
+        LispVariant DebuggerLoop(string script, string moduleName, TextWriter output, TextReader input, bool tracing = false);
     }
 }

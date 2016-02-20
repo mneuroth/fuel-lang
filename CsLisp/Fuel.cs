@@ -23,6 +23,7 @@ namespace CsLisp
                 return;
             }
 
+            string script = null;
             var doNotLoadFiles = false;
             var trace = false;
             var compile = false;
@@ -53,8 +54,7 @@ namespace CsLisp
             }
             if (args.Contains("-e"))
             {
-                var script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
-                result = Lisp.Eval(script);
+                script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
                 doNotLoadFiles = true;
             }
             if (args.Contains("-t"))
@@ -73,8 +73,19 @@ namespace CsLisp
                 }
                 if (args.Contains("-d"))
                 {
+                    var fileName = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
+                    // process -e option if script is given via command line
+                    if (script == null)
+                    {
+                        script = LispUtils.ReadFileOrEmptyString(fileName);
+                    }
+                    else
+                    {
+                        fileName = "command-line";
+                    }
+
                     InteractiveLoopHeader(output);
-                    result = debugger.DebuggerLoop(args, output, input, tracing: trace);
+                    result = debugger.DebuggerLoop(script, fileName, output, input, tracing: trace);
                     doNotLoadFiles = true;
                 }                
             }
@@ -95,7 +106,7 @@ namespace CsLisp
 
                 foreach (var fileName in scriptFiles)
                 {
-                    var script = LispUtils.ReadFileOrEmptyString(fileName);
+                    script = LispUtils.ReadFileOrEmptyString(fileName);
                     ILispCompiler compiler = TryGetCompiler();
                     if (compile && compiler != null)
                     {
@@ -111,6 +122,10 @@ namespace CsLisp
                         result = Lisp.SaveEval(script, moduleName: fileName, verboseErrorOutput: lengthyErrorOutput, tracing: trace);
                     }
                 }
+            }
+            else if (script != null)
+            {
+                result = Lisp.Eval(script);
             }
 
             if (trace)
@@ -227,5 +242,6 @@ namespace CsLisp
     // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
     // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
     // - setf macro implementieren...
-    // - out funktioniert aus import module nicht korrekt...
+    // - out funktioniert aus import module nicht korrekt...-?
+    // - option -e funktioniert nicht mit -d korrekt
 }

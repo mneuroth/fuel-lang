@@ -27,7 +27,7 @@ namespace CsLisp
 
         private List<LispBreakpointInfo> Breakpoints { get; set; }
 
-        private string Script { get; set; }
+        private string CommandLineScript { get; set; }
 
         private TextWriter Output { get; set; }
 
@@ -44,17 +44,12 @@ namespace CsLisp
         /// Public constructor needed for dynamic loading in fuel.exe.
         /// </remarks>
         public LispDebugger()
-            : this(null)
-        {            
-        }
-
-        private LispDebugger(List<LispBreakpointInfo> breakpoints)
         {
-            IsProgramStop = true;
-            IsStopStepFcn = (scope) => true;
-            Breakpoints = breakpoints != null ? breakpoints : new List<LispBreakpointInfo>();
+            Breakpoints = new List<LispBreakpointInfo>();
             Output = Console.Out;
             Input = Console.In;
+            CommandLineScript = string.Empty;
+            Reset();
         }
 
         #endregion
@@ -68,7 +63,7 @@ namespace CsLisp
         /// <param name="initialTopScope">The initial top scope.</param>
         /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
-        /// <returns>Value of the last expression</returns>
+        /// <returns>True if program should be restarted.</returns>
         /// <exception cref="LispStopDebuggerException"></exception>
         /// <exception cref="CsLisp.LispStopDebuggerException"></exception>
         public static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, bool startedFromMain = false, bool tracing = false)
@@ -138,7 +133,7 @@ namespace CsLisp
                     // use the script given on command line if no valid module name was set
                     if (string.IsNullOrEmpty(script))
                     {
-                        script = debugger.Script;
+                        script = debugger.CommandLineScript;
                     }
                     ShowSourceCode(debugger, script, currentScope.LineNumber);
                 }
@@ -251,41 +246,30 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public LispVariant DebuggerLoop(string[] args, TextWriter output, TextReader input, bool tracing = false)
+        public LispVariant DebuggerLoop(string script, string moduleName, TextWriter output, TextReader input, bool tracing = false)
         {
             Output = output;
             Input = input;
+
             LispVariant result = null;
             var bRestart = true;
-            var breakpoints = new List<LispBreakpointInfo>();
             while (bRestart)
             {
-                var fileName = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
-                var script = LispUtils.ReadFileOrEmptyString(fileName);
-                // if no valid script file name is given, try to use string as script
-                if (script == String.Empty && args.Length > 1)
+                // save the source code if the script is transfered via command line
+                if (moduleName == LispUtils.CommandLineModule)
                 {
-                    script = args[1].Trim(new[] { '"' });
-                    fileName = "command-line";
-                    Script = script;
+                    CommandLineScript = script;
                 }
 
                 var globalScope = LispEnvironment.CreateDefaultScope();
                 globalScope.Input = input;
                 globalScope.Output = output;
-
-// TODO: warum brauche ich hier eine zweite Debugger Instanz ? --> rekursion ?
-                var debugger = new LispDebugger(breakpoints);
-//                debugger.Breakpoints = breakpoints;
-                debugger.Input = input;
-                debugger.Output = output;
-                debugger.Script = Script;
-
-                globalScope.Debugger = debugger;                
+                globalScope.Debugger = this;                
 
                 try
                 {
-                    result = Lisp.Eval(script, globalScope, fileName, tracing: tracing);
+                    result = Lisp.Eval(script, globalScope, moduleName, tracing: tracing);
+                    Reset();
                 }
                 catch (LispStopDebuggerException)
                 {
@@ -296,10 +280,8 @@ namespace CsLisp
                     output.WriteLine("\nException: {0}", exception);
                     string stackInfo = exception.Data.Contains(LispUtils.StackInfo) ? (string)exception.Data[LispUtils.StackInfo] : string.Empty;
                     output.WriteLine("\nStack:\n{0}", stackInfo);
-                    bRestart = InteractiveLoop(debugger, globalScope, startedFromMain: true);
+                    bRestart = InteractiveLoop(this, globalScope, startedFromMain: true);
                 }
-
-                breakpoints = debugger.Breakpoints;
 
                 if (bRestart)
                 {
@@ -308,18 +290,25 @@ namespace CsLisp
                     // process empty script --> just start interactive loop
                     if (result == null)
                     {
-                        bRestart = InteractiveLoop(debugger, globalScope, startedFromMain: true);
+                        bRestart = InteractiveLoop(this, globalScope, startedFromMain: true);
                     }
                 }
 
                 globalScope.Debugger = null;
             }
+
             return result;
         }
 
         #endregion
 
         #region private methods
+
+        private void Reset()
+        {
+            IsProgramStop = true;
+            IsStopStepFcn = (scope) => true;
+        }
 
         private bool HitsBreakpoint(int lineNo, LispScope scope)
         {
