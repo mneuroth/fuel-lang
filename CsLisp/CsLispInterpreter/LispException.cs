@@ -8,16 +8,19 @@ namespace CsLisp
     public class LispException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LispException" /> class.
+        /// Initializes a new instance of the <see cref="LispException"/> class.
         /// </summary>
         /// <param name="text">The text.</param>
-        /// <param name="lineNo">The line no.</param>
-        /// <param name="moduleName">The module name and path.</param>
-        public LispException(string text, int? lineNo = null, string moduleName = null)
+        /// <param name="scope">The scope.</param>
+        public LispException(string text, LispScope scope = null)
             : base(text)
         {
-            Data[LispUtils.LineNo] = lineNo;
-            Data[LispUtils.ModuleName] = moduleName;
+            if (scope != null)
+            {
+                Data[LispUtils.StackInfo] = scope.DumpStackToString();
+                Data[LispUtils.ModuleName] = scope.ModuleName;
+                this.AddTokenInfos(scope.CurrentToken);
+            }
         }
     }
 }

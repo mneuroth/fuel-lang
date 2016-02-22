@@ -77,7 +77,7 @@ namespace CsLisp
                     {
                         if (isToplevel && i+1<tokens.Count && !OnlyCommentTokensFrom(tokens, i+1))
                         {
-                            throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode + GetPosInfo(token));
+                            throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode + " " + GetPosInfo(token));
                         }
                         return i;
                     }
@@ -123,7 +123,7 @@ namespace CsLisp
 
             if (isToplevel && tokens.Count>0)
             {
-                throw new LispException(BracketsOutOfBalance + GetPosInfo(tokens.Last()));
+                throw new LispException(BracketsOutOfBalance + " " + GetPosInfo(tokens.Last()));
             }
 
             return i;

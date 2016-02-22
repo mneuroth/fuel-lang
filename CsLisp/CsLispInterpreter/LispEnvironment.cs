@@ -25,11 +25,6 @@ namespace CsLisp
         public bool Tracing { get; set; }
 
         /// <summary>
-        /// Has program execution finished?
-        /// </summary>
-        public bool Finished { get; set; }
-
-        /// <summary>
         /// Gets and sets all tokens of the current script,
         /// used for debugging purpose and for showing the 
         /// position of an error.
@@ -61,9 +56,17 @@ namespace CsLisp
         public string ModuleName { get; set; }
 
         /// <summary>
-        /// Gets or sets the current line number.
+        /// Gets or sets the current token.
         /// </summary>
-        public int LineNumber { get; set; }
+        public LispToken CurrentToken { get; set; }
+
+        public int CurrentLineNo
+        {
+            get
+            {
+                return CurrentToken != null ? CurrentToken.LineNo : -1;
+            }
+        }
 
         /// <summary>
         /// Gets or sets user data.
@@ -119,7 +122,7 @@ namespace CsLisp
             Name = fcnName;
             GlobalScope = globalScope ?? this;
             ModuleName = moduleName;
-            LineNumber = -1;
+            CurrentToken = null;
             Input = Console.In;
             Output = Console.Out;
         }
@@ -184,7 +187,7 @@ namespace CsLisp
             {
                 string currentItem = currentLevel == i ? "-->" : "   ";
 
-                ret += string.Format("{0,3}{1,5} {2} lineno={3} module={4}\n", currentItem, i, current.Name, current.LineNumber, current.ModuleName);
+                ret += string.Format("{0,3}{1,5} {2} lineno={3} module={4}\n", currentItem, i, current.Name, current.CurrentLineNo, current.ModuleName);
                 current = current.Previous;
                 i--;
             } while (current != null);
@@ -638,7 +641,7 @@ namespace CsLisp
                     var importScope = new LispScope("import "+fileName, scope.GlobalScope, fileName);
                     scope.PushNextScope(importScope);
 
-                    result = Lisp.Eval(code, importScope, fileName, updateFinishedFlag: false);
+                    result = Lisp.Eval(code, importScope, fileName);
 
                     // merge new module into modules dictionary
                     importScope.ToList().ForEach(x => ((LispScope)scope.GlobalScope[Modules]).Add(x.Key, x.Value));
@@ -920,7 +923,7 @@ namespace CsLisp
                 return result;
             }
 
-            throw new LispException("expected list as arguments in apply");
+            throw new LispException("expected list as arguments in apply", scope);
         }
 
         public static LispVariant EvalFcn(object[] args, LispScope scope)
@@ -999,7 +1002,7 @@ namespace CsLisp
             }
             else
             {
-                throw new LispException("Symbol " + symbolName + " not found" + GetPositionOfPreviousTokenForSymbol(symbol, scope), symbol.Token.LineNo);
+                throw new LispException("Symbol " + symbolName + " not found" + GetPositionOfPreviousTokenForSymbol(symbol, scope), scope);
             }
             return value;
         }
@@ -1130,7 +1133,7 @@ namespace CsLisp
             {
                 if (!(statement is IEnumerable<object>))
                 {
-                    throw new LispException("List expected in do in " + GetPositionOfToken(((LispVariant)statement).Token));
+                    throw new LispException("List expected in do in " + GetPositionOfToken(((LispVariant)statement).Token), scope);
                 }
                 result = LispInterpreter.EvalAst(statement, scope);
             }
@@ -1175,6 +1178,9 @@ namespace CsLisp
                         // add the stack info and module name to the data of the exception
                         ex.Data[LispUtils.StackInfo] = childScope.DumpStackToString();
                         ex.Data[LispUtils.ModuleName] = childScope.ModuleName;
+                        ex.Data[LispUtils.LineNo] = childScope.CurrentToken != null ? childScope.CurrentToken.LineNo : -1;
+                        ex.Data[LispUtils.StartPos] = childScope.CurrentToken != null ? childScope.CurrentToken.StartPos : -1;
+                        ex.Data[LispUtils.StopPos] = childScope.CurrentToken != null ? childScope.CurrentToken.StopPos : -1;
 
                         var debugger = scope.GlobalScope.Debugger;
                         if (debugger != null)
@@ -1207,13 +1213,13 @@ namespace CsLisp
 
         #region internal methods
 
-        internal static Tuple<int, int> GetPosInfo(LispToken token)
+        internal static Tuple<int, int, int> GetPosInfo(LispToken token)
         {
             if (token != null)
             {
-                return new Tuple<int, int>(token.StartPos, token.LineNo);
+                return new Tuple<int, int, int>(token.StartPos, token.StopPos, token.LineNo);
             }
-            return new Tuple<int, int>(-1, -1);
+            return new Tuple<int, int, int>(-1, -1, -1);
         }
 
         #endregion
@@ -1250,7 +1256,7 @@ namespace CsLisp
                         return new LispVariant(LispType.NativeObject, result);
                     }
                 }
-                throw new LispException("Bad constructor for class " + nativeObjOrClassName, nativeObjOrClassName.Token.LineNo);
+                throw new LispException("Bad constructor for class " + nativeObjOrClassName, scope);
             }
             else
             {
@@ -1281,7 +1287,7 @@ namespace CsLisp
                         return new LispVariant(result);
                     }
                 }
-                throw new LispException("Bad method for class " + methodName, nativeObjOrClassName.Token!=null ? nativeObjOrClassName.Token.LineNo : -1);
+                throw new LispException("Bad method for class " + methodName, scope);
             }
         }
 
@@ -1389,14 +1395,14 @@ namespace CsLisp
         private static string GetPositionOfToken(LispToken token)
         {
             var infos = GetPosInfo(token);
-            return " (total-pos=" + infos.Item1 + " line=" + infos.Item2 + ")";
+            return " (total-pos=" + infos.Item1 + " line=" + infos.Item3 + ")";
         }
 
         private static void CheckArgs(string name, int count, object[] args, LispScope scope)
         {
             if (args.Length != count)
             {
-                throw new LispException(BadArgumentCount + name + GetPositionOfPreviousTokenForSymbol(args[0], scope));
+                throw new LispException(BadArgumentCount + name + GetPositionOfPreviousTokenForSymbol(args[0], scope), scope);
             }
         }
 
@@ -1405,7 +1411,7 @@ namespace CsLisp
             var function = (LispVariant)arg0;
             if (!function.IsFunction)
             {
-                throw new LispException("no function in " + functionName + GetPositionOfPreviousTokenForSymbol(arg0, scope), function.Token.LineNo);
+                throw new LispException("no function in " + functionName + GetPositionOfPreviousTokenForSymbol(arg0, scope), scope);
             }
             return function;
         }
@@ -1419,7 +1425,7 @@ namespace CsLisp
             var function = (LispVariant)arg0;
             if (!function.IsList)
             {
-                throw new LispException("no list in " + functionName + GetPositionOfPreviousTokenForSymbol(arg0, scope), function.Token.LineNo);
+                throw new LispException("no list in " + functionName + GetPositionOfPreviousTokenForSymbol(arg0, scope), scope);
             }
             return function.ListValue;
         }
@@ -1464,7 +1470,7 @@ namespace CsLisp
             var symbol = EvalArgIfNeeded(args[0], scope);
             if (!(symbol.IsSymbol || symbol.IsString))
             {
-                throw new LispException("Symbol expected" + GetPositionOfPreviousTokenForSymbol(symbol, scope), symbol.Token.LineNo);
+                throw new LispException("Symbol expected" + GetPositionOfPreviousTokenForSymbol(symbol, scope), scope);
             }
             var value = LispInterpreter.EvalAst(args[1], scope);
             scopeToSet[symbol.ToString()] = value;

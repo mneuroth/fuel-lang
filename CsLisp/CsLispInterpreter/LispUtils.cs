@@ -7,7 +7,7 @@ namespace CsLisp
     /// <summary>
     /// Helper class for FUEL lisp interpreter.
     /// </summary>
-    public class LispUtils
+    public static class LispUtils
     {
         #region constants
 
@@ -15,6 +15,16 @@ namespace CsLisp
         /// Constant to transport line number info in exception
         /// </summary>
         public const string LineNo = "LineNo";
+
+        /// <summary>
+        /// Constant to transport the start position info of the current statement in exception
+        /// </summary>
+        public const string StartPos = "StartPos";
+
+        /// <summary>
+        /// Constant to transport the stop position info of the current statement in exception
+        /// </summary>
+        public const string StopPos = "StopPos";
 
         /// <summary>
         /// Constant to transport module name and path info in exception
@@ -31,6 +41,21 @@ namespace CsLisp
         /// </summary>
         public const string CommandLineModule = "command-line";
 
+        #endregion
+
+        #region extension methods
+
+        /// <summary>
+        /// Add infos about given token to exception data.
+        /// </summary>
+        /// <param name="token">The token.</param>
+        public static void AddTokenInfos(this Exception ex, LispToken token)
+        {
+            ex.Data[LineNo] = token != null ? token.LineNo : -1;
+            ex.Data[StartPos] = token != null ? token.StartPos : -1;
+            ex.Data[StopPos] = token != null ? token.StopPos : -1;
+        }
+        
         #endregion
 
         /// <summary>

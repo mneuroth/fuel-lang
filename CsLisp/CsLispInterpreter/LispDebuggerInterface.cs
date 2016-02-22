@@ -25,7 +25,7 @@ namespace CsLisp
         /// <param name="scope">The scope.</param>
         /// <param name="posInfosOfCurrentAstItem">The position infos of current ast item.</param>
         /// <returns>True if a break is needed</returns>
-        bool NeedsBreak(LispScope scope, Tuple<int, int> posInfosOfCurrentAstItem);
+        bool NeedsBreak(LispScope scope, Tuple<int, int, int> posInfosOfCurrentAstItem);
 
         /// <summary>
         /// Enters the loop of the debugger.

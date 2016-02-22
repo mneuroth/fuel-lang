@@ -12,10 +12,10 @@ namespace CsLisp
     {
         public static void Main(string[] args)
         {
-            Main(args, Console.Out, Console.In);
+            MainExtended(args, Console.Out, Console.In);
         }
 
-        public static void Main(string[] args, TextWriter output, TextReader input)
+        public static void MainExtended(string[] args, TextWriter output, TextReader input)
         {
             if (args.Length == 0)
             {
@@ -24,7 +24,7 @@ namespace CsLisp
             }
 
             string script = null;
-            var doNotLoadFiles = false;
+            var loadFiles = true;
             var trace = false;
             var compile = false;
             var showCompileOutput = false;
@@ -52,14 +52,24 @@ namespace CsLisp
             {
                 lengthyErrorOutput = true;
             }
-            if (args.Contains("-e"))
-            {
-                script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
-                doNotLoadFiles = true;
-            }
             if (args.Contains("-t"))
             {
                 trace = true;
+            }
+            if (args.Contains("-e"))
+            {
+                script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
+                loadFiles = false;
+            }
+
+            // handle options for compiler
+            if (args.Contains("-c"))
+            {
+                compile = true;
+            }
+            if (args.Contains("-s"))
+            {
+                showCompileOutput = true;
             }
 
             // handle options for debugger
@@ -69,7 +79,7 @@ namespace CsLisp
                 {
                     InteractiveLoopHeader(output);
                     debugger.InteractiveLoop(startedFromMain:true, tracing: trace);
-                    doNotLoadFiles = true;
+                    loadFiles = false;
                 }
                 if (args.Contains("-d"))
                 {
@@ -86,21 +96,11 @@ namespace CsLisp
 
                     InteractiveLoopHeader(output);
                     result = debugger.DebuggerLoop(script, fileName, output, input, tracing: trace);
-                    doNotLoadFiles = true;
+                    loadFiles = false;
                 }                
             }
 
-            // handle options for compiler
-            if (args.Contains("-c"))
-            {
-                compile = true;
-            }
-            if (args.Contains("-s"))
-            {
-                showCompileOutput = true;
-            }
-
-            if (!doNotLoadFiles)
+            if (loadFiles)
             {
                 var scriptFiles = LispUtils.GetScriptFilesFromProgramArgs(args);
 
@@ -125,7 +125,8 @@ namespace CsLisp
             }
             else if (script != null)
             {
-                result = Lisp.Eval(script);
+                // process -e option
+                result = Lisp.SaveEval(script);
             }
 
             if (trace)
@@ -229,7 +230,7 @@ namespace CsLisp
     // (- debuggen: anzeige des korrekten codes, falls module geladen ist
     // ((- debuggen: set breakpoints in andren modulen realisieren
     // (- debuggen: up/down sollte auch den --> Zeiger anpassen
-    // - ist LispScope.Finished und LispScope.SourceCode noch notwendig? 
+    // (- ist LispScope.Finished und LispScope.SourceCode noch notwendig? 
     // - Makro Behandlung aufraeumen
     // - Quellcode aufraeumen
     // - debuggen: set next statement realisieren?
@@ -243,5 +244,11 @@ namespace CsLisp
     // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
     // - setf macro implementieren...
     // - out funktioniert aus import module nicht korrekt...-?
-    // - option -e funktioniert nicht mit -d korrekt
+    // ((- option -e funktioniert nicht mit -d korrekt
+    // ((- start unhd end position bei aktuellem step ausgeben --> besserer Support für debuggen
+    // - License und Copyright header in quellcode dateien einbauen
+    // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
+    // - Start/StopPos in LispException setzen, fuer bessere fehlermeldung
+    // - tracen auch mit Start/StopPos fuer besseren debugger support  --> highlighte aktuelles statement: (+ 1 2 3) 
+    // - GetPosInfoString() in Exceptions ggf. nicht mehr notwendig, da infos an Exception gesetzt wird
 }

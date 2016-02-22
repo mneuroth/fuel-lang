@@ -709,14 +709,14 @@ namespace CsLisp
         private Exception CreateInvalidCastException(string name, string msg = "no")
         {
             var exception = new InvalidCastException(string.Format(msg, StringValue, name));
-            exception.Data[LispUtils.LineNo] = Token != null ? Token.LineNo : -1;
+            exception.AddTokenInfos(Token);
             return exception;
         }
 
         static private Exception CreateInvalidOperationException(string operation, LispVariant l, LispVariant r)
         {
-            var exception = new InvalidCastException(String.Format(NoOperatorForTypes, operation, l.Type, r.Type));
-            exception.Data[LispUtils.LineNo] = l.Token != null ? l.Token.LineNo : -1;
+            var exception = new InvalidOperationException(String.Format(NoOperatorForTypes, operation, l.Type, r.Type));
+            exception.AddTokenInfos(l.Token);
             return exception;
         }
 

@@ -40,7 +40,7 @@ namespace CsLisp
 
         public const string Name = "FUEL(isp)";
         public const string Version = "v0.99.1";
-        public const string Date = "19.2.2016";
+        public const string Date = "22.2.2016";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";
@@ -61,10 +61,9 @@ namespace CsLisp
         /// <param name="lispCode">The lisp code.</param>
         /// <param name="scope">The scope.</param>
         /// <param name="moduleName">The module name and path.</param>
-        /// <param name="updateFinishedFlag">Flag which indicates request to update the finished flag at the scop.</param>
         /// <param name="tracing">if set to <c>true</c> [tracing].</param>
         /// <returns>The result of the script evaluation</returns>
-        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool updateFinishedFlag = true, bool tracing = false)
+        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool tracing = false)
         {
             // first create global scope, needed for macro expanding
             var globalScope = scope ?? LispEnvironment.CreateDefaultScope();
@@ -73,10 +72,6 @@ namespace CsLisp
             var ast = LispParser.Parse(lispCode, globalScope);
             var expandedAst = LispInterpreter.ExpandMacros(ast, globalScope);
             var result = LispInterpreter.EvalAst(expandedAst, globalScope);
-            if (updateFinishedFlag)
-            {
-                globalScope.Finished = true; // needed for debugging support                
-            }
             return result;
         }
 
@@ -98,9 +93,9 @@ namespace CsLisp
             }
             catch (Exception exc)
             {
-                Console.WriteLine("\nError executing script.\n\n{0} line={1} module={2}", exc.Message, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.ModuleName]);
-                Console.WriteLine("\nCallstack:\n{0}", exc.Data[LispUtils.StackInfo]);
-                if (verboseErrorOutput)
+                Console.WriteLine("\nError executing script.\n\n{0} line={1} start={2} stop={3} module={4}", exc.Message, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.StartPos], exc.Data[LispUtils.StopPos], exc.Data[LispUtils.ModuleName]);
+                var stackInfo = exc.Data[LispUtils.StackInfo];
+                Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : "<not available>");                if (verboseErrorOutput)
                 {
                     Console.WriteLine("\nNative callstack:");
                     Console.WriteLine("Exception in eval(): {0} \ndata={1}", exc, exc.Data);

@@ -17,7 +17,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Tuple<int, int> GetPosInfo(object item)
+        public static Tuple<int, int, int> GetPosInfo(object item)
         {
             LispToken token;
             if (item is LispToken)
@@ -42,8 +42,10 @@ namespace CsLisp
             string info = "pos=";
             var pos = GetPosInfo(item);
             info += pos.Item1;
-            info += " line=";
+            info += " stop=";
             info += pos.Item2;
+            info += " line=";
+            info += pos.Item3;
             return info;
         }
 
@@ -84,7 +86,7 @@ namespace CsLisp
                     {
                         if (!compile)
                         {
-                            throw new LispException("Function \"" + first + "\" not found (" + GetPosInfoString(first) + ")!", moduleName: scope.ModuleName);
+                            throw new LispException("Function \"" + first + "\" not found (" + GetPosInfoString(first) + ")!", scope);
                         }
                     }
                     isSpecialForm = firstElem.IsSpecialForm;
@@ -223,7 +225,7 @@ namespace CsLisp
 
             // for debugging: update the current line number at the current scope
             var currentToken = ((LispVariant)(astAsList.First())).Token;
-            scope.LineNumber = currentToken != null ? currentToken.LineNo : scope.LineNumber;
+            scope.CurrentToken = currentToken != null ? currentToken : scope.CurrentToken;
 
             // debugger processing
             var debugger = scope.GlobalScope.Debugger;

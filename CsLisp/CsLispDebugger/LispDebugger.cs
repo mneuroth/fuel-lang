@@ -68,7 +68,7 @@ namespace CsLisp
         /// <exception cref="CsLisp.LispStopDebuggerException"></exception>
         public static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, bool startedFromMain = false, bool tracing = false)
         {
-            startedFromMain = !startedFromMain ? debugger == null : true;
+            startedFromMain = startedFromMain || debugger == null;
             if (debugger == null)
             {
                 debugger = new LispDebugger();
@@ -81,7 +81,7 @@ namespace CsLisp
             }
             var topScope = initialTopScope != null ? initialTopScope : globalScope;
             var currentScope = topScope;
-            var bStop = false;
+            var bContinueWithNextStatement = false;
             var bRestart = false;
             do
             {
@@ -92,7 +92,7 @@ namespace CsLisp
 
                 if (cmd == null || cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
                 {
-                    bStop = true;
+                    bContinueWithNextStatement = true;
                     bRestart = false;
                     if (!startedFromMain)
                     {
@@ -135,7 +135,7 @@ namespace CsLisp
                     {
                         script = debugger.CommandLineScript;
                     }
-                    ShowSourceCode(debugger, script, currentScope.LineNumber);
+                    ShowSourceCode(debugger, script, currentScope.CurrentLineNo);
                 }
                 else if (cmd.StartsWith("list") || cmd.StartsWith("t"))
                 {
@@ -162,22 +162,22 @@ namespace CsLisp
                 else if (cmd.Equals("step") || cmd.Equals("s"))
                 {
                     debugger.DoStep(currentScope);
-                    bStop = CheckForStop(globalScope, bStop);
+                    bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("over") || cmd.Equals("v"))
                 {
                     debugger.DoStepOver(currentScope);
-                    bStop = CheckForStop(globalScope, bStop);
+                    bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("out") || cmd.Equals("o"))
                 {
                     debugger.DoStepOut(currentScope);
-                    bStop = CheckForStop(globalScope, bStop);
+                    bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("run") || cmd.Equals("r"))
                 {
                     debugger.DoRun();
-                    bStop = CheckForStop(globalScope, bStop);
+                    bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("locals") || cmd.StartsWith("l"))
                 {
@@ -189,7 +189,7 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("restart"))
                 {
-                    bStop = true;
+                    bContinueWithNextStatement = true;
                     bRestart = true;
                 }
                 else if (cmd.Equals("version") || cmd.Equals("ver"))
@@ -208,7 +208,7 @@ namespace CsLisp
                         debugger.Output.WriteLine("Exception: " + ex.Message);
                     }
                 }
-            } while (!bStop);
+            } while (!bContinueWithNextStatement);
 
             return bRestart;
         }
@@ -224,7 +224,7 @@ namespace CsLisp
         {
             if (currentAst != null)
             {
-                var lineNumber = initialTopScope != null ? initialTopScope.LineNumber : -1;
+                var lineNumber = initialTopScope != null ? initialTopScope.CurrentLineNo : -1;
                 Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " " + LispInterpreter.GetPosInfoString(currentAst[0]));
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
@@ -233,9 +233,9 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public bool NeedsBreak(LispScope scope, Tuple<int, int> posInfosOfCurrentAstItem)
+        public bool NeedsBreak(LispScope scope, Tuple<int, int, int> posInfosOfCurrentAstItem)
         {
-            if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item2, scope))
+            if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item3, scope))
             {
                 IsProgramStop = false;
                 return true;
@@ -321,7 +321,7 @@ namespace CsLisp
                     {
                         try
                         {
-                            LispVariant result = Lisp.Eval(breakpoint.Condition, scope, updateFinishedFlag: false);
+                            LispVariant result = Lisp.Eval(breakpoint.Condition, scope);
                             return result.BoolValue;
                         }
                         catch
@@ -344,7 +344,7 @@ namespace CsLisp
         private void AddBreakpoint(int lineNo, string moduleName, string condition)
         {
             var newItem = new LispBreakpointInfo(lineNo, moduleName, condition);
-            int index = Breakpoints.FindIndex(elem => elem.LineNo == lineNo);
+            var index = Breakpoints.FindIndex(elem => elem.LineNo == lineNo);
             if (index >= 0)
             {
                 // replace existing item for this line
@@ -381,14 +381,14 @@ namespace CsLisp
 
         private void DoStepOver(LispScope currentScope)
         {
-            int currentCallStackSize = currentScope.GetCallStackSize();
+            var currentCallStackSize = currentScope.GetCallStackSize();
             IsStopStepFcn = (scope) => currentCallStackSize >= scope.GetCallStackSize();
             IsProgramStop = true;
         }
 
         private void DoStepOut(LispScope currentScope)
         {
-            int currentCallStackSize = currentScope.GetCallStackSize();
+            var currentCallStackSize = currentScope.GetCallStackSize();
             IsStopStepFcn = (scope) => currentCallStackSize - 1 >= scope.GetCallStackSize();
             IsProgramStop = true;
         }
@@ -401,7 +401,7 @@ namespace CsLisp
         private void ShowBreakpoints()
         {
             Output.WriteLine("Breakpoints:");
-            int no = 1;
+            var no = 1;
             foreach (var breakpoint in Breakpoints)
             {
                 Output.WriteLine("#{0,-3} line={1,-5} module={2,-25} condition={3}", no, breakpoint.LineNo, breakpoint.ModuleName, breakpoint.Condition);
@@ -428,7 +428,7 @@ namespace CsLisp
             if (debugger != null)
             {
                 string[] sourceCodeLines = sourceCode.Split('\n');
-                for (int i = 0; i < sourceCodeLines.Length; i++)
+                for (var i = 0; i < sourceCodeLines.Length; i++)
                 {
                     string breakMark = debugger.HasBreakpointAt(i + 1) ? "B " : "  ";
                     string mark = currentLineNo != null && currentLineNo.Value == i + 1 ? "-->" : String.Empty;
@@ -508,19 +508,10 @@ namespace CsLisp
                     }
                 }
             }
-            if(!added)
+            if (!added && debugger != null)
             {
                 debugger.Output.WriteLine("Warning: no breakpoint set or modified");
             }
-        }
-
-        private static bool CheckForStop(LispScope globalScope, bool bStop)
-        {
-            if (!globalScope.Finished)
-            {
-                bStop = true;
-            }
-            return bStop;
         }
 
         private static void ShowInteractiveCmds(TextWriter output)

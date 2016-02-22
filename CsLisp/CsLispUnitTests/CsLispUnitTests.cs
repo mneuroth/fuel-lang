@@ -544,6 +544,13 @@ namespace CsLispUnitTests
             LispVariant result = Lisp.Eval("(if #t 1 2 3)");
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_FunctionNotFound()
+        {
+            LispVariant result = Lisp.Eval("(unknown-fcn 1 2 3)");
+        }
+
         #endregion
 
         #region interpreter internals
