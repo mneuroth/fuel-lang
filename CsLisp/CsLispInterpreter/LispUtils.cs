@@ -48,6 +48,7 @@ namespace CsLisp
         /// <summary>
         /// Add infos about given token to exception data.
         /// </summary>
+        /// <param name="ex">The exception.</param>
         /// <param name="token">The token.</param>
         public static void AddTokenInfos(this Exception ex, LispToken token)
         {
@@ -57,6 +58,8 @@ namespace CsLisp
         }
         
         #endregion
+
+        #region helper methods
 
         /// <summary>
         /// Show the version of this FUEL interpreter.
@@ -109,6 +112,8 @@ namespace CsLisp
             }
             return  exists ? File.ReadAllText(fileName) : string.Empty;
         }
+
+        #endregion
     }
 
     /// <summary>

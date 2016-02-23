@@ -28,6 +28,7 @@ namespace CsLisp
         public static IEnumerable<object> Parse(string code, LispScope scope = null)
         {
             List<object> parseResult = null;
+            string moduleName = string.Empty;
 
             // set tokens at LispScope to improve debugging and 
             // support displaying of error position 
@@ -35,9 +36,10 @@ namespace CsLisp
             if (scope != null)
             {
                 scope.Tokens = tokens;
+                moduleName = scope.ModuleName;
             }
 
-            ParseTokens(tokens, 0, ref parseResult, isToplevel: true);
+            ParseTokens(moduleName, tokens, 0, ref parseResult, isToplevel: true);
 
             return parseResult;
         }
@@ -46,7 +48,7 @@ namespace CsLisp
 
         #region private methods
 
-        private static int ParseTokens(IList<LispToken> tokens, int startIndex, ref List<object> parseResult, bool isToplevel)
+        private static int ParseTokens(string moduleName, IList<LispToken> tokens, int startIndex, ref List<object> parseResult, bool isToplevel)
         {
             int i;
             List<object> current = null;
@@ -77,7 +79,7 @@ namespace CsLisp
                     {
                         if (isToplevel && i+1<tokens.Count && !OnlyCommentTokensFrom(tokens, i+1))
                         {
-                            throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode + " " + GetPosInfo(token));
+                            throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
                         }
                         return i;
                     }
@@ -91,7 +93,7 @@ namespace CsLisp
                     if (nextToken.Type == LispTokenType.ListStart)
                     {
                         List<object> quotedList = null;
-                        i = ParseTokens(tokens, i + 1, ref quotedList, isToplevel: false);
+                        i = ParseTokens(moduleName, tokens, i + 1, ref quotedList, isToplevel: false);
                         quote.Add(quotedList);
                     }
                     else
@@ -115,7 +117,7 @@ namespace CsLisp
                 {
                     if (current == null)
                     {
-                        throw new LispException(UnexpectedToken + GetPosInfo(token));
+                        throw new LispException(UnexpectedToken, token, moduleName);
                     }
                     current.Add(new LispVariant(token));
                 }
@@ -123,7 +125,8 @@ namespace CsLisp
 
             if (isToplevel && tokens.Count>0)
             {
-                throw new LispException(BracketsOutOfBalance + " " + GetPosInfo(tokens.Last()));
+                LispToken token = tokens.Last();
+                throw new LispException(BracketsOutOfBalance, token, moduleName);
             }
 
             return i;

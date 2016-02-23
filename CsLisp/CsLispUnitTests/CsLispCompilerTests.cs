@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CsLisp;
+﻿using CsLisp;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LispUnitTests
 {

@@ -449,6 +449,8 @@ namespace CsLisp
         }
 
         #region Operations
+
+// TODO --> was soll mit diesem code passieren ?
         /*
         public override bool Equals(object other)
         {
@@ -485,6 +487,7 @@ namespace CsLisp
             }
         }
         */
+
         public void Add(object value)
         {
             if (Type != LispType.List)

@@ -86,7 +86,7 @@ namespace CsLisp
                     {
                         if (!compile)
                         {
-                            throw new LispException("Function \"" + first + "\" not found (" + GetPosInfoString(first) + ")!", scope);
+                            throw new LispException("Function \"" + first + "\" not found", scope);
                         }
                     }
                     isSpecialForm = firstElem.IsSpecialForm;
@@ -199,6 +199,10 @@ namespace CsLisp
                 //b) return EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
             }
 
+            // for debugging: update the current line number at the current scope
+            var currentToken = ((LispVariant)(astAsList.First())).Token;
+            scope.CurrentToken = currentToken != null ? currentToken : scope.CurrentToken;
+
             // resolve values via local and global scope
             var astWithResolvedValues = ResolveArgsInScopes(scope, astAsList, false);
 
@@ -222,10 +226,6 @@ namespace CsLisp
                                      !functionWrapper.IsSpecialForm;
                 arguments[i - 1] = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
             }
-
-            // for debugging: update the current line number at the current scope
-            var currentToken = ((LispVariant)(astAsList.First())).Token;
-            scope.CurrentToken = currentToken != null ? currentToken : scope.CurrentToken;
 
             // debugger processing
             var debugger = scope.GlobalScope.Debugger;

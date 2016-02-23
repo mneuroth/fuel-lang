@@ -22,5 +22,19 @@ namespace CsLisp
                 this.AddTokenInfos(scope.CurrentToken);
             }
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LispException" /> class.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <param name="token">The token.</param>
+        /// <param name="moduleName">Name of the module.</param>
+        public LispException(string text, LispToken token, string moduleName)
+            : base(text)
+        {
+            Data[LispUtils.StackInfo] = "not available";
+            Data[LispUtils.ModuleName] = moduleName;
+            this.AddTokenInfos(token);
+        }
     }
 }

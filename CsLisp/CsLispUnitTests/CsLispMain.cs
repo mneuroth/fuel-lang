@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CsLisp;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LispUnitTests
 {
@@ -290,5 +290,57 @@ namespace LispUnitTests
                 output.Close();
             }
         }
+
+        #region parser tests
+
+        [TestMethod]
+        public void Test_MainTestParserBracketsOutOfBalance()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(print ( (+ 1 2))" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Brackets out of balance --> line=1 start=16 stop=16 module="));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestParserUnexpectedToken()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "dummy (print (+ 1 2))" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("unexpected token --> line=1 start=0 stop=5"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestFunctionNotFound()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(unknown-fcn (+ 1 2))" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Function \"unknown-fcn\" not found --> line=1 start=1 stop=12"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestSymbolNotFound()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(setf a 5)" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Symbol a not found --> line=1 start=1 stop=5"));
+            }
+        }
+
+        #endregion
     }
 }

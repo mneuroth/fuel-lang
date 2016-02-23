@@ -69,6 +69,7 @@ namespace CsLisp
         public const string Quasiquote = "`";
         public const string Unquote = ",";
         public const string Unquotesplicing = ",@";
+        public const string Nil = "NIL";
 
         #endregion
 
@@ -226,7 +227,7 @@ namespace CsLisp
         {
             if (Type == LispTokenType.Nil)
             {
-                return "NIL";
+                return Nil;
             }
             return Value.ToString();
         }

@@ -1002,7 +1002,7 @@ namespace CsLisp
             }
             else
             {
-                throw new LispException("Symbol " + symbolName + " not found" + GetPositionOfPreviousTokenForSymbol(symbol, scope), scope);
+                throw new LispException("Symbol " + symbolName + " not found", scope);
             }
             return value;
         }
@@ -1392,6 +1392,7 @@ namespace CsLisp
             return GetPositionOfToken(prevToken);
         }
 
+// TODO ---> nach umstellung der exceptions ist diese methode ggf. nicht mehr notwendig !
         private static string GetPositionOfToken(LispToken token)
         {
             var infos = GetPosInfo(token);
