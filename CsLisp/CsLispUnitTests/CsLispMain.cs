@@ -313,7 +313,7 @@ namespace LispUnitTests
                 var args = new[] { "-e", "dummy (print (+ 1 2))" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
-                Assert.IsTrue(s.Contains("unexpected token --> line=1 start=0 stop=5"));
+                Assert.IsTrue(s.Contains("Unexpected token --> line=1 start=0 stop=5"));
             }
         }
 
@@ -338,6 +338,66 @@ namespace LispUnitTests
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Symbol a not found --> line=1 start=1 stop=5"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestListExpectedInDo()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(do (print 3) 5)" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("List expected in do --> line=1 start=13 stop=15"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestBadArgumentCount()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(do (print 3) (defn x))" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Bad argument count in def --> line=1 start=15 stop=19"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestNoFunction()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(do (print 3) (map 3 '(1 2 3)))" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("No function in map --> line=1 start=15 stop=18"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestNoList()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(do (print 3) (map (lambda (x) (print x)) 3))" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("No list in map --> line=1 start=40 stop=40"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainTestSymbolExpected()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(do (print 3) (def 4 \"test\"))" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Symbol expected --> line=1 start=15 stop=18"));
             }
         }
 

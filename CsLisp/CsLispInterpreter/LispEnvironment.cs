@@ -398,8 +398,6 @@ namespace CsLisp
         public const string Sym = "sym";
         public const string Str = "str";
 
-        private const string BadArgumentCount = "bad argument count in ";
-
         #endregion
 
         #region public methods of environment
@@ -476,6 +474,7 @@ namespace CsLisp
             scope["nop"] = CreateFunction(Nop);
             scope["return"] = CreateFunction(Return);
             scope["print"] = CreateFunction(Print);
+            scope["println"] = CreateFunction(PrintLn);
 
             scope["string"] = CreateFunction(Addition);
             scope["add"] = CreateFunction(Addition);
@@ -697,6 +696,13 @@ namespace CsLisp
         public static LispVariant Print(object[] args, LispScope scope)
         {
             var text = GetStringRepresentation(args, scope);
+            scope.GlobalScope.Output.Write(text);
+            return new LispVariant(text);
+        }
+
+        public static LispVariant PrintLn(object[] args, LispScope scope)
+        {
+            var text = GetStringRepresentation(args, scope);
             scope.GlobalScope.Output.WriteLine(text);
             return new LispVariant(text);
         }
@@ -911,6 +917,7 @@ namespace CsLisp
             if (arguments.IsList)
             {
                 var argumentsArray = arguments.ListValue.ToArray();
+// TODO
                 //var evaluatedArgs = new object[argumentsArray.Length];
                 //for (int i = 0; i < evaluatedArgs.Length; i++)
                 //{
@@ -923,17 +930,26 @@ namespace CsLisp
                 return result;
             }
 
-            throw new LispException("expected list as arguments in apply", scope);
+            throw new LispException("Expected list as arguments in apply", scope);
         }
 
         public static LispVariant EvalFcn(object[] args, LispScope scope)
         {
             CheckArgs("eval", 1, args, scope);
 
+            LispVariant result;
             // convert LispVariant.List --> object[] needed for evaluation
             var variant = (LispVariant)args[0];
-            object[] code = variant.ListValue.ToArray();
-            var result = LispInterpreter.EvalAst(code, scope);
+            if (variant.IsList)
+            {
+                object[] code = variant.ListValue.ToArray();
+                result = LispInterpreter.EvalAst(code, scope);
+            }
+            else
+            {
+                // if a single value is given for evaluation --> just return value !
+                result = variant;
+            }
             return result;
         }
 
@@ -1133,7 +1149,7 @@ namespace CsLisp
             {
                 if (!(statement is IEnumerable<object>))
                 {
-                    throw new LispException("List expected in do in " + GetPositionOfToken(((LispVariant)statement).Token), scope);
+                    throw new LispException("List expected in do", ((LispVariant)statement).Token, scope.ModuleName, scope.DumpStackToString());
                 }
                 result = LispInterpreter.EvalAst(statement, scope);
             }
@@ -1385,25 +1401,26 @@ namespace CsLisp
             return new LispVariant(new LispFunctionWrapper(func, signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
         }
 
-        private static string GetPositionOfPreviousTokenForSymbol(object symbol, LispScope scope)
-        {
-            var sym = (LispVariant)symbol;
-            var prevToken = scope.GetPreviousToken(sym.Token);
-            return GetPositionOfToken(prevToken);
-        }
+//// TODO ---> nach umstellung der exceptions ist diese methode ggf. nicht mehr notwendig !
+//        private static string GetPositionOfPreviousTokenForSymbol(object symbol, LispScope scope)
+//        {
+//            var sym = (LispVariant)symbol;
+//            var prevToken = scope.GetPreviousToken(sym.Token);
+//            return GetPositionOfToken(prevToken);
+//        }
 
-// TODO ---> nach umstellung der exceptions ist diese methode ggf. nicht mehr notwendig !
-        private static string GetPositionOfToken(LispToken token)
-        {
-            var infos = GetPosInfo(token);
-            return " (total-pos=" + infos.Item1 + " line=" + infos.Item3 + ")";
-        }
+//// TODO ---> nach umstellung der exceptions ist diese methode ggf. nicht mehr notwendig !
+//        private static string GetPositionOfToken(LispToken token)
+//        {
+//            var infos = GetPosInfo(token);
+//            return " (total-pos=" + infos.Item1 + " line=" + infos.Item3 + ")";
+//        }
 
         private static void CheckArgs(string name, int count, object[] args, LispScope scope)
         {
             if (args.Length != count)
             {
-                throw new LispException(BadArgumentCount + name + GetPositionOfPreviousTokenForSymbol(args[0], scope), scope);
+                throw new LispException("Bad argument count in " + name, scope);
             }
         }
 
@@ -1412,7 +1429,7 @@ namespace CsLisp
             var function = (LispVariant)arg0;
             if (!function.IsFunction)
             {
-                throw new LispException("no function in " + functionName + GetPositionOfPreviousTokenForSymbol(arg0, scope), scope);
+                throw new LispException("No function in " + functionName, scope);
             }
             return function;
         }
@@ -1426,7 +1443,7 @@ namespace CsLisp
             var function = (LispVariant)arg0;
             if (!function.IsList)
             {
-                throw new LispException("no list in " + functionName + GetPositionOfPreviousTokenForSymbol(arg0, scope), scope);
+                throw new LispException("No list in " + functionName, scope.GetPreviousToken(((LispVariant)arg0).Token), scope.ModuleName, scope.DumpStackToString());
             }
             return function.ListValue;
         }
@@ -1471,7 +1488,7 @@ namespace CsLisp
             var symbol = EvalArgIfNeeded(args[0], scope);
             if (!(symbol.IsSymbol || symbol.IsString))
             {
-                throw new LispException("Symbol expected" + GetPositionOfPreviousTokenForSymbol(symbol, scope), scope);
+                throw new LispException("Symbol expected", scope);
             }
             var value = LispInterpreter.EvalAst(args[1], scope);
             scopeToSet[symbol.ToString()] = value;

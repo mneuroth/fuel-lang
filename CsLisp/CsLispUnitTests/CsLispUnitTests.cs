@@ -12,21 +12,21 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Comments()
         {
-            LispVariant result = Lisp.Eval("(do (print \"hello\") ; a comment\n(print; separate lists with comments\n\"world\"));comment in last line");
+            LispVariant result = Lisp.Eval("(do (println \"hello\") ; a comment\n(println; separate lists with comments\n\"world\"));comment in last line");
             Assert.AreEqual("world", result.ToString());
         }
 
         [TestMethod]
         public void Test_DoAndPrint()
         {
-            LispVariant result = Lisp.Eval("(do (print \"hello\")\n (print \"world\"))");
+            LispVariant result = Lisp.Eval("(do (println \"hello\")\n (println \"world\"))");
             Assert.AreEqual("world", result.ToString());
         }
 
         [TestMethod]
         public void Test_PrintTrace()
         {
-            LispVariant result = Lisp.Eval("(do (trace #t) (print \"hello world\") (print (+ 9 8)) (gettrace))");
+            LispVariant result = Lisp.Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))");
             Assert.AreEqual("hello world17", result.ToString());
         }
 
@@ -75,7 +75,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_DefWithNil()
         {
-            LispVariant result = Lisp.Eval("(do (def a nil) (print a))");
+            LispVariant result = Lisp.Eval("(do (def a nil) (println a))");
             Assert.AreEqual("NIL", result.ToString());
         }
 
@@ -91,6 +91,15 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(eval '(def x 456))");
             Assert.AreEqual(456, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Eval3()
+        {
+            LispVariant result = Lisp.Eval("(eval #t)");
+            Assert.AreEqual(true, result.ToBool());
+            result = Lisp.Eval("(eval 42)");
+            Assert.AreEqual(42, result.ToInt());
         }
 
         [TestMethod]
@@ -110,7 +119,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Defn1()
         {
-            LispVariant result = Lisp.Eval("(do (def g_prn \"START:\") (defn prn (x) (setf g_prn (add g_prn x))) (prn \"34\") (print g_prn))");
+            LispVariant result = Lisp.Eval("(do (def g_prn \"START:\") (defn prn (x) (setf g_prn (add g_prn x))) (prn \"34\") (println g_prn))");
             Assert.AreEqual("START:34", result.ToString());
         }
 
@@ -246,14 +255,14 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Macros1()
         {
-            LispVariant result = Lisp.Eval("(do (define-macro blub (lambda (x y) (print x y))) (print (quote (1 2 3))) (blub 3 4))");
+            LispVariant result = Lisp.Eval("(do (define-macro blub (lambda (x y) (println x y))) (println (quote (1 2 3))) (blub 3 4))");
             Assert.AreEqual("3 4", result.ToString());
         }
 
         [TestMethod]
         public void Test_MacrosExpand1()
         {
-            LispVariant result = Lisp.Eval("(do (define-macro-expand blub (x y) (print x y)) (print (quote (1 2 3))) (blub 3 4))");
+            LispVariant result = Lisp.Eval("(do (define-macro-expand blub (x y) (println x y)) (println (quote (1 2 3))) (blub 3 4))");
             Assert.AreEqual("3 4", result.ToString());
         }
 
@@ -285,28 +294,28 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Quasiquote1()
         {
-            LispVariant result = Lisp.Eval("(do (def a '(42 99 102 \"hello\")) (def b 55) (print (type a)) (print (nth 3 `(1 2 3 ,@a))))");
+            LispVariant result = Lisp.Eval("(do (def a '(42 99 102 \"hello\")) (def b 55) (println (type a)) (println (nth 3 `(1 2 3 ,@a))))");
             Assert.AreEqual("42", result.ToString());
         }
 
         [TestMethod]
         public void Test_Quasiquote2()
         {
-            LispVariant result = Lisp.Eval("(do (def a 42) (print `(1 2 3 ,a)))");
+            LispVariant result = Lisp.Eval("(do (def a 42) (println `(1 2 3 ,a)))");
             Assert.AreEqual("(1 2 3 42)", result.ToString());
         }
 
         [TestMethod]
         public void Test_Quote1()
         {
-            LispVariant result = Lisp.Eval("(do (def x 42) (print 'x))");
+            LispVariant result = Lisp.Eval("(do (def x 42) (println 'x))");
             Assert.AreEqual("x", result.ToString());
         }
 
         [TestMethod]
         public void Test_String1()
         {
-            LispVariant result = Lisp.Eval("(print \"hello \\\\ \\' öäü \n \\\"blub\\\"\")");
+            LispVariant result = Lisp.Eval("(println \"hello \\\\ \\' öäü \n \\\"blub\\\"\")");
             Assert.AreEqual("hello \\ ' öäü \n \"blub\"", result.ToString());
         }
 
@@ -369,35 +378,35 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Closure1()
         {
-            LispVariant result = Lisp.Eval("(do (defn addx (delta) (lambda (x) (+ x delta))) (def addclosure (addx 41)) (print (addclosure 1)))");
+            LispVariant result = Lisp.Eval("(do (defn addx (delta) (lambda (x) (+ x delta))) (def addclosure (addx 41)) (println (addclosure 1)))");
             Assert.AreEqual(42, result.ToInt());
         }
         
         [TestMethod]
         public void Test_RecursiveCall1()
         {
-            LispVariant result = Lisp.Eval("(do (defn addConst (x a) (+ x a)) (def add2 (lambda (x) (addConst x 2))) (print (addConst 8 2)) (print (add2 4)))");
+            LispVariant result = Lisp.Eval("(do (defn addConst (x a) (+ x a)) (def add2 (lambda (x) (addConst x 2))) (println (addConst 8 2)) (println (add2 4)))");
             Assert.AreEqual(6, result.ToInt());
         }
 
         [TestMethod]
         public void Test_Return1()
         {
-            LispVariant result = Lisp.Eval("(do (defn f (x) (return (+ x x))) (print (f 7)))");
+            LispVariant result = Lisp.Eval("(do (defn f (x) (return (+ x x))) (println (f 7)))");
             Assert.AreEqual(14, result.ToInt());
         }
 
         [TestMethod]
         public void Test_Call1()
         {
-            LispVariant result = Lisp.Eval("(do (def obj 0) (setf obj (call \"CsLisp.DummyNative\")) (print obj (type obj)) (call obj \"Test\"))");
+            LispVariant result = Lisp.Eval("(do (def obj 0) (setf obj (call \"CsLisp.DummyNative\")) (println obj (type obj)) (call obj \"Test\"))");
             Assert.AreEqual(42, result.ToInt());
         }
 
         [TestMethod]
         public void Test_Apply1()
         {
-            LispVariant result = Lisp.Eval("(apply (lambda (x) (print \"hello\" x)) '(55))");
+            LispVariant result = Lisp.Eval("(apply (lambda (x) (println \"hello\" x)) '(55))");
             Assert.AreEqual("hello 55", result.ToString());
         }
 
@@ -474,14 +483,14 @@ namespace LispUnitTests
         [ExpectedException(typeof(LispException))]
         public void Test_Parser1()
         {
-            LispVariant result = Lisp.Eval("(print \"hello\"))");
+            LispVariant result = Lisp.Eval("(println \"hello\"))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_Parser2()
         {
-            LispVariant result = Lisp.Eval("((print \"hello\")");
+            LispVariant result = Lisp.Eval("((println \"hello\")");
         }
 
         [TestMethod]
@@ -558,28 +567,28 @@ namespace LispUnitTests
         [ExpectedException(typeof(LispException))]
         public void Test_BracketsOutOfBalance1()
         {
-            LispVariant result = Lisp.Eval("(do (print 2)))");
+            LispVariant result = Lisp.Eval("(do (println 2)))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_BracketsOutOfBalance2()
         {
-            LispVariant result = Lisp.Eval("(do ( (print 2))");
+            LispVariant result = Lisp.Eval("(do ( (println 2))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_UnexpectedToken1()
         {
-            LispVariant result = Lisp.Eval("blub (do (print 2))");
+            LispVariant result = Lisp.Eval("blub (do (println 2))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_UnexpectedTokenButIsBracketsOutOfBalance()
         {
-            LispVariant result = Lisp.Eval("(do (print 2)) asfd");
+            LispVariant result = Lisp.Eval("(do (println 2)) asfd");
         }
 
         #endregion
@@ -706,7 +715,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (print x))))");
+                LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (println x))))");
                 Assert.IsTrue(result.IsInt);
                 Assert.AreEqual(3, result.IntValue);
 
@@ -723,7 +732,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import fuellib) (foreach '(1 4 6) (lambda (x) (print x))))");
+                LispVariant result = Lisp.Eval("(do (import fuellib) (foreach '(1 4 6) (lambda (x) (println x))))");
                 Assert.IsTrue(result.IsInt);
                 Assert.AreEqual(3, result.IntValue);    // is last value of internal loop variable in foreach
 
@@ -741,7 +750,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import fuellib) (create-native \"List\" \"System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]\") (def obj (create-List)) (List-Add obj 7) (call obj \"Add\" 5) (print (List-get_Count obj)))");
+                LispVariant result = Lisp.Eval("(do (import fuellib) (create-native \"List\" \"System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]\") (def obj (create-List)) (List-Add obj 7) (call obj \"Add\" 5) (println (List-get_Count obj)))");
                 Assert.IsTrue(result.IsString);
                 Assert.AreEqual("2", result.Value.ToString());
 

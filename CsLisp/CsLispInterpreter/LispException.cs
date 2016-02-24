@@ -29,10 +29,11 @@ namespace CsLisp
         /// <param name="text">The text.</param>
         /// <param name="token">The token.</param>
         /// <param name="moduleName">Name of the module.</param>
-        public LispException(string text, LispToken token, string moduleName)
+        /// <param name="stackInfo">The stack information.</param>
+        public LispException(string text, LispToken token, string moduleName, string stackInfo = "not available")
             : base(text)
         {
-            Data[LispUtils.StackInfo] = "not available";
+            Data[LispUtils.StackInfo] = stackInfo;
             Data[LispUtils.ModuleName] = moduleName;
             this.AddTokenInfos(token);
         }

@@ -12,7 +12,7 @@ namespace CsLisp
 
         private const string BracketsOutOfBalance = "Brackets out of balance";
         private const string BracketsOutOfBalanceOrUnexpectedScriptCode = BracketsOutOfBalance + " or unexpected script code";
-        private const string UnexpectedToken = "unexpected token";
+        private const string UnexpectedToken = "Unexpected token";
 
         #endregion
 

@@ -248,9 +248,9 @@ namespace CsLisp
     // ((- start unhd end position bei aktuellem step ausgeben --> besserer Support für debuggen
     // - License und Copyright header in quellcode dateien einbauen
     // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
-    // - Start/StopPos in LispException setzen, fuer bessere fehlermeldung
+    // ((- Start/StopPos in LispException setzen, fuer bessere fehlermeldung
+    // ((- GetPosInfoString() in Exceptions ggf. nicht mehr notwendig, da infos an Exception gesetzt wird
     // - tracen auch mit Start/StopPos fuer besseren debugger support  --> highlighte aktuelles statement: (+ 1 2 3) 
-    // - GetPosInfoString() in Exceptions ggf. nicht mehr notwendig, da infos an Exception gesetzt wird
 
 
     /*
