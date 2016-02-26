@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CsLisp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -404,6 +406,20 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_CallStatic()
+        {
+            LispVariant result = Lisp.Eval("(do (call-static \"System.IO.File\" Exists \"dummy\"))");
+            Assert.AreEqual(false, result.ToBool());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_CallStaticError()
+        {
+            Lisp.Eval("(do (call-static \"System.IO.File\" NotExistingFunction \"dummy\"))");
+        }
+
+        [TestMethod]
         public void Test_Apply1()
         {
             LispVariant result = Lisp.Eval("(apply (lambda (x) (println \"hello\" x)) '(55))");
@@ -750,7 +766,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import fuellib) (create-native \"List\" \"System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]\") (def obj (create-List)) (List-Add obj 7) (call obj \"Add\" 5) (println (List-get_Count obj)))");
+                LispVariant result = Lisp.Eval("(do (import fuellib) (create-native \"List\" \"System.Collections.Generic.List`1[[System.Int32]]\") (def obj (create-List)) (List-Add obj 7) (call obj \"Add\" 5) (println (List-get_Count obj)))");
                 Assert.IsTrue(result.IsString);
                 Assert.AreEqual("2", result.Value.ToString());
 
@@ -770,6 +786,27 @@ namespace LispUnitTests
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("no debugger support"));
             }            
+        }
+
+        #endregion
+
+        #region test fuel standard lib
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_StdLib1()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (def lst (create-List)) (List-Add lst \"blub\") (List-Add lst 1.2354) (println \"count=\" (List-get_Count lst)) (map println lst) )");
+                Assert.IsTrue(result.IsList);
+                Assert.AreEqual(2, ((IEnumerable<object>)result.Value).Count());
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("count= 2"));
+                Assert.IsTrue(s.Contains("blub"));
+                Assert.IsTrue(s.Contains("1.2354"));               
+            }
         }
 
         #endregion

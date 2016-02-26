@@ -462,8 +462,9 @@ namespace CsLisp
             scope["import"] = CreateFunction(Import);
 
             // access to .NET
-            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count");
+            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count)");
             scope["call"] = CreateFunction(CallNative, "(call native-obj|class-name [method-name [args...]]|[args...])");    // call native function
+            scope["call-static"] = CreateFunction(CallStaticNative, "(call-static class-name method-name [args...])");    // call native static function
             // Macro: (register-native full-class-name lisp-name) --> erzeugt konstruktoren und zugriffsmethoden fuer klasse
             // --> (lisp-name-create args)
             // --> (lisp-name-method obj args)
@@ -1192,11 +1193,8 @@ namespace CsLisp
                     catch (Exception ex)
                     {
                         // add the stack info and module name to the data of the exception
-                        ex.Data[LispUtils.StackInfo] = childScope.DumpStackToString();
-                        ex.Data[LispUtils.ModuleName] = childScope.ModuleName;
-                        ex.Data[LispUtils.LineNo] = childScope.CurrentToken != null ? childScope.CurrentToken.LineNo : -1;
-                        ex.Data[LispUtils.StartPos] = childScope.CurrentToken != null ? childScope.CurrentToken.StartPos : -1;
-                        ex.Data[LispUtils.StopPos] = childScope.CurrentToken != null ? childScope.CurrentToken.StopPos : -1;
+                        ex.AddModuleNameAndStackInfos(childScope.ModuleName, childScope.DumpStackToString());
+                        ex.AddTokenInfos(childScope.CurrentToken);
 
                         var debugger = scope.GlobalScope.Debugger;
                         if (debugger != null)
@@ -1227,20 +1225,31 @@ namespace CsLisp
 
         #endregion
 
-        #region internal methods
-
-        internal static Tuple<int, int, int> GetPosInfo(LispToken token)
-        {
-            if (token != null)
-            {
-                return new Tuple<int, int, int>(token.StartPos, token.StopPos, token.LineNo);
-            }
-            return new Tuple<int, int, int>(-1, -1, -1);
-        }
-
-        #endregion
-
         #region private methods
+
+        private static LispVariant CallStaticNative(object[] args, LispScope scope)
+        {
+            var className = ((LispVariant)args[0]);
+            var methodName = args.Length > 1 ? args[1].ToString() : string.Empty;
+
+            if (className.IsString || className.IsSymbol)
+            {
+                var callArgs = GetCallArgs(args);
+
+                Type nativeClass = Type.GetType(className.ToString());
+                if (nativeClass != null)
+                {
+                    MethodInfo method = nativeClass.GetMethod(methodName);
+                    if (method != null)
+                    {
+                        ParameterInfo[] parameterInfos = method.GetParameters();
+                        object result = method.Invoke(null, ConvertAllToNative(callArgs, parameterInfos));
+                        return new LispVariant(result);
+                    }                    
+                }
+            }
+            throw new LispException("Bad static method " + methodName + " for class " + className, scope);                
+        }
 
         // (call class-name [args...])
         // or
@@ -1252,7 +1261,7 @@ namespace CsLisp
             Type nativeClass;
             if (nativeObjOrClassName.IsString || nativeObjOrClassName.IsSymbol)
             {
-                // constructor call
+                // constructor call or
                 var callArgs = new object[args.Length - 1];
                 if (args.Length > 1)
                 {
@@ -1260,7 +1269,6 @@ namespace CsLisp
                 }
 
                 nativeClass = Type.GetType(nativeObjOrClassName.ToString());
-
                 if (nativeClass != null)
                 {
                     ConstructorInfo constructor = nativeClass.GetConstructor(new Type[0]);
@@ -1278,16 +1286,10 @@ namespace CsLisp
             {
                 // method call
                 var methodName = args.Length > 1 ? args[1].ToString() : string.Empty;
-                var callArgs = new object[args.Length > 1 ? args.Length - 2 : 0];
-                if (args.Length > 2)
-                {
-                    Array.Copy(args, 2, callArgs, 0, args.Length - 2);
-                }
+                var callArgs = GetCallArgs(args);
 
                 nativeClass = nativeObjOrClassName.NativeObjectValue.GetType();
-
                 MethodInfo method = nativeClass.GetMethod(methodName);
-
                 if (method != null)
                 {
                     ParameterInfo[] parameterInfos = method.GetParameters();
@@ -1322,7 +1324,7 @@ namespace CsLisp
             }
 
             MethodInfo[] methods = nativeClass.GetMethods();
-            var result = methods.Where(elem => elem.IsPublic).Select(elem => new List<object> { elem.Name, elem.GetParameters().Count() }).ToList();
+            var result = methods.Where(elem => elem.IsPublic).Select(elem => new List<object> { elem.Name, elem.GetParameters().Count(), elem.IsStatic }).ToList();
 
             return new LispVariant(result);
         }
@@ -1401,21 +1403,6 @@ namespace CsLisp
             return new LispVariant(new LispFunctionWrapper(func, signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
         }
 
-//// TODO ---> nach umstellung der exceptions ist diese methode ggf. nicht mehr notwendig !
-//        private static string GetPositionOfPreviousTokenForSymbol(object symbol, LispScope scope)
-//        {
-//            var sym = (LispVariant)symbol;
-//            var prevToken = scope.GetPreviousToken(sym.Token);
-//            return GetPositionOfToken(prevToken);
-//        }
-
-//// TODO ---> nach umstellung der exceptions ist diese methode ggf. nicht mehr notwendig !
-//        private static string GetPositionOfToken(LispToken token)
-//        {
-//            var infos = GetPosInfo(token);
-//            return " (total-pos=" + infos.Item1 + " line=" + infos.Item3 + ")";
-//        }
-
         private static void CheckArgs(string name, int count, object[] args, LispScope scope)
         {
             if (args.Length != count)
@@ -1434,18 +1421,22 @@ namespace CsLisp
             return function;
         }
 
-        private static IEnumerable<object> CheckForList(string functionName, object arg0, LispScope scope)
+        private static IEnumerable<object> CheckForList(string functionName, object listObj, LispScope scope)
         {
-            if (arg0 is object[])
+            if (listObj is object[])
             {
-                return GetExpression(arg0);
+                return GetExpression(listObj);
             }
-            var function = (LispVariant)arg0;
-            if (!function.IsList)
+            var value = (LispVariant)listObj;
+            if (value.IsNativeObject && (value.Value is IEnumerable<object>))
             {
-                throw new LispException("No list in " + functionName, scope.GetPreviousToken(((LispVariant)arg0).Token), scope.ModuleName, scope.DumpStackToString());
+                return (IEnumerable<object>)value.Value;
             }
-            return function.ListValue;
+            if (!value.IsList)
+            {
+                throw new LispException("No list in " + functionName, scope.GetPreviousToken(((LispVariant)listObj).Token), scope.ModuleName, scope.DumpStackToString());
+            }
+            return value.ListValue;
         }
 
         private static IEnumerable<object> ToEnumerable(object obj)
@@ -1538,6 +1529,16 @@ namespace CsLisp
                 return ((LispScope)globalScope[key]).ContainsKey(funcName.ToString());
             }
             return false;
+        }
+
+        private static object[] GetCallArgs(object[] args)
+        {
+            var callArgs = new object[args.Length > 1 ? args.Length - 2 : 0];
+            if (args.Length > 2)
+            {
+                Array.Copy(args, 2, callArgs, 0, args.Length - 2);
+            }
+            return callArgs;
         }
 
         #endregion

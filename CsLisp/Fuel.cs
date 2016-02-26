@@ -251,6 +251,7 @@ namespace CsLisp
     // ((- Start/StopPos in LispException setzen, fuer bessere fehlermeldung
     // ((- GetPosInfoString() in Exceptions ggf. nicht mehr notwendig, da infos an Exception gesetzt wird
     // - tracen auch mit Start/StopPos fuer besseren debugger support  --> highlighte aktuelles statement: (+ 1 2 3) 
+    // - Unterstuetzung fuer statische Funktionen hinzufuegen --> System.IO.File ! --> MethodInfo.IsStatic
 
 
     /*

@@ -17,8 +17,7 @@ namespace CsLisp
         {
             if (scope != null)
             {
-                Data[LispUtils.StackInfo] = scope.DumpStackToString();
-                Data[LispUtils.ModuleName] = scope.ModuleName;
+                this.AddModuleNameAndStackInfos(scope.ModuleName, scope.DumpStackToString());
                 this.AddTokenInfos(scope.CurrentToken);
             }
         }
@@ -33,8 +32,7 @@ namespace CsLisp
         public LispException(string text, LispToken token, string moduleName, string stackInfo = "not available")
             : base(text)
         {
-            Data[LispUtils.StackInfo] = stackInfo;
-            Data[LispUtils.ModuleName] = moduleName;
+            this.AddModuleNameAndStackInfos(moduleName, stackInfo);
             this.AddTokenInfos(token);
         }
     }

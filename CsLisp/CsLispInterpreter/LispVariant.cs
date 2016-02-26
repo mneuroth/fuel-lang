@@ -255,7 +255,7 @@ namespace CsLisp
         {
             get
             {
-                if (Type != LispType.NativeObject)
+                if (Type != LispType.NativeObject && Type != LispType.Nil)
                 {
                     throw CreateInvalidCastException("native object");
                 }

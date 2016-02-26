@@ -144,11 +144,6 @@ namespace CsLisp
             return true;
         }
 
-        private static string GetPosInfo(LispToken token)
-        {
-            return "(" + LispInterpreter.GetPosInfoString(token) + ")";
-        }
-
         #endregion
     }
 }

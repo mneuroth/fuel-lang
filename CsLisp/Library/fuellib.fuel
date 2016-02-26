@@ -6,12 +6,12 @@
   ;; foreach looop  
   (defn foreach (container fcn) 
      (do 
-	   (def i 0)
+	   (def __i 0)
 	   (def max (len container))
-	   (while (< i max)
+	   (while (< __i max)
 	     (do 
-		   (apply fcn (list (nth i container)))
-		   (setf i (+ i 1))
+		   (apply fcn (list (nth __i container)))
+		   (setf __i (+ __i 1))
 		 )
 	   )
 	 )
@@ -33,21 +33,25 @@
   )
 
   ;; create list of symbols count=4 --> (obj p1 p2 p3 p4)
-  (defn obj-arg-list-expression-expression (argcount)
+  (defn arg-list-with-obj-expression (obj argcount)
      (do
          (def result (list))
-         (setf result (append result (list 'obj)))
+         (setf result (append result (list obj)))
          (setf result (append result (arg-list-expression argcount)))
          (return result)
      )
   )
   
   ;; create list of symbols: (call obj methodname p1 p2 p3 p4)
-  (defn create-call-expression (methodname argcount)
+  (defn create-call-expression (callfcn methodname obj argcount)
       (do
          (def _result (list))
-         (setf _result (append _result (list 'call)))
-         (setf _result (append _result (list 'obj)))
+         (setf _result (append _result (list callfcn)))
+; WORKING TODO         
+         ;(if (== obj ())
+            (setf _result (append _result (list obj)))
+          ;  (nop)
+         ;)
          (setf _result (append _result (list (sym methodname))))
          (def i 0)
          (while (< i argcount)
@@ -56,18 +60,28 @@
   			 (setf i (+ i 1))
            )
          )
+         (println _result)
          (return _result)
       )
   )
 
   ;; create something like (gdef name (obj p1 p2 ...) (<code>))
-  (defn create-native-method-expression (lisp-prefix name argcount) 
+  (defn create-native-method-expression (lisp-prefix callfcn name isStatic argcount) 
       (do 
           (def code (list))
           (setf code (append code (list 'gdefn)))
           (setf code (append code (list (string lisp-prefix name))))
-          (setf code (append code (list (obj-arg-list-expression-expression argcount))))
-          (setf code (append code (list (create-call-expression name argcount))))
+          (if isStatic
+             (do 
+               (setf code (append code (list (arg-list-expression argcount))))
+               (setf code (append code (list (create-call-expression callfcn name () argcount))))
+             )
+             (do 
+               (setf code (append code (list (arg-list-with-obj-expression 'obj argcount))))             
+               (setf code (append code (list (create-call-expression callfcn name obj argcount))))
+             )
+          )
+          (println "---->" code)
           (return code)
       )
   )
@@ -84,7 +98,10 @@
     			   (do 
     			     (def methodName (first methodNameAndArgCount))
     			     (def methodArgsCount (nth 1 methodNameAndArgCount))
-                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") methodName methodArgsCount))
+                     (def isStatic (nth 2 methodNameAndArgCount))
+                     ;(def obj (if isStatic full-class-name 'obj))
+                     (def callfcn (if isStatic 'call-static 'call))
+                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") callfcn methodName isStatic methodArgsCount))
                      (eval method-expr)
                      ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
                      ;(evalstr method)
@@ -94,4 +111,11 @@
         )     
   )
   
+  ;; create the standard library for fuel
+  
+  (create-native "List" "System.Collections.Generic.List`1[[System.Object]]")
+ 
+  (create-native "File" "System.IO.File")
+  
 )
+  

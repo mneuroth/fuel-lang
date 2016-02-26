@@ -56,6 +56,18 @@ namespace CsLisp
             ex.Data[StartPos] = token != null ? token.StartPos : -1;
             ex.Data[StopPos] = token != null ? token.StopPos : -1;
         }
+
+        /// <summary>
+        /// Adds the module name and stack infos.
+        /// </summary>
+        /// <param name="ex">The exception.</param>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="stackInfo">The stack information.</param>
+        public static void AddModuleNameAndStackInfos(this Exception ex, string moduleName, string stackInfo)
+        {
+            ex.Data[ModuleName] = moduleName;
+            ex.Data[StackInfo] = stackInfo;
+        }
         
         #endregion
 

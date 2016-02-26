@@ -23,7 +23,12 @@ namespace CsLisp
         /// this means a breakpoint was hit.
         /// </summary>
         /// <param name="scope">The scope.</param>
-        /// <param name="posInfosOfCurrentAstItem">The position infos of current ast item.</param>
+        /// <param name="posInfosOfCurrentAstItem">
+        /// The position infos of current ast item.
+        /// Item1 is start position in full text,
+        /// Item2 is stop position in full text,
+        /// Item3 is line number
+        /// </param>
         /// <returns>True if a break is needed</returns>
         bool NeedsBreak(LispScope scope, Tuple<int, int, int> posInfosOfCurrentAstItem);
 

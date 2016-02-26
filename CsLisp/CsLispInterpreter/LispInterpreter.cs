@@ -12,44 +12,6 @@ namespace CsLisp
         #region public methods
 
         /// <summary>
-        /// Get information about position in sourcecode for
-        /// given item of the ast.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public static Tuple<int, int, int> GetPosInfo(object item)
-        {
-            LispToken token;
-            if (item is LispToken)
-            {
-                token = (LispToken)item;
-            }
-            else
-            {
-                token = ((LispVariant)item).Token;                
-            }
-            return LispEnvironment.GetPosInfo(token);
-        }
-
-        /// <summary>
-        /// Get string representation for position in sourcecode for
-        /// given item of the ast.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public static string GetPosInfoString(object item)
-        {
-            string info = "pos=";
-            var pos = GetPosInfo(item);
-            info += pos.Item1;
-            info += " stop=";
-            info += pos.Item2;
-            info += " line=";
-            info += pos.Item3;
-            return info;
-        }
-
-        /// <summary>
         /// Resolves the items of the ast in the given scope.
         /// </summary>
         /// <param name="scope"></param>
@@ -360,18 +322,34 @@ namespace CsLisp
 
         #region private methods
 
-        ///// <summary>
-        ///// Normalizes to lists. Replaces all LispVariant-Lists with List{object}
-        ///// </summary>
-        ///// <param name="expression">The expression.</param>
-        ///// <returns></returns>
-        //private static IEnumerable<object> NormalizeToLists(IEnumerable<object> expression)
-        //{
-        //    LispVariant symbol = new LispVariant("_");
-        //    LispVariant replace = new LispVariant("_");
-        //    bool ignore = false;
-        //    return RepaceSymbolWithValueInExpression(symbol, replace, expression, ref ignore);
-        //}
+        /// <summary>
+        /// Get information about position in sourcecode for
+        /// given item of the ast.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        private static Tuple<int, int, int> GetPosInfo(object item)
+        {
+            LispToken token;
+            if (item is LispToken)
+            {
+                token = (LispToken)item;
+            }
+            else
+            {
+                token = ((LispVariant)item).Token;
+            }
+            return GetPosInfo(token);
+        }
+
+        private static Tuple<int, int, int> GetPosInfo(LispToken token)
+        {
+            if (token != null)
+            {
+                return new Tuple<int, int, int>(token.StartPos, token.StopPos, token.LineNo);
+            }
+            return new Tuple<int, int, int>(-1, -1, -1);
+        }
 
         private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, LispVariant symbolValue, IEnumerable<object> expression, ref bool replacedAnything)
         {

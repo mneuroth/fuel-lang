@@ -225,7 +225,9 @@ namespace CsLisp
             if (currentAst != null)
             {
                 var lineNumber = initialTopScope != null ? initialTopScope.CurrentLineNo : -1;
-                Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " " + LispInterpreter.GetPosInfoString(currentAst[0]));
+                var startPos = initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
+                var stopPos = initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
+                Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos);
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
         }
