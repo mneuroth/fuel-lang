@@ -61,6 +61,16 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_If5()
+        {
+            LispVariant result = Lisp.Eval("(if true 1)");
+            Assert.AreEqual(1, result.ToInt());
+            result = Lisp.Eval("(if false 1)");
+            Assert.IsNull(result);
+
+        }
+
+        [TestMethod]
         public void Test_Setf1()
         {
             LispVariant result = Lisp.Eval("(do (def a 1) (def b 1) (setf (first (list 'a 'b 'c)) 9))");
@@ -79,6 +89,20 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(do (def a nil) (println a))");
             Assert.AreEqual("NIL", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Gdef()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f (x) (gdef z (+ x x))) (f 8) (println z))");
+            Assert.AreEqual(16, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Gdefn()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f (x) (gdefn g (x) (+ x x))) (f 2) (g 8))");
+            Assert.AreEqual(16, result.ToInt());
         }
 
         [TestMethod]
@@ -179,6 +203,26 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(list (= 1 2) (= 4 4) (== \"blub\" \"blub\") (== #t #f) (equal 3 4))");
             Assert.AreEqual("(#f #t #t #f #f)", result.ToString());
+            result = Lisp.Eval("(do (def a ()) (== a ()))");
+            Assert.AreEqual(true, result.BoolValue);
+            result = Lisp.Eval("(do (def a 42) (== a ()))");
+            Assert.AreEqual(false, result.BoolValue);
+            result = Lisp.Eval("(do (def a blub) (def b nix) (== a b))");
+            Assert.AreEqual(false, result.BoolValue);
+            result = Lisp.Eval("(do (def a blub) (def b blub) (== a b))");
+            Assert.AreEqual(true, result.BoolValue);
+            result = Lisp.Eval("(do (def a blub) (def b blub) (== a b))");
+            Assert.AreEqual(true, result.BoolValue);
+            result = Lisp.Eval("(do (def a (list 1 2 3)) (def b (list 2 3 4)) (== a b))");
+            Assert.AreEqual(false, result.BoolValue);
+            result = Lisp.Eval("(do (def a (list 1 2 3)) (def b (list 1 2 3)) (== a b))");
+            Assert.AreEqual(true, result.BoolValue);
+            result = Lisp.Eval("(do (def a (list 1 2 3)) (def b (list 1 (sym 2) 3)) (== a b))");
+            Assert.AreEqual(false, result.BoolValue);
+            result = Lisp.Eval("(do (def a blub) (def b nix) (!= a b))");
+            Assert.AreEqual(true, result.BoolValue);
+            result = Lisp.Eval("(do (def a 7) (def b 7) (!= a b))");
+            Assert.AreEqual(false, result.BoolValue);
         }
 
         [TestMethod]
@@ -186,6 +230,14 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(list (< 1 2) (< 4 1) (> 5 2) (> 1 3) (> 4.0 4.0))");
             Assert.AreEqual("(#t #f #t #f #f)", result.ToString());
+            result = Lisp.Eval("(do (def a \"abc\") (def b \"def\") (< a b))");
+            Assert.AreEqual(true, result.BoolValue);
+            result = Lisp.Eval("(do (def a \"abc\") (def b \"abc\") (< a b))");
+            Assert.AreEqual(false, result.BoolValue);
+            result = Lisp.Eval("(do (def a \"abc\") (def b \"def\") (<= a b))");
+            Assert.AreEqual(true, result.BoolValue);
+            result = Lisp.Eval("(do (def a \"abc\") (def b \"abc\") (<= a b))");
+            Assert.AreEqual(true, result.BoolValue);
         }
 
         [TestMethod]
@@ -794,7 +846,7 @@ namespace LispUnitTests
 
         [TestMethod]
         [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
-        public void Test_StdLib1()
+        public void Test_StdLibList()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
@@ -806,6 +858,67 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("count= 2"));
                 Assert.IsTrue(s.Contains("blub"));
                 Assert.IsTrue(s.Contains("1.2354"));               
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_StdLibFile()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (println (File-Exists \"asdf.test\")) (File-Exists \"asdf.test\"))");
+                Assert.IsTrue(result.IsBool);
+                
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("#f"));
+// TODO --> Teste Text files lesen und schreiben
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_StdLibMath()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (println (Math-Sin 1.234)) (Math-Cos 0.0) )");
+                Assert.IsTrue(result.IsDouble);
+                Assert.AreEqual(1.0, result.DoubleValue);
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("0.943818209374634"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_StdLibArray()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (def arr (create-Array 10)) )");
+                Assert.IsTrue(result.IsDouble);
+                Assert.AreEqual(1.0, result.DoubleValue);
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("0.943818209374634"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_StdLibDictionary()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (def dict (create-Dict)) (println (Dict-get_Count dict)) (Dict-get_Count dict))");
+                Assert.IsTrue(result.IsInt);
+                Assert.AreEqual(0, result.IntValue);
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("0"));
+// TODO weitere funktionalitaeten testen...
             }
         }
 

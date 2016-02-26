@@ -225,33 +225,53 @@ namespace CsLisp
 
 
     // TODO:
+    // - License und Copyright header in quellcode dateien einbauen
+    // - Quellcode aufraeumen
+    // - TODOs behandeln
+    // - Makro Behandlung aufraeumen
+    // - Native Properties unterstuetzen --> Math.PI
+    // - ueberladene native methoden unterstuetzen --> argument typen pruefen
+    // - parameter in arrays unterstuetzen
+    // - ggf. stdlib unit tests in eigenes modul auslagern
+    // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
+    // - ggf. Bug ---> (list 1 '2 3) == (list 1 2 3) d. h. '2 liefert immer int 2 und kein symbol !?
+    // - im debugger: zeige keine funktionen an in der liste der lokalen variablen, insbesondere keine funktionen der std lib !
+    // - debuggen: show loaded module names 
+    // - debuggen: funcs befehl um module erweitern und anzeige von funktionen in modulen
+    // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
+    // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
+    // - setf macro implementieren...
+    // - ggf. debuggen: set next statement realisieren?
+    // - ggf. bug: step out funktioniert anscheinend bei modulen nicht ganz korrekt
+    // - Testabdeckung verbessern
+
+    // native calls verbessern --> type mapping implementieren --> ggf. reflection optimieren --> lambda zurueckgeben?
+    // reflection zum aufloesen von funktionen verwenden?
+    // warum ist LispScope bei Environment funktionen notwendig? --> fuer meta befehle wie z. b. vars, break, trace, ...
+
+    // ggf. compiler reparieren
+    // fuer compiler: closure fuer compiler modus implementieren --> siehe ClosoureChain
+    // fuer compiler: braucht man wirklich LispToken.cs module? --> Referenzen von LispVariant.Token pruefen?
+    // fuer compiler: manche environment funktionen benoetigen den Interpreter/Eval, dies gibt doch probleme im Compile modus?
+
+    //http://stackoverflow.com/questions/11501697/programmatically-call-c-sharp-compiler-to-compile-c-sharp-code
+
+    // (environment: hoehere Datentypen wie array/dyn-liste und map implementieren
     // (- debuggen: run funktioniert nicht in errorinmodule.fuel
     // ((- debuggen: anzeige module und line no in stack
     // (- debuggen: anzeige des korrekten codes, falls module geladen ist
     // ((- debuggen: set breakpoints in andren modulen realisieren
     // (- debuggen: up/down sollte auch den --> Zeiger anpassen
     // (- ist LispScope.Finished und LispScope.SourceCode noch notwendig? 
-    // - Makro Behandlung aufraeumen
-    // - Quellcode aufraeumen
-    // - debuggen: set next statement realisieren?
-    // - bug: step out funktioniert anscheinend bei modulen nicht ganz korrekt
     // (- ggf. module als eigenen Scope implementieren --> ###modules###
-    // - debuggen: show loaded module names 
-    // - debuggen: funcs befehl um module erweitern und anzeige von funktionen in modulen
-    // - stdlib um list<object> erweitern, damit man immer mit listen arbeiten kann
+    // (- stdlib um list<object> erweitern, damit man immer mit listen arbeiten kann
     // (- debugger: v (step over) funktioniert nicht so wie erwartet --> haengt bei quote
-    // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
-    // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
-    // - setf macro implementieren...
-    // - out funktioniert aus import module nicht korrekt...-?
     // ((- option -e funktioniert nicht mit -d korrekt
     // ((- start unhd end position bei aktuellem step ausgeben --> besserer Support für debuggen
-    // - License und Copyright header in quellcode dateien einbauen
-    // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
     // ((- Start/StopPos in LispException setzen, fuer bessere fehlermeldung
     // ((- GetPosInfoString() in Exceptions ggf. nicht mehr notwendig, da infos an Exception gesetzt wird
-    // - tracen auch mit Start/StopPos fuer besseren debugger support  --> highlighte aktuelles statement: (+ 1 2 3) 
-    // - Unterstuetzung fuer statische Funktionen hinzufuegen --> System.IO.File ! --> MethodInfo.IsStatic
+    // (- tracen auch mit Start/StopPos fuer besseren debugger support  --> highlighte aktuelles statement: (+ 1 2 3) 
+    // ((- Unterstuetzung fuer statische Funktionen hinzufuegen --> System.IO.File ! --> MethodInfo.IsStatic
 
 
     /*
@@ -325,37 +345,6 @@ http://www.mobiflip.de/asus-zenbook-ux303lb-testbericht/
 
     // csc /debug+ simplebench.cs ..\..\CsLispDll\LispVariant.cs ..\..\CsLispDll\LispToken.cs ..\..\CsLispDll\LispEnvironment.cs ..\..\CsLispDll\LispException.cs ..\..\CsLispDll\LispInterpreter.cs ..\..\CsLispDll\LispDebuggerInterface.cs
     // csc /debug+ simplebench.cs /reference:cslispinterpreter.dll
-
-    // TODO:
-    // source code sauberer und kompakter machen (falls moeglich)
-    //    --> LispCompiler
-    // License header für jede datei
-    // unit test: abdeckung verbessern
-    // unit test: compiler modus testen
-    // unit test: gdef, gdefn, nop, sym
-
-    // module implementieren, z. B. fuer foreach, etc. runtime lib...
-
-    // closure fuer compiler modus implementieren --> siehe ClosoureChain
-
-    // (nop)  functor fuer c# support --> sollte immer letzte anweisung sein, falls kein return benoetigt wird
-
-    // echte macro expansion realisieren --> code erzeugen (fuer Compiler notwendig)
-
-    // compiler modus einbauen --> csc.exe aufrufen und echtes exe erzeugen...
-    //http://stackoverflow.com/questions/11501697/programmatically-call-c-sharp-compiler-to-compile-c-sharp-code
-
-    // Name? --> LispInfo ggf. umbenennen?
-    // environment: file io implementieren --> makros fuer File class verwenden
-    // environment: math funktionen implementieren --> makros verwenden
-    // environment: hoehere Datentypen wie array/dyn-liste und map implementieren
-
-    // native calls verbessern --> type mapping implementieren --> ggf. reflection optimieren --> lambda zurueckgeben?
-
-    // refactoring zum aufloesen von funktionen verwenden?
-    // warum ist LispScope bei Environment funktionen notwendig? --> fuer meta befehle wie z. b. vars, break, trace, ...
-    // fuer compiler: braucht man wirklich LispToken.cs module? --> Referenzen von LispVariant.Token pruefen?
-    // fuer compiler: manche environment funktionen benoetigen den Interpreter/Eval, dies gibt doch probleme im Compile modus?
 
     /*
     https://www.quora.com/What-are-the-special-forms-for-Scheme

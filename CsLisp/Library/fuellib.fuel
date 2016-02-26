@@ -1,6 +1,7 @@
 ;;====================================
 ;; standard library for fuel language
 ;;====================================
+
 (do
     
   ;; foreach looop  
@@ -47,11 +48,10 @@
       (do
          (def _result (list))
          (setf _result (append _result (list callfcn)))
-; WORKING TODO         
-         ;(if (== obj ())
+         (if (!= obj ())
             (setf _result (append _result (list obj)))
-          ;  (nop)
-         ;)
+            (nop)
+         )
          (setf _result (append _result (list (sym methodname))))
          (def i 0)
          (while (< i argcount)
@@ -60,13 +60,13 @@
   			 (setf i (+ i 1))
            )
          )
-         (println _result)
+         ;(println _result)
          (return _result)
       )
   )
 
   ;; create something like (gdef name (obj p1 p2 ...) (<code>))
-  (defn create-native-method-expression (lisp-prefix callfcn name isStatic argcount) 
+  (defn create-native-method-expression (lisp-prefix full-class-name name isStatic argcount) 
       (do 
           (def code (list))
           (setf code (append code (list 'gdefn)))
@@ -74,14 +74,14 @@
           (if isStatic
              (do 
                (setf code (append code (list (arg-list-expression argcount))))
-               (setf code (append code (list (create-call-expression callfcn name () argcount))))
+               (setf code (append code (list (create-call-expression 'call-static name full-class-name argcount))))
              )
              (do 
                (setf code (append code (list (arg-list-with-obj-expression 'obj argcount))))             
-               (setf code (append code (list (create-call-expression callfcn name obj argcount))))
+               (setf code (append code (list (create-call-expression 'call name obj argcount))))
              )
           )
-          (println "---->" code)
+          ;(println "---->" code)
           (return code)
       )
   )
@@ -99,9 +99,7 @@
     			     (def methodName (first methodNameAndArgCount))
     			     (def methodArgsCount (nth 1 methodNameAndArgCount))
                      (def isStatic (nth 2 methodNameAndArgCount))
-                     ;(def obj (if isStatic full-class-name 'obj))
-                     (def callfcn (if isStatic 'call-static 'call))
-                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") callfcn methodName isStatic methodArgsCount))
+                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") full-class-name methodName isStatic methodArgsCount))
                      (eval method-expr)
                      ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
                      ;(evalstr method)
@@ -113,9 +111,12 @@
   
   ;; create the standard library for fuel
   
-  (create-native "List" "System.Collections.Generic.List`1[[System.Object]]")
- 
+  (create-native "Math" "System.Math")
   (create-native "File" "System.IO.File")
-  
+  (create-native "List" "System.Collections.Generic.List`1[[System.Object]]") 
+  (create-native "Array" "System.Object[]")
+  (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]")  
+
+  (nop)
 )
   

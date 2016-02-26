@@ -273,7 +273,7 @@ namespace LispUnitTests
                 {
                     Assert.IsTrue(s.Contains("DBG>"));
                     Assert.IsTrue(s.Contains("Type \"help\" for informations."));
-                    Assert.IsTrue(s.Contains("--> do line=1 pos=1 stop=3 line=1"));
+                    Assert.IsTrue(s.Contains("--> do line=1 start=1 stop=3"));
                     Assert.IsTrue(s.Contains("help for interactive loop:")); // help
                     Assert.IsTrue(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
                     Assert.IsTrue(s.Contains("-->    1 <main> lineno=3 module=command-line")); // stack

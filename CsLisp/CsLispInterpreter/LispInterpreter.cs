@@ -339,11 +339,6 @@ namespace CsLisp
             {
                 token = ((LispVariant)item).Token;
             }
-            return GetPosInfo(token);
-        }
-
-        private static Tuple<int, int, int> GetPosInfo(LispToken token)
-        {
             if (token != null)
             {
                 return new Tuple<int, int, int>(token.StartPos, token.StopPos, token.LineNo);
