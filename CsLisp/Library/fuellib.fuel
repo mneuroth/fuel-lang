@@ -106,6 +106,17 @@
     			   )
 			   )
 			)
+
+			(def fieldInfos (native-fields full-class-name))
+			(foreach fieldInfos 
+               (lambda (fieldName) 
+    			   (do 
+                     ;	(gdef Math-PI (field System.Math PI))
+					 (def field-expr (list 'gdef (sym (string lisp-name "-" fieldName)) (list 'field full-class-name fieldName) ))
+					 (eval field-expr)
+    			   )
+			   )
+			)
         )     
   )
   

@@ -254,6 +254,7 @@ namespace CsLisp
     // fuer compiler: braucht man wirklich LispToken.cs module? --> Referenzen von LispVariant.Token pruefen?
     // fuer compiler: manche environment funktionen benoetigen den Interpreter/Eval, dies gibt doch probleme im Compile modus?
 
+    //http://www.heise.de/newsticker/meldung/Neue-Version-des-c-t-Windows-Backup-unterstuetzt-auch-Windows-10-3116411.html
     //http://stackoverflow.com/questions/11501697/programmatically-call-c-sharp-compiler-to-compile-c-sharp-code
 
     // (environment: hoehere Datentypen wie array/dyn-liste und map implementieren

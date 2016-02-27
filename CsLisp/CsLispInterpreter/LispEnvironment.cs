@@ -462,7 +462,9 @@ namespace CsLisp
             scope["import"] = CreateFunction(Import);
 
             // access to .NET
-            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count)");
+            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static)");
+            scope["native-fields"] = CreateFunction(GetNativeFields, "(native-fields native-obj|class-name) -> (property-name)");
+            scope["field"] = CreateFunction(CallField, "(field native-obj|class-name field-name)");    // access native field
             scope["call"] = CreateFunction(CallNative, "(call native-obj|class-name [method-name [args...]]|[args...])");    // call native function
             scope["call-static"] = CreateFunction(CallStaticNative, "(call-static class-name method-name [args...])");    // call native static function
             // Macro: (register-native full-class-name lisp-name) --> erzeugt konstruktoren und zugriffsmethoden fuer klasse
@@ -1267,6 +1269,35 @@ namespace CsLisp
             throw new LispException("Bad static method " + methodName + " for class " + className, scope);                
         }
 
+        private static Type[] GetTypes(object[] objects)
+        {
+            return objects.Select(o => o.GetType()).ToArray();
+        }
+
+        private static LispVariant CallField(object[] args, LispScope scope)
+        {
+            var className = ((LispVariant)args[0]);
+            var fieldName = args.Length > 1 ? args[1].ToString() : string.Empty;
+
+            if (className.IsString || className.IsSymbol)
+            {
+                var callArgs = GetCallArgs(args);
+
+                Type nativeClass = Type.GetType(className.ToString());
+                if (nativeClass != null)
+                {
+                    FieldInfo field;
+                    field = nativeClass.GetField(fieldName);
+                    if (field != null)
+                    {
+                        object result = field.GetValue(null);
+                        return new LispVariant(result);
+                    }
+                }
+            }
+            throw new LispException("Bad field " + fieldName + " for class " + className, scope);
+        }
+
         // (call class-name [args...])
         // or
         // (call native-obj full-method-name [args...])
@@ -1287,9 +1318,13 @@ namespace CsLisp
                 nativeClass = Type.GetType(nativeObjOrClassName.ToString());
                 if (nativeClass != null)
                 {
-// TODO uebergebene typen behandeln --> (create-Array 10)
-                    ConstructorInfo constructor = nativeClass.GetConstructor(new Type[0]);
-//TODO ConstructorInfo[] constructors = nativeClass.GetConstructors();
+                    // TODO uebergebene typen behandeln --> (create-Array 10)
+                    //                    ConstructorInfo constructor = nativeClass.GetConstructor(new Type[0]);
+                    var argTypes = GetTypes(callArgs);
+                    ConstructorInfo constructor = nativeClass.GetConstructor(argTypes);
+
+                    //TODO --> optionale argumente fuer constructor call (create-Array 10)
+                    ConstructorInfo[] constructors = nativeClass.GetConstructors();
 
                     if (constructor != null)
                     {
@@ -1326,9 +1361,9 @@ namespace CsLisp
             }
         }
 
-        static private LispVariant GetNativeMethods(object[] args, LispScope scope)
+        static Type GetNativeClass(object item)
         {
-            var nativeObjOrClassName = ((LispVariant)args[0]);
+            var nativeObjOrClassName = ((LispVariant)item);
 
             Type nativeClass;
             if (nativeObjOrClassName.IsString || nativeObjOrClassName.IsSymbol)
@@ -1339,6 +1374,24 @@ namespace CsLisp
             {
                 nativeClass = nativeObjOrClassName.NativeObjectValue.GetType();
             }
+
+            return nativeClass;
+        }
+
+        static private LispVariant GetNativeFields(object[] args, LispScope scope)
+        {
+            var nativeClass = GetNativeClass(args[0]);
+
+            var properties = nativeClass.GetFields();
+
+            var result = properties.Select(elem => elem.Name ).ToList();
+
+            return new LispVariant(result);
+        }
+
+        static private LispVariant GetNativeMethods(object[] args, LispScope scope)
+        {
+            var nativeClass = GetNativeClass(args[0]);
 
             MethodInfo[] methods = nativeClass.GetMethods();
             var result = methods.Where(elem => elem.IsPublic).Select(elem => new List<object> { elem.Name, elem.GetParameters().Count(), elem.IsStatic }).ToList();
