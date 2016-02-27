@@ -882,12 +882,14 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import fuellib) (println (Math-Sin 1.234)) (Math-Cos 0.0) )");
+                LispVariant result = Lisp.Eval("(do (import fuellib) (println Math-PI) (println Math-E) (println (Math-Sin 1.234)) (Math-Cos 0.0) )");
                 Assert.IsTrue(result.IsDouble);
                 Assert.AreEqual(1.0, result.DoubleValue);
 
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("0.943818209374634"));
+                Assert.IsTrue(s.Contains("3.14159265358979"));
+                Assert.IsTrue(s.Contains("2.71828182845905"));
             }
         }
 
