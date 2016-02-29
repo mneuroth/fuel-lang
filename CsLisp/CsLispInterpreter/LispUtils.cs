@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -67,6 +68,24 @@ namespace CsLisp
         {
             ex.Data[ModuleName] = moduleName;
             ex.Data[StackInfo] = stackInfo;
+        }
+
+        /// <summary>
+        /// Gets the additional arguments from the scope.
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <returns>The result.</returns>
+        public static object[] GetAdditionalArgs(this LispScope scope)
+        {
+            if (scope.ContainsKey(LispEnvironment.Args))
+            {
+                LispVariant variant = scope[LispEnvironment.Args] as LispVariant;
+                if (variant != null)
+                {
+                    return variant.ListValue.ToArray();
+                }
+            }
+            return new object[0];
         }
         
         #endregion

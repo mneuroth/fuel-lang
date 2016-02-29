@@ -386,6 +386,9 @@ namespace CsLisp
         private const string Macros = MetaTag + "macros" + MetaTag;
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
+        internal const string Args = MetaTag + "args" + MetaTag;
+        private const string AdditionalArgs = "_additionalArgs";
+        private const string ArgsCount = "argscount";
 
         public const string Modules = MetaTag + "modules" + MetaTag;
 
@@ -516,6 +519,8 @@ namespace CsLisp
             scope[Sym] = CreateFunction(Symbol);
             scope[Str] = CreateFunction(ConvertToString);
 
+            scope[ArgsCount] = CreateFunction(ArgsCountFcn);
+            scope["args"] = CreateFunction(ArgsFcn);
             scope[Apply] = CreateFunction(ApplyFcn);
             scope[Eval] = CreateFunction(EvalFcn);
             scope[EvalStr] = CreateFunction(EvalStrFcn);
@@ -900,6 +905,26 @@ namespace CsLisp
             return new LispVariant(LispType.String, value);
         }
 
+        public static LispVariant ArgsCountFcn(object[] args, LispScope scope)
+        {
+            CheckArgs(Apply, 0, args, scope);
+
+            return new LispVariant(((LispVariant)scope[Args]).ListValue.Count());
+        }
+
+        public static LispVariant ArgsFcn(object[] args, LispScope scope)
+        {
+            CheckArgs(Apply, 1, args, scope);
+
+            var index = ((LispVariant) args[0]).IntValue;
+            var array = ((LispVariant) scope[Args]).ListValue.ToArray();
+            if (index >= 0 && index < array.Length)
+            {
+                return new LispVariant(array[index]);                
+            }
+            throw new LispException(string.Format("Index out of range in args function (index={0} max={1})", index, array.Length));
+        }
+
         // used also for processing macros !
         public static LispVariant ApplyFcn(object[] args, LispScope scope)
         {
@@ -1177,11 +1202,24 @@ namespace CsLisp
                     localScope.PushNextScope(childScope);
 
                     var i = 0;
-                    IEnumerable<object> argsEnum = args[0] is LispVariant ? ((LispVariant)args[0]).ListValue : GetExpression(args[0]);
-                    foreach (var arg in argsEnum)
+                    IEnumerable<object> formalArgs = args[0] is LispVariant ? ((LispVariant)args[0]).ListValue : GetExpression(args[0]);
+                    foreach (var arg in formalArgs)
                     {
                         childScope[arg.ToString()] = localArgs[i];
                         i++;
+                    }
+
+                    // support args function for accessing all given parameters
+                    childScope[Args] = new LispVariant(localArgs);
+                    int formalArgsCount = formalArgs.Count();
+                    if (localArgs.Length > formalArgsCount)
+                    {
+                        var additionalArgs = new object[localArgs.Length - formalArgsCount];
+                        for (int n = 0; n < localArgs.Length - formalArgsCount; n++)
+                        {
+                            additionalArgs[n] = localArgs[n + formalArgsCount];
+                        }
+                        childScope[AdditionalArgs] = new LispVariant(additionalArgs);
                     }
 
                     // save the current call stack to resolve variables in closures
@@ -1271,7 +1309,17 @@ namespace CsLisp
 
         private static Type[] GetTypes(object[] objects)
         {
-            return objects.Select(o => o.GetType()).ToArray();
+            return objects.Select(o =>
+            {
+                if (o is LispVariant)
+                {
+                    return ((LispVariant) o).Value.GetType();
+                }
+                else
+                {
+                    return o.GetType();
+                }                
+            }).ToArray();
         }
 
         private static LispVariant CallField(object[] args, LispScope scope)
@@ -1308,6 +1356,7 @@ namespace CsLisp
             Type nativeClass;
             if (nativeObjOrClassName.IsString || nativeObjOrClassName.IsSymbol)
             {
+// TODO --> code in hilfsmethoden fuer construktor und methoden call auslagern
                 // constructor call or
                 var callArgs = new object[args.Length - 1];
                 if (args.Length > 1)
@@ -1318,13 +1367,24 @@ namespace CsLisp
                 nativeClass = Type.GetType(nativeObjOrClassName.ToString());
                 if (nativeClass != null)
                 {
-                    // TODO uebergebene typen behandeln --> (create-Array 10)
-                    //                    ConstructorInfo constructor = nativeClass.GetConstructor(new Type[0]);
+// TODO uebergebene typen behandeln --> (create-Array 10)
                     var argTypes = GetTypes(callArgs);
                     ConstructorInfo constructor = nativeClass.GetConstructor(argTypes);
 
-                    //TODO --> optionale argumente fuer constructor call (create-Array 10)
-                    ConstructorInfo[] constructors = nativeClass.GetConstructors();
+//TODO --> optionale argumente fuer constructor call (create-Array 10)
+                    // if no default constructor is found try to resolve a constructor with arguments
+                    if (constructor == null)
+                    {
+                        var additionalArgs = scope.GetAdditionalArgs();
+                        constructor = nativeClass.GetConstructor(GetTypes(additionalArgs));
+                        // copy additional args into callArgs for constructor call
+                        callArgs = new object[additionalArgs.Length];
+                        for (int j = 0; j < callArgs.Length; j++)
+                        {
+                            callArgs[j] = ((LispVariant) (additionalArgs[j])).Value;
+                        }
+                    }
+//                    ConstructorInfo[] constructors = nativeClass.GetConstructors();
 
                     if (constructor != null)
                     {

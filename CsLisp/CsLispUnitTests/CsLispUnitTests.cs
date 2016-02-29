@@ -493,6 +493,38 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Args1()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (+ x x))) (f 5 6 7))");
+            Assert.AreEqual(10, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Args2()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (args 0)) (println (args 1)) (println (args 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))");
+                Assert.AreEqual(10, result.ToInt());
+
+                string s = cr.ToString().Trim();
+                Assert.AreEqual(true, s.Contains("count= 3"));
+                Assert.AreEqual(true, s.Contains("5"));
+                Assert.AreEqual(true, s.Contains("6"));
+                Assert.AreEqual(true, s.Contains("7"));
+                Assert.AreEqual(true, s.Contains("additional= 7"));
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_Args3()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f (x) (do (args 7) (+ x x))) (f 5 6 7))");
+            Assert.AreEqual(10, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_Cons1()
         {
             LispVariant result = Lisp.Eval("(cons 1 2)");
@@ -899,12 +931,12 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import fuellib) (def arr (create-Array 10)) )");
-                Assert.IsTrue(result.IsDouble);
-                Assert.AreEqual(1.0, result.DoubleValue);
+                LispVariant result = Lisp.Eval("(do (import fuellib) (def arr (create-Array 10)) (Array-Set arr 0 7) (println (Array-Get arr 0)) (println \"len=\" (Array-get_Length arr)) (return arr))");
+                Assert.IsTrue(result.IsNativeObject);
 
                 string s = cr.ToString().Trim();
-                Assert.IsTrue(s.Contains("0.943818209374634"));
+                Assert.IsTrue(s.Contains("7"));
+                Assert.IsTrue(s.Contains("len= 10"));
             }
         }
 
