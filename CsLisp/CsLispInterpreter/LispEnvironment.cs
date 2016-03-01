@@ -465,7 +465,7 @@ namespace CsLisp
             scope["import"] = CreateFunction(Import);
 
             // access to .NET
-            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static)");
+            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static, net-method-name)");
             scope["native-fields"] = CreateFunction(GetNativeFields, "(native-fields native-obj|class-name) -> (property-name)");
             scope["field"] = CreateFunction(CallField, "(field native-obj|class-name field-name)");    // access native field
             scope["call"] = CreateFunction(CallNative, "(call native-obj|class-name [method-name [args...]]|[args...])");    // call native function
@@ -1201,6 +1201,7 @@ namespace CsLisp
                     var childScope = new LispScope(name, localScope.GlobalScope, moduleName);
                     localScope.PushNextScope(childScope);
 
+                    // add formal arguments to current scope
                     var i = 0;
                     IEnumerable<object> formalArgs = args[0] is LispVariant ? ((LispVariant)args[0]).ListValue : GetExpression(args[0]);
                     foreach (var arg in formalArgs)
@@ -1329,13 +1330,12 @@ namespace CsLisp
 
             if (className.IsString || className.IsSymbol)
             {
-                var callArgs = GetCallArgs(args);
+//TODO                var callArgs = GetCallArgs(args);
 
                 Type nativeClass = Type.GetType(className.ToString());
                 if (nativeClass != null)
                 {
-                    FieldInfo field;
-                    field = nativeClass.GetField(fieldName);
+                    FieldInfo field = nativeClass.GetField(fieldName);
                     if (field != null)
                     {
                         object result = field.GetValue(null);
@@ -1401,7 +1401,18 @@ namespace CsLisp
                 var callArgs = GetCallArgs(args);
 
                 nativeClass = nativeObjOrClassName.NativeObjectValue.GetType();
-                MethodInfo method = nativeClass.GetMethod(methodName);
+                MethodInfo method;
+                try
+                {
+                    method = nativeClass.GetMethod(methodName);
+                }
+                catch (AmbiguousMatchException)
+                {
+// TODO ueberladene methoden behandeln!!!
+                    var callArgsTypes = GetTypes(callArgs);
+                    MethodInfo[] methods = nativeClass.GetMethods();
+                    method = nativeClass.GetMethod(methodName, callArgsTypes);
+                }
                 if (method != null)
                 {
                     ParameterInfo[] parameterInfos = method.GetParameters();
@@ -1421,23 +1432,6 @@ namespace CsLisp
             }
         }
 
-        static Type GetNativeClass(object item)
-        {
-            var nativeObjOrClassName = ((LispVariant)item);
-
-            Type nativeClass;
-            if (nativeObjOrClassName.IsString || nativeObjOrClassName.IsSymbol)
-            {
-                nativeClass = Type.GetType(nativeObjOrClassName.ToString());
-            }
-            else
-            {
-                nativeClass = nativeObjOrClassName.NativeObjectValue.GetType();
-            }
-
-            return nativeClass;
-        }
-
         static private LispVariant GetNativeFields(object[] args, LispScope scope)
         {
             var nativeClass = GetNativeClass(args[0]);
@@ -1454,9 +1448,27 @@ namespace CsLisp
             var nativeClass = GetNativeClass(args[0]);
 
             MethodInfo[] methods = nativeClass.GetMethods();
-            var result = methods.Where(elem => elem.IsPublic).Select(elem => new List<object> { elem.Name, elem.GetParameters().Count(), elem.IsStatic }).ToList();
+            List<List<object>> result = methods.Where(elem => elem.IsPublic).Select(elem => new List<object> { elem.Name, elem.GetParameters().Count(), elem.IsStatic, elem.Name }).ToList();
 
-            return new LispVariant(result);
+            // do name mangling for overloaded methods --> add number for method with same names 
+            var newResult = new List<List<object>>();
+            var methodNames = new Dictionary<string, int>();
+            foreach (List<object> methodInfo in result)
+            {
+                var methodName = (string)methodInfo.ElementAt(0);
+                if (methodNames.ContainsKey(methodName))
+                {
+                    methodNames[methodName] += 1;
+                    newResult.Add(new List<object> { string.Format("{0}-{1}", methodInfo[0], methodNames[methodName]), methodInfo[1], methodInfo[2], methodName });
+                }
+                else
+                {
+                    methodNames[methodName] = 1;
+                    newResult.Add(methodInfo);
+                }
+            }
+
+            return new LispVariant(newResult);
         }
 
         static private object[] ConvertAllToNative(object[] lstLispVariants, ParameterInfo[] parameterInfos)
@@ -1660,6 +1672,23 @@ namespace CsLisp
                 Array.Copy(args, 2, callArgs, 0, args.Length - 2);
             }
             return callArgs;
+        }
+
+        static private Type GetNativeClass(object item)
+        {
+            var nativeObjOrClassName = ((LispVariant)item);
+
+            Type nativeClass;
+            if (nativeObjOrClassName.IsString || nativeObjOrClassName.IsSymbol)
+            {
+                nativeClass = Type.GetType(nativeObjOrClassName.ToString());
+            }
+            else
+            {
+                nativeClass = nativeObjOrClassName.NativeObjectValue.GetType();
+            }
+
+            return nativeClass;
         }
 
         #endregion

@@ -66,7 +66,7 @@
   )
 
   ;; create something like (gdef name (obj p1 p2 ...) (<code>))
-  (defn create-native-method-expression (lisp-prefix full-class-name name isStatic argcount) 
+  (defn create-native-method-expression (lisp-prefix full-class-name name netName isStatic argcount) 
       (do 
           (def code (list))
           (setf code (append code (list 'gdefn)))
@@ -74,11 +74,11 @@
           (if isStatic
              (do 
                (setf code (append code (list (arg-list-expression argcount))))
-               (setf code (append code (list (create-call-expression 'call-static name full-class-name argcount))))
+               (setf code (append code (list (create-call-expression 'call-static netName full-class-name argcount))))
              )
              (do 
                (setf code (append code (list (arg-list-with-obj-expression 'obj argcount))))             
-               (setf code (append code (list (create-call-expression 'call name obj argcount))))
+               (setf code (append code (list (create-call-expression 'call netName obj argcount))))
              )
           )
           ;(println "---->" code)
@@ -99,8 +99,10 @@
     			     (def methodName (first methodNameAndArgCount))
     			     (def methodArgsCount (nth 1 methodNameAndArgCount))
                      (def isStatic (nth 2 methodNameAndArgCount))
-                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") full-class-name methodName isStatic methodArgsCount))
+    			     (def netMethodName (nth 3 methodNameAndArgCount))
+                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") full-class-name methodName netMethodName isStatic methodArgsCount))
                      (eval method-expr)
+                     (println method-expr)
                      ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
                      ;(evalstr method)
     			   )
