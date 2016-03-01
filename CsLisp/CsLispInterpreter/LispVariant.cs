@@ -37,7 +37,7 @@ namespace CsLisp
     /// <summary>
     /// Generic data container for lisp data types.
     /// </summary>
-    public class LispVariant
+    public class LispVariant : IComparable
     {
         #region constants
 
@@ -185,6 +185,21 @@ namespace CsLisp
 
         #endregion
 
+        #region IComparable
+
+        public int CompareTo(Object obj)
+        {
+            if (obj is LispVariant)
+            {
+                LispVariant v = (LispVariant)obj;
+                return IntValue.CompareTo(v.IntValue);
+            }
+// TODO andere typen auch vergeleichen und unit tests
+            return 0;
+        }
+
+        #endregion
+
         #region Casts
 
         public LispFunctionWrapper FunctionValue
@@ -208,8 +223,13 @@ namespace CsLisp
                 {
                     return new List<object>();
                 }
+                if (Type == LispType.NativeObject && NativeObjectValue is IEnumerable<object>)
+                {
+                    return (IEnumerable<object>)NativeObjectValue;
+                }
                 if (Type != LispType.List)
                 {
+// TODO ersetzte durch LispException
                     throw CreateInvalidCastException("list");
                 }
                 return (IEnumerable<object>)Value;

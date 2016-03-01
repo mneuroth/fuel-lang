@@ -1410,7 +1410,7 @@ namespace CsLisp
                 {
 // TODO ueberladene methoden behandeln!!!
                     var callArgsTypes = GetTypes(callArgs);
-                    MethodInfo[] methods = nativeClass.GetMethods();
+                    //MethodInfo[] methods = nativeClass.GetMethods();
                     method = nativeClass.GetMethod(methodName, callArgsTypes);
                 }
                 if (method != null)
