@@ -49,6 +49,7 @@
     <Compile Include="Lisp.cs" />
     <Compile Include="LispInterpreter.cs" />
     <Compile Include="LispParser.cs" />
+    <Compile Include="LispScope.cs" />
     <Compile Include="LispStopDebuggerException.cs" />
     <Compile Include="LispToken.cs" />
     <Compile Include="LispTokenizer.cs" />
