@@ -90,6 +90,11 @@ namespace CsLisp
             get { return Type == LispType.Int; }
         }
 
+        public bool IsNumber
+        {
+            get { return IsInt || IsDouble; }
+        }
+
         public bool IsBool
         {
             get { return Type == LispType.Bool; }
@@ -187,15 +192,28 @@ namespace CsLisp
 
         #region IComparable
 
-        public int CompareTo(Object obj)
+        /// <summary>
+        /// Compares to other object.
+        /// </summary>
+        /// <param name="other">The other.</param>
+        /// <returns></returns>
+        public int CompareTo(Object other)
         {
-            if (obj is LispVariant)
+            if (other is LispVariant)
             {
-                LispVariant v = (LispVariant)obj;
-                return IntValue.CompareTo(v.IntValue);
-            }
-// TODO andere typen auch vergeleichen und unit tests
-            return 0;
+                var otherVariant = (LispVariant)other;
+                if (IsNumber && otherVariant.IsNumber)
+                {
+                    if (IsDouble || otherVariant.IsDouble)
+                    {
+                        return ToDouble().CompareTo(otherVariant.ToDouble());
+                    }
+                    return IntValue.CompareTo(otherVariant.IntValue);
+                }
+                // all other types will be compared like a string
+                return String.Compare(StringValue, otherVariant.StringValue, StringComparison.Ordinal);
+            }            
+            return CompareTo(new LispVariant(other));
         }
 
         #endregion
@@ -208,7 +226,7 @@ namespace CsLisp
             {
                 if (Type != LispType.Function)
                 {
-                    throw CreateInvalidCastException("function");
+                    throw CreateInvalidCastException("function", "not found");
                 }
                 return (LispFunctionWrapper)Value;
             }
@@ -229,7 +247,6 @@ namespace CsLisp
                 }
                 if (Type != LispType.List)
                 {
-// TODO ersetzte durch LispException
                     throw CreateInvalidCastException("list");
                 }
                 return (IEnumerable<object>)Value;
@@ -281,6 +298,35 @@ namespace CsLisp
                     throw CreateInvalidCastException("native object");
                 }
                 return Value;
+            }
+        }
+
+        public string NativeObjectStringRepresentation
+        {
+            get
+            {
+                string result = string.Empty;
+
+                object native = NativeObjectValue;
+                if (native is IEnumerable<object>)
+                {
+                    var container = (IEnumerable<object>)native;
+                    foreach (var element in container)
+                    {
+                        if (result.Length > 0)
+                        {
+                            result += " ";
+                        }
+                        result += element.ToString();
+                    }
+                    result = "(" + result + ")";
+                }
+                else
+                {
+                    result = native.ToString();
+                }
+
+                return result;
             }
         }
 
@@ -477,7 +523,7 @@ namespace CsLisp
         /// <returns>
         /// true if the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>; otherwise, false.
         /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
+        /// <param name="other">The object to compare with the current object. </param><filterpriority>2</filterpriority>
         public override bool Equals(object other)
         {
             if (other is LispVariant)
@@ -754,14 +800,14 @@ namespace CsLisp
 
         private Exception CreateInvalidCastException(string name, string msg = "no")
         {
-            var exception = new InvalidCastException(string.Format(msg, StringValue, name));
+            var exception = new LispException(string.Format("Invalid cast for {2}, value={1} {0}", msg, StringValue, name));
             exception.AddTokenInfos(Token);
             return exception;
         }
 
         static private Exception CreateInvalidOperationException(string operation, LispVariant l, LispVariant r)
         {
-            var exception = new InvalidOperationException(String.Format(NoOperatorForTypes, operation, l.Type, r.Type));
+            var exception = new LispException(string.Format(NoOperatorForTypes, operation, l.Type, r.Type));
             exception.AddTokenInfos(l.Token);
             return exception;
         }

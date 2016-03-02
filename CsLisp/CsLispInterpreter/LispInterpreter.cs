@@ -31,7 +31,7 @@ namespace CsLisp
                 }
                 else
                 {
-                    resolvedElem = ResolveInScopes(scope, elem);
+                    resolvedElem = scope.ResolveInScopes(elem);
                 }
                 astWithResolvedValues.Add(resolvedElem);
 
@@ -44,7 +44,7 @@ namespace CsLisp
                         first = astWithResolvedValues.First();
                         firstElem = ((LispVariant)first).FunctionValue;
                     }
-                    catch (InvalidCastException)
+                    catch (LispException)
                     {
                         if (!compile)
                         {
@@ -56,49 +56,6 @@ namespace CsLisp
 
             }
             return astWithResolvedValues;
-        }
-
-        /// <summary>
-        /// Resolves the items of the ast in the given scope.
-        /// </summary>
-        /// <param name="scope">The scope.</param>
-        /// <param name="elem">The elem.</param>
-        /// <returns></returns>
-        public static object ResolveInScopes(LispScope scope, object elem)
-        {
-            object result;
-
-            var name = elem.ToString();
-            LispScope foundClosureScope;
-            // first try to resolve in local scope
-            if (scope != null && scope.ContainsKey(name))
-            {
-                result = scope[name];
-            }
-            // then try to resolve in closure chain scope(s)
-            else if (IsInClosureChain(name, scope, out foundClosureScope))
-            {
-                result = foundClosureScope[name];
-            }
-            // then try to resolve in global scope
-            else if (scope != null &&
-                     scope.GlobalScope != null &&
-                     scope.GlobalScope.ContainsKey(name))
-            {
-                result = scope.GlobalScope[name];
-            }
-            // then try to resolve in scope of loaded modules
-            else if (scope != null &&
-                     LispEnvironment.IsInModules(name, scope.GlobalScope))
-            {
-                result = LispEnvironment.GetFunctionInModules(name, scope.GlobalScope);
-            }
-            else
-            {
-                result = elem;
-            }
-
-            return result;
         }
 
         public static LispVariant EvalAst(object ast, LispScope scope)
@@ -116,7 +73,7 @@ namespace CsLisp
                 // evaluate the value for the symbol
                 if (item.IsSymbol)
                 {
-                    item = new LispVariant(ResolveInScopes(scope, item));
+                    item = new LispVariant(scope.ResolveInScopes(item));
                 }
                 if (item.IsList && !item.IsNil)
                 {
@@ -407,21 +364,6 @@ namespace CsLisp
             // (apply (lambda ...) arg1 arg2 ...)
             var result = EvalAst(evalMacro, globalScope);
             return result;
-        }
-
-        private static bool IsInClosureChain(string name, LispScope scope, out LispScope closureScopeFound)
-        {
-            closureScopeFound = null;
-            if (scope != null && scope.ClosureChain != null)
-            {
-                if (scope.ClosureChain.ContainsKey(name))
-                {
-                    closureScopeFound = scope.ClosureChain;
-                    return true;
-                }
-                return IsInClosureChain(name, scope.ClosureChain, out closureScopeFound);
-            }
-            return false;
         }
 
         #endregion

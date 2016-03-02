@@ -229,9 +229,9 @@ namespace CsLisp
     // - Quellcode aufraeumen
     // - TODOs behandeln
     // - Makro Behandlung aufraeumen
-    // - Native Properties unterstuetzen --> Math.PI
-    // - ueberladene native methoden unterstuetzen --> argument typen pruefen
-    // - parameter in arrays unterstuetzen
+    // - ueberladene native methoden unterstuetzen --> argument typen pruefen --> (List-Sort ...) (List-IndexOf ...)
+    // (- Native Properties unterstuetzen --> Math.PI
+    // (- parameter in arrays unterstuetzen
     // - ggf. stdlib unit tests in eigenes modul auslagern
     // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
     // - ggf. Bug ---> (list 1 '2 3) == (list 1 2 3) d. h. '2 liefert immer int 2 und kein symbol !?

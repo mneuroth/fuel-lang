@@ -143,6 +143,82 @@ namespace CsLisp
             Next = null;            
         }
 
+        public bool IsInClosureChain(string name, out LispScope closureScopeFound)
+        {
+            closureScopeFound = null;
+            if (ClosureChain != null)
+            {
+                if (ClosureChain.ContainsKey(name))
+                {
+                    closureScopeFound = ClosureChain;
+                    return true;
+                }
+                return ClosureChain.IsInClosureChain(name, out closureScopeFound);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Resolves the items of the ast in this scope.
+        /// </summary>
+        /// <param name="elem">The elem.</param>
+        /// <returns></returns>
+        public object ResolveInScopes(object elem)
+        {
+            object result;
+
+            var name = elem.ToString();
+            LispScope foundClosureScope;
+            // first try to resolve in this scope
+            if (ContainsKey(name))
+            {
+                result = this[name];
+            }
+            // then try to resolve in closure chain scope(s)
+            else if (IsInClosureChain(name, out foundClosureScope))
+            {
+                result = foundClosureScope[name];
+            }
+            // then try to resolve in global scope
+            else if (GlobalScope != null &&
+                     GlobalScope.ContainsKey(name))
+            {
+                result = GlobalScope[name];
+            }
+            // then try to resolve in scope of loaded modules
+            else if (LispEnvironment.IsInModules(name, GlobalScope))
+            {
+                result = LispEnvironment.GetFunctionInModules(name, GlobalScope);
+            }
+            else
+            {
+                result = elem;
+            }
+
+            return result;
+        }
+
+        public void SetInScopes(string symbolName, object value)
+        {
+            LispScope foundClosureScope;
+            if (symbolName != null && ContainsKey(symbolName))
+            {
+                this[symbolName] = value;
+            }
+            else if (symbolName != null && IsInClosureChain(symbolName, out foundClosureScope))
+            {
+                foundClosureScope[symbolName] = value;
+            }
+            else if (symbolName != null && GlobalScope != null && GlobalScope.ContainsKey(symbolName))
+            {
+                GlobalScope[symbolName] = value;
+            }
+            else
+            {
+                throw new LispException("Symbol " + symbolName + " not found", this);
+            }
+        }
+
         public LispToken GetPreviousToken(LispToken token)
         {
             LispToken previous = null;
@@ -902,6 +978,16 @@ namespace CsLisp
             CheckArgs(Str, 1, args, scope);
 
             var value = args[0].ToString();
+            // convert native object into a readable form
+            // used for: (println (str nativeLst))
+            if (args[0] is LispVariant)
+            {
+                var variant = (LispVariant)args[0];
+                if (variant.IsNativeObject)
+                {
+                    value = variant.NativeObjectStringRepresentation;
+                }                
+            }
             return new LispVariant(LispType.String, value);
         }
 
@@ -1036,18 +1122,7 @@ namespace CsLisp
             var symbol = EvalArgIfNeeded(args[0], scope);
             var symbolName = symbol != null ? symbol.ToString() : null;
             var value = LispInterpreter.EvalAst(args[1], scope);
-            if (symbolName != null && scope.ContainsKey(symbolName))
-            {
-                scope[symbolName] = value;
-            }
-            else if (symbolName != null && scope.GlobalScope.ContainsKey(symbolName))
-            {
-                scope.GlobalScope[symbolName] = value;
-            }
-            else
-            {
-                throw new LispException("Symbol " + symbolName + " not found", scope);
-            }
+            scope.SetInScopes(symbolName, value);
             return value;
         }
 

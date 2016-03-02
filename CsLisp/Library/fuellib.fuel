@@ -60,7 +60,7 @@
   			 (setf i (+ i 1))
            )
          )
-         ;(println _result)
+         '(println _result)
          (return _result)
       )
   )
@@ -69,7 +69,7 @@
   (defn create-native-method-expression (lisp-prefix full-class-name name netName isStatic argcount) 
       (do 
           (def code (list))
-          (setf code (append code (list 'gdefn)))
+          (setf code (append code (list 'defn)))
           (setf code (append code (list (string lisp-prefix name))))
           (if isStatic
              (do 
@@ -89,8 +89,16 @@
   ;; create lisp functions for a native class  
   (defn create-native (lisp-name full-class-name) 
         (do
+            (def result "(do ")
             ; inspect class and generate for all public properties and methods method stubs
-            (gdefn (sym (string "create-" lisp-name)) () (call full-class-name))
+            (setf result (+ result "(defn "))
+            (setf result (+ result (str (sym (string "create-" lisp-name)))))
+            (setf result (+ result " () "))
+            (setf result (+ result "(call "))
+            (setf result (+ result "\"" (str full-class-name) "\""))
+            (setf result (+ result "))"))
+            ;(setf result (+ result (str '(gdefn (sym (string "create-" lisp-name)) () (call full-class-name)))))
+            ;(setf result (str '(gdefn (sym (string "create-" lisp-name)) () (call full-class-name))))
 			
 			(def methodInfos (native-methods full-class-name))
 			(foreach methodInfos 
@@ -101,8 +109,9 @@
                      (def isStatic (nth 2 methodNameAndArgCount))
     			     (def netMethodName (nth 3 methodNameAndArgCount))
                      (def method-expr (create-native-method-expression (+ (str lisp-name) "-") full-class-name methodName netMethodName isStatic methodArgsCount))
-                     (eval method-expr)
-                     (println method-expr)
+                     ;(eval method-expr)
+                     (setf result (+ result (str method-expr)))
+                     ;(println method-expr)
                      ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
                      ;(evalstr method)
     			   )
@@ -114,21 +123,28 @@
                (lambda (fieldName) 
     			   (do 
                      ;	(gdef Math-PI (field System.Math PI))
-					 (def field-expr (list 'gdef (sym (string lisp-name "-" fieldName)) (list 'field full-class-name fieldName) ))
-					 (eval field-expr)
+					 (def field-expr (list 'def (sym (string lisp-name "-" fieldName)) (list 'field full-class-name fieldName) ))
+					 ;(eval field-expr)
+                     (setf result (+ result (str field-expr)))
     			   )
 			   )
 			)
+            (setf result (+ result ")"))
+            (return result)
         )     
   )
   
   ;; create the standard library for fuel
   
-  (create-native "Math" "System.Math")
-  (create-native "File" "System.IO.File")
-  (create-native "List" "System.Collections.Generic.List`1[[System.Object]]") 
-  (create-native "Array" "System.Object[]")
-  (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]")  
+  (evalstr (create-native "Math" "System.Math"))
+  (evalstr (create-native "File" "System.IO.File"))
+  (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
+  (evalstr (create-native "Array" "System.Object[]"))
+  (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
+  
+  (evalstr "(defn yyy (x) (+ x x x))")
+  (eval '(defn xxx (x) (+ x x x)))
+  (eval '(do (defn x1 (x) (+ x x x)) (defn x2 (x) (* x x x))))
 
   (nop)
 )

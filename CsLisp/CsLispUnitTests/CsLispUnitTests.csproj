@@ -55,6 +55,7 @@
     <Compile Include="CsLispParserTests.cs" />
     <Compile Include="CsLispTokenizerTests.cs" />
     <Compile Include="CsLispUnitTests.cs" />
+    <Compile Include="CsLispVariantTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CsLispMain.cs" />
   </ItemGroup>
