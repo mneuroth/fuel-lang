@@ -27,6 +27,7 @@ namespace CsLisp
             var loadFiles = true;
             var trace = false;
             var compile = false;
+            var wasDebugging = false;
             var showCompileOutput = false;
             var measureTime = false;
             var lengthyErrorOutput = false;
@@ -80,6 +81,7 @@ namespace CsLisp
                     InteractiveLoopHeader(output);
                     debugger.InteractiveLoop(startedFromMain:true, tracing: trace);
                     loadFiles = false;
+                    wasDebugging = true;
                 }
                 if (args.Contains("-d"))
                 {
@@ -97,6 +99,7 @@ namespace CsLisp
                     InteractiveLoopHeader(output);
                     result = debugger.DebuggerLoop(script, fileName, output, input, tracing: trace);
                     loadFiles = false;
+                    wasDebugging = true;
                 }                
             }
 
@@ -123,7 +126,7 @@ namespace CsLisp
                     }
                 }
             }
-            else if (script != null)
+            else if (script != null && !wasDebugging)
             {
                 // process -e option
                 result = Lisp.SaveEval(script);
@@ -229,21 +232,24 @@ namespace CsLisp
     // - Quellcode aufraeumen
     // - TODOs behandeln
     // - Makro Behandlung aufraeumen
-    // - ueberladene native methoden unterstuetzen --> argument typen pruefen --> (List-Sort ...) (List-IndexOf ...)
-    // (- Native Properties unterstuetzen --> Math.PI
-    // (- parameter in arrays unterstuetzen
-    // - ggf. stdlib unit tests in eigenes modul auslagern
-    // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
-    // - ggf. Bug ---> (list 1 '2 3) == (list 1 2 3) d. h. '2 liefert immer int 2 und kein symbol !?
-    // - im debugger: zeige keine funktionen an in der liste der lokalen variablen, insbesondere keine funktionen der std lib !
-    // - debuggen: show loaded module names 
-    // - debuggen: funcs befehl um module erweitern und anzeige von funktionen in modulen
-    // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
-    // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
     // - setf macro implementieren...
+    // - unit test reparieren (output/input queue behandlung)
+    // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
+    // - Testabdeckung verbessern
+    // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
+    // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
+    // - ggf. im debugger: zeige keine lokal definierte funktionen an in der liste der lokalen variablen !
     // - ggf. debuggen: set next statement realisieren?
     // - ggf. bug: step out funktioniert anscheinend bei modulen nicht ganz korrekt
-    // - Testabdeckung verbessern
+    // - ggf. stdlib unit tests in eigenes modul auslagern
+    // - ggf. Bug ---> (list 1 '2 3) == (list 1 2 3) d. h. '2 liefert immer int 2 und kein symbol !?
+    // (- ueberladene native methoden unterstuetzen --> argument typen pruefen --> (List-Sort ...) (List-IndexOf ...)
+    // (- Native Properties unterstuetzen --> Math.PI
+    // (- parameter in arrays unterstuetzen
+    // (- im debugger: zeige keine funktionen der std lib an !
+    // (- debuggen: show loaded module names 
+    // (- debuggen: funcs befehl um module erweitern und anzeige von funktionen in modulen
+    // (- debuggen: macros --> DumpMacros implementieren
 
     // native calls verbessern --> type mapping implementieren --> ggf. reflection optimieren --> lambda zurueckgeben?
     // reflection zum aufloesen von funktionen verwenden?

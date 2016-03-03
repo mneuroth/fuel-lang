@@ -124,6 +124,9 @@ namespace CsLisp
 
         #region Constructer
 
+        /// <summary>
+        /// Initializes the static elements of the <see cref="LispVariant"/> class.
+        /// </summary>
         static LispVariant()
         {
             Tolerance = 1e-8;
@@ -466,7 +469,7 @@ namespace CsLisp
             }
             if (IsNativeObject)
             {
-                return "NativeObject<"+Value.GetType()+">";
+                return NativeObjectStringRepresentation; // "NativeObject<"+Value.GetType()+">";
             }
             if (IsUndefined)
             {
@@ -533,21 +536,20 @@ namespace CsLisp
             return false;
         }
 
-        #endregion
-
-        #region Operations
-
         /// <summary>
-        /// Serves as a hash function for a particular type. 
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for the current <see cref="T:System.Object"/>.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
+
+        #endregion
+
+        #region Operations
 
         public void Add(object value)
         {
@@ -706,56 +708,6 @@ namespace CsLisp
             }
             throw CreateInvalidOperationException("==", l, r);
         }
-
-        //public static explicit operator Func<object[], LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return variant.FunctionValue.Function;
-        //}
-
-        //public static explicit operator Func<LispVariant, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, scope) => variant.FunctionValue.Function(new object[] { arg1 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, arg3, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, arg3, arg4, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3, arg4 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, arg3, arg4, arg5, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3, arg4, arg5 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, arg3, arg4, arg5, arg6, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3, arg4, arg5, arg6 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, arg3, arg4, arg5, arg6, arg7, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 }, scope);
-        //}
-
-        //public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispScope, LispVariant>(LispVariant variant)
-        //{
-        //    return (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 }, scope);
-        //}
 
         #endregion
 

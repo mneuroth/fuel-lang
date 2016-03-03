@@ -40,7 +40,7 @@ namespace CsLisp
 
         public const string Name = "FUEL(isp)";
         public const string Version = "v0.99.1";
-        public const string Date = "2.3.2016";
+        public const string Date = "3.3.2016";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";
@@ -66,12 +66,12 @@ namespace CsLisp
         public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool tracing = false)
         {
             // first create global scope, needed for macro expanding
-            var globalScope = scope ?? LispEnvironment.CreateDefaultScope();
-            globalScope.ModuleName = moduleName;
-            globalScope.Tracing = tracing;
-            var ast = LispParser.Parse(lispCode, globalScope);
-            var expandedAst = LispInterpreter.ExpandMacros(ast, globalScope);
-            var result = LispInterpreter.EvalAst(expandedAst, globalScope);
+            var currentScope = scope ?? LispEnvironment.CreateDefaultScope();
+            currentScope.ModuleName = moduleName;
+            currentScope.Tracing = tracing;
+            var ast = LispParser.Parse(lispCode, currentScope);
+            var expandedAst = LispInterpreter.ExpandMacros(ast, currentScope);
+            var result = LispInterpreter.EvalAst(expandedAst, currentScope);
             return result;
         }
 

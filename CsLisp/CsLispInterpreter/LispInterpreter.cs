@@ -58,6 +58,13 @@ namespace CsLisp
             return astWithResolvedValues;
         }
 
+        /// <summary>
+        /// Evaluates the given ast.
+        /// </summary>
+        /// <param name="ast">The ast.</param>
+        /// <param name="scope">The scope.</param>
+        /// <returns>The result of ast evaluation.</returns>
+        /// <exception cref="System.Exception">Unexpected macro modus!</exception>
         public static LispVariant EvalAst(object ast, LispScope scope)
         {
             if (ast == null)

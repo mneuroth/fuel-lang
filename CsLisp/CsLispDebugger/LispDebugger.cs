@@ -111,6 +111,10 @@ namespace CsLisp
                 {
                     globalScope.DumpFunctions();
                 }
+                else if (cmd.Equals("macros"))
+                {
+                    globalScope.DumpMacros();
+                }
                 else if (cmd.Equals("builtins"))
                 {
                     globalScope.DumpBuiltinFunctions();
@@ -200,7 +204,7 @@ namespace CsLisp
                 {
                     try
                     {
-                        LispVariant result = Lisp.Eval(cmd, currentScope);
+                        LispVariant result = Lisp.Eval(cmd, currentScope, currentScope.ModuleName);
                         debugger.Output.WriteLine("result=" + result);
                     }
                     catch (Exception ex)
@@ -227,7 +231,8 @@ namespace CsLisp
                 var lineNumber = initialTopScope != null ? initialTopScope.CurrentLineNo : -1;
                 var startPos = initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
                 var stopPos = initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
-                Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos);
+                var moduleName = initialTopScope != null ? initialTopScope.ModuleName : "?";
+                Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName);
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
         }
@@ -323,7 +328,7 @@ namespace CsLisp
                     {
                         try
                         {
-                            LispVariant result = Lisp.Eval(breakpoint.Condition, scope);
+                            LispVariant result = Lisp.Eval(breakpoint.Condition, scope, scope.ModuleName);
                             return result.BoolValue;
                         }
                         catch
@@ -541,6 +546,7 @@ namespace CsLisp
             output.WriteLine("  modules                      : show all available modules");
             output.WriteLine("  builtins                     : show all builtin functions");
             output.WriteLine("  funcs                        : show all available functions");
+            output.WriteLine("  macros                       : show all available macros");
             output.WriteLine("  exit                         : exit the interactive loop");
             output.WriteLine();
         }

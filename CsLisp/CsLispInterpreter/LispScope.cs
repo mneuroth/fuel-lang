@@ -49,7 +49,7 @@ namespace CsLisp
         /// </summary>
         /// <value>
         /// The module name and path.
-        /// </value>
+        /// </value>       
         public string ModuleName { get; set; }
 
         /// <summary>
@@ -119,6 +119,10 @@ namespace CsLisp
             Name = fcnName;
             GlobalScope = globalScope ?? this;
             ModuleName = moduleName;
+            if (ModuleName == null && globalScope != null)
+            {
+                ModuleName = globalScope.ModuleName;
+            }
             CurrentToken = null;
             Input = Console.In;
             Output = Console.Out;
@@ -140,6 +144,12 @@ namespace CsLisp
             Next = null;
         }
 
+        /// <summary>
+        /// Determines whether the given name is available in the closure chain.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="closureScopeFound">The closure scope found.</param>
+        /// <returns>True if name was found.</returns>
         public bool IsInClosureChain(string name, out LispScope closureScopeFound)
         {
             closureScopeFound = null;
@@ -156,10 +166,10 @@ namespace CsLisp
         }
 
         /// <summary>
-        /// Resolves the items of the ast in this scope.
+        /// Resolves the given element in this scope.
         /// </summary>
-        /// <param name="elem">The elem.</param>
-        /// <returns></returns>
+        /// <param name="elem">The element.</param>
+        /// <returns>Resolved value or null</returns>
         public object ResolveInScopes(object elem)
         {
             object result;
@@ -195,6 +205,15 @@ namespace CsLisp
             return result;
         }
 
+        /// <summary>
+        /// Searches the given symbol in the scope environment and 
+        /// sets the value if found.
+        /// Throws an exception if the symbol is not found in the scope 
+        /// environment.
+        /// </summary>
+        /// <param name="symbolName">Name of the symbol.</param>
+        /// <param name="value">The value.</param>
+        /// <exception cref="LispException">Symbol  + symbolName +  not found</exception>
         public void SetInScopes(string symbolName, object value)
         {
             LispScope foundClosureScope;
@@ -275,7 +294,20 @@ namespace CsLisp
         public void DumpFunctions()
         {
             Dump(v => v.IsFunction, v => " : module=" + v.FunctionValue.ModuleName);
-            // TODO --> dump also module functions and maybe macros !?
+
+            ProcessMetaScope(LispEnvironment.Modules, module =>
+            {
+                var mod = module.Value as LispScope;
+                if (mod != null)
+                {
+                    mod.DumpFunctions();
+                }
+            });
+        }
+
+        public void DumpMacros()
+        {
+            ProcessMetaScope(LispEnvironment.Macros, macro => Output.WriteLine(macro.Key));
         }
 
         public void DumpBuiltinFunctions()
@@ -285,13 +317,27 @@ namespace CsLisp
 
         public void DumpModules()
         {
-            // TODO --> ueber alle funktionen gehen und alle module namen sammeln und anzeigen
-            Output.WriteLine(this[LispEnvironment.Modules]);
+            ProcessMetaScope(LispEnvironment.Modules, module => Output.WriteLine(module.Key));
         }
 
         #endregion
 
         #region private methods
+
+        private void ProcessMetaScope(string metaScope, Action<KeyValuePair<string, object>> action)
+        {
+            if (ContainsKey(metaScope))
+            {
+                var items = this[metaScope] as LispScope;
+                if (items != null)
+                {
+                    foreach (KeyValuePair<string, object> item in items)
+                    {
+                        action(item);
+                    }
+                }
+            }
+        }
 
         private void Dump(Func<LispVariant, bool> select, Func<LispVariant, string> show = null)
         {
@@ -307,7 +353,6 @@ namespace CsLisp
                     }
                 }
             }
-            // TODO --> hier ggf. die Module-Funktionen auch loopen...
         }
 
         #endregion

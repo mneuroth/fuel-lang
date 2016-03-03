@@ -68,56 +68,6 @@ namespace CsLisp
             IsEvalInExpand = isEvalInExpand;
         }
 
-        //public LispFunctionWrapper(Func<LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), (LispVariant)(args[8]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
-        //public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
-        //    : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), (LispVariant)(args[3]), (LispVariant)(args[4]), (LispVariant)(args[5]), (LispVariant)(args[6]), (LispVariant)(args[7]), (LispVariant)(args[8]), (LispVariant)(args[9]), scope), signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName)
-        //{
-        //}
-
         #endregion
     }
 
@@ -150,13 +100,13 @@ namespace CsLisp
         private const string DefineMacro = "define-macro";
         private const string DefineMacroExpand = "define-macro-expand";
         private const string Lambda = "lambda";
-        private const string Macros = MetaTag + "macros" + MetaTag;
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
         internal const string Args = MetaTag + "args" + MetaTag;
         private const string AdditionalArgs = "_additionalArgs";
         private const string ArgsCount = "argscount";
 
+        public const string Macros = MetaTag + "macros" + MetaTag;
         public const string Modules = MetaTag + "modules" + MetaTag;
 
         public const string Apply = "apply";
@@ -172,24 +122,27 @@ namespace CsLisp
 
         #region public methods of environment
 
-        public static bool IsInModules(object funcName, LispScope globalScope)
+        public static bool IsInModules(string funcName, LispScope scope)
         {
-            return ExistsItem(funcName, globalScope, Modules);
+            object value;
+            return FindFunctionInModules(funcName, scope, out value);
         }
 
-        public static object GetFunctionInModules(object funcName, LispScope globalScope)
+        public static object GetFunctionInModules(string funcName, LispScope scope)
         {
-            return QueryItem(funcName, globalScope, Modules);            
+            object result;
+            FindFunctionInModules(funcName, scope, out result);
+            return result;         
         }
 
-        public static bool IsMacro(object funcName, LispScope globalScope)
+        public static bool IsMacro(object funcName, LispScope scope)
         {
-            return ExistsItem(funcName, globalScope, Macros);
+            return ExistsItem(funcName, scope, Macros);
         }
 
-        public static object GetMacro(object funcName, LispScope globalScope)
+        public static object GetMacro(object funcName, LispScope scope)
         {
-            return QueryItem(funcName, globalScope, Macros);
+            return QueryItem(funcName, scope, Macros);
         }
 
         public static bool IsExpression(object item)
@@ -418,8 +371,8 @@ namespace CsLisp
 
                     result = Lisp.Eval(code, importScope, fileName);
 
-                    // merge new module into modules dictionary
-                    importScope.ToList().ForEach(x => ((LispScope)scope.GlobalScope[Modules]).Add(x.Key, x.Value));
+                    // add new module to modules scope
+                    ((LispScope)scope.GlobalScope[Modules]).Add(fileName, importScope);
 
                     scope.PopNextScope();
 
@@ -763,7 +716,7 @@ namespace CsLisp
             CheckArgs("evalstr", 1, args, scope);
 
             var variant = (LispVariant)args[0];
-            var result = Lisp.Eval(variant.Value.ToString(), scope);
+            var result = Lisp.Eval(variant.Value.ToString(), scope, scope.ModuleName);
             return result;
         }
 
@@ -1059,7 +1012,7 @@ namespace CsLisp
                     catch(AmbiguousMatchException)
                     {
                         // try to match overloaded method with argument types
-                        MethodInfo[] methods = nativeClass.GetMethods();
+//                        MethodInfo[] methods = nativeClass.GetMethods();
 // TODO --> implementieren fuer Math-Abs     
                         method = null;
                     }
@@ -1409,23 +1362,39 @@ namespace CsLisp
             return text;
         }
 
-        private static object QueryItem(object funcName, LispScope globalScope, string key)
+        private static object QueryItem(object funcName, LispScope scope, string key)
         {
-            if (globalScope != null &&
-                globalScope.ContainsKey(key) &&
-                ((LispScope)globalScope[key]).ContainsKey(funcName.ToString()))
+            if (scope != null &&
+                scope.ContainsKey(key) &&
+                ((LispScope)scope[key]).ContainsKey(funcName.ToString()))
             {
-                return ((LispScope)globalScope[key])[funcName.ToString()];
+                return ((LispScope)scope[key])[funcName.ToString()];
             }
             return null;
         }
 
-        private static bool ExistsItem(object funcName, LispScope globalScope, string key)
+        private static bool ExistsItem(object funcName, LispScope scope, string key)
         {
-            if (globalScope != null &&
-                globalScope.ContainsKey(key))
+            if (scope != null &&
+                scope.ContainsKey(key))
             {
-                return ((LispScope)globalScope[key]).ContainsKey(funcName.ToString());
+                return ((LispScope)scope[key]).ContainsKey(funcName.ToString());
+            }
+            return false;
+        }
+
+        private static bool FindFunctionInModules(string funcName, LispScope scope, out object foundValue)
+        {
+            foundValue = null;
+            var importedModules = (LispScope)scope.GlobalScope[Modules];
+            foreach (KeyValuePair<string, object> kv in importedModules)
+            {
+                var module = (LispScope)kv.Value;
+                if (module.ContainsKey(funcName))
+                {
+                    foundValue = module[funcName];
+                    return true;
+                }
             }
             return false;
         }

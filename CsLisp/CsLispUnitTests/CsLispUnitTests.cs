@@ -435,7 +435,21 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (defn addx (delta) (lambda (x) (+ x delta))) (def addclosure (addx 41)) (println (addclosure 1)))");
             Assert.AreEqual(42, result.ToInt());
         }
-        
+
+        [TestMethod]
+        public void Test_Closure2()
+        {
+            LispVariant result = Lisp.Eval("(do (defn g (x) (do (+ x 2))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+            Assert.AreEqual(13, result.ToInt());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_Closure3()
+        {
+            Lisp.Eval("(do (defn g (x) (do (+ x 2 i))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+        }
+
         [TestMethod]
         public void Test_RecursiveCall1()
         {
@@ -890,6 +904,22 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("count= 2"));
                 Assert.IsTrue(s.Contains("blub"));
                 Assert.IsTrue(s.Contains("1.2354"));               
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_StdLibListSort()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(do (import fuellib) (def lst (create-List)) (List-Add lst 3) (List-Add lst 7) (List-Add lst 4) (println \"count=\" (List-get_Count lst)) (List-Sort lst) (println (str lst)) (return lst))");
+                Assert.IsTrue(result.IsNativeObject);
+                Assert.AreEqual(3, ((IEnumerable<object>)result.Value).Count());
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("count= 3"));
+                Assert.IsTrue(s.Contains("(3 4 7)"));
             }
         }
 

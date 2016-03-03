@@ -165,12 +165,12 @@ namespace CsLisp
             {
                 Type = LispTokenType.ListEnd;
             }
-            else if (CheckInt(text, out intValue))
+            else if (Int32.TryParse(text, out intValue))
             {
                 Type = LispTokenType.Int;
                 Value = intValue;
             }
-            else if (CheckDouble(text, out doubleValue))
+            else if (Double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out doubleValue))
             {
                 Type = LispTokenType.Double;
                 Value = doubleValue;
@@ -207,17 +207,6 @@ namespace CsLisp
         #region public methods
 
         /// <summary>
-        /// Gets the position information representation.
-        /// </summary>
-        /// <returns></returns>
-        public string GetPosInfo()
-        {
-            var info = "pos=";
-            info += StartPos;
-            return info;
-        }
-
-        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
@@ -230,42 +219,6 @@ namespace CsLisp
                 return Nil;
             }
             return Value.ToString();
-        }
-
-        #endregion
-
-        #region private methods
-
-        static private bool CheckInt(string text, out int value)
-        {
-            var checkInt = true;
-            value = 0;
-            try
-            {
-                var result = Int32.Parse(text);
-                value = result;
-            }
-            catch (FormatException)
-            {
-                checkInt = false;
-            }
-            return checkInt;
-        }
-
-        static private bool CheckDouble(string text, out double value)
-        {
-            var checkDouble = true;
-            value = 0;
-            try
-            {
-                var result = Double.Parse(text, CultureInfo.InvariantCulture);
-                value = result;
-            }
-            catch (FormatException)
-            {
-                checkDouble = false;
-            }
-            return checkDouble;
         }
 
         #endregion
