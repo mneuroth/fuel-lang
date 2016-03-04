@@ -76,13 +76,11 @@ namespace LispUnitTests
         /// </summary>
         public TestContext TestContext { get; set; }
 
-        [AssemblyInitialize]
-        public static void InitializeReferencedAssemblies(TestContext context)
+        [TestMethod]
+        public void Test_Debugger()
         {
-            // add reference to dynamic loaded modules 
-            // otherwise mstest does not copy the debugger dll into the test directory
-            // see: http://stackoverflow.com/questions/10486113/why-mstest-does-not-copy-referenced-project-libraries
-            LispDebugger dbg;
+            LispDebugger debugger = new LispDebugger();
+            Assert.IsNotNull(debugger);
         }
 
         [TestMethod]
