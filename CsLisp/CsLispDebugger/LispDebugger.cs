@@ -1,4 +1,29 @@
-﻿using System;
+﻿/*
+ * FUEL(isp) is a fast usable embeddable lisp interpreter.
+ *
+ * Copyright (c) 2016 Michael Neuroth
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining 
+ * a copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ * OTHER DEALINGS IN THE SOFTWARE.
+ * 
+ * */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -253,11 +278,8 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public LispVariant DebuggerLoop(string script, string moduleName, TextWriter output, TextReader input, bool tracing = false)
+        public LispVariant DebuggerLoop(string script, string moduleName, bool tracing = false)
         {
-            Output = output;
-            Input = input;
-
             LispVariant result = null;
             var bRestart = true;
             while (bRestart)
@@ -269,8 +291,8 @@ namespace CsLisp
                 }
 
                 var globalScope = LispEnvironment.CreateDefaultScope();
-                globalScope.Input = input;
-                globalScope.Output = output;
+                globalScope.Input = Input;
+                globalScope.Output = Output;
                 globalScope.Debugger = this;                
 
                 try
@@ -284,15 +306,15 @@ namespace CsLisp
                 }
                 catch (Exception exception)
                 {
-                    output.WriteLine("\nException: {0}", exception);
+                    Output.WriteLine("\nException: {0}", exception);
                     string stackInfo = exception.Data.Contains(LispUtils.StackInfo) ? (string)exception.Data[LispUtils.StackInfo] : string.Empty;
-                    output.WriteLine("\nStack:\n{0}", stackInfo);
+                    Output.WriteLine("\nStack:\n{0}", stackInfo);
                     bRestart = InteractiveLoop(this, globalScope, startedFromMain: true);
                 }
 
                 if (bRestart)
                 {
-                    output.WriteLine("restart program");
+                    Output.WriteLine("restart program");
 
                     // process empty script --> just start interactive loop
                     if (result == null)
@@ -305,6 +327,15 @@ namespace CsLisp
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// See interface.
+        /// </summary>
+        public void SetInputOutputStreams(TextWriter output, TextReader input)
+        {
+            Output = output;
+            Input = input;            
         }
 
         #endregion

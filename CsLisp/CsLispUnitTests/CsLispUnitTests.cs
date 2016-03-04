@@ -1,4 +1,29 @@
-﻿using System;
+﻿/*
+ * FUEL(isp) is a fast usable embeddable lisp interpreter.
+ *
+ * Copyright (c) 2016 Michael Neuroth
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining 
+ * a copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ * OTHER DEALINGS IN THE SOFTWARE.
+ * 
+ * */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CsLisp;
@@ -323,7 +348,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_MacrosExpand2()
         {
-            const string MacroExpandScript = @"(do
+            const string macroExpandScript = @"(do
   (define-macro-expand first-macro
         (a b) 
         (do 
@@ -341,7 +366,7 @@ namespace LispUnitTests
   
   (def m (second-macro 4 3))
 )";
-            LispVariant result = Lisp.Eval(MacroExpandScript);
+            LispVariant result = Lisp.Eval(macroExpandScript);
             Assert.AreEqual("96", result.ToString());
         }
 
@@ -391,28 +416,28 @@ namespace LispUnitTests
         [ExpectedException(typeof(LispException))]
         public void Test_MapError1()
         {
-            LispVariant result = Lisp.Eval("(map 4 '(1 2 3))");
+            Lisp.Eval("(map 4 '(1 2 3))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_MapError2()
         {
-            LispVariant result = Lisp.Eval("(map (lambda (x) (+ x 1)) 4)");
+            Lisp.Eval("(map (lambda (x) (+ x 1)) 4)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_ReduceError1()
         {
-            LispVariant result = Lisp.Eval("(reduce \"blub\" '(1 2 3) 0)");
+            Lisp.Eval("(reduce \"blub\" '(1 2 3) 0)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_ReduceError2()
         {
-            LispVariant result = Lisp.Eval("(reduce (lambda (x y) (+ x y))  \"test\" 0)");
+            Lisp.Eval("(reduce (lambda (x y) (+ x y))  \"test\" 0)");
         }
 
         [TestMethod]
@@ -597,112 +622,112 @@ namespace LispUnitTests
         [ExpectedException(typeof(LispException))]
         public void Test_Parser1()
         {
-            LispVariant result = Lisp.Eval("(println \"hello\"))");
+            Lisp.Eval("(println \"hello\"))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_Parser2()
         {
-            LispVariant result = Lisp.Eval("((println \"hello\")");
+            Lisp.Eval("((println \"hello\")");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_Parser3()
         {
-            LispVariant result = Lisp.Eval("(blub 1 2 3)");
+            Lisp.Eval("(blub 1 2 3)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_SetfError()
         {
-            LispVariant result = Lisp.Eval("(setf a 2.0)");
+            Lisp.Eval("(setf a 2.0)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_NotError()
         {
-            LispVariant result = Lisp.Eval("(not a 2.0)");
+            Lisp.Eval("(not a 2.0)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_CompareError1()
         {
-            LispVariant result = Lisp.Eval("(> 2.0)");
+            Lisp.Eval("(> 2.0)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_CompareError2()
         {
-            LispVariant result = Lisp.Eval("(> 2.0 5 234)");
+            Lisp.Eval("(> 2.0 5 234)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_ScriptToLong()
         {
-            LispVariant result = Lisp.Eval("(setf a 2.0) asdf");
+            Lisp.Eval("(setf a 2.0) asdf");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_DefError()
         {
-            LispVariant result = Lisp.Eval("(def 1 2)");
+            Lisp.Eval("(def 1 2)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_DoError()
         {
-            LispVariant result = Lisp.Eval("(do (def a 2) blub (setf a 5))");
+            Lisp.Eval("(do (def a 2) blub (setf a 5))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_IfError()
         {
-            LispVariant result = Lisp.Eval("(if #t 1 2 3)");
+            Lisp.Eval("(if #t 1 2 3)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_FunctionNotFound()
         {
-            LispVariant result = Lisp.Eval("(unknown-fcn 1 2 3)");
+            Lisp.Eval("(unknown-fcn 1 2 3)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_BracketsOutOfBalance1()
         {
-            LispVariant result = Lisp.Eval("(do (println 2)))");
+            Lisp.Eval("(do (println 2)))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_BracketsOutOfBalance2()
         {
-            LispVariant result = Lisp.Eval("(do ( (println 2))");
+            Lisp.Eval("(do ( (println 2))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_UnexpectedToken1()
         {
-            LispVariant result = Lisp.Eval("blub (do (println 2))");
+            Lisp.Eval("blub (do (println 2))");
         }
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_UnexpectedTokenButIsBracketsOutOfBalance()
         {
-            LispVariant result = Lisp.Eval("(do (println 2)) asfd");
+            Lisp.Eval("(do (println 2)) asfd");
         }
 
         #endregion
