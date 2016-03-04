@@ -371,6 +371,27 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_MacrosSetf1()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 42) (define-macro-expand my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))");
+            Assert.AreEqual("blubxyz", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_MacrosSetf2()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 42) (define-macro my-setf (lambda (x value) (setf x value))) (my-setf a (+ 8 9)) (println a))");
+            Assert.AreEqual(42, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_MacrosSetf3()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 42) (defn my-setf (x value) (setf x value)) (my-setf a (+ 8 9)) (println a))");
+            Assert.AreEqual(42, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_Quasiquote1()
         {
             LispVariant result = Lisp.Eval("(do (def a '(42 99 102 \"hello\")) (def b 55) (println (type a)) (println (nth 3 `(1 2 3 ,@a))))");
