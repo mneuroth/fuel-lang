@@ -49,6 +49,7 @@ namespace CsLisp
             }
 
             string script = null;
+			string libraryPath = null;
             var loadFiles = true;
             var trace = false;
             var compile = false;
@@ -74,7 +75,7 @@ namespace CsLisp
                 Usage(output);
                 return;
             }
-            if (args.Contains("-l"))
+            if (args.Contains("-x"))
             {
                 lengthyErrorOutput = true;
             }
@@ -87,6 +88,12 @@ namespace CsLisp
                 script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
                 loadFiles = false;
             }
+			if (args.Contains("-l="))
+			{
+				var libArg = args.Where(v => v.StartsWith("-l=")).Select(v => v);
+				libraryPath = libArg.First().Substring(3);
+				LispUtils.LibraryPath = libraryPath;
+			}
 
             // handle options for compiler
             if (args.Contains("-c"))
@@ -180,9 +187,10 @@ namespace CsLisp
             output.WriteLine("  -v          : show version");
             output.WriteLine("  -h          : show help");
             output.WriteLine("  -e \"script\" : execute given script");
+			output.WriteLine("  -l=\"path\"   : path to library");
             output.WriteLine("  -m          : measure execution time");
-            output.WriteLine("  -t          : enable tracing");
-            output.WriteLine("  -l          : lengthy error output");
+			output.WriteLine("  -t          : enable tracing");
+			output.WriteLine("  -x          : exhaustive error output");
             if (TryGetDebugger() != null)
             {
                 output.WriteLine("  -i          : interactive shell");

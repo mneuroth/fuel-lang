@@ -372,14 +372,31 @@ namespace CsLisp
                 string fileName = orgModuleFileName;
                 if (!File.Exists(fileName))
                 {
-                    // try default path Library\modulename.fuel
-                    fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
-                    fileName = AddFileExtensionIfNeeded(fileName);
-                    if (!File.Exists(fileName))
-                    {
-                        fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
-                        fileName = AddFileExtensionIfNeeded(fileName);
-                    }
+					// try the given library path (if available)
+					fileName = LispUtils.LibraryPath + Path.DirectorySeparatorChar + orgModuleFileName;
+					fileName = AddFileExtensionIfNeeded(fileName);
+					if (!File.Exists(fileName)) 
+					{
+						// try default path .\Library\modulename.fuel
+						fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+						fileName = AddFileExtensionIfNeeded(fileName);
+						if (!File.Exists(fileName))
+						{
+							// try default path <fuel.exe-path>\Library\modulename.fuel
+							fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+							fileName = AddFileExtensionIfNeeded(fileName);
+							if (!File.Exists(fileName))
+							{
+								// try environment variable FUELPATH
+								string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+								if (envPath != null) 
+								{
+									fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
+									fileName = AddFileExtensionIfNeeded(fileName);
+								}
+							}
+						}
+					}
                 }
                 if (File.Exists(fileName))
                 {

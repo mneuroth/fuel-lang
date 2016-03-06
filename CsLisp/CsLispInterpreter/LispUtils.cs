@@ -68,6 +68,21 @@ namespace CsLisp
 
         #endregion
 
+		#region static properties
+
+		public static string LibraryPath { get; set; }
+
+		#endregion
+
+		#region static constructor
+
+		static LispUtils()
+		{
+			LibraryPath = string.Empty;	
+		}
+
+		#endregion
+
         #region extension methods
 
         /// <summary>
