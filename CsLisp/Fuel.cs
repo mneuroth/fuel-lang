@@ -88,10 +88,10 @@ namespace CsLisp
                 script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
                 loadFiles = false;
             }
-			if (args.Contains("-l="))
+            var libPath = args.Where(v => v.StartsWith("-l=")).Select(v => v);
+            if (libPath.Count()>0)
 			{
-				var libArg = args.Where(v => v.StartsWith("-l=")).Select(v => v);
-				libraryPath = libArg.First().Substring(3);
+				libraryPath = libPath.First().Substring(3);
 				LispUtils.LibraryPath = libraryPath;
 			}
 

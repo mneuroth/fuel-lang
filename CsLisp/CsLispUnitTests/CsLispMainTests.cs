@@ -129,7 +129,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                var args = new[] { "-l", "error.fuel" };
+                var args = new[] { "-x", "error.fuel" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Error executing script"));
