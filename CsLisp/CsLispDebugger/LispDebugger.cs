@@ -164,7 +164,7 @@ namespace CsLisp
                     {
                         script = debugger.CommandLineScript;
                     }
-                    ShowSourceCode(debugger, script, currentScope.CurrentLineNo);
+                    ShowSourceCode(debugger, script, currentScope.ModuleName, currentScope.CurrentLineNo);
                 }
                 else if (cmd.StartsWith("list") || cmd.StartsWith("t"))
                 {
@@ -267,7 +267,7 @@ namespace CsLisp
         /// </summary>
         public bool NeedsBreak(LispScope scope, Tuple<int, int, int> posInfosOfCurrentAstItem)
         {
-            if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item3, scope))
+            if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item3, scope.ModuleName, scope))
             {
                 IsProgramStop = false;
                 return true;
@@ -348,11 +348,11 @@ namespace CsLisp
             IsStopStepFcn = (scope) => true;
         }
 
-        private bool HitsBreakpoint(int lineNo, LispScope scope)
+        private bool HitsBreakpoint(int lineNo, string moduleName, LispScope scope)
         {
             foreach (var breakpoint in Breakpoints)
             {
-                bool isSameModule = IsSameModule(breakpoint.ModuleName, scope != null ? scope.ModuleName : null);
+                bool isSameModule = IsSameModule(breakpoint.ModuleName, scope != null ? scope.ModuleName : moduleName);
                 if (isSameModule && (lineNo == breakpoint.LineNo))
                 {
                     if (breakpoint.Condition.Length > 0 && scope != null)
@@ -374,9 +374,9 @@ namespace CsLisp
             return false;
         }
 
-        private bool HasBreakpointAt(int lineNo)
+        private bool HasBreakpointAt(int lineNo, string moduleName)
         {
-            return HitsBreakpoint(lineNo, null);
+            return HitsBreakpoint(lineNo, moduleName, null);
         }
 
         private void AddBreakpoint(int lineNo, string moduleName, string condition)
@@ -461,14 +461,14 @@ namespace CsLisp
             return module1.Name.Equals(module2.Name);
         }
 
-        private static void ShowSourceCode(LispDebugger debugger, string sourceCode, int? currentLineNo)
+        private static void ShowSourceCode(LispDebugger debugger, string sourceCode, string moduleName, int? currentLineNo)
         {
             if (debugger != null)
             {
                 string[] sourceCodeLines = sourceCode.Split('\n');
                 for (var i = 0; i < sourceCodeLines.Length; i++)
                 {
-                    string breakMark = debugger.HasBreakpointAt(i + 1) ? "B " : "  ";
+                    string breakMark = debugger.HasBreakpointAt(i + 1, moduleName) ? "B " : "  ";
                     string mark = currentLineNo != null && currentLineNo.Value == i + 1 ? "-->" : String.Empty;
                     debugger.Output.WriteLine("{0,3} {1,2} {2,3} {3}", i + 1, breakMark, mark, sourceCodeLines[i]);
                 }
@@ -512,9 +512,9 @@ namespace CsLisp
         /// Adds a breakpoint.
         /// Possible command strings after break:
         /// break 7             --&gt; breakpoint with just one line number in the current module
-        /// break 7:modulename  --&gt; breakpoint with line number and module name
+        /// break modulename:7  --&gt; breakpoint with line number and module name
         /// break 7 condition   --&gt; breakpoint with line number and condition
-        /// break 7:modulename condition --&gt; breakpoint with line number, module name and condition
+        /// break modulename:7 condition --&gt; breakpoint with line number, module name and condition
         /// </summary>
         /// <param name="debugger">The debugger.</param>
         /// <param name="cmd">The command.</param>
@@ -530,13 +530,14 @@ namespace CsLisp
                 rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : String.Empty;
                 if (cmdArgs.Length > 0)
                 {
+// TODO: behandlung von fileNamen mit spaces --> "..." parsen !
                     string moduleName = currentModuleName;
                     string lineNumberString = cmdArgs[0];
                     int posModuleSeparator = cmdArgs[0].IndexOf(":", StringComparison.Ordinal);
                     if (posModuleSeparator >= 0)
                     {
-                        moduleName = cmdArgs[0].Substring(posModuleSeparator+1);
-                        lineNumberString = cmdArgs[0].Substring(0, posModuleSeparator);
+                        lineNumberString = cmdArgs[0].Substring(posModuleSeparator + 1);
+                        moduleName = cmdArgs[0].Substring(0, posModuleSeparator);
                     }
                     Tuple<bool, int> val = ConvertToInt(lineNumberString);
                     if (val.Item1)
@@ -568,7 +569,7 @@ namespace CsLisp
             output.WriteLine("  (s)tep                       : step into function");
             output.WriteLine("  o(v)er                       : step over function");
             output.WriteLine("  (o)ut                        : step out of function");
-            output.WriteLine("  (b)reak line[:module] [cond] : set a breakpoint in line no with condition cond");
+            output.WriteLine("  (b)reak [module:]line [cond] : set a breakpoint in line no with condition cond");
             output.WriteLine("  clear [no]                   : clears a breakpoint with number no or clears all");
             output.WriteLine("  lis(t)                       : shows all breakpoints");
             output.WriteLine("  restart                      : restart program");

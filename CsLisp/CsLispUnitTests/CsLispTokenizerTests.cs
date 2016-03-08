@@ -168,7 +168,7 @@ namespace LispUnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(4, result.Count());
             var resultAsArray = result.ToArray();
-            Assert.AreEqual("NIL", resultAsArray[2].ToString());
+            Assert.AreEqual(LispToken.Nil, resultAsArray[2].ToString());
             Assert.AreEqual(LispTokenType.Nil, resultAsArray[2].Type);
         }
     }

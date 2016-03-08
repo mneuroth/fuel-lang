@@ -113,7 +113,7 @@ namespace LispUnitTests
         public void Test_DefWithNil()
         {
             LispVariant result = Lisp.Eval("(do (def a nil) (println a))");
-            Assert.AreEqual("NIL", result.ToString());
+            Assert.AreEqual(LispToken.Nil, result.ToString());
         }
 
         [TestMethod]

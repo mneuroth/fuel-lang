@@ -304,7 +304,7 @@ namespace CsLisp
             {
                 string currentItem = currentLevel == i ? "-->" : "   ";
 
-                ret += string.Format("{0,3}{1,5} {2} lineno={3} module={4}\n", currentItem, i, current.Name, current.CurrentLineNo, current.ModuleName);
+                ret = string.Format("{0,3}{1,5} name={2,-35} lineno={3,-4} module={4}\n", currentItem, i, current.Name, current.CurrentLineNo, current.ModuleName) + ret;
                 current = current.Previous;
                 i--;
             } while (current != null);
@@ -374,7 +374,7 @@ namespace CsLisp
                     if (select(value))
                     {
                         string info = show != null ? show(value) : string.Empty;
-                        Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value, value.Type, info);
+                        Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value, value.TypeString, info);
                     }
                 }
             }

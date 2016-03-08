@@ -49,7 +49,6 @@ namespace CsLisp
             }
 
             string script = null;
-			string libraryPath = null;
             var loadFiles = true;
             var trace = false;
             var compile = false;
@@ -67,7 +66,7 @@ namespace CsLisp
             }
             if (args.Contains("-v"))
             {
-                output.WriteLine(Lisp.Version);
+                output.WriteLine(Lisp.ProgramName + " " + Lisp.Version + " from " + Lisp.Date);
                 return;
             }
             if (args.Contains("-h"))
@@ -90,10 +89,10 @@ namespace CsLisp
             }
             var libPath = args.Where(v => v.StartsWith("-l=")).Select(v => v);
             if (libPath.Count()>0)
-			{
-				libraryPath = libPath.First().Substring(3);
-				LispUtils.LibraryPath = libraryPath;
-			}
+            {
+                string libraryPath = libPath.First().Substring(3);
+                LispUtils.LibraryPath = libraryPath;
+            }
 
             // handle options for compiler
             if (args.Contains("-c"))

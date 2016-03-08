@@ -81,7 +81,17 @@ namespace CsLisp
 
         public LispType Type { get; set; }
 
-        public string TypeString { get { return Type.ToString(); } }
+        public string TypeString
+        {
+            get
+            {
+                if (Type == LispType.NativeObject)
+                {
+                    return Type+"<"+Value.GetType()+">";                    
+                }
+                return Type.ToString();
+            }
+        }
 
         public LispToken Token { get; private set; }
 
@@ -147,7 +157,7 @@ namespace CsLisp
 
         #endregion
 
-        #region Constructer
+        #region Constructor
 
         /// <summary>
         /// Initializes the static elements of the <see cref="LispVariant"/> class.
@@ -345,7 +355,7 @@ namespace CsLisp
                         {
                             result += " ";
                         }
-                        result += element.ToString();
+                        result += element != null ? element.ToString() : LispToken.Nil;
                     }
                     result = "(" + result + ")";
                 }
@@ -466,7 +476,7 @@ namespace CsLisp
             }
             if (IsNil)
             {
-                return "NIL";
+                return LispToken.Nil;
             }
             if (IsList)
             {
@@ -494,7 +504,7 @@ namespace CsLisp
             }
             if (IsNativeObject)
             {
-                return NativeObjectStringRepresentation; // "NativeObject<"+Value.GetType()+">";
+                return NativeObjectStringRepresentation;
             }
             if (IsUndefined)
             {

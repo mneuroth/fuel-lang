@@ -160,7 +160,7 @@ namespace LispUnitTests
                 var args = new[] { "-v" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
-                Assert.IsTrue(s.StartsWith(Lisp.Version));
+                Assert.IsTrue(s.StartsWith(Lisp.ProgramName + " " + Lisp.Version + " from " + Lisp.Date));
             }
         }
 
@@ -236,7 +236,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("--> do line=1 start=1 stop=3"));
                 Assert.IsTrue(s.Contains("help for interactive loop:")); // help
                 Assert.IsTrue(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
-                Assert.IsTrue(s.Contains("-->    1 <main> lineno=3 module=command-line")); // stack
+                Assert.IsTrue(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
                 Assert.IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
                 Assert.IsTrue(s.Contains("(def a 42)")); // code
                 Assert.IsTrue(s.Contains("print --> function <unknown>                       : Function  : module=<builtin>")); // funcs                    

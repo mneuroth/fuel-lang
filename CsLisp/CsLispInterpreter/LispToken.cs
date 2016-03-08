@@ -210,7 +210,7 @@ namespace CsLisp
                 Type = LispTokenType.False;
                 Value = false;
             }
-            else if (text.Equals("nil"))
+            else if (text.ToUpper().Equals(Nil))
             {
                 Type = LispTokenType.Nil;
                 Value = null;
