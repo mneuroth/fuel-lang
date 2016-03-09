@@ -480,18 +480,6 @@ namespace CsLisp
             }
             if (IsList)
             {
-                /*
-                string ret = string.Empty;
-                foreach (var elem in ListValue)
-                {
-                    if (ret.Length > 0)
-                    {
-                        ret += ", ";
-                    }
-                    ret += elem.ToString();
-                }
-                return "("+ret+")";
-                */
                 return ExpandContainerToString(ListValue);
             }
             if (IsFunction)

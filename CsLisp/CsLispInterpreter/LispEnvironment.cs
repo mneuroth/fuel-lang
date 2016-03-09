@@ -276,10 +276,15 @@ namespace CsLisp
             scope[Def] = CreateFunction(def_form, isSpecialForm: true);
             scope[Gdef] = CreateFunction(gdef_form, isSpecialForm: true);
             scope[Setf] = CreateFunction(setf_form, isSpecialForm: true);
-            scope[DefineMacro] = CreateFunction(definemacro_form, isSpecialForm: true, isEvalInExpand: true);
+            // deprecated macros:
+            scope[DefineMacro] = CreateFunction(definemacro_form, isSpecialForm: true, isEvalInExpand: false);
+            // compile time expand for macros:
+            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
+            // run time expand for macros:
+            scope["define-macro-evaluate"] = CreateFunction(definemacroevaluate_form, isSpecialForm: true, isEvalInExpand: false);
+// TODO was passiert mit diesen funktionen?
             scope["macro-expand"] = CreateFunction(macroexpand_form, isSpecialForm: true, isEvalInExpand: true);
             scope["macro-expand-flat"] = CreateFunction(macroexpandflat_form, isSpecialForm: true, isEvalInExpand: true);
-            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
             scope[Quote] = CreateFunction(quote_form, isSpecialForm: true);
             scope[Quasiquote] = CreateFunction(quasiquote_form, isSpecialForm: true);
             scope[If] = CreateFunction(if_form, isSpecialForm: true);
@@ -697,35 +702,26 @@ namespace CsLisp
             throw new LispException(string.Format("Index out of range in args function (index={0} max={1})", index, array.Length));
         }
 
-        // used also for processing macros !
         public static LispVariant ApplyFcn(object[] args, LispScope scope)
         {
             CheckArgs(Apply, 2, args, scope);
 
             var fcn = LispInterpreter.EvalAst(args[0], scope);
-            if (fcn.IsList)
-            {
-                fcn = LispInterpreter.EvalAst(fcn, scope);
-                if (!fcn.IsFunction)
-                {
-                    return fcn;
-                }
-            }
+// TODO --> fuer wass ist das notwendig ? war das ggf. fuer macros notwendig ?
+            //if (fcn.IsList)
+            //{
+            //    fcn = LispInterpreter.EvalAst(fcn, scope);
+            //    if (!fcn.IsFunction)
+            //    {
+            //        return fcn;
+            //    }
+            //}
 
             var arguments = (LispVariant)args[1];
 
             if (arguments.IsList)
             {
                 var argumentsArray = arguments.ListValue.ToArray();
-// TODO
-                //var evaluatedArgs = new object[argumentsArray.Length];
-                //for (int i = 0; i < evaluatedArgs.Length; i++)
-                //{
-                //    // apply is no special form --> arguments are already evaluated !
-                //    evaluatedArgs[i] = argumentsArray[i]; // old: LispInterpreter.EvalAst(argumentsArray[i], scope);
-                //}
-
-                //var result = fcn.FunctionValue.Function(evaluatedArgs, scope);
                 var result = fcn.FunctionValue.Function(argumentsArray, scope);
                 return result;
             }
@@ -827,6 +823,19 @@ namespace CsLisp
             return null;
         }
 
+        private static LispVariant definemacroevaluate_form(object[] args, LispScope scope)
+        {
+            CheckArgs(DefineMacroExpand, 3, args, scope);
+
+            var macros = scope.GlobalScope[Macros] as LispScope;
+            if (macros != null)
+            {
+                macros[args[0].ToString()] = new Tuple<object, object>(args[1], args[2]);
+            }
+
+            return null;
+        }
+
 // TODO --> implementieren --> dynamisch code erzeugen und in den Ast einhaengen !
         // (define-macro-expand name (args) (expression))
         private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
@@ -842,7 +851,7 @@ namespace CsLisp
                 macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), result as IEnumerable<object>);
             }
 
-            List<object> ret = new List<object>() { args[0], args[1], result };
+            //List<object> ret = new List<object>() { args[0], args[1], result };
             //return ret;
             //return new LispVariant(ret);
             return null; // TODO gulp working replace macro new LispVariant(result);
