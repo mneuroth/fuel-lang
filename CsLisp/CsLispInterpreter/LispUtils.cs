@@ -70,7 +70,21 @@ namespace CsLisp
 
 		#region static properties
 
+        /// <summary>
+        /// Gets or sets the fuel library path.
+        /// </summary>
+        /// <value>
+        /// The library path.
+        /// </value>
 		public static string LibraryPath { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the compile time macros are supported.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if compile time macros are enabled; otherwise, <c>false</c>.
+        /// </value>
+        public static bool IsCompileTimeMacroEnabled { get; private set; }
 
 		#endregion
 
@@ -78,7 +92,12 @@ namespace CsLisp
 
 		static LispUtils()
 		{
-			LibraryPath = string.Empty;	
+			LibraryPath = string.Empty;
+#if ENABLE_COMPILE_TIME_MACROS
+		    IsCompileTimeMacroEnabled = true;
+#else
+		    IsCompileTimeMacroEnabled = false;
+#endif
 		}
 
 		#endregion

@@ -101,7 +101,7 @@ namespace CsLisp
 
             if (ast is LispVariant)
             {
-                var item = (LispVariant) ast;
+                var item = (LispVariant)ast;
                 // evaluate the value for the symbol
                 if (item.IsSymbol)
                 {
@@ -158,12 +158,20 @@ namespace CsLisp
                     var expression = (IEnumerable<object>)runtimeMacro.Item2;
                     int i = 1;
 // TODO --> Rekursive macros ... flag replaced auswerten
+// TODO Code Duplikat !!!
                     bool anyMacroReplaced = false;
                     foreach (var formalParameter in (IEnumerable<object>)runtimeMacro.Item1)
                     {
-                        LispVariant value = new LispVariant(astAsList[i]);
+                        object value = null;
+                        if (astAsList[i] is IEnumerable<object>)
+                        {
+                            value = (IEnumerable<object>)astAsList[i];
+                        }
+                        else
+                        {
+                            value =  new LispVariant(astAsList[i]);   
+                        }
                         expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression, ref anyMacroReplaced);
-
                         i++;
                     }
 
@@ -207,7 +215,8 @@ namespace CsLisp
             var arguments = new object[astWithResolvedValues.Count - 1];
             for (var i = 1; i < astWithResolvedValues.Count; i++)
             {
-                var needEvaluation = (astWithResolvedValues[i] is IEnumerable<object>) &&
+                var isListValue = false; //(astWithResolvedValues[i] is LispVariant) && ((LispVariant)astWithResolvedValues[i]).IsList;
+                var needEvaluation = ((astWithResolvedValues[i] is IEnumerable<object>) || isListValue) &&
                                      !functionWrapper.IsSpecialForm;
                 arguments[i - 1] = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
             }
@@ -248,14 +257,13 @@ namespace CsLisp
                 return ast;
             }
 
-            // process define-macro statements ==> call special form, this will add macro to global scope as side effect
+#if ENABLE_COMPILE_TIME_MACROS 
+            // compile time macro: process define-macro statements ==> call special form, this will add macro to global scope as side effect
             var function = astAsList.First();
             var functionName = function.ToString();
-//TODO --> static flag mit support fuer runtime / compile Time macros --> dieser block ist nur fuer compile time macros notwendig !
             if (globalScope != null && globalScope.ContainsKey(functionName))
             {
                 var fcn = ((LispVariant)globalScope[functionName]).FunctionValue;
-// TODO --> braucht man wirklich IsEvalInExpand, wenn macros ausschliesslich expandiert (ersetzt) werden? --> nur bei compileTime Macors notwendig --> define setzen ?
                 if (fcn.IsEvalInExpand)
                 {
                     var args = new List<object>(astAsList);
@@ -267,7 +275,7 @@ namespace CsLisp
                 }
             }
 
-            // process macro expansion in an expression which calls a macro
+            // compile time macros: process macro expansion in an expression which calls a macro
             if (LispEnvironment.IsMacro(function, globalScope))
             {
                 var macro = LispEnvironment.GetMacro(function, globalScope);
@@ -276,6 +284,7 @@ namespace CsLisp
                     var macroExpand = (LispMacroExpand)macro;
                     var expression = macroExpand.Expression;
 
+// TODO Code Duplikat !!!
                     // replace formal parameters with actual parameters
                     int i = 1;
                     foreach(var formalParameter in macroExpand.FormalParameters)
@@ -286,13 +295,13 @@ namespace CsLisp
                         i++;
                     }
 
-                    //TODO working gulp: 
 // TODO working gulp --> rekursives Makro Expandieren unterstuetzen !!!
 // TODO --> im code definierte funktionen sind bei expandierung der Macros noch nicht bekannt !!! --> runtime Macros verwenden !
 
                     return expression;
                 }
             }
+#endif
 
             var expandedAst = new List<object>();
             // Expand recursively and handle enumarations (make them flat !)
@@ -333,7 +342,7 @@ namespace CsLisp
             return new Tuple<int, int, int>(-1, -1, -1);
         }
 
-        private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, LispVariant symbolValue, IEnumerable<object> expression, ref bool replacedAnything)
+        private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, ref bool replacedAnything)
         {
             var ret = new List<object>();
             foreach(var elem in expression)
@@ -388,7 +397,11 @@ namespace CsLisp
                 arguments.Add(EvalAst(arg, globalScope));
             }
 
-            evalMacro.Add(arguments);
+            var quotedArguments = new LispVariant(LispType.List, new List<object>());
+            quotedArguments.Add(new LispVariant(LispType.Symbol, LispEnvironment.Quote));
+            quotedArguments.Add(arguments);
+
+            evalMacro.Add(quotedArguments);
 
             // evaluate macroFcn with given args
             // (apply (lambda ...) arg1 arg2 ...)

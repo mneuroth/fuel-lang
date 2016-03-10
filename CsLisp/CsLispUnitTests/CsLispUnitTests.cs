@@ -335,8 +335,80 @@ namespace LispUnitTests
         public void Test_Macros1()
         {
             LispVariant result = Lisp.Eval("(do (define-macro blub (lambda (x y) (println x y))) (println (quote (1 2 3))) (blub 3 4))");
-            Assert.AreEqual("3 4", result.ToString());
+            Assert.AreEqual("quote (3 4)", result.ToString());
         }
+
+        [TestMethod]
+        public void Test_MacrosEvaluateNested()
+        {
+            const string macroExpandScript = @"(do
+  (define-macro-evaluate first-macro
+        (a b) 
+        (do 
+           (println first-macro)
+    	   (def i 1)
+           (+ a b i)
+        )
+  )
+  
+  (define-macro-evaluate second-macro
+        (x y) 
+        (do 
+           (println second-macro)
+           (* x y (first-macro (+ x 1) (+ y 2)))
+        )
+  )
+  
+  (def m (second-macro 4 3))
+)";
+
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval(macroExpandScript);
+                Assert.AreEqual("132", result.ToString());
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("first-macro"));
+                Assert.IsTrue(s.Contains("second-macro"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MacrosEvaluateRecursive()
+        {
+            const string macroExpandScript = @"(do
+  (define-macro-evaluate first-macro
+        (a b) 
+        (do 
+           (println first-macro)
+    	   (def i 1)
+           (+ a b i)
+        )
+  )
+  
+  (define-macro-evaluate second-macro
+        (x y) 
+        (do 
+           (println second-macro)
+           (* x y (first-macro x (second-macro x y)))
+        )
+  )
+  
+  (def m (second-macro 4 3))
+)";
+
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval(macroExpandScript);
+                Assert.AreEqual("132", result.ToString());
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("first-macro"));
+                Assert.IsTrue(s.Contains("second-macro"));
+            }
+        }
+
+#if ENABLE_COMPILE_TIME_MACROS 
 
         [TestMethod]
         public void Test_MacrosExpand1()
@@ -377,7 +449,10 @@ namespace LispUnitTests
             Assert.AreEqual("blubxyz", result.ToString());
         }
 
+#endif
+
         [TestMethod]
+        [Ignore]
         public void Test_MacrosSetf2()
         {
             LispVariant result = Lisp.Eval("(do (def a 42) (define-macro my-setf (lambda (x value) (setf x value))) (my-setf a (+ 8 9)) (println a))");

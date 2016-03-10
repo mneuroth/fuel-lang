@@ -123,7 +123,10 @@ namespace CsLisp
         private const string MapFcn = "map";
         private const string ReduceFcn = "reduce";
         private const string DefineMacro = "define-macro";
+#if ENABLE_COMPILE_TIME_MACROS 
         private const string DefineMacroExpand = "define-macro-expand";
+#endif
+        private const string DefineMacroEvaluate = "define-macro-evaluate";
         private const string Lambda = "lambda";
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
@@ -277,14 +280,18 @@ namespace CsLisp
             scope[Gdef] = CreateFunction(gdef_form, isSpecialForm: true);
             scope[Setf] = CreateFunction(setf_form, isSpecialForm: true);
             // deprecated macros:
-            scope[DefineMacro] = CreateFunction(definemacro_form, isSpecialForm: true, isEvalInExpand: false);
+// TODO --> deprecated macros entfernen ...
+            scope[DefineMacro] = CreateFunction(definemacro_form, isSpecialForm: true);
+#if ENABLE_COMPILE_TIME_MACROS 
             // compile time expand for macros:
-            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
+            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);                
+#endif
             // run time expand for macros:
-            scope["define-macro-evaluate"] = CreateFunction(definemacroevaluate_form, isSpecialForm: true, isEvalInExpand: false);
-// TODO was passiert mit diesen funktionen?
+            scope[DefineMacroEvaluate] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
+// TODO was passiert mit diesen beiden funktionen?
             scope["macro-expand"] = CreateFunction(macroexpand_form, isSpecialForm: true, isEvalInExpand: true);
             scope["macro-expand-flat"] = CreateFunction(macroexpandflat_form, isSpecialForm: true, isEvalInExpand: true);
+
             scope[Quote] = CreateFunction(quote_form, isSpecialForm: true);
             scope[Quasiquote] = CreateFunction(quasiquote_form, isSpecialForm: true);
             scope[If] = CreateFunction(if_form, isSpecialForm: true);
@@ -825,7 +832,7 @@ namespace CsLisp
 
         private static LispVariant definemacroevaluate_form(object[] args, LispScope scope)
         {
-            CheckArgs(DefineMacroExpand, 3, args, scope);
+            CheckArgs(DefineMacroEvaluate, 3, args, scope);
 
             var macros = scope.GlobalScope[Macros] as LispScope;
             if (macros != null)
@@ -835,6 +842,8 @@ namespace CsLisp
 
             return null;
         }
+
+#if ENABLE_COMPILE_TIME_MACROS 
 
 // TODO --> implementieren --> dynamisch code erzeugen und in den Ast einhaengen !
         // (define-macro-expand name (args) (expression))
@@ -856,6 +865,8 @@ namespace CsLisp
             //return new LispVariant(ret);
             return null; // TODO gulp working replace macro new LispVariant(result);
         }
+
+#endif
 
 // TODO --> ggf. entfernen
         private static LispVariant macroexpand_form(object[] args, LispScope scope)
