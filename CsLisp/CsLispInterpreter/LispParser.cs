@@ -126,13 +126,19 @@ namespace CsLisp
                         quote.Add(new LispVariant(nextToken));
                         i++;
                     }
-                    current.Add(quote);
+                    if (current != null)
+                    {
+                        current.Add(quote);                        
+                    }
                 }
                 else if (token.Type == LispTokenType.UnQuote || token.Type == LispTokenType.UnQuoteSplicing)
                 {
                     i++;
                     var nextToken = tokens[i];
-                    current.Add(new LispVariant(nextToken, unQuoted: token.Type == LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing));
+                    if (current != null)
+                    {
+                        current.Add(new LispVariant(nextToken, unQuoted: token.Type == LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing));                        
+                    }
                 }
                 else if (token.Type == LispTokenType.Comment)
                 {

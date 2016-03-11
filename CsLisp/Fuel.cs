@@ -87,8 +87,8 @@ namespace CsLisp
                 script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
                 loadFiles = false;
             }
-            var libPath = args.Where(v => v.StartsWith("-l=")).Select(v => v);
-            if (libPath.Count()>0)
+            var libPath = args.Where(v => v.StartsWith("-l=")).Select(v => v).ToArray();
+            if (libPath.Length > 0)
             {
                 string libraryPath = libPath.First().Substring(3);
                 LispUtils.LibraryPath = libraryPath;
@@ -263,9 +263,9 @@ namespace CsLisp
     // TODO:
     // (- License und Copyright header in quellcode dateien einbauen
     // - Quellcode aufraeumen
-    // - TODOs behandeln
-    // - Makro Behandlung aufraeumen
-    // - setf macro implementieren...
+    // (- TODOs behandeln
+    // (- Makro Behandlung aufraeumen
+    // (- setf macro implementieren...
     // (- unit test reparieren (output/input queue behandlung)
     // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
     // - Testabdeckung verbessern

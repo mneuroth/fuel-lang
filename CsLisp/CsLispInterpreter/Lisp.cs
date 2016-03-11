@@ -65,7 +65,7 @@ namespace CsLisp
 
         public const string Name = "FUEL(isp)";
         public const string Version = "v0.99.1";
-        public const string Date = "10.3.2016";
+        public const string Date = "11.3.2016";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";
@@ -95,7 +95,11 @@ namespace CsLisp
             currentScope.ModuleName = moduleName;
             currentScope.Tracing = tracing;
             var ast = LispParser.Parse(lispCode, currentScope);
+#if ENABLE_COMPILE_TIME_MACROS 
             var expandedAst = LispInterpreter.ExpandMacros(ast, currentScope);
+#else
+            var expandedAst = ast;
+#endif
             var result = LispInterpreter.EvalAst(expandedAst, currentScope);
             return result;
         }

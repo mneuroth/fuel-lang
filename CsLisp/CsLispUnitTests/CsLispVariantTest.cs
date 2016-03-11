@@ -66,6 +66,44 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_VariantConvert()
+        {
+            LispVariant variant1 = new LispVariant(4.3);
+            LispVariant variant2 = new LispVariant(56.1);
+            LispVariant variant3 = new LispVariant(42);
+            LispVariant variant4 = new LispVariant("4.5");
+            LispVariant variant5 = new LispVariant(true);
+            LispVariant variant6 = new LispVariant(LispType.Int, (object)0);
+            Assert.AreEqual(true, variant1.ToBool());
+            Assert.AreEqual(true, variant3.ToBool());
+            Assert.AreEqual(false, variant6.ToBool());
+            Assert.AreEqual(4.5, variant4.ToDouble());
+            Assert.AreEqual(1.0, variant5.ToDouble());
+            Assert.AreEqual(56, variant2.ToInt());
+            Assert.AreEqual(true, variant2.ToBool());
+        }
+
+        [TestMethod]
+        public void Test_VariantOperations()
+        {
+            LispVariant variant1 = new LispVariant(4.3);
+            LispVariant variant2 = new LispVariant(56.1);
+            LispVariant variant3 = new LispVariant(42);
+            LispVariant variant4 = new LispVariant(45);
+            Assert.AreEqual(1890, (variant3 * variant4).ToInt());
+            Assert.AreEqual(60.4, (variant1 + variant2).ToDouble());
+        }
+
+        [TestMethod]
+        public void Test_VariantEqualOp()
+        {
+            LispVariant variant1 = new LispVariant(4.3);
+            LispVariant variant2 = new LispVariant(56.1);
+            Assert.IsFalse(LispVariant.EqualOp(variant1, variant2));
+            Assert.IsTrue(LispVariant.EqualOp(variant1, variant1));
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_VariantCastError()
         {

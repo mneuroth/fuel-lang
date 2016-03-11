@@ -126,69 +126,43 @@ namespace CsLisp
                 return new LispVariant(LispType.Nil);
             }
 
-            // is this function a macro ==> evaluate the macro... and return
+            // is this function a macro ==> process the macro and return
             if (LispEnvironment.IsMacro(astAsList.First(), scope.GlobalScope))
             {
                 // check the macro modus: evaluate or expand or lambda
                 var macro = LispEnvironment.GetMacro(astAsList.First(), scope.GlobalScope);
-                // evaluate macro:
-                if (macro is Tuple<object, object>)
+
+                // evaluate macro at run time:
+                if (macro is LispMacroRuntimeEvaluate)
                 {
-// TODO --> replace formal with real parameters (nicht zur compile zeit wei bei macro-expand) sondern zur laufzeit !!!
-
-                    //         Item1          Item2
-                    // my-setf (x value) -->  (setf (sym (eval x)) (eval value))
-
-                    // ast:
+                    // Example for macro at runtime handling:
+                    //
+                    // macro definition:
+                    // (define-macro-evaluate my-setf (x value) (setf x value))
+                    //
+                    // call (ast):
                     // (my-setf a (+ \"blub\" \"xyz\")) 
                     //          |         |
                     //          v         v
                     //          x        value
-                    // ==> (setf (sym (eval a)) (eval (+ \"blub\" \"xyz\")))
-                    // ==> (setf a (+ \"blub\" \"xyz\"))  <-- formale Parameter ersetzen (symbol weise)
                     //
-                    // geht nicht, durch apply ersetzen ! Da Problem mit evaluieren der Parameter !!!
-                    // --> (apply (lambda (x value) macro.Item2) '(a (+ \"blub\" \"xyz\")))
+                    // Result:
+                    // (setf a (+ \"blub\" \"xyz\"))  <-- replace formal arguments (as symbol)
 
-                    Tuple<object, object> runtimeMacro = (Tuple<object, object>) macro;
-
-                    // 1) replace formal with current parameters in expression
-                    // 2) evaluate expression
-
-                    var expression = (IEnumerable<object>)runtimeMacro.Item2;
-                    int i = 1;
-// TODO --> Rekursive macros ... flag replaced auswerten
-// TODO Code Duplikat !!!
                     bool anyMacroReplaced = false;
-                    foreach (var formalParameter in (IEnumerable<object>)runtimeMacro.Item1)
-                    {
-                        object value = null;
-                        if (astAsList[i] is IEnumerable<object>)
-                        {
-                            value = (IEnumerable<object>)astAsList[i];
-                        }
-                        else
-                        {
-                            value =  new LispVariant(astAsList[i]);   
-                        }
-                        expression = RepaceSymbolWithValueInExpression((LispVariant)formalParameter, value, expression, ref anyMacroReplaced);
-                        i++;
-                    }
+                    var runtimeMacro = (LispMacroRuntimeEvaluate)macro;
+                    var expression = ReplaceFormalArgumentsInExpression(runtimeMacro.FormalArguments, astAsList, runtimeMacro.Expression, ref anyMacroReplaced);
 
                     return EvalAst(expression, scope);
                 }
-                // expand macro:
-                if (macro is LispMacroExpand)
-                {
-                    return new LispVariant();
-                }
-// TODO --> should be deleted !!!
-                // lambda macro:
-                if (macro is IEnumerable<object>)
-                {
-                    var expression = EvaluateMacro(astAsList.First(), astAsList, scope.GlobalScope);
-                    return expression;
-                }
+                
+                // expand macro at compile time: --> nothing to do at run time !
+                // code not needed, because code for compile time macros will be removed in ExpandMacro phase
+                //if (macro is LispMacroCompileTimeExpand)
+                //{
+                //    return new LispVariant();
+                //}
+
                 throw new Exception("Unexpected macro modus!");
             }
 
@@ -215,8 +189,7 @@ namespace CsLisp
             var arguments = new object[astWithResolvedValues.Count - 1];
             for (var i = 1; i < astWithResolvedValues.Count; i++)
             {
-                var isListValue = false; //(astWithResolvedValues[i] is LispVariant) && ((LispVariant)astWithResolvedValues[i]).IsList;
-                var needEvaluation = ((astWithResolvedValues[i] is IEnumerable<object>) || isListValue) &&
+                var needEvaluation = (astWithResolvedValues[i] is IEnumerable<object>) &&
                                      !functionWrapper.IsSpecialForm;
                 arguments[i - 1] = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
             }
@@ -231,6 +204,8 @@ namespace CsLisp
             // call the function with the arguments
             return functionWrapper.Function(arguments, scope);
         }
+
+#if ENABLE_COMPILE_TIME_MACROS 
 
         public static object ExpandMacros(object ast, LispScope globalScope)
         {
@@ -257,7 +232,6 @@ namespace CsLisp
                 return ast;
             }
 
-#if ENABLE_COMPILE_TIME_MACROS 
             // compile time macro: process define-macro statements ==> call special form, this will add macro to global scope as side effect
             var function = astAsList.First();
             var functionName = function.ToString();
@@ -269,9 +243,13 @@ namespace CsLisp
                     var args = new List<object>(astAsList);
                     args.RemoveAt(0);
 
-// TODO --> replace current macro code with (recursivly) replaced macro code after evaluation 
-                    LispVariant macroEvalResult = fcn.Function(args.ToArray(), globalScope);
-                    return macroEvalResult != null ? macroEvalResult.ListValue : ast;
+                    // process compile time macro definition 
+                    //   --> side effect: add macro definition to internal macro scope
+                    fcn.Function(args.ToArray(), globalScope);
+
+                    // compile time macros definitions will be removed from code in expand macro phase
+                    // because only the side effect above is needed for further macro replacements
+                    return null;
                 }
             }
 
@@ -279,40 +257,28 @@ namespace CsLisp
             if (LispEnvironment.IsMacro(function, globalScope))
             {
                 var macro = LispEnvironment.GetMacro(function, globalScope);
-                if (macro is LispMacroExpand)
+                if (macro is LispMacroCompileTimeExpand)
                 {
-                    var macroExpand = (LispMacroExpand)macro;
-                    var expression = macroExpand.Expression;
-
-// TODO Code Duplikat !!!
-                    // replace formal parameters with actual parameters
-                    int i = 1;
-                    foreach(var formalParameter in macroExpand.FormalParameters)
-                    {
-// TODO working: do not replace anything with values, just replace macro expressions !
-                        LispVariant value = new LispVariant(astAsList[i]); 
-                        expression = RepaceSymbolWithValueInExpression((LispVariant) formalParameter, value, expression, ref anyMacroReplaced);
-                        i++;
-                    }
-
-// TODO working gulp --> rekursives Makro Expandieren unterstuetzen !!!
-// TODO --> im code definierte funktionen sind bei expandierung der Macros noch nicht bekannt !!! --> runtime Macros verwenden !
-
-                    return expression;
+                    var macroExpand = (LispMacroCompileTimeExpand)macro;
+                    return ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, ref anyMacroReplaced);
                 }
             }
-#endif
 
             var expandedAst = new List<object>();
             // Expand recursively and handle enumarations (make them flat !)
             foreach (var elem in astAsList)
             {
                 var expandResult = ExpandMacros(elem, globalScope);
-                expandedAst.Add(expandResult);                    
+                // ignore code which is removed in nacri expand phase
+                if (expandResult != null)
+                {
+                    expandedAst.Add(expandResult);                    
+                }
             }
 
             return expandedAst;
         }
+#endif
 
         #endregion
 
@@ -368,6 +334,26 @@ namespace CsLisp
             return ret;
         }
 
+        private static IEnumerable<object> ReplaceFormalArgumentsInExpression(IEnumerable<object> formalArguments, IList<object> astAsList, IEnumerable<object> expression, ref bool anyMacroReplaced)
+        {
+            int i = 1;
+            foreach (var formalArgument in formalArguments)
+            {
+                object value;
+                if (astAsList[i] is IEnumerable<object>)
+                {
+                    value = astAsList[i];
+                }
+                else
+                {
+                    value = new LispVariant(astAsList[i]);
+                }
+                expression = RepaceSymbolWithValueInExpression((LispVariant)formalArgument, value, expression, ref anyMacroReplaced);
+                i++;
+            }
+            return expression;
+        }
+
         private static bool IsSymbol(object elem)
         {
             bool isSymbol = false;
@@ -377,36 +363,6 @@ namespace CsLisp
                 isSymbol = variant.IsSymbol;
             }
             return isSymbol;
-        }
-
-        private static LispVariant EvaluateMacro(object function, IEnumerable<object> rawExpression, LispScope globalScope)
-        {
-            var macroFcn = LispEnvironment.GetMacro(function, globalScope);
-
-            var argsTmp = new List<object>(rawExpression);
-            argsTmp.RemoveAt(0);
-            var args = argsTmp.ToArray();
-
-            var evalMacro = new List<object>();
-            evalMacro.Add(new LispVariant(LispType.Symbol, LispEnvironment.Apply));
-            evalMacro.Add(macroFcn);
-
-            var arguments = new LispVariant(LispType.List, new List<object>());
-            foreach (var arg in args)
-            {
-                arguments.Add(EvalAst(arg, globalScope));
-            }
-
-            var quotedArguments = new LispVariant(LispType.List, new List<object>());
-            quotedArguments.Add(new LispVariant(LispType.Symbol, LispEnvironment.Quote));
-            quotedArguments.Add(arguments);
-
-            evalMacro.Add(quotedArguments);
-
-            // evaluate macroFcn with given args
-            // (apply (lambda ...) arg1 arg2 ...)
-            var result = EvalAst(evalMacro, globalScope);
-            return result;
         }
 
         #endregion

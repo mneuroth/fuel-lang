@@ -33,11 +33,11 @@ using System.Text;
 namespace CsLisp
 {
     /// <summary>
-    /// Class to hold informations about macro expansions
+    /// Class to hold informations about macro expansions at compile time.
     /// </summary>
-    public class LispMacroExpand : Tuple<IEnumerable<object>, IEnumerable<object>>
+    internal class LispMacroCompileTimeExpand : Tuple<IEnumerable<object>, IEnumerable<object>>
     {
-        public IEnumerable<object> FormalParameters
+        public IEnumerable<object> FormalArguments
         {
             get
             {
@@ -53,8 +53,19 @@ namespace CsLisp
             }
         }
 
-        public LispMacroExpand(IEnumerable<object> parameters, IEnumerable<object> expression)
+        public LispMacroCompileTimeExpand(IEnumerable<object> parameters, IEnumerable<object> expression)
             : base(parameters, expression)
+        {     
+        }
+    }
+
+    /// <summary>
+    /// Class to hold informations about macro expansions at run time.
+    /// </summary>
+    internal class LispMacroRuntimeEvaluate : LispMacroCompileTimeExpand
+    {
+        public LispMacroRuntimeEvaluate(object parameters, object expression)
+            : base((IEnumerable<object>)parameters, (IEnumerable<object>)expression)
         {     
         }
     }
@@ -103,13 +114,10 @@ namespace CsLisp
     {
         #region constants
 
-
+        public const string MetaTag = "###";
         public const string Builtin = "<builtin>";
 
-        public const string MetaTag = "###";
-
         private const string MainScope = "<main>";
-        private const string AnonymousScope = "<anonymous>";
 
         private const string If = "if";
         private const string While = "while";
@@ -122,11 +130,11 @@ namespace CsLisp
         private const string Gdefn = "gdefn";
         private const string MapFcn = "map";
         private const string ReduceFcn = "reduce";
-        private const string DefineMacro = "define-macro";
+        private const string DefineMacro = "define-macro";      // == define-macro-evaluate
+        private const string DefineMacroEvaluate = "define-macro-evaluate";
 #if ENABLE_COMPILE_TIME_MACROS 
         private const string DefineMacroExpand = "define-macro-expand";
 #endif
-        private const string DefineMacroEvaluate = "define-macro-evaluate";
         private const string Lambda = "lambda";
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
@@ -279,18 +287,18 @@ namespace CsLisp
             scope[Def] = CreateFunction(def_form, isSpecialForm: true);
             scope[Gdef] = CreateFunction(gdef_form, isSpecialForm: true);
             scope[Setf] = CreateFunction(setf_form, isSpecialForm: true);
-            // deprecated macros:
-// TODO --> deprecated macros entfernen ...
-            scope[DefineMacro] = CreateFunction(definemacro_form, isSpecialForm: true);
+            // macros are:
+            // a special form to control evaluation of function parameters inside the macro code
+            // there are two options possible:
+            //  - run time evaluation of macros
+            //  - compile time replacement/expanding of macros
+            scope[DefineMacro] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
+            // run time evaluation for macros: 
+            scope[DefineMacroEvaluate] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
 #if ENABLE_COMPILE_TIME_MACROS 
             // compile time expand for macros:
-            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);                
+            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
 #endif
-            // run time expand for macros:
-            scope[DefineMacroEvaluate] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
-// TODO was passiert mit diesen beiden funktionen?
-            scope["macro-expand"] = CreateFunction(macroexpand_form, isSpecialForm: true, isEvalInExpand: true);
-            scope["macro-expand-flat"] = CreateFunction(macroexpandflat_form, isSpecialForm: true, isEvalInExpand: true);
 
             scope[Quote] = CreateFunction(quote_form, isSpecialForm: true);
             scope[Quasiquote] = CreateFunction(quasiquote_form, isSpecialForm: true);
@@ -437,11 +445,11 @@ namespace CsLisp
 
         private static string AddFileExtensionIfNeeded(string fileName)
         {
-            const string EXTENSION = ".fuel";
+            const string extension = ".fuel";
 
-            if (!fileName.EndsWith(EXTENSION))
+            if (!fileName.EndsWith(extension))
             {
-                fileName += EXTENSION;
+                fileName += extension;
             }
             return fileName;
         }
@@ -714,15 +722,6 @@ namespace CsLisp
             CheckArgs(Apply, 2, args, scope);
 
             var fcn = LispInterpreter.EvalAst(args[0], scope);
-// TODO --> fuer wass ist das notwendig ? war das ggf. fuer macros notwendig ?
-            //if (fcn.IsList)
-            //{
-            //    fcn = LispInterpreter.EvalAst(fcn, scope);
-            //    if (!fcn.IsFunction)
-            //    {
-            //        return fcn;
-            //    }
-            //}
 
             var arguments = (LispVariant)args[1];
 
@@ -815,21 +814,6 @@ namespace CsLisp
             return value;
         }
 
-        // ??? (define-macro name (arg1 arg2 ...) (block ... ))
-        // (define-macro name (lambda (arg1 arg2 ...) (block ... )))
-        private static LispVariant definemacro_form(object[] args, LispScope scope)
-        {
-            CheckArgs(DefineMacro, 2, args, scope);
-
-            var macros = scope.GlobalScope[Macros] as LispScope;
-            if (macros != null)
-            {
-                macros[args[0].ToString()] = args[1];
-            }
-
-            return null;
-        }
-
         private static LispVariant definemacroevaluate_form(object[] args, LispScope scope)
         {
             CheckArgs(DefineMacroEvaluate, 3, args, scope);
@@ -837,7 +821,7 @@ namespace CsLisp
             var macros = scope.GlobalScope[Macros] as LispScope;
             if (macros != null)
             {
-                macros[args[0].ToString()] = new Tuple<object, object>(args[1], args[2]);
+                macros[args[0].ToString()] = new LispMacroRuntimeEvaluate(args[1], args[2]);
             }
 
             return null;
@@ -845,54 +829,23 @@ namespace CsLisp
 
 #if ENABLE_COMPILE_TIME_MACROS 
 
-// TODO --> implementieren --> dynamisch code erzeugen und in den Ast einhaengen !
         // (define-macro-expand name (args) (expression))
         private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
         {
             CheckArgs(DefineMacroExpand, 3, args, scope);
 
-            object result = null;
             var macros = scope.GlobalScope[Macros] as LispScope;
             if (macros != null)
             {
                 // allow macros in macros --> recursive call for ExpandMacros()
-                result = LispInterpreter.ExpandMacros(GetExpression(args[2]), scope);
-                macros[args[0].ToString()] = new LispMacroExpand(GetExpression(args[1]), result as IEnumerable<object>);
+                object result = LispInterpreter.ExpandMacros(GetExpression(args[2]), scope);
+                macros[args[0].ToString()] = new LispMacroCompileTimeExpand(GetExpression(args[1]), result as IEnumerable<object>);
             }
 
-            //List<object> ret = new List<object>() { args[0], args[1], result };
-            //return ret;
-            //return new LispVariant(ret);
-            return null; // TODO gulp working replace macro new LispVariant(result);
+            return null;
         }
 
 #endif
-
-// TODO --> ggf. entfernen
-        private static LispVariant macroexpand_form(object[] args, LispScope scope)
-        {
-            CheckArgs(DefineMacro, 1, args, scope);
-
-            return LispInterpreter.EvalAst(args[0], scope);
-        }
-
-// TODO --> ggf. entfernen
-        private static LispVariant macroexpandflat_form(object[] args, LispScope scope)
-        {
-            var result = macroexpand_form(args, scope);
-
-            //if (result is IEnumerable<object>)
-            {
-                var resultList = new List<object>();
-                foreach (var item in GetExpression(result))
-                {
-                    resultList.Add(item);
-                }
-                return new LispVariant(resultList.ToArray());
-            }
-
-            //return result;
-        }
 
         public static LispVariant quote_form(object[] args, LispScope scope)
         {
@@ -984,7 +937,7 @@ namespace CsLisp
 
                     // add formal arguments to current scope
                     var i = 0;
-                    IEnumerable<object> formalArgs = args[0] is LispVariant ? ((LispVariant)args[0]).ListValue : GetExpression(args[0]);
+                    var formalArgs = (args[0] is LispVariant ? ((LispVariant)args[0]).ListValue : GetExpression(args[0])).ToArray();
                     foreach (var arg in formalArgs)
                     {
                         childScope[arg.ToString()] = localArgs[i];
@@ -1007,7 +960,7 @@ namespace CsLisp
                     // save the current call stack to resolve variables in closures
                     childScope.ClosureChain = scope;
 
-                    LispVariant ret = null;
+                    LispVariant ret;
                     try
                     {
                         ret = LispInterpreter.EvalAst(args[1], childScope);
@@ -1073,9 +1026,10 @@ namespace CsLisp
                     }
                     catch(AmbiguousMatchException)
                     {
-                        // try to match overloaded method with argument types
-//                        MethodInfo[] methods = nativeClass.GetMethods();
-// TODO --> implementieren fuer Math-Abs     
+                        // this exception should not happen, becuase
+                        // overloaded method will be handled in native-methods 
+                        // in this functions all overloaded methods get a unique name
+                        // i. e. Math-Abs --> Math-Abs-1, Math-Abs-2, ...
                         method = null;
                     }
                     if (method != null)
@@ -1097,10 +1051,7 @@ namespace CsLisp
                 {
                     return ((LispVariant) o).Value.GetType();
                 }
-                else
-                {
-                    return o.GetType();
-                }                
+                return o.GetType();
             }).ToArray();
         }
 
@@ -1111,8 +1062,6 @@ namespace CsLisp
 
             if (className.IsString || className.IsSymbol)
             {
-//TODO                var callArgs = GetCallArgs(args);
-
                 Type nativeClass = Type.GetType(className.ToString());
                 if (nativeClass != null)
                 {
@@ -1137,8 +1086,7 @@ namespace CsLisp
             Type nativeClass;
             if (nativeObjOrClassName.IsString || nativeObjOrClassName.IsSymbol)
             {
-// TODO --> code in hilfsmethoden fuer construktor und methoden call auslagern
-                // constructor call or
+                // constructor call
                 var callArgs = new object[args.Length - 1];
                 if (args.Length > 1)
                 {
@@ -1148,11 +1096,9 @@ namespace CsLisp
                 nativeClass = Type.GetType(nativeObjOrClassName.ToString());
                 if (nativeClass != null)
                 {
-// TODO uebergebene typen behandeln --> (create-Array 10)
                     var argTypes = GetTypes(callArgs);
                     ConstructorInfo constructor = nativeClass.GetConstructor(argTypes);
 
-//TODO --> optionale argumente fuer constructor call (create-Array 10)
                     // if no default constructor is found try to resolve a constructor with arguments
                     if (constructor == null)
                     {
@@ -1165,7 +1111,9 @@ namespace CsLisp
                             callArgs[j] = ((LispVariant) (additionalArgs[j])).Value;
                         }
                     }
-//                    ConstructorInfo[] constructors = nativeClass.GetConstructors();
+                    
+                    // optional improvment: get all constructors and try to resolve:
+                    // ConstructorInfo[] constructors = nativeClass.GetConstructors();
 
                     if (constructor != null)
                     {
@@ -1189,9 +1137,9 @@ namespace CsLisp
                 }
                 catch (AmbiguousMatchException)
                 {
-// TODO ueberladene methoden behandeln!!!
+                    // process overloaded methods, try to resolve method via types of given arguments
+                    // example: List-Sort
                     var callArgsTypes = GetTypes(callArgs);
-                    //MethodInfo[] methods = nativeClass.GetMethods();
                     method = nativeClass.GetMethod(methodName, callArgsTypes);
                 }
                 if (method != null)
@@ -1200,15 +1148,13 @@ namespace CsLisp
                     object result = method.Invoke(nativeObjOrClassName.NativeObjectValue, ConvertAllToNative(callArgs, parameterInfos));
                     return new LispVariant(result);
                 }
-                else
-                {
-                    PropertyInfo property = nativeClass.GetProperty(methodName);
-                    if (property != null)
-                    {
-                        object result = property.GetValue(nativeObjOrClassName.NativeObjectValue, null);
-                        return new LispVariant(result);
-                    }
-                }
+                // try to resolve as property (really needed here?)
+                //PropertyInfo property = nativeClass.GetProperty(methodName);
+                //if (property != null)
+                //{
+                //    object result = property.GetValue(nativeObjOrClassName.NativeObjectValue, null);
+                //    return new LispVariant(result);
+                //}
                 throw new LispException("Bad method for class " + methodName, scope);
             }
         }
@@ -1330,7 +1276,7 @@ namespace CsLisp
         {
             if (count < 0 || args.Length != count)
             {
-                throw new LispException("Bad argument count in " + name, scope);
+                throw new LispException(string.Format("Bad argument count in {0}, has {1} expected {2}", name, args.Length, count), scope);
             }
         }
 

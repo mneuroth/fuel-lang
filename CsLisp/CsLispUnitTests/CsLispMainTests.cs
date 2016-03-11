@@ -177,6 +177,19 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_MainInteractiveImport()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
+            {
+                var args = new[] { "-i" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains(@".\Library\fuellib.fuel"));
+                Assert.IsTrue(s.Contains(@"Dict-Remove --> function <unknown>                       : Function  : module=.\Library\fuellib.fuel"));
+            }
+        }
+
+        [TestMethod]
         [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
         public void Test_Compile()
         {
@@ -185,6 +198,46 @@ namespace LispUnitTests
                 var args = new[] { "-c", "simple.fuel" };
                 Fuel.Main(args);
                 Assert.IsTrue(File.Exists("simple.fuel.exe"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        public void Test_Profile()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-m", "simple.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("Execution time ="));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        public void Test_Trace()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-t", "simple.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("--> do"));
+                Assert.IsTrue(s.Contains("--> print"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        public void Test_CompileOutput()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-s", "simple.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("public static void Main(string[] args)"));
             }
         }
 
@@ -204,7 +257,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_MainInteractive()
         {
-            using (var cr = new ConsoleRedirector("help\nq\n"))
+            using (var cr = new ConsoleRedirector("help\nfuncs\nbuiltins\nq\n"))
             {
                 var args = new[] { "-i" };
                 Fuel.Main(args);
@@ -215,6 +268,8 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("DBG>"));
                 Assert.IsTrue(s.Contains("Type \"help\" for informations."));
                 Assert.IsTrue(s.Contains("help for interactive loop:")); // help
+                Assert.IsTrue(s.Contains("equal --> function <unknown>                       : Function  : module=<builtin>"));
+                Assert.IsTrue(s.Contains("define-macro --> function <unknown>                       : Function"));
             }
         }
 
@@ -313,7 +368,7 @@ namespace LispUnitTests
                 var args = new[] { "-e", "(do (print 3) (defn x))" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
-                Assert.IsTrue(s.Contains("Bad argument count in def --> line=1 start=15 stop=19"));
+                Assert.IsTrue(s.Contains("Bad argument count in def, has 1 expected 3 --> line=1 start=15 stop=19"));
             }
         }
 

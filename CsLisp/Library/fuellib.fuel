@@ -165,9 +165,9 @@
   (evalstr (create-native "Array" "System.Object[]"))
   (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
   
-  (evalstr "(defn yyy (x) (+ x x x))")
-  (eval '(defn xxx (x) (+ x x x)))
-  (eval '(do (defn x1 (x) (+ x x x)) (defn x2 (x) (* x x x))))
+;  (evalstr "(defn yyy (x) (+ x x x))")
+;  (eval '(defn xxx (x) (+ x x x)))
+;  (eval '(do (defn x1 (x) (+ x x x)) (defn x2 (x) (* x x x))))
 
   (nop)
 )

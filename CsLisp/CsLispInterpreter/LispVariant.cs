@@ -422,7 +422,7 @@ namespace CsLisp
             }
             if (IsString)
             {
-                return Convert.ToDouble(StringValue);
+                return Convert.ToDouble(StringValue, CultureInfo.InvariantCulture);
             }
             throw CreateInvalidCastException("double", CanNotConvertTo);
         }
@@ -567,6 +567,7 @@ namespace CsLisp
         /// </returns>
         public override int GetHashCode()
         {
+            // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
             return base.GetHashCode();
         }
 
