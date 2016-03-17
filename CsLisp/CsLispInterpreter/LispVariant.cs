@@ -24,6 +24,7 @@
  * */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -287,7 +288,7 @@ namespace CsLisp
                 {
                     throw CreateInvalidCastException("list");
                 }
-                return (IEnumerable<object>)Value;
+                return ((IEnumerable)Value).Cast<object>();
             }
         }
 
@@ -756,6 +757,10 @@ namespace CsLisp
                 return LispType.String;
             }
             if (obj is IEnumerable<object>)
+            {
+                return LispType.List;
+            }
+            if (obj is IEnumerable)        // needed for .NET 3.5
             {
                 return LispType.List;
             }

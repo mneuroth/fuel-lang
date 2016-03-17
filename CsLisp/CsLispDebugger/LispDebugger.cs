@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace CsLisp
 {
@@ -112,6 +113,10 @@ namespace CsLisp
             {
                 debugger.Output.Write(debugger != null ? DbgPrompt : Prompt);
 
+                // Warning:
+                // QProcess and .NET >3.5 does not work correclty reading from input !!!
+                // see: http://www.qtcentre.org/threads/62415-QProcess-not-communicating-with-net-framework-gt-3-5
+                // ==> CsLisp is now using .NET 3.5 !
                 var cmd = debugger.Input.ReadLine();
                 cmd = cmd != null ? cmd.Trim() : null;
 

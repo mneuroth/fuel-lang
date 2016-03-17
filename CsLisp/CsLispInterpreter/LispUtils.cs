@@ -29,6 +29,35 @@ using System.Linq;
 
 namespace CsLisp
 {
+    public class Tuple<T1, T2>
+    {
+        public Tuple(T1 v1, T2 v2)
+        {
+            Item1 = v1;
+            Item2 = v2;
+        }
+
+        public T1 Item1 { get; set; }
+
+        public T2 Item2 { get; set; }
+    }
+
+    public class Tuple<T1, T2, T3>
+    {
+        public Tuple(T1 v1, T2 v2, T3 v3)
+        {
+            Item1 = v1;
+            Item2 = v2;
+            Item3 = v3;
+        }
+
+        public T1 Item1 { get; set; }
+
+        public T2 Item2 { get; set; }
+
+        public T3 Item3 { get; set; }
+    }
+
     /// <summary>
     /// Helper class for FUEL lisp interpreter.
     /// </summary>
