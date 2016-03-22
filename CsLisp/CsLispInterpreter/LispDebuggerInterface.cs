@@ -23,7 +23,6 @@
  * 
  * */
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -50,12 +49,9 @@ namespace CsLisp
         /// <param name="scope">The scope.</param>
         /// <param name="posInfosOfCurrentAstItem">
         /// The position infos of current ast item.
-        /// Item1 is start position in full text,
-        /// Item2 is stop position in full text,
-        /// Item3 is line number
         /// </param>
         /// <returns>True if a break is needed</returns>
-        bool NeedsBreak(LispScope scope, Tuple<int, int, int> posInfosOfCurrentAstItem);
+        bool NeedsBreak(LispScope scope, LispBreakpointPosition posInfosOfCurrentAstItem);
 
         /// <summary>
         /// Enters the loop of the debugger.
@@ -72,5 +68,43 @@ namespace CsLisp
         /// <param name="output">The output stream.</param>
         /// <param name="input">The input stream.</param>
         void SetInputOutputStreams(TextWriter output, TextReader input);
+    }
+
+    /// <summary>
+    /// Class representing breakpoint position information.
+    /// Item1 is start position in full text,
+    /// Item2 is stop position in full text,
+    /// Item3 is line number
+    /// </summary>
+    public class LispBreakpointPosition : Tuple<int, int, int>
+    {
+        public LispBreakpointPosition(int start, int stop, int lineNumber)
+            : base(start, stop, lineNumber)
+        {            
+        }
+
+        public int Start
+        {
+            get
+            {
+                return Item1;
+            }
+        }
+
+        public int Stop
+        {
+            get
+            {
+                return Item2;
+            }
+        }
+
+        public int LineNo
+        {
+            get
+            {
+                return Item3;
+            }
+        }
     }
 }

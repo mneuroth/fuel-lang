@@ -299,6 +299,43 @@ namespace LispUnitTests
             }
         }
 
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\TestData\testdebugger.fuel")]
+        public void Test_DebugFile()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup"))
+            {
+                var args = new[] { "-d", "testdebugger.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("FUEL(isp)-DBG>                    x --> 4                                        : Int "));
+                Assert.IsTrue(s.Contains("       1 name=<main>                              lineno=11   module=testdebugger.fuel"));
+                Assert.IsTrue(s.Contains("       2 name=g                                   lineno=8    module=testdebugger.fuel"));
+                Assert.IsTrue(s.Contains("-->    3 name=f                                   lineno=4    module=testdebugger.fuel"));
+                Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+                Assert.IsTrue(s.Contains("#1   line=4     module=testdebugger.fuel         condition="));
+                Assert.IsTrue(s.Contains("-->    2 name=g                                   lineno=8    module=testdebugger.fuel"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\TestData\test.fuel")]
+        [DeploymentItem(@"..\..\..\TestData\testmodule.fuel")]
+        public void Test_DebugModule()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("b .\\testmodule.fuel:4\nlist\nr\nk\nl"))
+            {
+                var args = new[] { "-d", "test.fuel", "-l=." };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+                Assert.IsTrue(s.Contains("#1   line=4     module=.\\testmodule.fuel         condition="));
+                Assert.IsTrue(s.Contains("       1 name=<main>                              lineno=4    module=test.fuel"));
+                Assert.IsTrue(s.Contains("-->    2 name=blub                                lineno=4    module=.\\testmodule.fuel"));
+                Assert.IsTrue(s.Contains("x --> 8                                        : Int"));
+            }
+        }
+
         #region parser tests
 
         [TestMethod]

@@ -457,6 +457,19 @@ namespace CsLisp
             return ToString();
         }
 
+        /// <summary>
+        /// Comverts this value into a string representation used by the debugger module.
+        /// </summary>
+        /// <returns>The string representation</returns>
+        public string ToStringDebugger()
+        {
+            if (IsString)
+            {
+                return "\"" + StringValue + "\"";
+            }
+            return ToString();
+        }
+
         public override string ToString()
         {
             if (IsString)
@@ -525,10 +538,23 @@ namespace CsLisp
             }
             else
             {
-                ret += maybeContainer.ToString();
+                ret += ExpandItemForContainer(maybeContainer);
             }
 
             return ret;
+        }
+
+        private static string ExpandItemForContainer(object item)
+        {
+            if (item is LispVariant)
+            {
+                LispVariant variant = (LispVariant)item;
+                if (variant.IsString)
+                {
+                    return variant.ToStringDebugger();
+                }
+            }
+            return item.ToString();
         }
 
         #endregion

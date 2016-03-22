@@ -374,7 +374,7 @@ namespace CsLisp
                     if (select(value))
                     {
                         string info = show != null ? show(value) : string.Empty;
-                        Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value, value.TypeString, info);
+                        Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value.ToStringDebugger(), value.TypeString, info);
                     }
                 }
             }

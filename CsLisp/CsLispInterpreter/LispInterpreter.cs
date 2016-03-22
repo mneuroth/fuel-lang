@@ -290,7 +290,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        private static Tuple<int, int, int> GetPosInfo(object item)
+        private static LispBreakpointPosition GetPosInfo(object item)
         {
             LispToken token;
             if (item is LispToken)
@@ -303,9 +303,9 @@ namespace CsLisp
             }
             if (token != null)
             {
-                return new Tuple<int, int, int>(token.StartPos, token.StopPos, token.LineNo);
+                return new LispBreakpointPosition(token.StartPos, token.StopPos, token.LineNo);
             }
-            return new Tuple<int, int, int>(-1, -1, -1);
+            return new LispBreakpointPosition(-1, -1, -1);
         }
 
         private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, ref bool replacedAnything)

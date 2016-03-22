@@ -270,7 +270,7 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public bool NeedsBreak(LispScope scope, Tuple<int, int, int> posInfosOfCurrentAstItem)
+        public bool NeedsBreak(LispScope scope, LispBreakpointPosition posInfosOfCurrentAstItem)
         {
             if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item3, scope.ModuleName, scope))
             {

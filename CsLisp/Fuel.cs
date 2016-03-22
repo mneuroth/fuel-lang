@@ -269,7 +269,7 @@ namespace CsLisp
     // (- unit test reparieren (output/input queue behandlung)
     // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
     // - Testabdeckung verbessern
-    // - Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
+    // (- Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
     // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
     // - ggf. im debugger: zeige keine lokal definierte funktionen an in der liste der lokalen variablen !
     // - ggf. debuggen: set next statement realisieren?
@@ -292,6 +292,8 @@ namespace CsLisp
     // fuer compiler: closure fuer compiler modus implementieren --> siehe ClosoureChain
     // fuer compiler: braucht man wirklich LispToken.cs module? --> Referenzen von LispVariant.Token pruefen?
     // fuer compiler: manche environment funktionen benoetigen den Interpreter/Eval, dies gibt doch probleme im Compile modus?
+
+    // see: https://bitbucket.org/ktg/lfgo
 
     //http://www.heise.de/newsticker/meldung/Neue-Version-des-c-t-Windows-Backup-unterstuetzt-auch-Windows-10-3116411.html
     //http://stackoverflow.com/questions/11501697/programmatically-call-c-sharp-compiler-to-compile-c-sharp-code

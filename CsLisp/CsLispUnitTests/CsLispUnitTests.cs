@@ -184,8 +184,8 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_AddLists()
         {
-            LispVariant result = Lisp.Eval("(+ '(1 2 3) '(\"hello\" 2.3 42))");
-            Assert.AreEqual("(1 2 3 hello 2.3 42)", result.ToString());
+            LispVariant result = Lisp.Eval("(+ '(1 2 3) '(\"hello world\" 2.3 42))");
+            Assert.AreEqual("(1 2 3 \"hello world\" 2.3 42)", result.ToString());
         }
 
         [TestMethod]
@@ -1088,7 +1088,7 @@ namespace LispUnitTests
 
                 string s = cr.ToString().Trim();
                 Assert.AreEqual(true, s.Contains("a --> 4"));
-                Assert.AreEqual(true, s.Contains("b --> asdf"));
+                Assert.AreEqual(true, s.Contains("b --> \"asdf\""));
             }
         }
 
