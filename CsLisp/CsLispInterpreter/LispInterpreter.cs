@@ -138,7 +138,7 @@ namespace CsLisp
                     // Example for macro at runtime handling:
                     //
                     // macro definition:
-                    // (define-macro-evaluate my-setf (x value) (setf x value))
+                    // (define-macro-eval my-setf (x value) (setf x value))
                     //
                     // call (ast):
                     // (my-setf a (+ \"blub\" \"xyz\")) 

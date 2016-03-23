@@ -149,6 +149,10 @@ namespace CsLisp
                 {
                     globalScope.DumpBuiltinFunctions();
                 }
+                else if (cmd.Equals("doc"))
+                {
+                    globalScope.DumpBuiltinFunctionsHelp();
+                }
                 else if (cmd.Equals("modules"))
                 {
                     globalScope.DumpModules();
@@ -584,6 +588,7 @@ namespace CsLisp
             output.WriteLine("  builtins                     : show all builtin functions");
             output.WriteLine("  funcs                        : show all available functions");
             output.WriteLine("  macros                       : show all available macros");
+            output.WriteLine("  doc                          : show documentation about all builtin functions");
             output.WriteLine("  exit                         : exit the interactive loop");
             output.WriteLine();
         }

@@ -74,6 +74,11 @@ namespace CsLisp
                 Usage(output);
                 return;
             }
+            if (args.Contains("--doc"))
+            {
+                script = "(println (doc))";
+                loadFiles = false; 
+            }
             if (args.Contains("-x"))
             {
                 lengthyErrorOutput = true;
@@ -187,6 +192,7 @@ namespace CsLisp
             output.WriteLine("  -h          : show help");
             output.WriteLine("  -e \"script\" : execute given script");
 			output.WriteLine("  -l=\"path\"   : path to library");
+            output.WriteLine("  --doc       : show language documentation");
             output.WriteLine("  -m          : measure execution time");
 			output.WriteLine("  -t          : enable tracing");
 			output.WriteLine("  -x          : exhaustive error output");
@@ -263,12 +269,17 @@ namespace CsLisp
     // TODO:
     // (- License und Copyright header in quellcode dateien einbauen
     // - Quellcode aufraeumen
+    // - Todos entfernen
+    // - Dokumentation fuer homepage auf github (Einfuehrung fuel) --> siehe https://bitbucket.org/ktg/lfgo
+    // - Logo Icon fuer fuel erstellen ?
+    // - (do ...) in jedem fuel file vermeiden (automatisch erzeugen?)
+    // - API Dokumentation in html aus dem Code generieren...
     // (- TODOs behandeln
     // (- Makro Behandlung aufraeumen
     // (- setf macro implementieren...
     // (- unit test reparieren (output/input queue behandlung)
-    // - unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
-    // - Testabdeckung verbessern
+    // (- unit tests erweitern um neue Features: set breakpoints in modulen, debuggen von modulen, line no anzeige in stack, source code anzeige aktualisierung in up/down
+    // (- Testabdeckung verbessern
     // (- Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
     // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
     // - ggf. im debugger: zeige keine lokal definierte funktionen an in der liste der lokalen variablen !

@@ -303,7 +303,7 @@ namespace LispUnitTests
         [DeploymentItem(@"..\..\..\TestData\testdebugger.fuel")]
         public void Test_DebugFile()
         {
-            using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup"))
+            using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode"))
             {
                 var args = new[] { "-d", "testdebugger.fuel" };
                 Fuel.Main(args);
@@ -315,6 +315,9 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
                 Assert.IsTrue(s.Contains("#1   line=4     module=testdebugger.fuel         condition="));
                 Assert.IsTrue(s.Contains("-->    2 name=g                                   lineno=8    module=testdebugger.fuel"));
+                Assert.IsTrue(s.Contains("  4 B  --> 	   (+ x 1)"));
+                Assert.IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
+                Assert.IsTrue(s.Contains("  4 B      	   (+ x 1)"));
             }
         }
 
@@ -336,6 +339,20 @@ namespace LispUnitTests
             }
         }
 
+
+        [TestMethod]
+        public void Test_Documentation()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "--doc" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("lambda"));
+                Assert.IsTrue(s.Contains("Syntax: (lambda (arguments) block)"));
+            }
+        }
+        
         #region parser tests
 
         [TestMethod]

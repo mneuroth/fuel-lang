@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 namespace CsLisp
@@ -340,6 +341,16 @@ namespace CsLisp
             Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin);
         }
 
+        public void DumpBuiltinFunctionsHelp()
+        {
+            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin, v => v.FunctionValue.Documentation, showHelp: true);
+        }
+
+        public void DumpBuiltinFunctionsHelpFormated()
+        {
+            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin, sort: true, format: v => v.FunctionValue.FormatedDoc);
+        }
+
         public void DumpModules()
         {
             ProcessMetaScope(LispEnvironment.Modules, module => Output.WriteLine(module.Key));
@@ -364,17 +375,40 @@ namespace CsLisp
             }
         }
 
-        private void Dump(Func<LispVariant, bool> select, Func<LispVariant, string> show = null)
+        private void Dump(Func<LispVariant, bool> select, Func<LispVariant, string> show = null, bool showHelp = false, bool sort = false, Func<LispVariant, string> format = null)
         {
-            foreach (var key in Keys)
+            var keys = Keys.ToList();
+            if (sort)
+            {
+                keys.Sort();                
+            }
+            foreach (var key in keys)
             {
                 if (!key.StartsWith(LispEnvironment.MetaTag))
                 {
                     var value = (LispVariant)this[key];
                     if (select(value))
                     {
-                        string info = show != null ? show(value) : string.Empty;
-                        Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value.ToStringDebugger(), value.TypeString, info);
+                        if (format != null)
+                        {
+                            Output.WriteLine("{0}", format(value));
+                        }
+                        else
+                        {
+                            string info = show != null ? show(value) : string.Empty;
+                            if (showHelp)
+                            {
+                                Output.WriteLine("{0,20} --> {1}", key, value.FunctionValue.Signature);
+                                if (!string.IsNullOrEmpty(info))
+                                {
+                                    Output.WriteLine("{0,20}     {1}", "", info);
+                                }
+                            }
+                            else
+                            {
+                                Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value.ToStringDebugger(), value.TypeString, info);
+                            }                            
+                        }
                     }
                 }
             }

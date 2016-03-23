@@ -117,6 +117,13 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Fn()
+        {
+            LispVariant result = Lisp.Eval("(do (def f (fn (x) (+ x x 1))) (println (f 8)))");
+            Assert.AreEqual(17, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_Gdef()
         {
             LispVariant result = Lisp.Eval("(do (defn f (x) (gdef z (+ x x))) (f 8) (println z))");
@@ -335,7 +342,7 @@ namespace LispUnitTests
         public void Test_MacrosEvaluateNested()
         {
             const string macroExpandScript = @"(do
-  (define-macro-evaluate first-macro
+  (define-macro-eval first-macro
         (a b) 
         (do 
            (println first-macro)
@@ -344,7 +351,7 @@ namespace LispUnitTests
         )
   )
   
-  (define-macro-evaluate second-macro
+  (define-macro-eval second-macro
         (x y) 
         (do 
            (println second-macro)
@@ -370,7 +377,7 @@ namespace LispUnitTests
         public void Test_MacrosEvaluateRecursive()
         {
             const string macroExpandScript = @"(do
-  (define-macro-evaluate first-macro
+  (define-macro-eval first-macro
         (a b) 
         (do 
            (println first-macro)
@@ -379,7 +386,7 @@ namespace LispUnitTests
         )
   )
   
-  (define-macro-evaluate second-macro
+  (define-macro-eval second-macro
         (x y) 
         (do 
            (println second-macro)
@@ -405,7 +412,7 @@ namespace LispUnitTests
         public void Test_MacrosEvaluateDoubleMacroCall()
         {
             const string macroExpandScript = @"(do
-  (define-macro-evaluate first-macro
+  (define-macro-eval first-macro
         (a b) 
         (do 
            (println first-macro)
@@ -414,7 +421,7 @@ namespace LispUnitTests
         )
   )
   
-  (define-macro-evaluate second-macro
+  (define-macro-eval second-macro
         (x y) 
         (do 
            (println second-macro)
@@ -634,7 +641,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_MacrosSetf3()
         {
-            LispVariant result = Lisp.Eval("(do (def a 42) (define-macro-evaluate my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))");
+            LispVariant result = Lisp.Eval("(do (def a 42) (define-macro-eval my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))");
             Assert.AreEqual("blubxyz", result.ToString());
         }
 

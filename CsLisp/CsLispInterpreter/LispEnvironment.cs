@@ -81,6 +81,8 @@ namespace CsLisp
 
         public string Signature { get; private set; }
 
+        public string Documentation { get; private set; }
+
         public string ModuleName { get; private set; }
 
         public bool IsBuiltin { get; private set; }
@@ -89,15 +91,36 @@ namespace CsLisp
 
         public bool IsEvalInExpand { get; private set; }
 
+        public string FormatedDoc
+        {
+            get
+            {
+                const string separator = "\n\n";
+                const string splitter = "-------------------------------------------------" + separator;
+                string name = "???";
+                string signature = (Signature != null ? Signature : string.Empty);
+                if (signature.Length > 0 && signature.StartsWith("("))
+                {
+                    name = signature.Substring(1, signature.IndexOf(" "));
+                }
+                name += separator;
+                string syntax = "Syntax: " + signature + separator;
+                string doc = (Documentation != null ? Documentation : "<not available>");
+                doc += separator;
+                return splitter + name + syntax + doc;
+            }
+        }
+
         #endregion
 
         #region constroctor(s)
 
-        public LispFunctionWrapper(Func<object[], LispScope, LispVariant> func, string signature, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
+        public LispFunctionWrapper(Func<object[], LispScope, LispVariant> func, string signature, string documentation, bool isBuiltin, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = null)
             : this()
         {
             Function = func;
             Signature = signature;
+            Documentation = documentation;
             ModuleName = moduleName;
             IsBuiltin = isBuiltin;
             IsSpecialForm = isSpecialForm;
@@ -121,7 +144,10 @@ namespace CsLisp
 
         private const string If = "if";
         private const string While = "while";
+        private const string Begin = "begin";
         private const string Do = "do";
+        private const string Or = "or";
+        private const string And = "and";
         private const string Fn = "fn";
         private const string Def = "def";
         private const string Gdef = "gdef";
@@ -130,21 +156,22 @@ namespace CsLisp
         private const string Gdefn = "gdefn";
         private const string MapFcn = "map";
         private const string ReduceFcn = "reduce";
-        private const string DefineMacro = "define-macro";      // == define-macro-evaluate
-        private const string DefineMacroEvaluate = "define-macro-evaluate";
+        private const string DefineMacro = "define-macro";      // == define-macro-eval
+        private const string DefineMacroEval = "define-macro-eval";
 #if ENABLE_COMPILE_TIME_MACROS 
         private const string DefineMacroExpand = "define-macro-expand";
 #endif
         private const string Lambda = "lambda";
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
-        internal const string Args = MetaTag + "args" + MetaTag;
+        internal const string ArgsMeta = MetaTag + "args" + MetaTag;
         private const string AdditionalArgs = "_additionalArgs";
-        private const string ArgsCount = "argscount";
 
         public const string Macros = MetaTag + "macros" + MetaTag;
         public const string Modules = MetaTag + "modules" + MetaTag;
 
+        private const string ArgsCount = "argscount";
+        private const string Args = "args";
         public const string Apply = "apply";
         public const string Eval = "eval";
         public const string EvalStr = "evalstr";
@@ -214,6 +241,7 @@ namespace CsLisp
             scope["fuel"] = CreateFunction(Fuel);
             scope["copyright"] = CreateFunction(Copyright);
             scope["help"] = CreateFunction(Help);
+            scope["doc"] = CreateFunction(Documentation);
             scope["break"] = CreateFunction(Break);
             scope["vars"] = CreateFunction(Vars);
             scope["trace"] = CreateFunction(TracePrint);
@@ -276,14 +304,14 @@ namespace CsLisp
             scope[Str] = CreateFunction(ConvertToString);
 
             scope[ArgsCount] = CreateFunction(ArgsCountFcn);
-            scope["args"] = CreateFunction(ArgsFcn);
+            scope[Args] = CreateFunction(ArgsFcn);
             scope[Apply] = CreateFunction(ApplyFcn);
             scope[Eval] = CreateFunction(EvalFcn);
             scope[EvalStr] = CreateFunction(EvalStrFcn);
 
             // special forms
-            scope["and"] = CreateFunction(and_form, isSpecialForm: true);
-            scope["or"] = CreateFunction(or_form, isSpecialForm: true);
+            scope[And] = CreateFunction(and_form, isSpecialForm: true);
+            scope[Or] = CreateFunction(or_form, isSpecialForm: true);
             scope[Def] = CreateFunction(def_form, isSpecialForm: true);
             scope[Gdef] = CreateFunction(gdef_form, isSpecialForm: true);
             scope[Setf] = CreateFunction(setf_form, isSpecialForm: true);
@@ -294,7 +322,7 @@ namespace CsLisp
             //  - compile time replacement/expanding of macros
             scope[DefineMacro] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
             // run time evaluation for macros: 
-            scope[DefineMacroEvaluate] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
+            scope[DefineMacroEval] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
 #if ENABLE_COMPILE_TIME_MACROS 
             // compile time expand for macros:
             scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
@@ -302,14 +330,14 @@ namespace CsLisp
 
             scope[Quote] = CreateFunction(quote_form, isSpecialForm: true);
             scope[Quasiquote] = CreateFunction(quasiquote_form, isSpecialForm: true);
-            scope[If] = CreateFunction(if_form, isSpecialForm: true);
-            scope[While] = CreateFunction(while_form, isSpecialForm: true);
-            scope[Do] = CreateFunction(do_form, isSpecialForm: true);
-            scope["begin"] = CreateFunction(do_form, isSpecialForm: true);
-            scope[Lambda] = CreateFunction(fn_form, isSpecialForm: true);
-            scope[Fn] = CreateFunction(fn_form, isSpecialForm: true);
-            scope[Defn] = CreateFunction(defn_form, isSpecialForm: true);
-            scope[Gdefn] = CreateFunction(gdefn_form, isSpecialForm: true);
+            scope[If] = CreateFunction(if_form, "(if cond then-block [else-block])", isSpecialForm: true);
+            scope[While] = CreateFunction(while_form, "(while cond block)", isSpecialForm: true);
+            scope[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", isSpecialForm: true);
+            scope[Begin] = CreateFunction(do_form, "see: do", isSpecialForm: true);
+            scope[Lambda] = CreateFunction(fn_form, "(lambda (arguments) block)", "defines a lambda function", isSpecialForm: true);
+            scope[Fn] = CreateFunction(fn_form, "(fn (arguments) block)", isSpecialForm: true);
+            scope[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "defines a function", isSpecialForm: true);
+            scope[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "function defined in global scope", isSpecialForm: true);
 
             return scope;
         }
@@ -344,6 +372,16 @@ namespace CsLisp
             scope.GlobalScope.Output.WriteLine(helpText.ToString());
             return new LispVariant(helpText.ToString());
         }
+
+        private static LispVariant Documentation(object[] args, LispScope scope)
+        {
+            var text = new StringBuilder();
+            var tempOutputWriter = scope.GlobalScope.Output;
+            scope.GlobalScope.Output = new StringWriter(text);
+            scope.GlobalScope.DumpBuiltinFunctionsHelpFormated();
+            scope.GlobalScope.Output = tempOutputWriter;
+            return new LispVariant(text.ToString());
+        }        
 
         private static LispVariant Break(object[] args, LispScope scope)
         {
@@ -392,31 +430,31 @@ namespace CsLisp
                 string fileName = orgModuleFileName;
                 if (!File.Exists(fileName))
                 {
-					// try the given library path (if available)
-					fileName = LispUtils.LibraryPath + Path.DirectorySeparatorChar + orgModuleFileName;
-					fileName = AddFileExtensionIfNeeded(fileName);
-					if (!File.Exists(fileName)) 
-					{
-						// try default path .\Library\modulename.fuel
-						fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
-						fileName = AddFileExtensionIfNeeded(fileName);
-						if (!File.Exists(fileName))
-						{
-							// try default path <fuel.exe-path>\Library\modulename.fuel
-							fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
-							fileName = AddFileExtensionIfNeeded(fileName);
-							if (!File.Exists(fileName))
-							{
-								// try environment variable FUELPATH
-								string envPath = Environment.GetEnvironmentVariable("FUELPATH");
-								if (envPath != null) 
-								{
-									fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
-									fileName = AddFileExtensionIfNeeded(fileName);
-								}
-							}
-						}
-					}
+                    // try the given library path (if available)
+                    fileName = LispUtils.LibraryPath + Path.DirectorySeparatorChar + orgModuleFileName;
+                    fileName = AddFileExtensionIfNeeded(fileName);
+                    if (!File.Exists(fileName)) 
+                    {
+                        // try default path .\Library\modulename.fuel
+                        fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+                        fileName = AddFileExtensionIfNeeded(fileName);
+                        if (!File.Exists(fileName))
+                        {
+                            // try default path <fuel.exe-path>\Library\modulename.fuel
+                            fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+                            fileName = AddFileExtensionIfNeeded(fileName);
+                            if (!File.Exists(fileName))
+                            {
+                                // try environment variable FUELPATH
+                                string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+                                if (envPath != null) 
+                                {
+                                    fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
+                                    fileName = AddFileExtensionIfNeeded(fileName);
+                                }
+                            }
+                        }
+                    }
                 }
                 if (File.Exists(fileName))
                 {
@@ -701,7 +739,7 @@ namespace CsLisp
         {
             CheckArgs(Apply, 0, args, scope);
 
-            return new LispVariant(((LispVariant)scope[Args]).ListValue.Count());
+            return new LispVariant(((LispVariant)scope[ArgsMeta]).ListValue.Count());
         }
 
         public static LispVariant ArgsFcn(object[] args, LispScope scope)
@@ -709,7 +747,7 @@ namespace CsLisp
             CheckArgs(Apply, 1, args, scope);
 
             var index = ((LispVariant) args[0]).IntValue;
-            var array = ((LispVariant) scope[Args]).ListValue.ToArray();
+            var array = ((LispVariant) scope[ArgsMeta]).ListValue.ToArray();
             if (index >= 0 && index < array.Length)
             {
                 return new LispVariant(array[index]);                
@@ -816,7 +854,7 @@ namespace CsLisp
 
         private static LispVariant definemacroevaluate_form(object[] args, LispScope scope)
         {
-            CheckArgs(DefineMacroEvaluate, 3, args, scope);
+            CheckArgs(DefineMacroEval, 3, args, scope);
 
             var macros = scope.GlobalScope[Macros] as LispScope;
             if (macros != null)
@@ -945,7 +983,7 @@ namespace CsLisp
                     }
 
                     // support args function for accessing all given parameters
-                    childScope[Args] = new LispVariant(localArgs);
+                    childScope[ArgsMeta] = new LispVariant(localArgs);
                     int formalArgsCount = formalArgs.Count();
                     if (localArgs.Length > formalArgsCount)
                     {
@@ -1267,9 +1305,9 @@ namespace CsLisp
             return result;
         }
 
-        private static object CreateFunction(Func<object[], LispScope, LispVariant> func, string signature = null, bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = Builtin)
+        private static object CreateFunction(Func<object[], LispScope, LispVariant> func, string signature = null, string documentation = null, bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = Builtin)
         {
-            return new LispVariant(new LispFunctionWrapper(func, signature, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
+            return new LispVariant(new LispFunctionWrapper(func, signature, documentation, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
         }
 
         private static void CheckArgs(string name, int count, object[] args, LispScope scope)

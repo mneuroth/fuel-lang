@@ -164,9 +164,9 @@ namespace CsLisp
         /// <returns>The result.</returns>
         public static object[] GetAdditionalArgs(this LispScope scope)
         {
-            if (scope.ContainsKey(LispEnvironment.Args))
+            if (scope.ContainsKey(LispEnvironment.ArgsMeta))
             {
-                LispVariant variant = scope[LispEnvironment.Args] as LispVariant;
+                LispVariant variant = scope[LispEnvironment.ArgsMeta] as LispVariant;
                 if (variant != null)
                 {
                     return variant.ListValue.ToArray();
