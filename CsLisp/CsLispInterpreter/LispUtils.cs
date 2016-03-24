@@ -121,7 +121,7 @@ namespace CsLisp
 
 		static LispUtils()
 		{
-			LibraryPath = string.Empty;
+			LibraryPath = String.Empty;
 #if ENABLE_COMPILE_TIME_MACROS
 		    IsCompileTimeMacroEnabled = true;
 #else
@@ -228,7 +228,20 @@ namespace CsLisp
             {
                 exists = false;
             }
-            return  exists ? File.ReadAllText(fileName) : string.Empty;
+            return  exists ? File.ReadAllText(fileName) : String.Empty;
+        }
+
+        /// <summary>
+        /// Decorates the code with a block.
+        /// </summary>
+        /// <param name="code">The code.</param>
+        /// <param name="offset">The position offset created by the decorated code.</param>
+        /// <returns>Decorated code.</returns>
+        public static string DecorateWithBlock(string code, out int offset)
+        {
+            const string block = "(do ";
+            offset = block.Length;
+            return block + code + "\n)";
         }
 
         #endregion

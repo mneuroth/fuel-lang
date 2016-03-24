@@ -39,8 +39,9 @@ namespace CsLisp
         /// Tokenizes the specified code.
         /// </summary>
         /// <param name="code">The code.</param>
+        /// <param name="offset">The position offset (decorated code).</param>
         /// <returns>Container with tokens</returns>
-        public static IEnumerable<LispToken> Tokenize(string code)
+        public static IEnumerable<LispToken> Tokenize(string code, int offset = 0)
         {
             var tokens = new List<LispToken>();
             var currentToken = String.Empty;
@@ -52,7 +53,7 @@ namespace CsLisp
 
             Action<string, int, int> addToken = (currentTok, pos, line) =>
             {
-                tokens.Add(new LispToken(currentTok, currentTokenStartPos, pos, line));
+                tokens.Add(new LispToken(currentTok, currentTokenStartPos - offset, pos - offset, line));
                 isInSymbol = false;
                 isInString = false;
                 currentToken = String.Empty;

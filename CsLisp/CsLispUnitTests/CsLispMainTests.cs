@@ -177,6 +177,19 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_MainExecuteAutoBlockDecorate()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-e", "(println \"hello world\") (println \"done.\")" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("hello world"));
+                Assert.IsTrue(s.Contains("done"));
+            }
+        }
+
+        [TestMethod]
         public void Test_MainInteractiveImport()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
@@ -270,7 +283,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("Type \"help\" for informations."));
                 Assert.IsTrue(s.Contains("help for interactive loop:")); // help
                 Assert.IsTrue(s.Contains("equal --> function <unknown>                       : Function  : module=<builtin>"));
-                Assert.IsTrue(s.Contains("define-macro --> function <unknown>                       : Function"));
+                Assert.IsTrue(s.Contains("define-macro --> function (define-macro name (arguments) statement) : Function  : module=<builtin>"));
             }
         }
 
@@ -322,6 +335,19 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        public void Test_DebugSetBreakpoints()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("b \"module name\":4 (== a 4)\nlist"))
+            {
+                var args = new[] { "-d", "simple.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("#1   line=4     module=module name               condition=(== a 4)"));
+            }
+        }
+
+        [TestMethod]
         [DeploymentItem(@"..\..\..\TestData\test.fuel")]
         [DeploymentItem(@"..\..\..\TestData\testmodule.fuel")]
         public void Test_DebugModule()
@@ -338,7 +364,6 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("x --> 8                                        : Int"));
             }
         }
-
 
         [TestMethod]
         public void Test_Documentation()
@@ -363,7 +388,7 @@ namespace LispUnitTests
                 var args = new[] { "-e", "(print ( (+ 1 2))" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
-                Assert.IsTrue(s.Contains("Brackets out of balance --> line=1 start=16 stop=16 module="));
+                Assert.IsTrue(s.Contains("Brackets out of balance --> line=2 start=17 stop=18 module="));
             }
         }
 
@@ -375,7 +400,7 @@ namespace LispUnitTests
                 var args = new[] { "-e", "dummy (print (+ 1 2))" };
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
-                Assert.IsTrue(s.Contains("Unexpected token --> line=1 start=0 stop=5"));
+                Assert.IsTrue(s.Contains("List expected in do --> line=1 start=0 stop=5 module="));
             }
         }
 

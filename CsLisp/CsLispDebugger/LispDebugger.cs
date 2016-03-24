@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace CsLisp
 {
@@ -391,7 +390,7 @@ namespace CsLisp
         private void AddBreakpoint(int lineNo, string moduleName, string condition)
         {
             var newItem = new LispBreakpointInfo(lineNo, moduleName, condition);
-            var index = Breakpoints.FindIndex(elem => elem.LineNo == lineNo);
+            var index = Breakpoints.FindIndex(elem => (elem.LineNo == lineNo) && (elem.ModuleName == moduleName));
             if (index >= 0)
             {
                 // replace existing item for this line
@@ -524,6 +523,7 @@ namespace CsLisp
         /// break modulename:7  --&gt; breakpoint with line number and module name
         /// break 7 condition   --&gt; breakpoint with line number and condition
         /// break modulename:7 condition --&gt; breakpoint with line number, module name and condition
+        /// break "modulename with spaces":7 condition --&gt; breakpoint with line number, module name and condition
         /// </summary>
         /// <param name="debugger">The debugger.</param>
         /// <param name="cmd">The command.</param>
@@ -533,14 +533,29 @@ namespace CsLisp
             bool added = false;
             if (debugger != null)
             {
+                var cmdArgs = new string[0];
+                string moduleName = currentModuleName;
                 string rest = cmd.Substring(cmd.IndexOf(" ", StringComparison.Ordinal)).Trim();
-                string[] cmdArgs = rest.Split(' ');
+                if (rest.StartsWith("\""))
+                {
+                    // process: filename:linenumber
+                    int iStopPos;
+                    moduleName = GetStringLiteral(rest.Substring(1), out iStopPos);
+                    rest = rest.Substring(iStopPos + 2); // adjust for the two "
+                    if (rest.StartsWith(":"))
+                    {
+                        cmdArgs = rest.Substring(1).Split(' ');
+                    }
+                }
+                else
+                {
+                    // process: linennumber
+                    cmdArgs = rest.Split(' ');
+                }
                 int indexRest = rest.IndexOf(" ", StringComparison.Ordinal);
                 rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : String.Empty;
                 if (cmdArgs.Length > 0)
                 {
-// TODO: behandlung von fileNamen mit spaces --> "..." parsen !
-                    string moduleName = currentModuleName;
                     string lineNumberString = cmdArgs[0];
                     int posModuleSeparator = cmdArgs[0].IndexOf(":", StringComparison.Ordinal);
                     if (posModuleSeparator >= 0)
@@ -560,6 +575,31 @@ namespace CsLisp
             {
                 debugger.Output.WriteLine("Warning: no breakpoint set or modified");
             }
+        }
+
+        private static string GetStringLiteral(string text, out int stopPos)
+        {
+            string result = string.Empty;
+            stopPos = text.Length;
+
+            int i = 0;
+            while (i < text.Length)
+            {
+                char ch = text[i];
+                if (ch == '"')
+                {
+                    // string literal is finished, stop loop
+                    stopPos = i;
+                    break;
+                }
+                else
+                {
+                    result += ch;
+                }
+                i++;
+            }
+
+            return result;
         }
 
         private static void ShowInteractiveCmds(TextWriter output)

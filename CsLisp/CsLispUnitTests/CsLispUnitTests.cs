@@ -203,10 +203,24 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_ListCar()
+        {
+            LispVariant result = Lisp.Eval("(car '(\"abc\" 2 3))");
+            Assert.AreEqual("abc", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_ListRest()
         {
             LispVariant result = Lisp.Eval("(rest '(1 2 3))");
             Assert.AreEqual("(2 3)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_ListCdr()
+        {
+            LispVariant result = Lisp.Eval("(cdr '(\"nix\" 1 2 3))");
+            Assert.AreEqual("(1 2 3)", result.ToString());
         }
 
         [TestMethod]
@@ -657,6 +671,20 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(do (def a 42) (println `(1 2 3 ,a)))");
             Assert.AreEqual("(1 2 3 42)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote3()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 42) (def lst (list 6 8 12)) (println (quasiquote (1 2 3 ,a ,@lst))))");
+            Assert.AreEqual("(1 2 3 42 6 8 12)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote4()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 42) (def lst (list 6 8 12)) (println (quasiquote (1 2 3 ,a ,lst))))");
+            Assert.AreEqual("(1 2 3 42 (6 8 12))", result.ToString());
         }
 
         [TestMethod]

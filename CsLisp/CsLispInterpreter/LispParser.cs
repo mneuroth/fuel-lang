@@ -45,19 +45,20 @@ namespace CsLisp
 
         /// <summary>
         /// Parses the specified code.
-        /// string ==> List(Tokens) ==> List(object) mit object == List(object), LispVariant(string, int, double, and ==> for unquoting Symbols)
+        /// string ==&gt; List(Tokens) ==&gt; List(object) mit object == List(object), LispVariant(string, int, double, and ==&gt; for unquoting Symbols)
         /// </summary>
         /// <param name="code">The code.</param>
+        /// <param name="offset">The position offset.</param>
         /// <param name="scope">The scope.</param>
         /// <returns>Abstract syntax tree as container</returns>
-        public static IEnumerable<object> Parse(string code, LispScope scope = null)
+        public static IEnumerable<object> Parse(string code, int offset = 0, LispScope scope = null)
         {
             List<object> parseResult = null;
             string moduleName = string.Empty;
 
             // set tokens at LispScope to improve debugging and 
             // support displaying of error position 
-            var tokens = LispTokenizer.Tokenize(code).ToList();
+            var tokens = LispTokenizer.Tokenize(code, offset).ToList();
             if (scope != null)
             {
                 scope.Tokens = tokens;

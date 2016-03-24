@@ -101,7 +101,13 @@ namespace CsLisp
                 string signature = (Signature != null ? Signature : string.Empty);
                 if (signature.Length > 0 && signature.StartsWith("("))
                 {
-                    name = signature.Substring(1, signature.IndexOf(" "));
+                    int len = signature.IndexOf(" ");
+                    // process commands like: (doc)
+                    if (len < 0)
+                    {
+                        len = signature.IndexOf(")");
+                    }
+                    name = signature.Substring(1, len);
                 }
                 name += separator;
                 string syntax = "Syntax: " + signature + separator;
@@ -289,55 +295,56 @@ namespace CsLisp
             scope["not"] = CreateFunction(Not);
             scope["!"] = CreateFunction(Not);
 
-            scope["list"] = CreateFunction(CreateList);
-            scope[MapFcn] = CreateFunction(Map, "(map func list)");
-            scope[ReduceFcn] = CreateFunction(Reduce, "(reduce func list initial)");
-            scope["cons"] = CreateFunction(Cons);
-            scope["len"] = CreateFunction(Length);
-            scope["first"] = CreateFunction(First);
-            scope["car"] = CreateFunction(First);
-            scope["rest"] = CreateFunction(Rest);
-            scope["cdr"] = CreateFunction(Rest);
-            scope["nth"] = CreateFunction(Nth);
-            scope["append"] = CreateFunction(Append);
-            scope[Sym] = CreateFunction(Symbol);
-            scope[Str] = CreateFunction(ConvertToString);
+            scope["list"] = CreateFunction(CreateList, "(list item1 item2 ...)", "Returns a new list with the given elements.");
+            scope[MapFcn] = CreateFunction(Map, "(map function list)", "Returns a new list with elements, where all elements of the list where applied to the function.");
+            scope[ReduceFcn] = CreateFunction(Reduce, "(reduce function list initial)", "Reduce function.");
+            scope["cons"] = CreateFunction(Cons, "(cons item list)", "Returns a new list containing the item and the elements of the list.");
+            scope["len"] = CreateFunction(Length, "(len list)", "Returns the length of the list.");
+            scope["first"] = CreateFunction(First, "(first list)", "see: car");
+            scope["car"] = CreateFunction(First, "(car list)", "Returns the first element of the list.");
+            scope["rest"] = CreateFunction(Rest, "(rest list)", "see: cdr");
+            scope["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");
+            scope["nth"] = CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list.");
+            scope["append"] = CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements.");
+            scope[Sym] = CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol.");
+            scope[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
 
-            scope[ArgsCount] = CreateFunction(ArgsCountFcn);
-            scope[Args] = CreateFunction(ArgsFcn);
-            scope[Apply] = CreateFunction(ApplyFcn);
-            scope[Eval] = CreateFunction(EvalFcn);
-            scope[EvalStr] = CreateFunction(EvalStrFcn);
+            scope[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of command line arguments for this script.");
+            scope[Args] = CreateFunction(ArgsFcn, "(args number)", "Returns the [number] command line argument for this script.");
+            scope[Apply] = CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments.");
+            scope[Eval] = CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast).");
+            scope[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");
 
             // special forms
-            scope[And] = CreateFunction(and_form, isSpecialForm: true);
-            scope[Or] = CreateFunction(or_form, isSpecialForm: true);
-            scope[Def] = CreateFunction(def_form, isSpecialForm: true);
-            scope[Gdef] = CreateFunction(gdef_form, isSpecialForm: true);
-            scope[Setf] = CreateFunction(setf_form, isSpecialForm: true);
+            scope[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "Special form: And operator with short cut.", isSpecialForm: true);
+            scope[Or] = CreateFunction(or_form, "(or expr1 expr2 ...)", "Special form: Or operator with short cut.", isSpecialForm: true);
+            scope[Def] = CreateFunction(def_form, "(def symbol expression)", "Special form: Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+            scope[Gdef] = CreateFunction(gdef_form, "(gdef symbol expression)", "Special form: Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+            scope[Setf] = CreateFunction(setf_form, "(setf symbol expression)", "Special form: Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+
             // macros are:
             // a special form to control evaluation of function parameters inside the macro code
             // there are two options possible:
             //  - run time evaluation of macros
             //  - compile time replacement/expanding of macros
-            scope[DefineMacro] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
+            scope[DefineMacro] = CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", isSpecialForm: true);
             // run time evaluation for macros: 
-            scope[DefineMacroEval] = CreateFunction(definemacroevaluate_form, isSpecialForm: true);
+            scope[DefineMacroEval] = CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", isSpecialForm: true);
 #if ENABLE_COMPILE_TIME_MACROS 
             // compile time expand for macros:
-            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, isSpecialForm: true, isEvalInExpand: true);
+            scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", isSpecialForm: true, isEvalInExpand: true);
 #endif
 
-            scope[Quote] = CreateFunction(quote_form, isSpecialForm: true);
-            scope[Quasiquote] = CreateFunction(quasiquote_form, isSpecialForm: true);
-            scope[If] = CreateFunction(if_form, "(if cond then-block [else-block])", isSpecialForm: true);
-            scope[While] = CreateFunction(while_form, "(while cond block)", isSpecialForm: true);
-            scope[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", isSpecialForm: true);
+            scope[Quote] = CreateFunction(quote_form, "(quote expr)", "Special form: Returns expression without evaluating it.", isSpecialForm: true);
+            scope[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Special form: Returns expression without evaluating it, but processes evaluation operators , and ,@.", isSpecialForm: true);
+            scope[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "Special form for an if statement.", isSpecialForm: true);
+            scope[While] = CreateFunction(while_form, "(while cond block)", "Special form for a while loop.", isSpecialForm: true);
+            scope[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Special form: Returns a sequence of statements.", isSpecialForm: true);
             scope[Begin] = CreateFunction(do_form, "see: do", isSpecialForm: true);
-            scope[Lambda] = CreateFunction(fn_form, "(lambda (arguments) block)", "defines a lambda function", isSpecialForm: true);
-            scope[Fn] = CreateFunction(fn_form, "(fn (arguments) block)", isSpecialForm: true);
-            scope[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "defines a function", isSpecialForm: true);
-            scope[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "function defined in global scope", isSpecialForm: true);
+            scope[Lambda] = CreateFunction(fn_form, "(lambda (arguments) block)", "Special form: Returns a lambda function.", isSpecialForm: true);
+            scope[Fn] = CreateFunction(fn_form, "(fn (arguments) block)", "Special form: Returns a function.", isSpecialForm: true);
+            scope[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "Special form: Defines a function in the current scope.", isSpecialForm: true);
+            scope[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "Special form: Defines a function in the global scope.", isSpecialForm: true);
 
             return scope;
         }
@@ -901,10 +908,11 @@ namespace CsLisp
             var ret = new List<object>();
             foreach (var elem in lst)
             {
-                object item = UnQuoteIfNeeded(elem, scope);
+                bool isSplicing;
+                object item = UnQuoteIfNeeded(elem, out isSplicing, scope);
                 // process unquotesplicing
                 IEnumerable<object> sublst = ToEnumerable(item);
-                if (sublst != null)
+                if (isSplicing && sublst != null)
                 {
                     foreach (var subitem in sublst)
                     {
@@ -1268,12 +1276,21 @@ namespace CsLisp
             return value;
         }
 
-        private static object UnQuoteIfNeeded(object item, LispScope scope)
+        private static object UnQuoteIfNeeded(object item, out bool isSplicing, LispScope scope)
         {
             var value = item as LispVariant;
-            if (value != null && (value.IsUnQuoted == LispUnQuoteModus.UnQuote || value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing))
+            isSplicing = false;
+            if (value != null)
             {
-                return scope[value.StringValue];
+                if (value.IsUnQuoted == LispUnQuoteModus.UnQuote)
+                {
+                    return scope[value.StringValue];
+                }
+                if (value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing)
+                {
+                    isSplicing = true;
+                    return scope[value.StringValue];
+                }
             }
             return item;
         }
