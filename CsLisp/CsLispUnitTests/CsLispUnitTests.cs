@@ -353,6 +353,35 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Arithmetric8()
+        {
+            LispVariant result = Lisp.Eval("(sub 42.5 1.5 2.0)");
+            int res = (int)Math.Round(result.ToDouble() * 10.0);
+            Assert.AreEqual(390, res);
+        }
+
+        [TestMethod]
+        public void Test_Arithmetric9()
+        {
+            LispVariant result = Lisp.Eval("(div 12 3)");
+            Assert.AreEqual(4, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Arithmetric10()
+        {
+            LispVariant result = Lisp.Eval("(mul 2 3 4)");
+            Assert.AreEqual(24, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Arithmetric11()
+        {
+            LispVariant result = Lisp.Eval("(add 2 3 4)");
+            Assert.AreEqual(9, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_MacrosEvaluateNested()
         {
             const string macroExpandScript = @"(do

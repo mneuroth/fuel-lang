@@ -79,6 +79,11 @@ namespace CsLisp
                 script = "(println (doc))";
                 loadFiles = false; 
             }
+            if (args.Contains("--html"))
+            {
+                script = "(println (htmldoc))";
+                loadFiles = false;
+            }
             if (args.Contains("-x"))
             {
                 lengthyErrorOutput = true;
@@ -193,6 +198,7 @@ namespace CsLisp
             output.WriteLine("  -e \"script\" : execute given script");
 			output.WriteLine("  -l=\"path\"   : path to library");
             output.WriteLine("  --doc       : show language documentation");
+            output.WriteLine("  --html      : show language documentation in html");
             output.WriteLine("  -m          : measure execution time");
 			output.WriteLine("  -t          : enable tracing");
 			output.WriteLine("  -x          : exhaustive error output");
@@ -270,10 +276,11 @@ namespace CsLisp
     // (- License und Copyright header in quellcode dateien einbauen
     // - Quellcode aufraeumen
     // - Todos entfernen
+    // - FileInfo, Directory Klasse in stdlib hinzufuegen
     // - Dokumentation fuer homepage auf github (Einfuehrung fuel) --> siehe https://bitbucket.org/ktg/lfgo
     // - Logo Icon fuer fuel erstellen ?
-    // - (do ...) in jedem fuel file vermeiden (automatisch erzeugen?)
-    // - API Dokumentation in html aus dem Code generieren...
+    // (- (do ...) in jedem fuel file vermeiden (automatisch erzeugen?)
+    // (- API Dokumentation in html aus dem Code generieren...
     // (- TODOs behandeln
     // (- Makro Behandlung aufraeumen
     // (- setf macro implementieren...

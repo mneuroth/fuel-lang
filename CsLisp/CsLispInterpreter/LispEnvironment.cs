@@ -97,23 +97,17 @@ namespace CsLisp
             {
                 const string separator = "\n\n";
                 const string splitter = "-------------------------------------------------" + separator;
-                string name = "???";
-                string signature = (Signature != null ? Signature : string.Empty);
-                if (signature.Length > 0 && signature.StartsWith("("))
-                {
-                    int len = signature.IndexOf(" ");
-                    // process commands like: (doc)
-                    if (len < 0)
-                    {
-                        len = signature.IndexOf(")");
-                    }
-                    name = signature.Substring(1, len);
-                }
-                name += separator;
-                string syntax = "Syntax: " + signature + separator;
-                string doc = (Documentation != null ? Documentation : "<not available>");
-                doc += separator;
-                return splitter + name + syntax + doc;
+                return GetFormatString(separator, splitter);
+            }
+        }
+
+        public string HtmlFormatedDoc
+        {
+            get
+            {
+                const string separator = "<br><br>";
+                const string splitter = "<hr>" + "<br>";
+                return GetFormatString(separator, splitter, s => "<b>" + s + "</b>", s => "<code>" + s + "</code>");
             }
         }
 
@@ -131,6 +125,40 @@ namespace CsLisp
             IsBuiltin = isBuiltin;
             IsSpecialForm = isSpecialForm;
             IsEvalInExpand = isEvalInExpand;
+        }
+
+        #endregion
+
+        #region private helpers
+
+        private string GetFormatString(string separator, string splitter, Func<string, string> nameDecorator = null, Func<string, string> syntaxDecorator = null)
+        {
+            if (nameDecorator == null)
+            {
+                nameDecorator = s => s;
+            }
+            if (syntaxDecorator == null)
+            {
+                syntaxDecorator = s => s;
+            }
+            string name = "???";
+            string signature = (Signature != null ? Signature : string.Empty);
+            if (signature.Length > 0 && signature.StartsWith("("))
+            {
+                int len = signature.IndexOf(" ");
+                // process commands like: (doc)
+                if (len < 0)
+                {
+                    len = signature.IndexOf(")") - 1;
+                }
+                name = nameDecorator(signature.Substring(1, len));
+            }
+            name += IsSpecialForm ? " [special form]" : string.Empty;
+            name += separator;
+            string syntax = syntaxDecorator("Syntax: " + signature) + separator;
+            string doc = (Documentation != null ? Documentation : "<not available>");
+            doc += separator;
+            return splitter + name + syntax + doc + "\n";
         }
 
         #endregion
@@ -244,56 +272,57 @@ namespace CsLisp
             scope[Traceon] = false;
 
             // infrastructure functions
-            scope["fuel"] = CreateFunction(Fuel);
-            scope["copyright"] = CreateFunction(Copyright);
-            scope["help"] = CreateFunction(Help);
-            scope["doc"] = CreateFunction(Documentation);
-            scope["break"] = CreateFunction(Break);
-            scope["vars"] = CreateFunction(Vars);
-            scope["trace"] = CreateFunction(TracePrint);
-            scope["gettrace"] = CreateFunction(GetTracePrint);
-            scope["import"] = CreateFunction(Import);
+            scope["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
+            scope["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
+            scope["help"] = CreateFunction(Help, "(help)", "Returns and shows the available builtin functions.");
+            scope["doc"] = CreateFunction(Documentation, "(doc)", "Returns and shows the documentation of all builtin functions.");
+            scope["htmldoc"] = CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format.");
+            scope["break"] = CreateFunction(Break, "(break)", "Sets a breakpoint in the code.");
+            scope["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
+            scope["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
+            scope["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
+            scope["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
 
             // access to .NET
-            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static, net-method-name)");
-            scope["native-fields"] = CreateFunction(GetNativeFields, "(native-fields native-obj|class-name) -> (property-name)");
-            scope["field"] = CreateFunction(CallField, "(field native-obj|class-name field-name)");    // access native field
-            scope["call"] = CreateFunction(CallNative, "(call native-obj|class-name [method-name [args...]]|[args...])");    // call native function
-            scope["call-static"] = CreateFunction(CallStaticNative, "(call-static class-name method-name [args...])");    // call native static function
+            scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static, net-method-name)", "Returns a list of all available method names of the given native class.");
+            scope["native-fields"] = CreateFunction(GetNativeFields, "(native-fields native-obj|class-name) -> (property-name)", "Returns a list of all available property names of the given native class.");
+            scope["field"] = CreateFunction(CallField, "(field native-obj|class-name field-name)", "Accesses a field of a native object.");    // access native field
+            scope["call"] = CreateFunction(CallNative, "(call native-obj|class-name [method-name [args...]]|[args...])", "Calls a method for a native object.");    // call native function
+            scope["call-static"] = CreateFunction(CallStaticNative, "(call-static class-name method-name [args...])", "Calls a static method for a native object.");    // call native static function
             // Macro: (register-native full-class-name lisp-name) --> erzeugt konstruktoren und zugriffsmethoden fuer klasse
             // --> (lisp-name-create args)
             // --> (lisp-name-method obj args)
 
             // interpreter functions
-            scope["type"] = CreateFunction(GetType);
-            scope["typestr"] = CreateFunction(GetTypeString);
-            scope["nop"] = CreateFunction(Nop);
-            scope["return"] = CreateFunction(Return);
-            scope["print"] = CreateFunction(Print);
-            scope["println"] = CreateFunction(PrintLn);
+            scope["type"] = CreateFunction(GetType, "(type expr)", "Returns the type id of the value of the expression.");
+            scope["typestr"] = CreateFunction(GetTypeString, "(typestr expr)", "Returns a readable string representing the type of the value of the expression.");
+            scope["nop"] = CreateFunction(Nop, "(nop)", "Does nothing (no operation).");
+            scope["return"] = CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function.");
+            scope["print"] = CreateFunction(Print, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
+            scope["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
 
-            scope["string"] = CreateFunction(Addition);
-            scope["add"] = CreateFunction(Addition);
-            scope["+"] = CreateFunction(Addition);
-            scope["minus"] = CreateFunction(Subtraction);
-            scope["-"] = CreateFunction(Subtraction);
-            scope["mul"] = CreateFunction(Multiplication);
-            scope["*"] = CreateFunction(Multiplication);
-            scope["div"] = CreateFunction(Division);
-            scope["/"] = CreateFunction(Division);
+            scope["string"] = CreateFunction(Addition, "(string expr1 expr2 ...)", "see: add");
+            scope["add"] = CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ...");
+            scope["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
+            scope["sub"] = CreateFunction(Subtraction, "(sub expr1 expr2 ...)", "Returns value of expr1 subtracted with expr2 subtracted with ...");
+            scope["-"] = CreateFunction(Subtraction, "(- expr1 expr2 ...)", "see: sub");
+            scope["mul"] = CreateFunction(Multiplication, "(mul expr1 expr2 ...)", "Returns value of expr1 multipied by expr2 multiplied by ...");
+            scope["*"] = CreateFunction(Multiplication, "(* expr1 expr2 ...)", "see: mul");
+            scope["div"] = CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ...");
+            scope["/"] = CreateFunction(Division, "(/ expr1 expr2 ...)", "see: div");
 
-            scope["<"] = CreateFunction(LessTest);
-            scope[">"] = CreateFunction(GreaterTest);
-            scope["<="] = CreateFunction(LessEqualTest);
-            scope[">="] = CreateFunction(GreaterEqualTest);
+            scope["<"] = CreateFunction(LessTest, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese.");
+            scope[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
+            scope["<="] = CreateFunction(LessEqualTest, "(<= expr1 expr2)", "Returns #t if value of expression1 is equal or smaller than value of expression2 and returns #f otherwiese.");
+            scope[">="] = CreateFunction(GreaterEqualTest, "(>= expr1 expr2)", "Returns #t if value of expression1 is equal or larger than value of expression2 and returns #f otherwiese.");
 
-            scope["equal"] = CreateFunction(EqualTest);
-            scope["="] = CreateFunction(EqualTest);
-            scope["=="] = CreateFunction(EqualTest);
-            scope["!="] = CreateFunction(NotEqualTest);
+            scope["equal"] = CreateFunction(EqualTest, "(equal expr1 expr2)", "Returns #t if value of expression1 is equal with value of expression2 and returns #f otherwiese.");
+            scope["="] = CreateFunction(EqualTest, "(= expr1 expr2)", "see: equal");
+            scope["=="] = CreateFunction(EqualTest, "(== expr1 expr2)", "see: equal");
+            scope["!="] = CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese.");
 
-            scope["not"] = CreateFunction(Not);
-            scope["!"] = CreateFunction(Not);
+            scope["not"] = CreateFunction(Not, "(not expr)", "Returns the inverted bool value of the expression.");
+            scope["!"] = CreateFunction(Not, "(! expr)", "see: not");
 
             scope["list"] = CreateFunction(CreateList, "(list item1 item2 ...)", "Returns a new list with the given elements.");
             scope[MapFcn] = CreateFunction(Map, "(map function list)", "Returns a new list with elements, where all elements of the list where applied to the function.");
@@ -316,11 +345,11 @@ namespace CsLisp
             scope[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");
 
             // special forms
-            scope[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "Special form: And operator with short cut.", isSpecialForm: true);
-            scope[Or] = CreateFunction(or_form, "(or expr1 expr2 ...)", "Special form: Or operator with short cut.", isSpecialForm: true);
-            scope[Def] = CreateFunction(def_form, "(def symbol expression)", "Special form: Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
-            scope[Gdef] = CreateFunction(gdef_form, "(gdef symbol expression)", "Special form: Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
-            scope[Setf] = CreateFunction(setf_form, "(setf symbol expression)", "Special form: Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+            scope[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", isSpecialForm: true);
+            scope[Or] = CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", isSpecialForm: true);
+            scope[Def] = CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+            scope[Gdef] = CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+            scope[Setf] = CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
 
             // macros are:
             // a special form to control evaluation of function parameters inside the macro code
@@ -335,16 +364,16 @@ namespace CsLisp
             scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", isSpecialForm: true, isEvalInExpand: true);
 #endif
 
-            scope[Quote] = CreateFunction(quote_form, "(quote expr)", "Special form: Returns expression without evaluating it.", isSpecialForm: true);
-            scope[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Special form: Returns expression without evaluating it, but processes evaluation operators , and ,@.", isSpecialForm: true);
-            scope[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "Special form for an if statement.", isSpecialForm: true);
-            scope[While] = CreateFunction(while_form, "(while cond block)", "Special form for a while loop.", isSpecialForm: true);
-            scope[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Special form: Returns a sequence of statements.", isSpecialForm: true);
-            scope[Begin] = CreateFunction(do_form, "see: do", isSpecialForm: true);
-            scope[Lambda] = CreateFunction(fn_form, "(lambda (arguments) block)", "Special form: Returns a lambda function.", isSpecialForm: true);
-            scope[Fn] = CreateFunction(fn_form, "(fn (arguments) block)", "Special form: Returns a function.", isSpecialForm: true);
-            scope[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "Special form: Defines a function in the current scope.", isSpecialForm: true);
-            scope[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "Special form: Defines a function in the global scope.", isSpecialForm: true);
+            scope[Quote] = CreateFunction(quote_form, "(quote expr)", "Returns expression without evaluating it.", isSpecialForm: true);
+            scope[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", isSpecialForm: true);
+            scope[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", isSpecialForm: true);
+            scope[While] = CreateFunction(while_form, "(while cond block)", "The while loop.", isSpecialForm: true);
+            scope[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", isSpecialForm: true);
+            scope[Begin] = CreateFunction(do_form, "(begin statement1 statement2 ...)", "see: do", isSpecialForm: true);
+            scope[Lambda] = CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", isSpecialForm: true);
+            scope[Fn] = CreateFunction(fn_form, "(fn (arguments) block)", "Returns a function.", isSpecialForm: true);
+            scope[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", isSpecialForm: true);
+            scope[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "Defines a function in the global scope.", isSpecialForm: true);
 
             return scope;
         }
@@ -382,13 +411,23 @@ namespace CsLisp
 
         private static LispVariant Documentation(object[] args, LispScope scope)
         {
+            return DumpDocumentation(scope, () => scope.GlobalScope.DumpBuiltinFunctionsHelpFormated());
+        }
+
+        private static LispVariant HtmlDocumentation(object[] args, LispScope scope)
+        {
+            return DumpDocumentation(scope, () => scope.GlobalScope.DumpBuiltinFunctionsHelpHtmlFormated());
+        }
+
+        private static LispVariant DumpDocumentation(LispScope scope, Action dump)
+        {
             var text = new StringBuilder();
             var tempOutputWriter = scope.GlobalScope.Output;
             scope.GlobalScope.Output = new StringWriter(text);
-            scope.GlobalScope.DumpBuiltinFunctionsHelpFormated();
+            dump();
             scope.GlobalScope.Output = tempOutputWriter;
             return new LispVariant(text.ToString());
-        }        
+        }
 
         private static LispVariant Break(object[] args, LispScope scope)
         {

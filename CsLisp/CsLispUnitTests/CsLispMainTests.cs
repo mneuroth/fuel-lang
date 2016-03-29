@@ -282,7 +282,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("DBG>"));
                 Assert.IsTrue(s.Contains("Type \"help\" for informations."));
                 Assert.IsTrue(s.Contains("help for interactive loop:")); // help
-                Assert.IsTrue(s.Contains("equal --> function <unknown>                       : Function  : module=<builtin>"));
+                Assert.IsTrue(s.Contains("equal --> function (equal expr1 expr2)             : Function"));
                 Assert.IsTrue(s.Contains("define-macro --> function (define-macro name (arguments) statement) : Function  : module=<builtin>"));
             }
         }
@@ -308,7 +308,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
                 Assert.IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
                 Assert.IsTrue(s.Contains("(def a 42)")); // code
-                Assert.IsTrue(s.Contains("print --> function <unknown>                       : Function  : module=<builtin>")); // funcs                    
+                Assert.IsTrue(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs                    
             }
         }
 
