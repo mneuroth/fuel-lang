@@ -198,7 +198,51 @@ namespace LispUnitTests
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains(@".\Library\fuellib.fuel"));
-                Assert.IsTrue(s.Contains(@"Dict-Remove --> function <unknown>                       : Function  : module=.\Library\fuellib.fuel"));
+                Assert.IsTrue(s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=.\Library\fuellib.fuel"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\TestData\multiprintln.fuel")]
+        public void Test_MultiPrintLn()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "multiprintln.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("hello\nworld\ndone."));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"..\..\..\TestData\writereadfile.fuel")]
+        public void Test_WriteAndReadFile()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "writereadfile.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("exists file =  #t"));
+                Assert.IsTrue(s.Contains("test non existing file =  #f"));
+                Assert.IsTrue(s.Contains("is equal =  #t"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"..\..\..\TestData\teststdlib.fuel")]
+        public void Test_StdLibObjects()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "teststdlib.fuel" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("DictCount= 2"));
+                Assert.IsTrue(s.Contains("NewDictCount= 0"));
             }
         }
 

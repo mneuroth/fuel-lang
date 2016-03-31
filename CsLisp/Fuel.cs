@@ -275,10 +275,16 @@ namespace CsLisp
     // TODO:
     // (- License und Copyright header in quellcode dateien einbauen
     // - Quellcode aufraeumen
-    // - Todos entfernen
-    // - FileInfo, Directory Klasse in stdlib hinzufuegen
+    // (- Todos entfernen
+    // (- FileInfo, Directory Klasse in stdlib hinzufuegen
+    // - Unit test fuer (doc 'blub)
     // - Dokumentation fuer homepage auf github (Einfuehrung fuel) --> siehe https://bitbucket.org/ktg/lfgo
     // - Logo Icon fuer fuel erstellen ?
+    // - Suchen nach Funktionen Doku ermoeglichen: help File oder help File-WriteAllText...
+    // - Native Methoden dokumentieren unterstuetzen, auslesen aus .NET api ?
+    // - weitere stdlib objekte in test script testen
+    // - ggf. einfacheres foreach mit native objekten --> Dict, List, Array --> ggf. in fuellib ?
+    // (- Bug: erlaube \n in string konstanten...
     // (- (do ...) in jedem fuel file vermeiden (automatisch erzeugen?)
     // (- API Dokumentation in html aus dem Code generieren...
     // (- TODOs behandeln

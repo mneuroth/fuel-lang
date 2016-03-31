@@ -51,6 +51,13 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_PrintLnMultilines()
+        {
+            LispVariant result = Lisp.Eval("(do (println \"hello\nworld\"))");
+            Assert.AreEqual("hello\nworld", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_PrintTrace()
         {
             LispVariant result = Lisp.Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))");
@@ -1291,7 +1298,6 @@ namespace LispUnitTests
                 
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("#f"));
-// TODO --> Teste Text files lesen und schreiben
             }
         }
 
@@ -1309,6 +1315,21 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("0.943818209374634"));
                 Assert.IsTrue(s.Contains("3.14159265358979"));
                 Assert.IsTrue(s.Contains("2.71828182845905"));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_StdLibMath2()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                LispVariant result = Lisp.Eval("(import fuellib) (def val (Math-Abs -3000.5)) (println val) (return val)");
+                Assert.IsTrue(result.IsDouble);
+                Assert.AreEqual(3000.5, result.DoubleValue);
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("3000.5"));
             }
         }
 
@@ -1339,7 +1360,6 @@ namespace LispUnitTests
 
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("0"));
-// TODO weitere funktionalitaeten testen...
             }
         }
 

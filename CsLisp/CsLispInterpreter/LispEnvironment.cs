@@ -275,7 +275,7 @@ namespace CsLisp
             scope["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
             scope["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
             scope["help"] = CreateFunction(Help, "(help)", "Returns and shows the available builtin functions.");
-            scope["doc"] = CreateFunction(Documentation, "(doc)", "Returns and shows the documentation of all builtin functions.");
+            scope["doc"] = CreateFunction(Documentation, "(doc functionname)", "Returns and shows the documentation of all builtin functions or for the given function name.");
             scope["htmldoc"] = CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format.");
             scope["break"] = CreateFunction(Break, "(break)", "Sets a breakpoint in the code.");
             scope["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
@@ -411,6 +411,11 @@ namespace CsLisp
 
         private static LispVariant Documentation(object[] args, LispScope scope)
         {
+            if (args.Length > 0)
+            {
+                string help = scope.GetFunctionsHelpFormated(args[0].ToString());
+                return DumpDocumentation(scope, () => scope.GlobalScope.Output.WriteLine("{0}", help));
+            }
             return DumpDocumentation(scope, () => scope.GlobalScope.DumpBuiltinFunctionsHelpFormated());
         }
 
@@ -1011,8 +1016,11 @@ namespace CsLisp
 
         public static LispVariant fn_form(object[] args, LispScope scope)
         {
-            string name = (string)scope.UserData;
-            string moduleName = scope.ModuleName;
+            var name = (string)scope.UserData;
+            var moduleName = scope.ModuleName;
+            var userDoc = scope.UserDoc;
+            var signature = userDoc != null ? userDoc.Item1 : null;
+            var documentation = userDoc != null ? userDoc.Item2 : null;
             
             Func<object[], LispScope, LispVariant> fcn =
                 (localArgs, localScope) =>
@@ -1075,7 +1083,35 @@ namespace CsLisp
                     return ret;
                 };
 
-            return new LispVariant(CreateFunction(fcn, isBuiltin: false, moduleName: scope.ModuleName));
+            return new LispVariant(CreateFunction(fcn, signature, documentation, isBuiltin: false, moduleName: scope.ModuleName));
+        }
+
+        private static string GetSignatureFromArgs(object arg0, string name)
+        {
+            string signature = "(" + (name != null ? name : "?");
+            string formalArgsAsString = GetFormalArgsAsString(arg0);
+            if (formalArgsAsString.Length > 0)
+            {
+                signature += " ";
+            }
+            signature += formalArgsAsString;
+            signature += ")";
+            return signature;
+        }
+
+        private static string GetFormalArgsAsString(object args)
+        {
+            string result = string.Empty;
+            IEnumerable<object> theArgs = (IEnumerable<object>)args;
+            foreach (var s in theArgs)
+            {
+                if (result.Length > 0)
+                {
+                    result += " ";
+                }
+                result += s;
+            }
+            return result;
         }
 
         public static LispVariant defn_form(object[] args, LispScope scope)
@@ -1111,11 +1147,10 @@ namespace CsLisp
                     }
                     catch(AmbiguousMatchException)
                     {
-                        // this exception should not happen, becuase
-                        // overloaded method will be handled in native-methods 
-                        // in this functions all overloaded methods get a unique name
-                        // i. e. Math-Abs --> Math-Abs-1, Math-Abs-2, ...
-                        method = null;
+                        // process overloaded methods, try to resolve method via types of given arguments
+                        // example: Math-Abs, File-Exits, ...
+                        var callArgsTypes = GetTypes(callArgs);
+                        method = nativeClass.GetMethod(methodName, callArgsTypes);
                     }
                     if (method != null)
                     {
@@ -1417,13 +1452,45 @@ namespace CsLisp
         {
             CheckArgs(name, 3, args, scope);
 
+            UpdateDocumentationInformationAtScope(args, scope, name);
+
             var fn = ((LispVariant)scope.GlobalScope[Fn]).FunctionValue;
             scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
-            var resFn = fn.Function(new[] { args[1], args[2] }, scope);
+            var resultingFcn = fn.Function(new[] { args[1], args[2] }, scope);
             scope.UserData = null;
 
             var defFcn = ((LispVariant)scope.GlobalScope[name]).FunctionValue;
-            return defFcn.Function(new[] { args[0], resFn }, scope);
+            return defFcn.Function(new[] { args[0], resultingFcn }, scope);
+        }
+
+        private static void UpdateDocumentationInformationAtScope(object[] args, LispScope scope, string name)
+        {
+            var documentation = string.Empty;
+            var token = GetTokenBeforeDefn(args[0], scope);
+            if (token.Type == LispTokenType.Comment)
+            {
+                documentation = token.Value.ToString();
+            }
+            var signature = GetSignatureFromArgs(args[1], args[0].ToString());
+            scope.UserDoc = new Tuple<string, string>(signature, documentation);
+        }
+
+        // returns token just befor defn statement:
+        // ; comment before defn
+        // (defn fcn (x) (+ x 1))
+        // --> Comment Token
+        private static LispToken GetTokenBeforeDefn(object p, LispScope scope)
+        {
+            LispToken result = null;
+            if (p is LispVariant)
+            {
+                LispVariant tokenName = (LispVariant)p;
+                LispToken t1 = scope.GetPreviousToken(tokenName.Token);
+                LispToken t2 = scope.GetPreviousToken(t1);
+                LispToken t3 = scope.GetPreviousToken(t2);
+                return t3;
+            }
+            return result;
         }
 
         private static LispVariant def_form_helper(object[] args, LispScope scope, string name, LispScope scopeToSet)

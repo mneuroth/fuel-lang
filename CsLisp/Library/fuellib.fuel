@@ -153,6 +153,7 @@
 			   )
 			)
             (setf result (+ result ")"))
+			;(println result)
             (return result)
         )     
   )
@@ -161,6 +162,8 @@
   
   (evalstr (create-native "Math" "System.Math"))
   (evalstr (create-native "File" "System.IO.File"))
+  (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
+  (evalstr (create-native "Directory" "System.IO.Directory"))
   (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
   (evalstr (create-native "Array" "System.Object[]"))
   (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))

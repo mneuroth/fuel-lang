@@ -1,0 +1,16 @@
+
+(import fuellib)
+
+(def dic (create-Dict))
+(Dict-Add dic "hello" "world")
+(Dict-Add dic 7 #t)
+(println "DictCount=" (Dict-get_Count dic))
+(Dict-Clear dic)
+(println "NewDictCount=" (Dict-get_Count dic))
+;(println dic)
+
+(foreach '(1 2 3) 
+   (lambda (x)
+       (println x)
+   )
+)

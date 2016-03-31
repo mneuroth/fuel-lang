@@ -176,6 +176,10 @@ namespace CsLisp
                     {
                         isInSymbol = true;
                     }
+                    if (wasLastBackslash)
+                    {
+                        ch = ProcessCharAfterBackslash(ch);
+                    }
                     currentToken += ch;
                     wasLastBackslash = false;
                 }
@@ -190,6 +194,22 @@ namespace CsLisp
         #endregion
 
         #region private static methods
+
+        private static char ProcessCharAfterBackslash(char ch)
+        {
+            switch (ch)
+            {
+                case 'n':
+                    return '\n';
+                case 'r':
+                    return '\r';
+                case 't':
+                    return '\t';
+                case '\\':
+                    return '\\';
+            }
+            throw new LispException(string.Format("Invalid character after backslash {0}", ch));
+        }
 
         private static int ProcessComment(string code, int i, int lineCount, char ch, Action<string, int, int> addToken)
         {

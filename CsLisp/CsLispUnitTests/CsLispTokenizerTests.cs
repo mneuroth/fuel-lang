@@ -171,5 +171,16 @@ namespace LispUnitTests
             Assert.AreEqual(LispToken.Nil, resultAsArray[2].ToString());
             Assert.AreEqual(LispTokenType.Nil, resultAsArray[2].Type);
         }
+
+        [TestMethod]
+        public void Test_Tokenizer7()
+        {
+            IEnumerable<LispToken> result = LispTokenizer.Tokenize("(test \"blub\nhello\")");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(4, result.Count());
+            var resultAsArray = result.ToArray();
+            Assert.AreEqual("blub\nhello", resultAsArray[2].ToString());
+            Assert.AreEqual(LispTokenType.String, resultAsArray[2].Type);
+        }
     }
 }

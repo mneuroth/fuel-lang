@@ -98,6 +98,12 @@ namespace CsLisp
         /// <value> The user data. </value>
         public object UserData { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user documentation information.
+        /// </summary>
+        /// <value>The user documentation.</value>
+        public Tuple<string, string> UserDoc { get; set; }
+
         #endregion
 
         #region properties
@@ -369,6 +375,19 @@ namespace CsLisp
         public void DumpModules()
         {
             ProcessMetaScope(LispEnvironment.Modules, module => Output.WriteLine(module.Key));
+        }
+
+        public string GetFunctionsHelpFormated(string functionName)
+        {
+            foreach (var key in Keys)
+            {
+                if (key.StartsWith(functionName))
+                {
+                    var value = (LispVariant)this[key];
+                    return value.FunctionValue.FormatedDoc;
+                }
+            }
+            return string.Empty;
         }
 
         #endregion
