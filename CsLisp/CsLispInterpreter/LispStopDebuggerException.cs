@@ -25,6 +25,9 @@
 
 namespace CsLisp
 {
+    /// <summary>
+    /// Exception used to stop the debugger loop.
+    /// </summary>
     public class LispStopDebuggerException : LispException
     {
         public LispStopDebuggerException(string text = "")

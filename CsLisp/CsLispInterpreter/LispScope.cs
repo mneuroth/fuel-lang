@@ -377,17 +377,26 @@ namespace CsLisp
             ProcessMetaScope(LispEnvironment.Modules, module => Output.WriteLine(module.Key));
         }
 
-        public string GetFunctionsHelpFormated(string functionName)
+        public string GetFunctionsHelpFormated(string functionName, Func<string, string, bool> select = null)
         {
+            string result = string.Empty;
             foreach (var key in Keys)
             {
-                if (key.StartsWith(functionName))
+                if (select != null)
+                {
+                    if (select(key, functionName))
+                    {
+                        var value = (LispVariant)this[key];
+                        result += value.FunctionValue.FormatedDoc;                        
+                    }
+                }
+                else if (key.StartsWith(functionName))
                 {
                     var value = (LispVariant)this[key];
-                    return value.FunctionValue.FormatedDoc;
+                    result += value.FunctionValue.FormatedDoc;
                 }
             }
-            return string.Empty;
+            return result;
         }
 
         #endregion

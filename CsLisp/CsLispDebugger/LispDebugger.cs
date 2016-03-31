@@ -148,9 +148,33 @@ namespace CsLisp
                 {
                     globalScope.DumpBuiltinFunctions();
                 }
-                else if (cmd.Equals("doc"))
+                else if (cmd.StartsWith("doc"))
                 {
-                    globalScope.DumpBuiltinFunctionsHelp();
+                    var items = cmd.Split(' ');
+                    if (items.Length > 1)
+                    {
+                        string docCmd = "(doc '" + items[1] + ")";
+                        LispVariant result = Lisp.Eval(docCmd, currentScope, currentScope.ModuleName);
+                        debugger.Output.WriteLine("{0}", result);
+                    }
+                    else
+                    {
+                        globalScope.DumpBuiltinFunctionsHelp();                        
+                    }
+                }
+                else if (cmd.StartsWith("searchdoc"))
+                {
+                    var items = cmd.Split(' ');
+                    if (items.Length > 1)
+                    {
+                        string docCmd = "(searchdoc '" + items[1] + ")";
+                        LispVariant result = Lisp.Eval(docCmd, currentScope, currentScope.ModuleName);
+                        debugger.Output.WriteLine("{0}", result);
+                    }
+                    else
+                    {
+                        globalScope.DumpBuiltinFunctionsHelp();
+                    }
                 }
                 else if (cmd.Equals("modules"))
                 {
@@ -238,7 +262,7 @@ namespace CsLisp
                     try
                     {
                         LispVariant result = Lisp.Eval(cmd, currentScope, currentScope.ModuleName);
-                        debugger.Output.WriteLine("result=" + result);
+                        debugger.Output.WriteLine("result={0}", result);
                     }
                     catch (Exception ex)
                     {
@@ -592,10 +616,7 @@ namespace CsLisp
                     stopPos = i;
                     break;
                 }
-                else
-                {
-                    result += ch;
-                }
+                result += ch;
                 i++;
             }
 
@@ -628,7 +649,8 @@ namespace CsLisp
             output.WriteLine("  builtins                     : show all builtin functions");
             output.WriteLine("  funcs                        : show all available functions");
             output.WriteLine("  macros                       : show all available macros");
-            output.WriteLine("  doc                          : show documentation about all builtin functions");
+            output.WriteLine("  doc [function]               : show documentation for all or only given function(s)");
+            output.WriteLine("  searchdoc name               : show documentation for function(s) containing name");
             output.WriteLine("  exit                         : exit the interactive loop");
             output.WriteLine();
         }

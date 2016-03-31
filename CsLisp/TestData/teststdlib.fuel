@@ -1,16 +1,48 @@
-
-(import fuellib)
-
-(def dic (create-Dict))
-(Dict-Add dic "hello" "world")
+;; test some stdlib classes
+
+(import fuellib)
+
+;; test Dict
+(def dic (create-Dict))
+(Dict-Add dic "hello" "world")
 (Dict-Add dic 7 #t)
 (println "DictCount=" (Dict-get_Count dic))
-(Dict-Clear dic)
+(Dict-Clear dic)
 (println "NewDictCount=" (Dict-get_Count dic))
-;(println dic)
 
-(foreach '(1 2 3) 
+;; test Directory
+(def dirLst (Directory-GetFiles "."))
+(println dirLst)
+(println "DirListType=" (typestr dirLst))
+(foreach dirLst
    (lambda (x)
-       (println x)
+       (println "File=" x)
    )
 )
+
+;; test List
+(def lst (create-List))
+(List-Add lst "Hi")
+(List-Add lst #f)
+(List-Add lst 9)
+(List-Add lst dic)
+(println "ListCount=" (List-get_Count lst))
+(println "item=" (List-get_Item lst 3))
+(List-set_Item lst 2 12)
+(println "newitem=" (List-get_Item lst 2))
+(List-Clear lst)
+(println "NewListCount=" (List-get_Count lst))
+
+;; test Array
+(def arr (create-Array 5))
+(Array-Set arr 0 1)
+(Array-Set arr 1 "blub")
+(Array-Set arr 2 #t)
+(Array-Set arr 3 42)
+(Array-Set arr 4 123)
+(println "ArrayCount=" (Array-get_Length arr))
+(println "ArrayItem1=" (Array-Get arr 0))
+(println "ArrayItem2=" (Array-Get arr 1))
+(println "ArrayItem3=" (Array-Get arr 2))
+(println "ArrayItem4=" (Array-Get arr 3))
+(println "ArrayItem5=" (Array-Get arr 4))

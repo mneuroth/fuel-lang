@@ -275,15 +275,20 @@ namespace CsLisp
     // TODO:
     // (- License und Copyright header in quellcode dateien einbauen
     // - Quellcode aufraeumen
-    // (- Todos entfernen
-    // (- FileInfo, Directory Klasse in stdlib hinzufuegen
-    // - Unit test fuer (doc 'blub)
     // - Dokumentation fuer homepage auf github (Einfuehrung fuel) --> siehe https://bitbucket.org/ktg/lfgo
     // - Logo Icon fuer fuel erstellen ?
-    // - Suchen nach Funktionen Doku ermoeglichen: help File oder help File-WriteAllText...
-    // - Native Methoden dokumentieren unterstuetzen, auslesen aus .NET api ?
-    // - weitere stdlib objekte in test script testen
+    // - Umbenennen CsLispInterpreter.dll --> FuelInterpreter.dll etc. ?
+    // - Namespace CsLisp in Fuel ?
+    // - Einfache Registrierung von application objects via API ermoeglichen
+    // - Unit Test und Anwendungs Beispiel fuer Registrierung von App Objekten 
     // - ggf. einfacheres foreach mit native objekten --> Dict, List, Array --> ggf. in fuellib ?
+    // (- weitere stdlib objekte in test script testen
+    // (- Suchen nach Funktionen Doku ermoeglichen: help File oder help File-WriteAllText... wildcard suche ?
+    // (- Unit test fuer (doc 'blub)
+    // (- timer funktionen in builtin functions aufnehmen
+    // (- Todos entfernen
+    // (- FileInfo, Directory Klasse in stdlib hinzufuegen
+    // (- Native Methoden dokumentieren unterstuetzen, auslesen aus .NET api ?
     // (- Bug: erlaube \n in string konstanten...
     // (- (do ...) in jedem fuel file vermeiden (automatisch erzeugen?)
     // (- API Dokumentation in html aus dem Code generieren...
@@ -295,6 +300,7 @@ namespace CsLisp
     // (- Testabdeckung verbessern
     // (- Tuple<int, int, int> in einen typsicheren struct verwandeln? --> gibt es auch in Interface --> unschoen !
     // - Behandlung von Variablen im Modulen korrekt realisieren --> sind global nicht sichtbar, nur im Modul selbst --> im debugger anzeigen
+    // - ggf. weitere Verbesserung der native Methoden automatischen Dokumentation --> .NET doku zurueck liefern?
     // - ggf. im debugger: zeige keine lokal definierte funktionen an in der liste der lokalen variablen !
     // - ggf. debuggen: set next statement realisieren?
     // - ggf. bug: step out funktioniert anscheinend bei modulen nicht ganz korrekt

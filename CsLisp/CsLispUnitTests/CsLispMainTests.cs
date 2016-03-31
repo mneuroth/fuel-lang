@@ -203,6 +203,33 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_MainInteractiveDoc()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("doc\ndoc if"))
+            {
+                var args = new[] { "-i" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains(@"doc --> (doc functionname ...)"));
+                Assert.IsTrue(s.Contains(@"Returns and shows the documentation of all builtin functions or for the given function name(s)."));
+                Assert.IsTrue(s.Contains(@"-------------------------------"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainInteractiveSearchDoc()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("searchdoc arg"))
+            {
+                var args = new[] { "-i" };
+                Fuel.Main(args);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains(@"Syntax: (argscount)"));
+                Assert.IsTrue(s.Contains(@"Syntax: (args number)"));
+            }
+        }
+
+        [TestMethod]
         [DeploymentItem(@"..\..\..\TestData\multiprintln.fuel")]
         public void Test_MultiPrintLn()
         {
@@ -238,11 +265,27 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                var args = new[] { "teststdlib.fuel" };
+                var args = new[] {"teststdlib.fuel"};
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("DictCount= 2"));
                 Assert.IsTrue(s.Contains("NewDictCount= 0"));
+                Assert.IsTrue(s.Contains("DirListType= List"));
+                Assert.IsTrue(s.Contains(@"File= .\CsLispCompiler.dll"));
+                Assert.IsTrue(s.Contains(@"File= .\CsLispDebugger.dll"));
+                Assert.IsTrue(s.Contains(@"File= .\CsLispInterpreter.dll"));
+                Assert.IsTrue(s.Contains(@"File= .\fuel.exe"));
+                Assert.IsTrue(s.Contains(@"File= .\teststdlib.fuel"));
+                Assert.IsTrue(s.Contains("ListCount= 4"));
+                Assert.IsTrue(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
+                Assert.IsTrue(s.Contains("newitem= 12"));
+                Assert.IsTrue(s.Contains("NewListCount= 0"));
+                Assert.IsTrue(s.Contains("ArrayCount= 5"));
+                Assert.IsTrue(s.Contains("ArrayItem1= 1"));
+                Assert.IsTrue(s.Contains("ArrayItem2= blub"));
+                Assert.IsTrue(s.Contains("ArrayItem3= #t"));
+                Assert.IsTrue(s.Contains("ArrayItem4= 42"));
+                Assert.IsTrue(s.Contains("ArrayItem5= 123"));
             }
         }
 
@@ -360,7 +403,7 @@ namespace LispUnitTests
         [DeploymentItem(@"..\..\..\TestData\testdebugger.fuel")]
         public void Test_DebugFile()
         {
-            using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode"))
+            using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout"))
             {
                 var args = new[] { "-d", "testdebugger.fuel" };
                 Fuel.Main(args);
@@ -375,6 +418,9 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("  4 B  --> 	   (+ x 1)"));
                 Assert.IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
                 Assert.IsTrue(s.Contains("  4 B      	   (+ x 1)"));
+                Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
+                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.1 (for .NET/C#) from 31.3.2016, (C) by Michael Neuroth"));
+                Assert.IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
             }
         }
 

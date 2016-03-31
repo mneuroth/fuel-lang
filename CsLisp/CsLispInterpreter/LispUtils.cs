@@ -29,6 +29,11 @@ using System.Linq;
 
 namespace CsLisp
 {
+    /// <summary>
+    /// Tuple class, because .NET 3.5 does not have a Tuple class.
+    /// </summary>
+    /// <typeparam name="T1">The type of the type parameter 1.</typeparam>
+    /// <typeparam name="T2">The type of the type parameter 2.</typeparam>
     public class Tuple<T1, T2>
     {
         public Tuple(T1 v1, T2 v2)
@@ -42,6 +47,12 @@ namespace CsLisp
         public T2 Item2 { get; set; }
     }
 
+    /// <summary>
+    /// Tuple class, because .NET 3.5 does not have a Tuple class.
+    /// </summary>
+    /// <typeparam name="T1">The type of the type parameter 1.</typeparam>
+    /// <typeparam name="T2">The type of the type parameter 2.</typeparam>
+    /// <typeparam name="T3">The type of the type parameter 3.</typeparam>
     public class Tuple<T1, T2, T3>
     {
         public Tuple(T1 v1, T2 v2, T3 v3)

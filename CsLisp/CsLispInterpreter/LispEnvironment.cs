@@ -97,7 +97,7 @@ namespace CsLisp
             {
                 const string separator = "\n\n";
                 const string splitter = "-------------------------------------------------" + separator;
-                return GetFormatString(separator, splitter);
+                return GetFormatedHelpString(separator, splitter);
             }
         }
 
@@ -107,7 +107,7 @@ namespace CsLisp
             {
                 const string separator = "<br><br>";
                 const string splitter = "<hr>" + "<br>";
-                return GetFormatString(separator, splitter, s => "<b>" + s + "</b>", s => "<code>" + s + "</code>");
+                return GetFormatedHelpString(separator, splitter, s => "<b>" + s + "</b>", s => "<code>" + s + "</code>");
             }
         }
 
@@ -131,7 +131,7 @@ namespace CsLisp
 
         #region private helpers
 
-        private string GetFormatString(string separator, string splitter, Func<string, string> nameDecorator = null, Func<string, string> syntaxDecorator = null)
+        private string GetFormatedHelpString(string separator, string splitter, Func<string, string> nameDecorator = null, Func<string, string> syntaxDecorator = null)
         {
             if (nameDecorator == null)
             {
@@ -145,11 +145,11 @@ namespace CsLisp
             string signature = (Signature != null ? Signature : string.Empty);
             if (signature.Length > 0 && signature.StartsWith("("))
             {
-                int len = signature.IndexOf(" ");
+                int len = signature.IndexOf(" ", StringComparison.Ordinal);
                 // process commands like: (doc)
                 if (len < 0)
                 {
-                    len = signature.IndexOf(")") - 1;
+                    len = signature.IndexOf(")", StringComparison.Ordinal) - 1;
                 }
                 name = nameDecorator(signature.Substring(1, len));
             }
@@ -275,13 +275,15 @@ namespace CsLisp
             scope["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
             scope["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
             scope["help"] = CreateFunction(Help, "(help)", "Returns and shows the available builtin functions.");
-            scope["doc"] = CreateFunction(Documentation, "(doc functionname)", "Returns and shows the documentation of all builtin functions or for the given function name.");
+            scope["doc"] = CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s).");
+            scope["searchdoc"] = CreateFunction(SearchDocumentation, "(searchdoc name ...)", "Returns and shows the documentation of functions containing name(s).");
             scope["htmldoc"] = CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format.");
             scope["break"] = CreateFunction(Break, "(break)", "Sets a breakpoint in the code.");
             scope["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
             scope["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
             scope["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
             scope["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
+            scope["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");            
 
             // access to .NET
             scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static, net-method-name)", "Returns a list of all available method names of the given native class.");
@@ -411,9 +413,23 @@ namespace CsLisp
 
         private static LispVariant Documentation(object[] args, LispScope scope)
         {
+            return DoSearchDocumentation(args, scope, null);
+        }
+
+        private static LispVariant SearchDocumentation(object[] args, LispScope scope)
+        {
+            return DoSearchDocumentation(args, scope, (k, n) => k.Contains(n) );
+        }
+
+        private static LispVariant DoSearchDocumentation(object[] args, LispScope scope, Func<string, string, bool> select)
+        {
             if (args.Length > 0)
             {
-                string help = scope.GetFunctionsHelpFormated(args[0].ToString());
+                string help = string.Empty;
+                foreach (var item in args)
+                {
+                    help += scope.GetFunctionsHelpFormated(item.ToString(), select);
+                }
                 return DumpDocumentation(scope, () => scope.GlobalScope.Output.WriteLine("{0}", help));
             }
             return DumpDocumentation(scope, () => scope.GlobalScope.DumpBuiltinFunctionsHelpFormated());
@@ -470,6 +486,12 @@ namespace CsLisp
             return new LispVariant(buffer.ToString());
         }
 
+        private static LispVariant CurrentTickCount(object[] args, LispScope scope)
+        {
+            var value = Environment.TickCount;
+            return new LispVariant(value);
+        }
+        
         private static LispVariant Import(object[] args, LispScope scope)
         {
             LispVariant result = new LispVariant();
@@ -1452,7 +1474,7 @@ namespace CsLisp
         {
             CheckArgs(name, 3, args, scope);
 
-            UpdateDocumentationInformationAtScope(args, scope, name);
+            UpdateDocumentationInformationAtScope(args, scope);
 
             var fn = ((LispVariant)scope.GlobalScope[Fn]).FunctionValue;
             scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
@@ -1463,11 +1485,11 @@ namespace CsLisp
             return defFcn.Function(new[] { args[0], resultingFcn }, scope);
         }
 
-        private static void UpdateDocumentationInformationAtScope(object[] args, LispScope scope, string name)
+        private static void UpdateDocumentationInformationAtScope(object[] args, LispScope scope)
         {
             var documentation = string.Empty;
             var token = GetTokenBeforeDefn(args[0], scope);
-            if (token.Type == LispTokenType.Comment)
+            if ((token != null) && (token.Type == LispTokenType.Comment))
             {
                 documentation = token.Value.ToString();
             }
@@ -1475,22 +1497,22 @@ namespace CsLisp
             scope.UserDoc = new Tuple<string, string>(signature, documentation);
         }
 
-        // returns token just befor defn statement:
+        // returns token just before the defn statement:
+        // item is fcn token, go three tokens before, example:
         // ; comment before defn
         // (defn fcn (x) (+ x 1))
         // --> Comment Token
-        private static LispToken GetTokenBeforeDefn(object p, LispScope scope)
+        private static LispToken GetTokenBeforeDefn(object item, LispScope scope)
         {
-            LispToken result = null;
-            if (p is LispVariant)
+            if (item is LispVariant)
             {
-                LispVariant tokenName = (LispVariant)p;
-                LispToken t1 = scope.GetPreviousToken(tokenName.Token);
-                LispToken t2 = scope.GetPreviousToken(t1);
-                LispToken t3 = scope.GetPreviousToken(t2);
-                return t3;
+                LispVariant tokenName = (LispVariant)item;
+                LispToken token1 = scope.GetPreviousToken(tokenName.Token);
+                LispToken token2 = scope.GetPreviousToken(token1);
+                LispToken token3 = scope.GetPreviousToken(token2);
+                return token3;
             }
-            return result;
+            return null;
         }
 
         private static LispVariant def_form_helper(object[] args, LispScope scope, string name, LispScope scopeToSet)

@@ -175,6 +175,45 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Doc()
+        {
+            LispVariant result = Lisp.Eval("(doc 'if)");
+            var s = result.ToString();
+            Assert.IsTrue(s.Contains("-------------------------------------------------"));
+            Assert.IsTrue(s.Contains("if  [special form]"));
+            Assert.IsTrue(s.Contains("Syntax: (if cond then-block [else-block])"));
+            Assert.IsTrue(s.Contains("The if statement."));
+        }
+
+        [TestMethod]
+        public void Test_DocForDefn()
+        {
+            LispVariant result = Lisp.Eval("; this is a fcn documenataion\n(defn blub (x) (+ x 1))\n(doc 'blub)");
+            var s = result.ToString();
+            Assert.IsTrue(s.Contains("-------------------------------------------------"));
+            Assert.IsTrue(s.Contains("blub"));
+            Assert.IsTrue(s.Contains("Syntax: (blub x)"));
+            Assert.IsTrue(s.Contains("; this is a fcn documenataion"));
+        }
+
+        [TestMethod]
+        public void Test_NoAutoDocForDefn()
+        {
+            LispVariant result = Lisp.Eval("(defn blub (x y ) (+ x y 1))\n(doc 'blub)");
+            var s = result.ToString();
+            Assert.IsTrue(s.Contains("-------------------------------------------------"));
+            Assert.IsTrue(s.Contains("blub"));
+            Assert.IsTrue(s.Contains("Syntax: (blub x y)"));
+        }
+
+        [TestMethod]
+        public void Test_TickCount()
+        {
+            LispVariant result = Lisp.Eval("(tickcount)");
+            Assert.IsTrue(result.IsInt);
+        }
+
+        [TestMethod]
         public void Test_While1()
         {
             LispVariant result = Lisp.Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))");
