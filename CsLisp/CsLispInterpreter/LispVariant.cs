@@ -171,6 +171,16 @@ namespace CsLisp
         /// <summary>
         /// Initializes a new instance of the <see cref="LispVariant"/> class.
         /// </summary>
+        /// <param name="val">The value.</param>
+        /// <remarks>Needed for compiler module and .NET 3.5</remarks>
+        public LispVariant(object val)
+            : this(val, LispUnQuoteModus.None)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LispVariant"/> class.
+        /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="value">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
@@ -186,7 +196,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="val">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        public LispVariant(object val, LispUnQuoteModus unQuoted = LispUnQuoteModus.None)
+        public LispVariant(object val, LispUnQuoteModus unQuoted /*= LispUnQuoteModus.None*/)
             : this(TypeOf(val), val, unQuoted)
         {
             var value = val as LispVariant;

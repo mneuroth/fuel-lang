@@ -291,7 +291,6 @@ namespace LispUnitTests
 
         [TestMethod]
         [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
-        [Ignore]    // does not work under .NET 3.5 ! why ?
         public void Test_Compile()
         {
             using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
@@ -344,6 +343,7 @@ namespace LispUnitTests
 
         [TestMethod]
         [DeploymentItem(@"..\..\..\TestData\controlflow.fuel")]
+        [Ignore]
         public void Test_Compile2()
         {
             using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
@@ -351,7 +351,7 @@ namespace LispUnitTests
                 var args = new[] { "-c", "controlflow.fuel" };
                 Fuel.Main(args);
 // TODO --> does not work yet
-                Assert.IsFalse(File.Exists("controlflow.fuel.exe"));
+                Assert.IsTrue(File.Exists("controlflow.fuel.exe"));
             }
         }
 
@@ -419,7 +419,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
                 Assert.IsTrue(s.Contains("  4 B      	   (+ x 1)"));
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
-                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.1 (for .NET/C#) from 31.3.2016, (C) by Michael Neuroth"));
+                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.1 (for .NET/C#) from 1.4.2016, (C) by Michael Neuroth"));
                 Assert.IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
             }
         }

@@ -265,6 +265,21 @@ namespace CsLisp
     {
         public string MyValue { get; set; }
 
+        public DummyNative()
+            : this(string.Empty)
+        {            
+        }
+
+        public DummyNative(string value)
+        {
+            MyValue = value;            
+        }
+
+        public string GetMessage(string text)
+        {
+            return text + " " + MyValue;
+        }
+
         public int Test()
         {
             Console.WriteLine(">>> dummy native call --> Test()");

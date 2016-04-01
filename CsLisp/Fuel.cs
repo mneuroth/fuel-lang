@@ -279,9 +279,9 @@ namespace CsLisp
     // - Logo Icon fuer fuel erstellen ?
     // - Umbenennen CsLispInterpreter.dll --> FuelInterpreter.dll etc. ?
     // - Namespace CsLisp in Fuel ?
-    // - Einfache Registrierung von application objects via API ermoeglichen
-    // - Unit Test und Anwendungs Beispiel fuer Registrierung von App Objekten 
     // - ggf. einfacheres foreach mit native objekten --> Dict, List, Array --> ggf. in fuellib ?
+    // (- Einfache Registrierung von application objects via API ermoeglichen
+    // (- Unit Test und Anwendungs Beispiel fuer Registrierung von App Objekten 
     // (- weitere stdlib objekte in test script testen
     // (- Suchen nach Funktionen Doku ermoeglichen: help File oder help File-WriteAllText... wildcard suche ?
     // (- Unit test fuer (doc 'blub)
@@ -324,6 +324,21 @@ namespace CsLisp
     // fuer compiler: manche environment funktionen benoetigen den Interpreter/Eval, dies gibt doch probleme im Compile modus?
 
     // see: https://bitbucket.org/ktg/lfgo
+
+/*
+https://news.ycombinator.com/item?id=11278065
+http://nbviewer.jupyter.org/url/norvig.com/ipython/Probability.ipynb
+http://www.qtcentre.org/threads/62415-QProcess-not-communicating-with-net-framework-gt-3-5
+https://www.tensorflow.org/
+
+http://setosa.io/ev/markov-chains/
+
+http://www.zdnet.com/article/microsoft-and-canonical-partner-to-bring-ubuntu-to-windows-10/
+
+https://blogs.msdn.microsoft.com/vcblog/2016/03/30/visual-c-for-linux-development/
+https://blogs.msdn.microsoft.com/visualstudio/2016/03/31/mobile-app-development-made-easy-with-visual-studio-and-xamarin/
+https://blog.xamarin.com/xamarin-for-all/
+*/
 
     //http://www.heise.de/newsticker/meldung/Neue-Version-des-c-t-Windows-Backup-unterstuetzt-auch-Windows-10-3116411.html
     //http://stackoverflow.com/questions/11501697/programmatically-call-c-sharp-compiler-to-compile-c-sharp-code

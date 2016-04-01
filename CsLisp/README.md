@@ -38,13 +38,13 @@ the static Lisp.Eval function.
 Objects from the embedding application can easily be registered 
 at the FUEL interpreter and used in a script.
 
-    // script = '(+ (call nativeObjName "MethodName" args...) 1)'
-    private double InvokeFuelScriptWithAppObj(string script, string appObjName, object obj)
+    private double InvokeFuelScriptWithAppObj(string script, string appObjName, object appObj)
     {
-        LispScope scope = LispEnvironment.CreateDefaultScope();
-        scope[appObjName] = obj;
+        var nativeItems = new Dictionary<string, object>();
+        nativeItems[appObjName] = appObj;
         
-        LispVariant result = Lisp.Eval(script, scope);
+        // script = '(call appObjName "MethodName" args ...)'
+        LispVariant result = Lisp.Eval(script, nativeItems: nativeItems);
         
         return result.DoubleValue;
     }
@@ -109,10 +109,13 @@ For mor documentation of the FUEL language see:
   
 Or navigate to the homepage(s):
 
-  https://github.com/mneuroth/fuel-language
+  https://github.com/mneuroth/fuel-lang
     
   http://mneuroth.de/projects/Fuel.html.
   
+Or inspect the demo and test scripts and
+look at the TestAppUsingFuel project.
+
   
 Deployment  
 ----------

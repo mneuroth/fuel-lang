@@ -51,6 +51,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace CsLisp
 {
@@ -65,7 +66,7 @@ namespace CsLisp
 
         public const string Name = "FUEL(isp)";
         public const string Version = "v0.99.1";
-        public const string Date = "31.3.2016";
+        public const string Date = "1.4.2016";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";
@@ -87,13 +88,15 @@ namespace CsLisp
         /// <param name="scope">The scope.</param>
         /// <param name="moduleName">The module name and path.</param>
         /// <param name="tracing">if set to <c>true</c> [tracing].</param>
+        /// <param name="nativeItems">The dictionary with native items.</param>
         /// <returns>The result of the script evaluation</returns>
-        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool tracing = false)
+        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool tracing = false, Dictionary<string, object> nativeItems = null)
         {
             // first create global scope, needed for macro expanding
             var currentScope = scope ?? LispEnvironment.CreateDefaultScope();
             currentScope.ModuleName = moduleName;
-            currentScope.Tracing = tracing;
+            currentScope.Tracing = tracing;            
+            RegisterNativeObjects(nativeItems, currentScope);
             int offset;
             string code = LispUtils.DecorateWithBlock(lispCode, out offset);
             var ast = LispParser.Parse(code, offset, currentScope);
@@ -134,6 +137,21 @@ namespace CsLisp
                 result = LispVariant.CreateErrorValue(exc.Message);
             }
             return result;
+        }
+
+        #endregion
+
+        #region private methods
+
+        private static void RegisterNativeObjects(Dictionary<string, object> nativeItems, LispScope currentScope)
+        {
+            if (nativeItems != null)
+            {
+                foreach (KeyValuePair<string, object> item in nativeItems)
+                {
+                    currentScope[item.Key] = new LispVariant(LispType.NativeObject, item.Value);
+                }
+            }
         }
 
         #endregion

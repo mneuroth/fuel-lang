@@ -73,7 +73,10 @@ namespace CsLisp
         /// <returns>Compiler result</returns>
         public /*static*/ CompilerResults CompileCsCodeToAssembly(string csCode, string outputFileName, bool debug = false)
         {
-            var codeProvider = new CSharpCodeProvider();
+            var provOptions = new Dictionary<string, string>();
+            provOptions.Add("CompilerVersion", "v3.5");
+
+            var codeProvider = new CSharpCodeProvider(provOptions);
             var parameters = new CompilerParameters();
 
             parameters.GenerateExecutable = true;

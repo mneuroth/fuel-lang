@@ -146,7 +146,7 @@ namespace CsLisp
         /// <param name="fcnName">Name of the FCN.</param>
         /// <param name="globalScope">The global scope.</param>
         /// <param name="moduleName">The current module name for the scope.</param>
-        public LispScope(string fcnName = "", LispScope globalScope = null, string moduleName = null)
+        public LispScope(string fcnName, LispScope globalScope = null, string moduleName = null)
         {
             Name = fcnName;
             GlobalScope = globalScope ?? this;
@@ -158,6 +158,15 @@ namespace CsLisp
             CurrentToken = null;
             Input = Console.In;
             Output = Console.Out;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LispScope"/> class.
+        /// </summary>
+        /// <remarks>Needed for compiler module and .NET 3.5</remarks>
+        public LispScope()
+            : this(string.Empty)
+        {
         }
 
         #endregion

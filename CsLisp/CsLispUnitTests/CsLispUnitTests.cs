@@ -1275,6 +1275,35 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("2"));
             }
         }
+        
+        [TestMethod]
+        public void Test_RegisterNativeObjects()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var model = new DummyNative("fuel");
+
+                var nativeItems = new Dictionary<string, object>();
+                nativeItems["model"] = model;
+
+                const string script =
+                    "(println model)" +
+                    "(println (call model GetMessage \"hello\")) " +      // call a method
+                    "(println (call model get_MyValue))" +                // access property --> get
+                    "(println (call model set_MyValue \"test\"))" +       // access property --> set
+                    "(println (call model GetMessage \"hello\")) ";       // call a method
+
+                LispVariant result = Lisp.Eval(script, nativeItems: nativeItems);
+                
+                Assert.IsTrue(result.IsString);
+                Assert.AreEqual("hello test", result.Value.ToString());
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("hello fuel"));
+                Assert.IsTrue(s.Contains("<undefined>"));
+                Assert.IsTrue(s.Contains("hello test"));
+            }
+        }
 
         [TestMethod]
         public void Test_Break()
