@@ -1,5 +1,5 @@
-# FUEL(isp)
-FUEL(isp) is a fast usable embeddable lisp interpreter.
+# fuel-lang == FUEL(isp)
+FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform)
 
 FUEL
 ----
@@ -8,19 +8,19 @@ and extension language for applications.
 
 FUEL comes with a command line application which can execute programs: 
 
-  >type test.fuel
-  (println "hello fuel")
-  
-  >fuel.exe test.fuel
-  hello fuel
+    >type test.fuel
+    (println "hello fuel")
+    
+    >fuel.exe test.fuel
+    hello fuel
   
 The FUEL interpreter can easily be embedded into .NET applications.
 Just link the CsLispInterpreter.dll to your .NET solution and use
 the static Lisp.Eval function.
 
-  using CsLisp;
+    using CsLisp;
   
-  ...
+    ...
   
     // script = "(* 6 7)"
     private double InvokeFuelScript(string script)
@@ -65,53 +65,54 @@ Interactive loop
 ----------------
 FUEL comes with a interactive loop.
 
-  >fuel -i
+    >fuel -i
   
-  FUEL(isp) v0.99.1 (for .NET/C#) from 31.3.2016, (C) by Michael Neuroth
+    FUEL(isp) v0.99.1 (for .NET/C#) from 31.3.2016, (C) by Michael Neuroth
   
-  Type "help" for informations.
+    Type "help" for informations.
   
-  FUEL(isp)-DBG> (println "Hello fuel")
-  hello fuel
-  result=Hello fuel
-  FUEL(isp)-DBG>
+    FUEL(isp)-DBG> (println "Hello fuel")
+    hello fuel
+    result=Hello fuel
+    FUEL(isp)-DBG>
 
   
 Debugger
 --------
 FUEL comes with a command line debugger. 
 
-  >fuel -d test.fuel
+    >fuel -d test.fuel
   
-  FUEL(isp) v0.99.1 (for .NET/C#) from 31.3.2016, (C) by Michael Neuroth
+    FUEL(isp) v0.99.1 (for .NET/C#) from 31.3.2016, (C) by Michael Neuroth
   
-  Type "help" for informations.
+    Type "help" for informations.
   
-  --> do line=1 start=-3 stop=-1 module=test.fuel
-  FUEL(isp)-DBG>
+    --> do line=1 start=-3 stop=-1 module=test.fuel
+    FUEL(isp)-DBG>
   
 A graphical front end for the debugger is available in the VisiScript
-Text Editor. See: http://mneuroth.de/projects/Visiscript.html.
+Text Editor in version 0.6.0 and above. 
+See: http://mneuroth.de/projects/Visiscript.html.
 
 
 Compiler
 --------
 FUEL comes with a (experimental) compiler.
 
-  >fuel -c test.fuel
+    >fuel -c test.fuel
   
 
 Documentation
 -------------
 For mor documentation of the FUEL language see:
 
-  >fuel --doc
+    >fuel --doc
   
 Or navigate to the homepage(s):
 
-  https://github.com/mneuroth/fuel-lang
+https://github.com/mneuroth/fuel-lang
     
-  http://mneuroth.de/projects/Fuel.html.
+http://mneuroth.de/projects/Fuel.html.
   
 Or inspect the demo and test scripts and
 look at the TestAppUsingFuel project.
@@ -121,14 +122,14 @@ Deployment
 ----------
 The binary distribution of FUEL consists of the following components:
 
-  LICENSE                   (license)
-  README.md                 (this file)
-  fuel.exe                  (command line application)
-  fuel.exe.config           
-  Library/fuellib.fuel      (standard library)
-  CsLispInterpreter.dll     
-  CsLispDebugger.dll        (optional)
-  CsLispCompiler.dll        (optional)
+    LICENSE                   (license)
+    README.md                 (this file)
+    fuel.exe                  (command line application)
+    fuel.exe.config           
+    Library/fuellib.fuel      (standard library)
+    CsLispInterpreter.dll     
+    CsLispDebugger.dll        (optional)
+    CsLispCompiler.dll        (optional)
   
   
 Plattforms  
@@ -141,25 +142,25 @@ License
 -------
 FUEL is released under the MIT license:
 
-  FUEL(isp) is a fast usable embeddable lisp interpreter.
-  
-  Copyright (c) 2016 Michael Neuroth
-
-  Permission is hereby granted, free of charge, to any person obtaining
-  a copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-  OTHER DEALINGS IN THE SOFTWARE.
+>  FUEL(isp) is a fast usable embeddable lisp interpreter.
+>  
+>  Copyright (c) 2016 Michael Neuroth
+>
+>  Permission is hereby granted, free of charge, to any person obtaining
+>  a copy of this software and associated documentation files (the "Software"),
+>  to deal in the Software without restriction, including without limitation
+>  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+>  and/or sell copies of the Software, and to permit persons to whom the
+>  Software is furnished to do so, subject to the following conditions:
+>
+>  The above copyright notice and this permission notice shall be included
+>  in all copies or substantial portions of the Software.
+>
+>  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+>  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+>  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+>  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+>  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+>  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+>  OTHER DEALINGS IN THE SOFTWARE.
   
