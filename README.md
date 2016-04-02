@@ -132,8 +132,8 @@ The binary distribution of FUEL consists of the following components:
     CsLispCompiler.dll        (optional)
   
   
-Plattforms  
-----------
+Platforms  
+---------
 FUEL is developed with the Microsoft .NET version 3.5 under Windows.
 FUEL can be used with mono environment under Linux and Mac OS X.
   
