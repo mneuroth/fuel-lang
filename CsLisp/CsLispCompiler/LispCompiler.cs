@@ -81,7 +81,7 @@ namespace CsLisp
 
             parameters.GenerateExecutable = true;
             parameters.OutputAssembly = outputFileName;
-            parameters.CompilerOptions = "/reference:cslispinterpreter.dll /reference:System.Core.dll";
+            parameters.CompilerOptions = "/reference:fuelinterpreter.dll /reference:System.Core.dll";
             if (debug)
             {
                 parameters.CompilerOptions += " /debug+";                

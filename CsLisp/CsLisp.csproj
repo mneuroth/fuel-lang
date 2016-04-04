@@ -79,8 +79,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)\CsLispDebugger\bin\$(ConfigurationName)\CsLispDebugger.* $(TargetDir)
-copy $(ProjectDir)\CsLispCompiler\bin\$(ConfigurationName)\CsLispCompiler.* $(TargetDir)</PostBuildEvent>
+    <PostBuildEvent>copy $(ProjectDir)\CsLispDebugger\bin\$(ConfigurationName)\FuelDebugger.* $(TargetDir)
+copy $(ProjectDir)\CsLispCompiler\bin\$(ConfigurationName)\FuelCompiler.* $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -271,9 +271,9 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("DictCount= 2"));
                 Assert.IsTrue(s.Contains("NewDictCount= 0"));
                 Assert.IsTrue(s.Contains("DirListType= List"));
-                Assert.IsTrue(s.Contains(@"File= .\CsLispCompiler.dll"));
-                Assert.IsTrue(s.Contains(@"File= .\CsLispDebugger.dll"));
-                Assert.IsTrue(s.Contains(@"File= .\CsLispInterpreter.dll"));
+                Assert.IsTrue(s.Contains(@"File= .\FuelCompiler.dll"));
+                Assert.IsTrue(s.Contains(@"File= .\FuelDebugger.dll"));
+                Assert.IsTrue(s.Contains(@"File= .\FuelInterpreter.dll"));
                 Assert.IsTrue(s.Contains(@"File= .\fuel.exe"));
                 Assert.IsTrue(s.Contains(@"File= .\teststdlib.fuel"));
                 Assert.IsTrue(s.Contains("ListCount= 4"));

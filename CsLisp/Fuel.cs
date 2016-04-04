@@ -234,12 +234,12 @@ namespace CsLisp
 
         private static ILispCompiler TryGetCompiler()
         {
-            return TryGetClassFromDll<ILispCompiler>("CsLispCompiler.dll", "CsLisp.LispCompiler");
+            return TryGetClassFromDll<ILispCompiler>("FuelCompiler.dll", "CsLisp.LispCompiler");
         }
 
         private static ILispDebugger TryGetDebugger()
         {
-            return TryGetClassFromDll<ILispDebugger>("CsLispDebugger.dll", "CsLisp.LispDebugger");
+            return TryGetClassFromDll<ILispDebugger>("FuelDebugger.dll", "CsLisp.LispDebugger");
         }
         
         private static T TryGetClassFromDll<T>(string dllName, string className)
