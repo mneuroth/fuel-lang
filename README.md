@@ -16,7 +16,7 @@ FUEL comes with a command line application which can execute programs:
   
 The FUEL interpreter can easily be embedded into .NET applications.
 Just link the CsLispInterpreter.dll to your .NET solution and use
-the static Lisp.Eval function.
+the static Lisp.Eval() function.
 
     using CsLisp;
   
@@ -63,7 +63,7 @@ Even complete classes can be registered at the FUEL interpreter.
 
 Interactive loop
 ----------------
-FUEL comes with a interactive loop.
+FUEL comes with an interactive loop.
 
     >fuel -i
   
@@ -97,14 +97,14 @@ See: http://mneuroth.de/projects/Visiscript.html.
 
 Compiler
 --------
-FUEL comes with a (experimental) compiler.
+FUEL comes with a compiler (experimental).
 
     >fuel -c test.fuel
   
 
 Documentation
 -------------
-For mor documentation of the FUEL language see:
+For more documentation of the FUEL language see:
 
     >fuel --doc
   
