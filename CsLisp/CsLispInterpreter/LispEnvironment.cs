@@ -127,6 +127,24 @@ namespace CsLisp
             IsEvalInExpand = isEvalInExpand;
         }
 
+        // used for compiler module
+        public LispFunctionWrapper(Func<LispVariant, LispScope, LispVariant> func, string signature, string documentation, bool isBuiltin)
+            : this((args, scope) => func((LispVariant)(args[0]), scope), signature, documentation, isBuiltin)
+        {
+        }
+
+        // used for compiler module
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispScope, LispVariant> func, string signature, string documentation, bool isBuiltin)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), scope), signature, documentation, isBuiltin)
+        {
+        }
+
+        // used for compiler module
+        public LispFunctionWrapper(Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant> func, string signature, string documentation, bool isBuiltin)
+            : this((args, scope) => func((LispVariant)(args[0]), (LispVariant)(args[1]), (LispVariant)(args[2]), scope), signature, documentation, isBuiltin)
+        {
+        }
+
         #endregion
 
         #region private helpers

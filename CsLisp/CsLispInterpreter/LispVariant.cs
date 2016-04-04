@@ -183,6 +183,17 @@ namespace CsLisp
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="value">The value.</param>
+        /// <remarks>Needed for compiler module and .NET 3.5</remarks>
+        public LispVariant(LispType type, object value)
+            : this(type, value, LispUnQuoteModus.None)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LispVariant"/> class.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="value">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
         public LispVariant(LispType type = LispType.Undefined, object value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus.None)
         {
@@ -527,6 +538,30 @@ namespace CsLisp
                 return "Error: " + Value;
             }
             return "?";
+        }
+
+        // used for compiler module
+        public static explicit operator Func<object[], LispScope, LispVariant>(LispVariant variant)
+        {
+            return variant.FunctionValue.Function;
+        }
+
+        // used for compiler module
+        public static explicit operator Func<LispVariant, LispScope, LispVariant>(LispVariant variant)
+        {
+            return (arg1, scope) => variant.FunctionValue.Function(new object[] { arg1 }, scope);
+        }
+
+        // used for compiler module
+        public static explicit operator Func<LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
+        {
+            return (arg1, arg2, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2 }, scope);
+        }
+
+        // used for compiler module
+        public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
+        {
+            return (arg1, arg2, arg3, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3 }, scope);
         }
 
         private static string ExpandContainerToString(object maybeContainer)

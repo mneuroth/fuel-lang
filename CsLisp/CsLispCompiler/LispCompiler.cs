@@ -54,12 +54,12 @@ namespace CsLisp
             code = LispUtils.DecorateWithBlock(code, out offset);
             var ast = LispParser.Parse(code, offset, globalScope);
             //var expandedAst = ExpandMacros(ast, globalScope);
-            var compileResult = Compile(ast, globalScope, "        ", true, "scope");
+            var compileResult = Compile(ast, globalScope, "        ", "__return__", "scope");
             var csCode = "namespace CsLisp\n{\nusing System;\nclass CompiledLisp\n{\n    // functions:\n" +
                         ShiftLines(compileResult.Item2, "    ") +
-                        "\n    public static LispVariant LispMain(string[] args)\n    {\n        var scope = new LispScope();\n\n" +
+                        "\n    public static LispVariant LispMain(string[] args)\n    {\n        var scope = new LispScope();\n        LispVariant __return__;\n\n" +
                         ShiftLines(compileResult.Item1, "        ") +
-                         "    }\n\n    public static void Main(string[] args)\n    {\n        var startTickCount = Environment.TickCount;\n        LispMain(args);\n        Console.WriteLine(string.Format(\"Execution time = {0} s\", (Environment.TickCount - startTickCount)*0.001));\n    }\n}\n}";
+                         "        return __return__;\n    }\n\n    public static void Main(string[] args)\n    {\n        var startTickCount = Environment.TickCount;\n        LispMain(args);\n        Console.WriteLine(string.Format(\"Execution time = {0} s\", (Environment.TickCount - startTickCount)*0.001));\n    }\n}\n}";
             return new LispVariant(csCode);
         }
 
@@ -81,7 +81,7 @@ namespace CsLisp
 
             parameters.GenerateExecutable = true;
             parameters.OutputAssembly = outputFileName;
-            parameters.CompilerOptions = "/reference:cslispinterpreter.dll";
+            parameters.CompilerOptions = "/reference:cslispinterpreter.dll /reference:System.Core.dll";
             if (debug)
             {
                 parameters.CompilerOptions += " /debug+";                
@@ -111,18 +111,18 @@ namespace CsLisp
 
         #region private methods
 
-        private static Tuple<string, string> Compile(object ast, LispScope globalScope, string shift, bool lastMustReturn, string scopeName)
+        private static Tuple<string, string> Compile(object ast, LispScope globalScope, string shift, string saveReturn, string scopeName)
         {
             if(ast is IEnumerable<object>)
             {
-                return Compile((IEnumerable<object>)ast, globalScope, string.Empty, lastMustReturn, scopeName);
+                return Compile((IEnumerable<object>)ast, globalScope, string.Empty, saveReturn, scopeName);
             }
             var value = ast as LispVariant;
             var temp = value != null ? value.ToStringCompiler() : ast.ToString();
             return new Tuple<string, string>(temp, string.Empty);
         }
 
-        private static Tuple<string, string> Compile(IEnumerable<object> ast, LispScope globalScope, string shift, bool lastMustReturn, string scopeName)
+        private static Tuple<string, string> Compile(IEnumerable<object> ast, LispScope globalScope, string shift, string saveReturn, string scopeName)
         {
             string code = string.Empty;
             string functions = string.Empty;
@@ -164,7 +164,7 @@ namespace CsLisp
                         LispFunctionWrapper function = ((LispVariant)first).FunctionValue;
                         if (function.Function == LispEnvironment.def_form)
                         {
-                            var compileResult = Compile(astWithResolvedValues[i + 2], globalScope, string.Empty, false, scopeName);
+                            var compileResult = Compile(astWithResolvedValues[i + 2], globalScope, string.Empty, null, scopeName);
 // TODO --> ggf. nur einfache datentypen dekorieren !? siehe bei arg
                             code += shift + "/*def_form*/LispVariant " + astWithResolvedValues[i + 1] + " = new LispVariant( (object)" + compileResult.Item1 + ")";
                             functions += compileResult.Item2;
@@ -187,7 +187,10 @@ namespace CsLisp
                             }
                             functions += argStrg + ", LispScope " + scopeName + ")\n";
                             functions += shift + "{\n";
-                            functions += Compile(astWithResolvedValues[i + 3], globalScope, string.Empty, true, scopeName).Item1;
+                            functions += shift + "LispVariant __return__;\n";
+                            functions += Compile(astWithResolvedValues[i + 3], globalScope, string.Empty, "__return__", scopeName).Item1;
+                            functions += shift + ";\n";
+                            functions += shift + "\nreturn __return__;\n";
                             functions += shift + "}\n";
                             separator = "";
                             closeStatement = "";
@@ -206,7 +209,7 @@ namespace CsLisp
                                     temp += ", ";
                                 }
                                 temp += "new LispVariant( ";
-                                temp += Compile(item, globalScope, string.Empty, true, scopeName).Item1;
+                                temp += Compile(item, globalScope, string.Empty, null, scopeName).Item1;
                                 temp += " )";
                             }
                             code += temp + " }";
@@ -226,7 +229,7 @@ namespace CsLisp
                                     temp += ", ";
                                 }
                                 temp += "new LispVariant( ";
-                                temp += Compile(item, globalScope, string.Empty, true, scopeName).Item1;
+                                temp += Compile(item, globalScope, string.Empty, null, scopeName).Item1;
                                 temp += " )";
                             }
                             code += temp + " }";
@@ -238,14 +241,10 @@ namespace CsLisp
                             separator = "\n";
                             closeStatement = "";
                             int j;
-                            string temp = string.Empty;
+                            string temp = "{ /*do*/\n";
                             for (j = i + 1; j < astWithResolvedValues.Count; j++)
                             {
-                                if (lastMustReturn && (j + 1 == astWithResolvedValues.Count))
-                                {
-                                    temp += "return ";
-                                }
-                                var compileResult = Compile(astWithResolvedValues[j], globalScope, shift, false, scopeName);
+                                var compileResult = Compile(astWithResolvedValues[j], globalScope, shift, saveReturn, scopeName);
                                 functions += compileResult.Item2;
                                 temp += compileResult.Item1;
                                 if (temp.Length > 0)
@@ -254,34 +253,35 @@ namespace CsLisp
                                 }
                             }
                             i = j;
-                            code += temp;
+                            code += temp + "/*do*/ }\n";
                         }
                         else if (function.Function == LispEnvironment.if_form)
                         {
                             code += "if( ";
-                            code += Compile(astWithResolvedValues[i + 1], globalScope, string.Empty, false, scopeName).Item1;
+                            code += Compile(astWithResolvedValues[i + 1], globalScope, string.Empty, null, scopeName).Item1;
                             code += ".ToBool() )\n{\n";
-                            code += Compile(astWithResolvedValues[i + 2], globalScope, "    ", false, scopeName).Item1;
+                            code += Compile(astWithResolvedValues[i + 2], globalScope, "    ", null, scopeName).Item1;
                             code += ";\n}\n";
                             code += "else\n{\n";
-                            code += Compile(astWithResolvedValues[i + 3], globalScope, "    ", false, scopeName).Item1;
+                            code += Compile(astWithResolvedValues[i + 3], globalScope, "    ", null, scopeName).Item1;
                             code += ";\n}\n";
                             i += 3;
                         }
                         else if (function.Function == LispEnvironment.while_form)
                         {
                             code += "while( ";
-                            code += Compile(astWithResolvedValues[i + 1], globalScope, string.Empty, false, scopeName).Item1;
+                            code += Compile(astWithResolvedValues[i + 1], globalScope, string.Empty, null, scopeName).Item1;
                             code += ".ToBool() )\n{\n";
-                            code += Compile(astWithResolvedValues[i + 2], globalScope, "    ", false, scopeName).Item1;
+                            code += Compile(astWithResolvedValues[i + 2], globalScope, "    ", null, scopeName).Item1;
                             code += ";}\n";
                             i += 2;
                         }
                         else if (function.Function == LispEnvironment.setf_form)
                         {
-                            code += Compile(astWithResolvedValues[i + 1], globalScope, string.Empty, false, scopeName).Item1;
-                            code += " = ";
-                            code += Compile(astWithResolvedValues[i + 2], globalScope, string.Empty, false, scopeName).Item1;
+                            code += Compile(astWithResolvedValues[i + 1], globalScope, string.Empty, null, scopeName).Item1;
+                            code += " = new LispVariant(";
+                            code += Compile(astWithResolvedValues[i + 2], globalScope, string.Empty, null, scopeName).Item1;
+                            code += ")";
                             i += 2;
                         }
                         else if (function.Function == LispEnvironment.fn_form)
@@ -298,19 +298,20 @@ namespace CsLisp
                                 temp += "LispVariant " + name;
                             }
                             code += temp;
-                            code += ", LispScope _scope) => { ";
-                            code += Compile(astWithResolvedValues[i + 2], globalScope, string.Empty, true, "_scope").Item1;
-                            code += "; }, string.Empty, false ) )";
+                            code += ", LispScope _scope) => { LispVariant __ret__; ";
+                            code += Compile(astWithResolvedValues[i + 2], globalScope, string.Empty, "__ret__", "_scope").Item1;
+                            code += "; return __ret__; }, /*signature*/string.Empty, /*documentation*/string.Empty, false ) )";
                             i += 2;
                         }
                         else
                         {
                             // process normal function call
-                            if (lastMustReturn)
+                            code += shift;
+                            if (!string.IsNullOrEmpty(saveReturn))
                             {
-                                code += "return ";
+                                code += saveReturn + " = ";
                             }
-                            code += shift + "/*func*/LispEnvironment." + ResolveFunction(ast.First(), globalScope) +
+                            code += "/*func*/LispEnvironment." + ResolveFunction(ast.First(), globalScope) +
                                     "( new object[] { ";
                             separator = ", ";
                             closeStatement = " }, " + scopeName + ")";
@@ -319,17 +320,13 @@ namespace CsLisp
                 }
                 else
                 {
-                    //if (lastMustReturn && (i + 1 == astWithResolvedValues.Count))
-                    //{
-                    //    code += "return /*pos2*/ ";
-                    //}
                     if (args.Length > 0)
                     {
                         args += separator;
                     }
                     if (elem is IEnumerable<object>)
                     {
-                        var compileResult = Compile((IEnumerable<object>)elem, globalScope, shift, false, scopeName);
+                        var compileResult = Compile((IEnumerable<object>)elem, globalScope, shift, saveReturn, scopeName);
                         args += compileResult.Item1;
                         functions += compileResult.Item2;
                     }

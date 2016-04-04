@@ -343,14 +343,15 @@ namespace LispUnitTests
 
         [TestMethod]
         [DeploymentItem(@"..\..\..\TestData\controlflow.fuel")]
-        [Ignore]
         public void Test_Compile2()
         {
+            // test offline with:
+            // fuel -s controlflow.fuel >controlflow.cs
+            // C:\Windows\Microsoft.NET\Framework\v3.5\csc controlflow.cs /reference:cslispinterpreter.dll
             using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
             {
                 var args = new[] { "-c", "controlflow.fuel" };
                 Fuel.Main(args);
-// TODO --> does not work yet
                 Assert.IsTrue(File.Exists("controlflow.fuel.exe"));
             }
         }
@@ -419,7 +420,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
                 Assert.IsTrue(s.Contains("  4 B      	   (+ x 1)"));
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
-                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.1 (for .NET/C#) from 1.4.2016, (C) by Michael Neuroth"));
+                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.1 (for .NET/C#) from 4.4.2016, (C) by Michael Neuroth"));
                 Assert.IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
             }
         }
