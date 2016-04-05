@@ -127,9 +127,9 @@ The binary distribution of FUEL consists of the following components:
     fuel.exe                  (command line application)
     fuel.exe.config           
     Library/fuellib.fuel      (standard library)
-    CsLispInterpreter.dll     
-    CsLispDebugger.dll        (optional)
-    CsLispCompiler.dll        (optional)
+    FuelInterpreter.dll     
+    FuelDebugger.dll          (optional)
+    FuelCompiler.dll          (optional)
   
   
 Platforms  
