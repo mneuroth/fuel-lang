@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   fill-opacity="1"
+   color-rendering="auto"
+   color-interpolation="auto"
+   text-rendering="auto"
+   stroke="black"
+   stroke-linecap="square"
+   stroke-miterlimit="10"
+   shape-rendering="auto"
+   stroke-opacity="1"
+   fill="black"
+   stroke-dasharray="none"
+   font-weight="normal"
+   stroke-width="1"
+   font-family="'Dialog'"
+   font-style="normal"
+   stroke-linejoin="miter"
+   font-size="12"
+   stroke-dashoffset="0"
+   image-rendering="auto"
+   id="svg3177"
+   version="1.1"
+   inkscape:version="0.48.5 r10040"
+   width="100%"
+   height="100%"
+   sodipodi:docname="black_droplet_org.svg"
+   inkscape:export-filename="/Users/min/Documents/home/Entwicklung/projects/fuel-lang/black_droplet_org.png"
+   inkscape:export-xdpi="112.5"
+   inkscape:export-ydpi="112.5">
+  <metadata
+     id="metadata3188">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1032"
+     inkscape:window-height="729"
+     id="namedview3186"
+     showgrid="false"
+     inkscape:zoom="0.89702957"
+     inkscape:cx="372.04724"
+     inkscape:cy="806.18912"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg3177" />
+  <!--Unicode Character 'BLACK DROPLET' (U+1F322)-->
+  <rect
+     style="fill:#ffffff;stroke:#ffffff;stroke-width:2.14633869999999982px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+     id="rect3968"
+     width="397.85367"
+     height="397.85367"
+     x="163.04121"
+     y="36.326485"
+     rx="32.218918" />
+  <defs
+     id="genericDefs" />
+  <g
+     id="g3180"
+     transform="translate(270.89408,41.247247)">
+    <g
+       id="g3182">
+      <path
+         d="m 163.125,219.2344 q 0,28.5468 -20.3906,48.6562 Q 122.3438,288 93.6562,288 65.1094,288 44.7188,267.8906 24.3281,247.7812 24.3281,219.2344 24.3281,193.5 47.25,168.0469 l 5.0625,-5.625 q 17.7187,-19.6875 26.7187,-38.25 8.2969,-16.875 14.625,-44.2969 6.4688,27.4219 14.7657,44.2969 9.1406,18.7031 26.7187,38.25 l 5.0625,5.625 Q 163.125,193.5 163.125,219.2344 z"
+         id="path3184"
+         inkscape:connector-curvature="0"
+         style="stroke:none" />
+    </g>
+  </g>
+  <flowRoot
+     xml:space="preserve"
+     id="flowRoot3190"
+     style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+     transform="matrix(1.5354859,0,0,2.0393884,10.607936,-147.4835)"><flowRegion
+       id="flowRegion3192"><rect
+         id="rect3194"
+         width="473.78595"
+         height="208.46582"
+         x="119.28258"
+         y="82.494492" /></flowRegion><flowPara
+       id="flowPara3196"
+       style="font-size:144px">(   )</flowPara></flowRoot></svg>
