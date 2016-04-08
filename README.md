@@ -1,3 +1,5 @@
+![fuel image](fuel.png)
+
 # fuel-lang == FUEL(isp)
 FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform)
 
