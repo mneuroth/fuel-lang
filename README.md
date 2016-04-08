@@ -1,4 +1,4 @@
-<img src="fuel.png" alt="fuel logo" height="70" >
+<img src="fuel.png" alt="fuel logo" height="128" >
 
 # fuel-lang == FUEL(isp)
 FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform)
