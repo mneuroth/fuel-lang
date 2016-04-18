@@ -553,7 +553,15 @@ namespace CsLisp
                 }
                 else
                 {
-                    scope.GlobalScope.Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+                    // use std lib of fuel from builtin resources
+                    if(orgModuleFileName=="fuellib")
+                    {
+                        code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
+                    }
+                    else
+                    {
+                        scope.GlobalScope.Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+                    }
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
