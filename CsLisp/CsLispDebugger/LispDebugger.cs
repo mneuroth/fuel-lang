@@ -581,7 +581,7 @@ namespace CsLisp
                 if (cmdArgs.Length > 0)
                 {
                     string lineNumberString = cmdArgs[0];
-                    int posModuleSeparator = cmdArgs[0].IndexOf(":", StringComparison.Ordinal);
+                    int posModuleSeparator = cmdArgs[0].LastIndexOf(":", StringComparison.Ordinal);
                     if (posModuleSeparator >= 0)
                     {
                         lineNumberString = cmdArgs[0].Substring(posModuleSeparator + 1);
