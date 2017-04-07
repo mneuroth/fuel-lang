@@ -1,251 +1,395 @@
-﻿/*
- * FUEL(isp) is a fast usable embeddable lisp interpreter.
- *
- * Copyright (c) 2016 Michael Neuroth
- *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included 
- * in all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
- * OTHER DEALINGS IN THE SOFTWARE.
- * 
- * */
+#ifndef _TOKEN_H
+#define _TOKEN_H
 
-using System;
-using System.Globalization;
+/*
+* FUEL(isp) is a fast usable embeddable lisp interpreter.
+*
+* Copyright (c) 2016 Michael Neuroth
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+* OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*
+* */
+
+#include <string>
+
+#define null 0
 
 namespace CsLisp
 {
-    /// <summary>
-    /// Type for lisp tokens.
-    /// </summary>
-    public enum LispTokenType
-    {
-        ListStart = 0,
-        ListEnd = 1,
-        Symbol = 2,
-        String = 3,
-        Int = 4,
-        Double = 5,
-        Quote = 6,
-        QuasiQuote = 7,
-        UnQuote = 8,
-        UnQuoteSplicing = 9,
-        True = 10,
-        False = 11,
-        Comment = 12,
-        Nil = 13,
-    }
+	class LispToken;
+	class object;
 
-    /// <summary>
-    /// Interface for a lisp token.
-    /// </summary>
-    /// <remark>
-    /// This interface is intended to remove the dependency to the LispToken class in the future.
-    /// </remark>
-    public interface ILispTokenInterface
-    {
-        /// <summary>
-        /// Gets the type of the token.
-        /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        LispTokenType Type { get; }
+	class string : public std::string
+	{
+	public:
+		string(const char * txt) 
+			: std::string(txt)
+		{			
+		}
 
-        /// <summary>
-        /// Gets the value.
-        /// </summary>
-        /// <value>
-        /// The value.
-        /// </value>
-        object Value { get; }
+		string(char ch)
+		{
+			*this += ch;
+		}
 
-        /// <summary>
-        /// Gets the start position of the token.
-        /// </summary>
-        /// <value>
-        /// The start position.
-        /// </value>
-        int StartPos { get; }
-    }
+		string(const string & txt)
+			: std::string(txt)
+		{
+		}
 
-    /// <summary>
-    /// Lisp token.
-    /// </summary>
-    public class LispToken : ILispTokenInterface
-    {
-        #region constants
+		string& operator+(const string & other)
+		{
+			append(other);
+			return *this;
+		}
 
-        public const string StringStart = "\"";
-        public const string Quote = "'";
-        public const string Quasiquote = "`";
-        public const string Unquote = ",";
-        public const string Unquotesplicing = ",@";
-        public const string Nil = "NIL";
+//		string& operator=(const string & other)
+//		{
+//// TODO
+//			return *this;
+//		}
+//
+//		string& operator=(const char * other)
+//		{
+//// TODO
+//			return *this;
+//		}
 
-        #endregion
+		bool Equals(const string & txt)
+		{
+			return *this == txt;
+		}
 
-        #region properties
+		string & ToUpper()
+		{
+// TODO
+			return *this;
+		}
 
-        /// <summary>
-        /// Gets the type of the token.
-        /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        public LispTokenType Type { get; private set; }
+		bool StartsWith(const string & txt)
+		{
+// TODO
+			return false;
+		}
 
-        /// <summary>
-        /// Gets the value.
-        /// </summary>
-        /// <value>
-        /// The value.
-        /// </value>
-        public object Value { get; private set; }
+		string Substring(int p, int q = 0)
+		{
+// TODO
+			return *this;
+		}
 
-        /// <summary>
-        /// Gets or sets the start position of the token.
-        /// </summary>
-        /// <value>
-        /// The start position.
-        /// </value>
-        public int StartPos { get; set; }
+		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/)
+		{
+// TODO
+			return -1;
+		}
 
-        /// <summary>
-        /// Gets or sets the stop position of the token.
-        /// </summary>
-        /// <value>
-        /// The stop position.
-        /// </value>
-        public int StopPos { get; set; }
+		static string Format(const string & txt, const string & args)
+		{
+// TODO
+			return txt;
+		}
 
-        /// <summary>
-        /// Gets or sets the line no of the token.
-        /// </summary>
-        /// <value>
-        /// The line no.
-        /// </value>
-        public int LineNo { get; set; }
+		int Length()
+		{
+			return size();
+		}
 
-        #endregion
+		const static string Empty;
+	};
 
-        #region constructor
+	inline CsLisp::string operator+(const CsLisp::string & s1, const CsLisp::string & s2)
+	{
+		CsLisp::string s = s1;
+		s.append(s2);
+		return s;
+	}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LispToken"/> class.
-        /// </summary>
-        /// <param name="text">The text of the token.</param>
-        /// <param name="start">The start position.</param>
-        /// <param name="stop">The stop position.</param>
-        /// <param name="lineNo">The line no.</param>
-        public LispToken(string text, int start, int stop, int lineNo)
-        {
-            int intValue;
-            double doubleValue;
+	// variant object
+	class object
+	{
+	public:
+		object& operator=(const string & other)
+		{
+// TODO
+			return *this;
+		}
 
-            StartPos = start;
-            StopPos = stop;
-            LineNo = lineNo;
-            Value = text;
+		object& operator=(int other)
+		{
+// TODO
+			return *this;
+		}
 
-            if (text.StartsWith(StringStart))
-            {
-                Type = LispTokenType.String;
-                Value = text.Substring(1, text.Length - 2);
-            }
-            else if (text == Quote)
-            {
-                Type = LispTokenType.Quote;
-            }
-            else if (text == Quasiquote)
-            {
-                Type = LispTokenType.QuasiQuote;
-            }
-            else if (text == Unquote)
-            {
-                Type = LispTokenType.UnQuote;
-            }
-            else if (text == Unquotesplicing)
-            {
-                Type = LispTokenType.UnQuoteSplicing;
-            }
-            else if (text == "(")
-            {
-                Type = LispTokenType.ListStart;
-            }
-            else if (text == ")")
-            {
-                Type = LispTokenType.ListEnd;
-            }
-            else if (Int32.TryParse(text, out intValue))
-            {
-                Type = LispTokenType.Int;
-                Value = intValue;
-            }
-            else if (Double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out doubleValue))
-            {
-                Type = LispTokenType.Double;
-                Value = doubleValue;
-            }
-            else if (text.Equals("true") || text.Equals("#t"))
-            {
-                Type = LispTokenType.True;
-                Value = true;
-            }
-            else if (text.Equals("false") || text.Equals("#f"))
-            {
-                Type = LispTokenType.False;
-                Value = false;
-            }
-            else if (text.ToUpper().Equals(Nil))
-            {
-                Type = LispTokenType.Nil;
-                Value = null;
-            }
-            else if (text.StartsWith(";"))
-            {
-                Type = LispTokenType.Comment;
-                Value = text;
-            }
-            else
-            {
-                Type = LispTokenType.Symbol;
-                Value = text;
-            }
-        }
+		object& operator=(double other)
+		{
+// TODO
+			return *this;
+		}
 
-        #endregion
+		string ToString()
+		{
+// TODO
+			return "?";
+		}
+	};
 
-        #region public methods
+	inline bool Int32_TryParse(const string & txt, int & outValue)
+	{
+// TODO
+		return false;
+	}
 
-        /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        public override string ToString()
-        {
-            if (Type == LispTokenType.Nil)
-            {
-                return Nil;
-            }
-            return Value.ToString();
-        }
+	inline bool Double_TryParse(const string & txt, const string & NumberStyles_Any, const string & CultureInfo_InvariantCulture, double & doubleValue)
+	{
+// TODO
+		return false;
+	}
 
-        #endregion
-    }
+	inline bool Char_IsWhiteSpace(char ch)
+	{
+// TODO
+		return false;
+	}
+
+	/// <summary>
+	/// Type for lisp tokens.
+	/// </summary>
+	enum LispTokenType
+	{
+		ListStart = 0,
+		ListEnd = 1,
+		Symbol = 2,
+		String = 3,
+		Int = 4,
+		Double = 5,
+		Quote = 6,
+		QuasiQuote = 7,
+		UnQuote = 8,
+		UnQuoteSplicing = 9,
+		True = 10,
+		False = 11,
+		Comment = 12,
+		Nil = 13,
+	};
+
+	/// <summary>
+	/// Interface for a lisp token.
+	/// </summary>
+	/// <remark>
+	/// This interface is intended to remove the dependency to the LispToken class in the future.
+	/// </remark>
+	/*public interface*/class ILispTokenInterface
+	{
+	public:
+		/// <summary>
+		/// Gets the type of the token.
+		/// </summary>
+		/// <value>
+		/// The type.
+		/// </value>
+		LispTokenType Type; //{ get; }
+
+		/// <summary>
+		/// Gets the value.
+		/// </summary>
+		/// <value>
+		/// The value.
+		/// </value>
+		object Value; // { get; }
+
+		/// <summary>
+		/// Gets the start position of the token.
+		/// </summary>
+		/// <value>
+		/// The start position.
+		/// </value>
+		int StartPos; // { get; }
+	};
+
+	/// <summary>
+	/// Lisp token.
+	/// </summary>
+	/*public*/ class LispToken : ILispTokenInterface
+	{
+	public:
+		//#region constants
+
+		/*public*/ const static string StringStart;
+		/*public*/ const static string QuoteConst;
+		/*public*/ const static string Quasiquote;
+		/*public*/ const static string Unquote;
+		/*public*/ const static string Unquotesplicing;
+		/*public*/ const static string NilConst;
+
+		//#endregion
+
+		//#region properties
+
+		/// <summary>
+		/// Gets the type of the token.
+		/// </summary>
+		/// <value>
+		/// The type.
+		/// </value>
+		/*public*/ LispTokenType Type_; // { get; private set; }
+
+		/// <summary>
+		/// Gets the value.
+		/// </summary>
+		/// <value>
+		/// The value.
+		/// </value>
+		/*public*/ object Value_; // { get; private set; }
+
+		/// <summary>
+		/// Gets or sets the start position of the token.
+		/// </summary>
+		/// <value>
+		/// The start position.
+		/// </value>
+		/*public*/ int StartPos; // { get; set; }
+
+		/// <summary>
+		/// Gets or sets the stop position of the token.
+		/// </summary>
+		/// <value>
+		/// The stop position.
+		/// </value>
+		/*public*/ int StopPos; // { get; set; }
+
+		/// <summary>
+		/// Gets or sets the line no of the token.
+		/// </summary>
+		/// <value>
+		/// The line no.
+		/// </value>
+		/*public*/ int LineNo; // { get; set; }
+
+		//#endregion
+
+		//#region constructor
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LispToken"/> class.
+		/// </summary>
+		/// <param name="text">The text of the token.</param>
+		/// <param name="start">The start position.</param>
+		/// <param name="stop">The stop position.</param>
+		/// <param name="lineNo">The line no.</param>
+		/*public*/ LispToken(string text, int start, int stop, int lineNo)
+		{
+			int intValue;
+			double doubleValue;
+
+			StartPos = start;
+			StopPos = stop;
+			LineNo = lineNo;
+			Value_ = text;
+
+			if (text.StartsWith(StringStart))
+			{
+				Type_ = /*LispTokenType::*/String;
+				Value_ = text.Substring(1, text.Length() - 2);
+			}
+			else if (text == QuoteConst)
+			{
+				Type_ = /*LispTokenType::*/Quote;
+			}
+			else if (text == Quasiquote)
+			{
+				Type_ = /*LispTokenType::*/QuasiQuote;
+			}
+			else if (text == Unquote)
+			{
+				Type_ = /*LispTokenType::*/UnQuote;
+			}
+			else if (text == Unquotesplicing)
+			{
+				Type_ = /*LispTokenType::*/UnQuoteSplicing;
+			}
+			else if (text == "(")
+			{
+				Type_ = /*LispTokenType::*/ListStart;
+			}
+			else if (text == ")")
+			{
+				Type_ = /*LispTokenType::*/ListEnd;
+			}
+			else if (Int32_TryParse(text, /*out*/ intValue))
+			{
+				Type_ = /*LispTokenType::*/Int;
+				Value_ = intValue;
+			}
+			else if (Double_TryParse(text, "NumberStyles.Any", "CultureInfo.InvariantCulture", /*out*/ doubleValue))
+			{
+				Type_ = /*LispTokenType::*/Double;
+				Value_ = doubleValue;
+			}
+			else if (text.Equals("true") || text.Equals("#t"))
+			{
+				Type_ = /*LispTokenType::*/True;
+				Value_ = true;
+			}
+			else if (text.Equals("false") || text.Equals("#f"))
+			{
+				Type_ = /*LispTokenType::*/False;
+				Value_ = false;
+			}
+			else if (text.ToUpper().Equals(NilConst))
+			{
+				Type_ = /*LispTokenType::*/Nil;
+				Value_ = null;
+			}
+			else if (text.StartsWith(";"))
+			{
+				Type_ = /*LispTokenType::*/Comment;
+				Value_ = text;
+			}
+			else
+			{
+				Type_ = /*LispTokenType::*/Symbol;
+				Value_ = text;
+			}
+		}
+
+		//#endregion
+
+		//#region public methods
+
+		/// <summary>
+		/// Returns a <see cref="System.String" /> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String" /> that represents this instance.
+		/// </returns>
+		/*public override*/ string ToString()
+		{
+			if (Type_ == /*LispTokenType::*/Nil)
+			{
+				return NilConst;
+			}
+			return Value_.ToString();
+		}
+
+		//#endregion
+	};
 }
+
+#endif
