@@ -52,7 +52,7 @@ namespace CsLisp
 	public:
 		size_t Count() const
 		{
-			return size();
+			return std::list<T>::size();
 		}
 
 		std::vector<T> ToArray() const
@@ -62,12 +62,12 @@ namespace CsLisp
 
 		const T & First() const
 		{
-			return front();
+			return std::list<T>::front();
 		}
 
 		const T & Last() const
 		{
-			return back();
+			return std::list<T>::back();
 		}
 	};
 
