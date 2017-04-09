@@ -27,6 +27,10 @@
 * */
 
 #include <string>
+#include <cctype>
+#include <functional>
+#include <algorithm>
+#include <stdexcept>
 
 #define null 0
 
@@ -49,6 +53,11 @@ namespace CsLisp
 		}
 
 		string(const string & txt)
+			: std::string(txt)
+		{
+		}
+
+		string(const std::string & txt)
 			: std::string(txt)
 		{
 		}
@@ -78,31 +87,30 @@ namespace CsLisp
 
 		string & ToUpper()
 		{
-// TODO
+			std::transform(begin(), end(), begin(), std::ptr_fun<int, int>(std::toupper));
 			return *this;
 		}
 
 		bool StartsWith(const string & txt)
 		{
-// TODO
-			return false;
+			return compare(0, txt.length(), txt) == 0;
 		}
 
-		string Substring(int p, int q = 0)
+		string Substring(int offs, int length = 0)
 		{
-// TODO
-			return *this;
+			return substr(offs, length);
 		}
 
 		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/)
 		{
-// TODO
-			return -1;
+			return (*this).find_first_of(txt);
 		}
 
 		static string Format(const string & txt, const string & args)
 		{
 // TODO
+			string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
+			//std::strin
 			return txt;
 		}
 
@@ -124,48 +132,78 @@ namespace CsLisp
 	// variant object
 	class object
 	{
+	private:
+		string m_sValue;
+
 	public:
+		object()
+			: m_sValue("?")
+		{
+		}
+
 		object& operator=(const string & other)
 		{
-// TODO
+			m_sValue = other;
 			return *this;
 		}
 
 		object& operator=(int other)
 		{
-// TODO
+			m_sValue = std::to_string(other);
 			return *this;
 		}
 
 		object& operator=(double other)
 		{
-// TODO
+			m_sValue = std::to_string(other);
 			return *this;
 		}
 
 		string ToString()
 		{
-// TODO
-			return "?";
+			return m_sValue;
 		}
 	};
 
 	inline bool Int32_TryParse(const string & txt, int & outValue)
 	{
-// TODO
-		return false;
+		try
+		{
+			size_t errPos;
+			outValue = std::stoi(txt, &errPos);
+			if (errPos < txt.length())
+			{
+				return false;
+			}
+			return true;
+		}
+		catch (const std::invalid_argument & exc)
+		{
+			return false;
+		}
 	}
 
 	inline bool Double_TryParse(const string & txt, const string & NumberStyles_Any, const string & CultureInfo_InvariantCulture, double & doubleValue)
 	{
-// TODO
-		return false;
+		try
+		{
+			size_t errPos;
+			doubleValue = std::stod(txt, &errPos);
+			if (errPos < txt.length())
+			{
+				return false;
+			}
+			return true;
+		}
+		catch (const std::invalid_argument & exc)
+		{
+			return false;
+		}
 	}
 
 	inline bool Char_IsWhiteSpace(char ch)
 	{
-// TODO
-		return false;
+		return isspace(ch);
 	}
 
 	/// <summary>

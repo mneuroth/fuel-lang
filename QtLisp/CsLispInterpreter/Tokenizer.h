@@ -46,7 +46,7 @@ namespace CsLisp
 	};
 
 	template <class T>
-	class IEnumerable
+	class IEnumerable : public std::list<T>
 	{
 	};
 
@@ -56,7 +56,7 @@ namespace CsLisp
 	public:
 		void Add(const T & elem)
 		{
-// TODO			
+			std::list<T>::push_back(elem);
 		}
 	};
 
