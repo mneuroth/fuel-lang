@@ -14,10 +14,8 @@ using namespace CsLisp;
 
 int main()
 {
-	LispTokenizer aTokenizer;
-
 	string code = "(+ 1 2 3)";
-	IEnumerable<LispToken> tokens = aTokenizer.Tokenize(code);
+	IEnumerable<LispToken> tokens = LispTokenizer::Tokenize(code);
 
 	//for each (LispToken elem in tokens)
 	//{

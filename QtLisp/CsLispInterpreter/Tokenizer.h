@@ -29,6 +29,7 @@
 #include "Token.h"
 
 #include <list>
+#include <vector>
 #include <functional>
 
 typedef std::function<void()> Action;
@@ -48,6 +49,26 @@ namespace CsLisp
 	template <class T>
 	class IEnumerable : public std::list<T>
 	{
+	public:
+		size_t Count() const
+		{
+			return size();
+		}
+
+		std::vector<T> ToArray() const
+		{
+			return std::vector<T>(std::list<T>::begin(), std::list<T>::end());
+		}
+
+		const T & First() const
+		{
+			return front();
+		}
+
+		const T & Last() const
+		{
+			return back();
+		}
 	};
 
 	template <class T>

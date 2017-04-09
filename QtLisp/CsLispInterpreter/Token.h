@@ -85,10 +85,11 @@ namespace CsLisp
 			return *this == txt;
 		}
 
-		string & ToUpper()
+		string ToUpper()
 		{
-			std::transform(begin(), end(), begin(), std::ptr_fun<int, int>(std::toupper));
-			return *this;
+			string temp = *this;
+			std::transform(temp.begin(), temp.end(), temp.begin(), std::ptr_fun<int, int>(std::toupper));
+			return temp;
 		}
 
 		bool StartsWith(const string & txt)
@@ -96,9 +97,9 @@ namespace CsLisp
 			return compare(0, txt.length(), txt) == 0;
 		}
 
-		string Substring(int offs, int length = 0)
+		string Substring(int offs, int length = npos)
 		{
-			return substr(offs, length);
+			return string(substr(offs, length));
 		}
 
 		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/)
@@ -109,7 +110,7 @@ namespace CsLisp
 		static string Format(const string & txt, const string & args)
 		{
 // TODO
-			string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
+			//string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
 			//std::strin
 			return txt;
 		}
@@ -159,7 +160,22 @@ namespace CsLisp
 			return *this;
 		}
 
-		string ToString()
+		operator int()
+		{
+			return stoi(m_sValue);
+		}
+
+		operator double()
+		{
+			return stod(m_sValue);
+		}
+
+		operator bool()
+		{
+			return stoi(m_sValue) == 1;
+		}
+
+		string ToString() const
 		{
 			return m_sValue;
 		}
@@ -177,7 +193,7 @@ namespace CsLisp
 			}
 			return true;
 		}
-		catch (const std::invalid_argument & exc)
+		catch (const std::invalid_argument &)
 		{
 			return false;
 		}
@@ -195,7 +211,7 @@ namespace CsLisp
 			}
 			return true;
 		}
-		catch (const std::invalid_argument & exc)
+		catch (const std::invalid_argument &)
 		{
 			return false;
 		}
@@ -203,7 +219,7 @@ namespace CsLisp
 
 	inline bool Char_IsWhiteSpace(char ch)
 	{
-		return isspace(ch);
+		return isspace(ch) != 0;
 	}
 
 	/// <summary>
@@ -236,35 +252,35 @@ namespace CsLisp
 	/*public interface*/class ILispTokenInterface
 	{
 	public:
-		/// <summary>
-		/// Gets the type of the token.
-		/// </summary>
-		/// <value>
-		/// The type.
-		/// </value>
-		LispTokenType Type; //{ get; }
+		///// <summary>
+		///// Gets the type of the token.
+		///// </summary>
+		///// <value>
+		///// The type.
+		///// </value>
+		//LispTokenType Type; //{ get; }
 
-		/// <summary>
-		/// Gets the value.
-		/// </summary>
-		/// <value>
-		/// The value.
-		/// </value>
-		object Value; // { get; }
+		///// <summary>
+		///// Gets the value.
+		///// </summary>
+		///// <value>
+		///// The value.
+		///// </value>
+		//object Value; // { get; }
 
-		/// <summary>
-		/// Gets the start position of the token.
-		/// </summary>
-		/// <value>
-		/// The start position.
-		/// </value>
-		int StartPos; // { get; }
+		///// <summary>
+		///// Gets the start position of the token.
+		///// </summary>
+		///// <value>
+		///// The start position.
+		///// </value>
+		//int StartPos; // { get; }
 	};
 
 	/// <summary>
 	/// Lisp token.
 	/// </summary>
-	/*public*/ class LispToken : ILispTokenInterface
+	/*public*/ class LispToken : public ILispTokenInterface
 	{
 	public:
 		//#region constants
@@ -286,7 +302,7 @@ namespace CsLisp
 		/// <value>
 		/// The type.
 		/// </value>
-		/*public*/ LispTokenType Type_; // { get; private set; }
+		/*public*/ LispTokenType Type; // { get; private set; }
 
 		/// <summary>
 		/// Gets the value.
@@ -294,7 +310,7 @@ namespace CsLisp
 		/// <value>
 		/// The value.
 		/// </value>
-		/*public*/ object Value_; // { get; private set; }
+		/*public*/ object Value; // { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the start position of the token.
@@ -339,71 +355,71 @@ namespace CsLisp
 			StartPos = start;
 			StopPos = stop;
 			LineNo = lineNo;
-			Value_ = text;
+			Value = text;
 
 			if (text.StartsWith(StringStart))
 			{
-				Type_ = /*LispTokenType::*/String;
-				Value_ = text.Substring(1, text.Length() - 2);
+				Type = /*LispTokenType::*/String;
+				Value = text.Substring(1, text.Length() - 2);
 			}
 			else if (text == QuoteConst)
 			{
-				Type_ = /*LispTokenType::*/Quote;
+				Type = /*LispTokenType::*/Quote;
 			}
 			else if (text == Quasiquote)
 			{
-				Type_ = /*LispTokenType::*/QuasiQuote;
+				Type = /*LispTokenType::*/QuasiQuote;
 			}
 			else if (text == Unquote)
 			{
-				Type_ = /*LispTokenType::*/UnQuote;
+				Type = /*LispTokenType::*/UnQuote;
 			}
 			else if (text == Unquotesplicing)
 			{
-				Type_ = /*LispTokenType::*/UnQuoteSplicing;
+				Type = /*LispTokenType::*/UnQuoteSplicing;
 			}
 			else if (text == "(")
 			{
-				Type_ = /*LispTokenType::*/ListStart;
+				Type = /*LispTokenType::*/ListStart;
 			}
 			else if (text == ")")
 			{
-				Type_ = /*LispTokenType::*/ListEnd;
+				Type = /*LispTokenType::*/ListEnd;
 			}
 			else if (Int32_TryParse(text, /*out*/ intValue))
 			{
-				Type_ = /*LispTokenType::*/Int;
-				Value_ = intValue;
+				Type = /*LispTokenType::*/Int;
+				Value = intValue;
 			}
 			else if (Double_TryParse(text, "NumberStyles.Any", "CultureInfo.InvariantCulture", /*out*/ doubleValue))
 			{
-				Type_ = /*LispTokenType::*/Double;
-				Value_ = doubleValue;
+				Type = /*LispTokenType::*/Double;
+				Value = doubleValue;
 			}
 			else if (text.Equals("true") || text.Equals("#t"))
 			{
-				Type_ = /*LispTokenType::*/True;
-				Value_ = true;
+				Type = /*LispTokenType::*/True;
+				Value = true;
 			}
 			else if (text.Equals("false") || text.Equals("#f"))
 			{
-				Type_ = /*LispTokenType::*/False;
-				Value_ = false;
+				Type = /*LispTokenType::*/False;
+				Value = false;
 			}
 			else if (text.ToUpper().Equals(NilConst))
 			{
-				Type_ = /*LispTokenType::*/Nil;
-				Value_ = null;
+				Type = /*LispTokenType::*/Nil;
+				Value = null;
 			}
 			else if (text.StartsWith(";"))
 			{
-				Type_ = /*LispTokenType::*/Comment;
-				Value_ = text;
+				Type = /*LispTokenType::*/Comment;
+				Value = text;
 			}
 			else
 			{
-				Type_ = /*LispTokenType::*/Symbol;
-				Value_ = text;
+				Type = /*LispTokenType::*/Symbol;
+				Value = text;
 			}
 		}
 
@@ -417,13 +433,13 @@ namespace CsLisp
 		/// <returns>
 		/// A <see cref="System.String" /> that represents this instance.
 		/// </returns>
-		/*public override*/ string ToString()
+		/*public override*/ string ToString() const
 		{
-			if (Type_ == /*LispTokenType::*/Nil)
+			if (Type == /*LispTokenType::*/Nil)
 			{
 				return NilConst;
 			}
-			return Value_.ToString();
+			return Value.ToString();
 		}
 
 		//#endregion
