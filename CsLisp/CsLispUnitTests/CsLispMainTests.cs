@@ -420,7 +420,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
                 Assert.IsTrue(s.Contains("  4 B      	   (+ x 1)"));
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
-                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.2 (for .NET/C#) from 18.4.2016, (C) by Michael Neuroth"));
+                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.2 (for .NET/C#) from 12.11.2016, (C) by Michael Neuroth"));
                 Assert.IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
             }
         }
