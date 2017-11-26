@@ -1,10 +1,10 @@
-ren call with two parameters: OS BUILD_NO VCS_BUILD_NO	
+ren call with two parameters: OS BUILD_NO VCS_BUILD_NO
 mkdir deploy
 cd deploy
 mkdir %1
 cd %1
-mkdir %2
-cd %2
+mkdir %3
+cd %3
 copy ..\..\..\CsLisp\bin\release\fuel.exe
 copy ..\..\..\CsLisp\bin\release\fuel.pdb
 copy ..\..\..\CsLisp\bin\release\fuel.exe.config
