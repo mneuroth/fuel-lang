@@ -26,159 +26,40 @@
 *
 * */
 
-#include <string>
 #include <cctype>
 #include <functional>
 #include <algorithm>
 #include <stdexcept>
+#include <memory>
 
 #define null 0
+
+#include "csobject.h"
+#include "csstring.h"
 
 namespace CsLisp
 {
 	class LispToken;
-	class object;
 
-	class string : public std::string
+	/// <summary>
+	/// Type for lisp tokens.
+	/// </summary>
+	enum LispTokenType
 	{
-	public:
-		string(const char * txt) 
-			: std::string(txt)
-		{			
-		}
-
-		string(char ch)
-		{
-			*this += ch;
-		}
-
-		string(const string & txt)
-			: std::string(txt)
-		{
-		}
-
-		string(const std::string & txt)
-			: std::string(txt)
-		{
-		}
-
-		string& operator+(const string & other)
-		{
-			append(other);
-			return *this;
-		}
-
-//		string& operator=(const string & other)
-//		{
-//// TODO
-//			return *this;
-//		}
-//
-//		string& operator=(const char * other)
-//		{
-//// TODO
-//			return *this;
-//		}
-
-		bool Equals(const string & txt)
-		{
-			return *this == txt;
-		}
-
-		string ToUpper()
-		{
-			string temp = *this;
-			std::transform(temp.begin(), temp.end(), temp.begin(), std::ptr_fun<int, int>(std::toupper));
-			return temp;
-		}
-
-		bool StartsWith(const string & txt)
-		{
-			return compare(0, txt.length(), txt) == 0;
-		}
-
-		string Substring(int offs, int length = npos)
-		{
-			return string(substr(offs, length));
-		}
-
-		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/)
-		{
-			return (*this).find_first_of(txt);
-		}
-
-		static string Format(const string & txt, const string & args)
-		{
-// TODO
-			//string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
-			//std::strin
-			return txt;
-		}
-
-		int Length()
-		{
-			return size();
-		}
-
-		const static string Empty;
-	};
-
-	inline CsLisp::string operator+(const CsLisp::string & s1, const CsLisp::string & s2)
-	{
-		CsLisp::string s = s1;
-		s.append(s2);
-		return s;
-	}
-
-	// variant object
-	class object
-	{
-	private:
-		string m_sValue;
-
-	public:
-		object()
-			: m_sValue("?")
-		{
-		}
-
-		object& operator=(const string & other)
-		{
-			m_sValue = other;
-			return *this;
-		}
-
-		object& operator=(int other)
-		{
-			m_sValue = std::to_string(other);
-			return *this;
-		}
-
-		object& operator=(double other)
-		{
-			m_sValue = std::to_string(other);
-			return *this;
-		}
-
-		operator int()
-		{
-			return stoi(m_sValue);
-		}
-
-		operator double()
-		{
-			return stod(m_sValue);
-		}
-
-		operator bool()
-		{
-			return stoi(m_sValue) == 1;
-		}
-
-		string ToString() const
-		{
-			return m_sValue;
-		}
+		ListStart = 0,
+		ListEnd = 1,
+		Symbol = 2,
+		String = 3,
+		Int = 4,
+		Double = 5,
+		Quote = 6,
+		QuasiQuote = 7,
+		UnQuote = 8,
+		UnQuoteSplicing = 9,
+		True = 10,
+		False = 11,
+		Comment = 12,
+		Nil = 13,
 	};
 
 	inline bool Int32_TryParse(const string & txt, int & outValue)
@@ -221,27 +102,6 @@ namespace CsLisp
 	{
 		return isspace(ch) != 0;
 	}
-
-	/// <summary>
-	/// Type for lisp tokens.
-	/// </summary>
-	enum LispTokenType
-	{
-		ListStart = 0,
-		ListEnd = 1,
-		Symbol = 2,
-		String = 3,
-		Int = 4,
-		Double = 5,
-		Quote = 6,
-		QuasiQuote = 7,
-		UnQuote = 8,
-		UnQuoteSplicing = 9,
-		True = 10,
-		False = 11,
-		Comment = 12,
-		Nil = 13,
-	};
 
 	/// <summary>
 	/// Interface for a lisp token.
@@ -310,7 +170,7 @@ namespace CsLisp
 		/// <value>
 		/// The value.
 		/// </value>
-		/*public*/ object Value; // { get; private set; }
+		/*public*/ std::shared_ptr<object> Value; // { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the start position of the token.
@@ -355,12 +215,12 @@ namespace CsLisp
 			StartPos = start;
 			StopPos = stop;
 			LineNo = lineNo;
-			Value = text;
+			Value = std::make_shared<object>(text);
 
 			if (text.StartsWith(StringStart))
 			{
 				Type = /*LispTokenType::*/String;
-				Value = text.Substring(1, text.Length() - 2);
+				Value = std::make_shared<object>(text.Substring(1, text.Length() - 2));
 			}
 			else if (text == QuoteConst)
 			{
@@ -389,37 +249,37 @@ namespace CsLisp
 			else if (Int32_TryParse(text, /*out*/ intValue))
 			{
 				Type = /*LispTokenType::*/Int;
-				Value = intValue;
+				Value = std::make_shared<object>(intValue);
 			}
 			else if (Double_TryParse(text, "NumberStyles.Any", "CultureInfo.InvariantCulture", /*out*/ doubleValue))
 			{
 				Type = /*LispTokenType::*/Double;
-				Value = doubleValue;
+				Value = std::make_shared<object>(doubleValue);
 			}
 			else if (text.Equals("true") || text.Equals("#t"))
 			{
 				Type = /*LispTokenType::*/True;
-				Value = true;
+				Value = std::make_shared<object>(true);
 			}
 			else if (text.Equals("false") || text.Equals("#f"))
 			{
 				Type = /*LispTokenType::*/False;
-				Value = false;
+				Value = std::make_shared<object>(false);
 			}
 			else if (text.ToUpper().Equals(NilConst))
 			{
 				Type = /*LispTokenType::*/Nil;
-				Value = null;
+				Value = std::make_shared<object>(null);
 			}
 			else if (text.StartsWith(";"))
 			{
 				Type = /*LispTokenType::*/Comment;
-				Value = text;
+				Value = std::make_shared<object>(text);
 			}
 			else
 			{
 				Type = /*LispTokenType::*/Symbol;
-				Value = text;
+				Value = std::make_shared<object>(text);
 			}
 		}
 
@@ -439,7 +299,7 @@ namespace CsLisp
 			{
 				return NilConst;
 			}
-			return Value.ToString();
+			return Value->ToString();
 		}
 
 		//#endregion

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
+#include "../CsLispInterpreter/csstring.h"
+#include "../CsLispInterpreter/csobject.h"
 #include "../CsLispInterpreter/Token.h"
 #include "../CsLispInterpreter/Tokenizer.h"
 
@@ -50,15 +52,16 @@ namespace QtLispInterpreterTests
 			Assert::IsTrue(LispTokenType::ListStart == resultAsArray[0].Type);
 			Assert::AreEqual("+", resultAsArray[1].ToString().c_str());
 			Assert::IsTrue(LispTokenType::Symbol == resultAsArray[1].Type);
-			Assert::AreEqual(1, (int)resultAsArray[2].Value);
+			Assert::AreEqual(1, (int)*(resultAsArray[2].Value));
 			Assert::IsTrue(LispTokenType::Int == resultAsArray[2].Type);
-			Assert::AreEqual(true, (bool)resultAsArray[3].Value);
+			Assert::AreEqual(true, (bool)*(resultAsArray[3].Value));
 			Assert::IsTrue(LispTokenType::True == resultAsArray[3].Type);
-			Assert::AreEqual(3.1415, (double)resultAsArray[4].Value);
+			Assert::AreEqual(3.1415, (double)*(resultAsArray[4].Value));
 			Assert::IsTrue(LispTokenType::Double == resultAsArray[4].Type);
 			Assert::AreEqual("asdf blub", resultAsArray[5].ToString().c_str());
 			Assert::IsTrue(LispTokenType::String == resultAsArray[5].Type);
-			Assert::AreEqual(false, (bool)resultAsArray[6].Value);
+			bool o = (bool)*(resultAsArray[6].Value);
+			Assert::AreEqual(false, (bool)*(resultAsArray[6].Value));
 			Assert::IsTrue(LispTokenType::False == resultAsArray[6].Type);
 			Assert::AreEqual(")", resultAsArray[7].ToString().c_str());
 			Assert::IsTrue(LispTokenType::ListEnd == resultAsArray[7].Type);
@@ -77,8 +80,8 @@ namespace QtLispInterpreterTests
 			Assert::AreEqual("print", resultAsArray[3].ToString().c_str());
 			Assert::AreEqual("(", resultAsArray[4].ToString().c_str());
 			Assert::AreEqual("*", resultAsArray[5].ToString().c_str());
-			Assert::AreEqual(9, (int)resultAsArray[6].Value);
-			Assert::AreEqual(9, (int)resultAsArray[7].Value);
+			Assert::AreEqual(9, (int)*(resultAsArray[6].Value));
+			Assert::AreEqual(9, (int)*(resultAsArray[7].Value));
 			Assert::AreEqual(")", resultAsArray[8].ToString().c_str());
 			Assert::AreEqual(")", resultAsArray[9].ToString().c_str());
 			Assert::AreEqual(")", resultAsArray[10].ToString().c_str());
@@ -96,8 +99,8 @@ namespace QtLispInterpreterTests
 			Assert::AreEqual("print", resultAsArray[3].ToString().c_str());
 			Assert::AreEqual("(", resultAsArray[4].ToString().c_str());
 			Assert::AreEqual("*", resultAsArray[5].ToString().c_str());
-			Assert::AreEqual(9, (int)resultAsArray[6].Value);
-			Assert::AreEqual(9, (int)resultAsArray[7].Value);
+			Assert::AreEqual(9, (int)*(resultAsArray[6].Value));
+			Assert::AreEqual(9, (int)*(resultAsArray[7].Value));
 			Assert::AreEqual(")", resultAsArray[8].ToString().c_str());
 			Assert::AreEqual(")", resultAsArray[9].ToString().c_str());
 			Assert::AreEqual("; this is a comment\n", resultAsArray[10].ToString().c_str());
