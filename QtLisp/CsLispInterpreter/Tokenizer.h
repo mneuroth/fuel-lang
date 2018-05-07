@@ -33,10 +33,6 @@
 #include <vector>
 #include <functional>
 
-typedef std::function<void()> Action;
-
-#define var auto
-
 namespace CsLisp
 {
 	/// <summary>

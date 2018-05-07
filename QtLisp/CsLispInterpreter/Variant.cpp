@@ -1,3 +1,27 @@
+/*
+* FUEL(isp) is a fast usable embeddable lisp interpreter.
+*
+* Copyright (c) 2016 Michael Neuroth
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+* OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*
+* */
 
 #include "Variant.h"
 #include "cstypes.h"
@@ -11,7 +35,7 @@ namespace CsLisp
 
 	int LispVariant::CompareTo(std::shared_ptr<object> other)
 	{
-		if (other->GetType() == ObjectType::__LispVariant /*is LispVariant*/)
+		if (other->IsLispVariant())
 		{
 			var otherVariant = other->ToLispVariant();
 			if (IsNumber() && otherVariant->IsNumber())
@@ -47,17 +71,17 @@ namespace CsLisp
 			// Nil is an empty list () !
 		if (Type == LispType::_Nil)
 		{
-			return IEnumerable<std::shared_ptr<object>>(); // std::make_shared<object>(new List<std::shared_ptr<object>>());
+			return IEnumerable<std::shared_ptr<object>>();
 		}
-		if (Type == LispType::_NativeObject && NativeObjectValue is IEnumerable<object>)
+		if (IsNativeObject() && NativeObjectValue()->IsIEnumerableOfObject())
 		{
-			return (IEnumerable<object>)NativeObjectValue;
+			return NativeObjectValue()->ToEnumerableOfObject();
 		}
 		if (Type != LispType::_List)
 		{
 			throw CreateInvalidCastException("list");
 		}
-		return ((IEnumerable)Value).Cast<object>();
+		return ToEnumerableOfObject(); // ((IEnumerable)Value).Cast<object>();
 		//}
 	}
 
@@ -65,11 +89,11 @@ namespace CsLisp
 	{
 		//get
 		//{
-		if (Type != LispType::_Double)
+		if (!IsDouble())
 		{
 			throw CreateInvalidCastException("double");
 		}
-		return (double)Value;
+			return (double)(*Value);
 		//}
 	}
 
@@ -77,11 +101,11 @@ namespace CsLisp
 	{
 		//get
 		//{
-		if (Type != LispType.Int)
+		if (!IsInt())
 		{
 			throw CreateInvalidCastException("int");
 		}
-		return (int)Value;
+		return (int)(*Value);
 		//}
 	}
 
@@ -89,7 +113,7 @@ namespace CsLisp
 	{
 		//get
 		//{
-		if (Type != LispType.Bool)
+		if (IsBool())
 		{
 			throw CreateInvalidCastException("bool");
 		}
@@ -101,7 +125,7 @@ namespace CsLisp
 	{
 		//get
 		//{
-		if (Type != LispType.NativeObject && Type != LispType.Nil)
+		if (IsNativeObject() && Type != LispType::_Nil)
 		{
 			throw CreateInvalidCastException("native object");
 		}
@@ -113,45 +137,45 @@ namespace CsLisp
 	{
 		//get
 		//{
-		string result = string.Empty;
+		string result = string::Empty;
 
-		object native = NativeObjectValue;
-		if (native is IEnumerable<object>)
+		std::shared_ptr<object> native = NativeObjectValue();
+		if (native->IsIEnumerableOfObject())
 		{
-			var container = (IEnumerable<object>)native;
-			foreach(var element in container)
+			IEnumerable<std::shared_ptr<object>> container = native->ToEnumerableOfObject();
+			for (var element = container.begin(); element != container.end(); element++)	//foreach(var element in container)
 			{
-				if (result.Length > 0)
+				if (result.Length() > 0)
 				{
 					result += " ";
 				}
-				result += element != null ? element.ToString() : LispToken.Nil;
+				result += *element != null ? (*element)->ToString() : LispToken::NilConst;
 			}
 			result = "(" + result + ")";
 		}
 		else
 		{
-			result = native.ToString();
+			result = native->ToString();
 		}
 
 		return result;
 		//}
 	}
 
-	/*private*/ static string LispVariant::ExpandContainerToString(std::shared_ptr<object> maybeContainer)
+	/*private*/ string LispVariant::ExpandContainerToString(std::shared_ptr<object> maybeContainer)
 	{
 		string ret = string::Empty;
 
-		if (maybeContainer is IEnumerable<object>)
+		if (maybeContainer->IsIEnumerableOfObject())
 		{
-			var container = (IEnumerable<object>)maybeContainer;
-			foreach(var item in container)
+			var container = maybeContainer->ToEnumerableOfObject();
+			for (var item = container.begin(); item != container.end(); item++) // foreach(var item in container)
 			{
-				if (ret.Length > 0)
+				if (ret.Length() > 0)
 				{
 					ret += " ";
 				}
-				ret += ExpandContainerToString(item);
+				ret += ExpandContainerToString(*item);
 			}
 			ret = "(" + ret + ")";
 		}

@@ -43,6 +43,11 @@ namespace CsLisp
 // TODO --> forward declaration    
     struct LispFunctionWrapper
     {
+		LispFunctionWrapper()
+			: Signature("")
+		{
+		}
+
 		/*public*/ string Signature; // { get; private set; }
 	};
     
@@ -175,7 +180,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="val">The value.</param>
         /// <remarks>Needed for compiler module and .NET 3.5</remarks>
-        /*public*/ LispVariant(std::shared_ptr<object> val)
+        /*public*/ explicit LispVariant(std::shared_ptr<object> val)
             : LispVariant(val, LispUnQuoteModus::_None)
         {
         }
@@ -186,7 +191,7 @@ namespace CsLisp
         /// <param name="type">The type.</param>
         /// <param name="value">The value.</param>
         /// <remarks>Needed for compiler module and .NET 3.5</remarks>
-//        /*public*/ LispVariant(LispType type, std::shared_ptr<object> value)
+//        /*public*/ explicit LispVariant(LispType type, std::shared_ptr<object> value)
 //            : LispVariant(type, value, LispUnQuoteModus::_None)
 //        {
 //        }
@@ -197,7 +202,7 @@ namespace CsLisp
         /// <param name="type">The type.</param>
         /// <param name="value">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        /*public*/ LispVariant(LispType type /*= LispType::_Undefined*/, std::shared_ptr<object> value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
+        /*public*/ explicit LispVariant(LispType type /*= LispType::_Undefined*/, std::shared_ptr<object> value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
         {
             Type = type;
             Value = value;
@@ -209,7 +214,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="val">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        /*public*/ LispVariant(std::shared_ptr<object> val, LispUnQuoteModus unQuoted /*= LispUnQuoteModus::_None*/)
+        /*public*/ explicit LispVariant(std::shared_ptr<object> val, LispUnQuoteModus unQuoted /*= LispUnQuoteModus::_None*/)
             : LispVariant(TypeOf(val), val, unQuoted)
         {
             //std::shared_ptr<LispVariant> value = std::dynamic_pointer_cast<LispVariant>(val); //val as LispVariant;
@@ -223,13 +228,20 @@ namespace CsLisp
             }
         }
 
-    protected:
+		LispVariant(const LispVariant & other)
+		{
+			Type = other.Type;
+			Value = other.Value;
+			IsUnQuoted = other.IsUnQuoted;
+		}
+
+	protected:
         /// <summary>
         /// Initializes a new instance of the <see cref="LispVariant"/> class.
         /// </summary>
         /// <param name="token">The token.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        /*internal*/ LispVariant(std::shared_ptr<LispToken> token, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
+        /*internal*/ explicit LispVariant(std::shared_ptr<LispToken> token, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
             : LispVariant(TypeOf(token->Value), token->Value, unQuoted)
         {
             std::shared_ptr<LispToken> Token = token;
@@ -242,7 +254,7 @@ namespace CsLisp
                 Type = LispType::_Symbol;
             }
         }
-                
+        
     public:
         /// <summary>
         /// Creates a new value representing an error.
@@ -251,8 +263,8 @@ namespace CsLisp
         /// <returns>The value</returns>
         /*public*/ static std::shared_ptr<LispVariant> CreateErrorValue(string errorMessage)
         {
-            std::shared_ptr<object> msg = std::make_shared<object>(new object(errorMessage));
-            return std::make_shared<LispVariant>(new LispVariant(LispType::_Error, msg));
+            std::shared_ptr<object> msg = std::make_shared<object>(object(errorMessage));
+            return std::make_shared<LispVariant>(LispVariant(LispType::_Error, msg));
         }
 
         //#endregion
@@ -363,7 +375,7 @@ namespace CsLisp
             }
             if (IsDouble())
             {
-                return DoubleValue(); //.ToString("F", CultureInfo.InvariantCulture);
+                return std::to_string(DoubleValue()); //.ToString("F", CultureInfo.InvariantCulture);
             }
             if (IsString())
             {
@@ -393,11 +405,11 @@ namespace CsLisp
             }
             if (IsInt())
             {
-                return IntValue(); //.ToString(CultureInfo.InvariantCulture);
+                return std::to_string(IntValue()); //.ToString(CultureInfo.InvariantCulture);
             }
             if (IsDouble())
             {
-                return DoubleValue(); //.ToString(CultureInfo.InvariantCulture);
+                return std::to_string(DoubleValue()); //.ToString(CultureInfo.InvariantCulture);
             }
             if (IsBool())
             {
@@ -550,7 +562,7 @@ namespace CsLisp
             }
             if (IsList() && r.IsList())
             {
-                var newList = new List<std::shared_ptr<object>>();
+                var newList = new IEnumerable<std::shared_ptr<object>>();
                 newList->AddRange(ListValue());
                 newList->AddRange(r.ListValue());
                 return /*new*/ LispVariant(std::make_shared<object>(newList));

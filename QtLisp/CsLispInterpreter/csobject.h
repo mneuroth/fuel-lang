@@ -1,3 +1,28 @@
+/*
+* FUEL(isp) is a fast usable embeddable lisp interpreter.
+*
+* Copyright (c) 2016 Michael Neuroth
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+* OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*
+* */
+
 #ifndef _CSOBJECT_H
 #define _CSOBJECT_H
 
@@ -58,52 +83,67 @@ namespace CsLisp
 	private:
 // TODO --> ersetzte string durch void * fuer diverse typen !!!
 		std::string m_sValue;
+		union DataType
+		{
+			bool   b;
+			int    i;
+			double d;
+			LispVariant * pVariant;
+		} m_Data;;
         ObjectType m_Type;
 
 	public:
-		object()
+		explicit object()
 			: m_sValue("?"), m_Type(ObjectType::__Undefined)
 		{
 		}
         
-		object(const object & other)
+		explicit object(const object & other)
 			: m_sValue(other.m_sValue), m_Type(other.m_Type)
 		{
 		}
 
-		object(void * ptr)
+		explicit object(void * ptr)
 			: m_sValue("NULL"), m_Type(ObjectType::__VoidPtr)
 		{
 		}
 
-		object(const std::string & text)
+		explicit object(const std::string & text)
 			: m_sValue(text), m_Type(ObjectType::__String)
         {
         }
 
-        object(bool value)
+		explicit object(const char * text)
+			: m_sValue(text), m_Type(ObjectType::__String)
+		{
+		}
+
+		explicit object(bool value)
 			: m_sValue(value ? "true" : "false"), m_Type(ObjectType::__Bool)
         {
+			m_Data.b = value;
         }
         
-        object(int value)
+		explicit object(int value)
 			: m_sValue(std::to_string(value)), m_Type(ObjectType::__Int)
         {
-        }
+			m_Data.i = value;
+		}
 
-        object(double value)
+		explicit object(double value)
 			: m_sValue(std::to_string(value)), m_Type(ObjectType::__Double)
         {
-        }
+			m_Data.d = value;
+		}
 
-		object(const List<std::shared_ptr<object>> & value)
+		explicit object(const IEnumerable<std::shared_ptr<object>> & value)
 			: m_sValue("NOT_IMPLEMENTED_YET"), m_Type(ObjectType::__List)
 		{
 		}
 
-		~object()
-		{
-		}
+		explicit object(const LispVariant & value);
+
+		~object();
 
 		object& operator=(const std::string & other)
 		{
@@ -182,9 +222,11 @@ namespace CsLisp
 
 		LispFunctionWrapper ToLispFunctionWrapper();
 
-		/*std::list<std::shared_ptr<object>> &*/std::shared_ptr<List<std::shared_ptr<object>>> ToList();
+		IEnumerable<std::shared_ptr<object>> ToEnumerableOfObject() const;
 
-		std::string ToString() const
+		/*std::list<std::shared_ptr<object>> &*/std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList();
+
+		string ToString() const
 		{
 			return m_sValue;
 		}

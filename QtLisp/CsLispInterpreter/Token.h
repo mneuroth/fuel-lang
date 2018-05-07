@@ -1,6 +1,3 @@
-#ifndef _TOKEN_H
-#define _TOKEN_H
-
 /*
 * FUEL(isp) is a fast usable embeddable lisp interpreter.
 *
@@ -25,6 +22,9 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 *
 * */
+
+#ifndef _TOKEN_H
+#define _TOKEN_H
 
 #include <cctype>
 #include <functional>
