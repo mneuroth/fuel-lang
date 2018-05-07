@@ -1,10 +1,17 @@
-#ifndef _OBJECT_H
-#define _OBJECT_H
+#ifndef _CSOBJECT_H
+#define _CSOBJECT_H
 
 #include <string>
+#include <list>
+#include <memory>
+
+#include "cstypes.h"
 
 namespace CsLisp
 {
+	class LispVariant;
+	struct LispFunctionWrapper;
+
     /// <summary>
     /// Lisp data types.
     /// </summary>
@@ -39,7 +46,9 @@ namespace CsLisp
 		//__Array = 10,
 		__LispVariant = 11,
 		__LispFunctionWrapper = 12,
-		__VoidPtr = 13,
+		__LispToken = 13,
+		__IEnumerableOfObject = 14,
+		__VoidPtr = 15,
         __Error = 999
     };
 
@@ -47,6 +56,7 @@ namespace CsLisp
 	class object
 	{
 	private:
+// TODO --> ersetzte string durch void * fuer diverse typen !!!
 		std::string m_sValue;
         ObjectType m_Type;
 
@@ -86,6 +96,15 @@ namespace CsLisp
         {
         }
 
+		object(const List<std::shared_ptr<object>> & value)
+			: m_sValue("NOT_IMPLEMENTED_YET"), m_Type(ObjectType::__List)
+		{
+		}
+
+		~object()
+		{
+		}
+
 		object& operator=(const std::string & other)
 		{
 			m_sValue = other;
@@ -119,6 +138,52 @@ namespace CsLisp
 			return stod(m_sValue);
 		}
 
+		bool IsBool() const
+		{
+			return m_Type == ObjectType::__Bool;
+		}
+
+		bool IsInt() const
+		{
+			return m_Type == ObjectType::__Int;
+		}
+
+		bool IsDouble() const
+		{
+			return m_Type == ObjectType::__Double;
+		}
+
+		bool IsString() const
+		{
+			return m_Type == ObjectType::__String;
+		}
+
+		bool IsLispVariant() const
+		{
+			return m_Type == ObjectType::__LispVariant;
+		}
+
+		bool IsLispToken() const
+		{
+			return m_Type == ObjectType::__LispToken;
+		}
+
+		bool IsLispFunctionWrapper() const
+		{
+			return m_Type == ObjectType::__LispFunctionWrapper;
+		}
+
+		bool IsIEnumerableOfObject() const
+		{
+			return m_Type == ObjectType::__IEnumerableOfObject;
+		}
+
+		std::shared_ptr<LispVariant> ToLispVariant();
+
+		LispFunctionWrapper ToLispFunctionWrapper();
+
+		/*std::list<std::shared_ptr<object>> &*/std::shared_ptr<List<std::shared_ptr<object>>> ToList();
+
 		std::string ToString() const
 		{
 			return m_sValue;
@@ -129,10 +194,16 @@ namespace CsLisp
             return "unknown";       // TODO
         }
         
-        ObjectType GetType()
+        ObjectType GetType() const
         {
             return m_Type;
         }
+
+		bool Equals(const object & other)
+		{
+// TODO --> compare realisieren
+			return false;
+		}
 	};
 }
 

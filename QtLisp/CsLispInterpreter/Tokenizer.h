@@ -27,6 +27,7 @@
 * */
 
 #include "Token.h"
+#include "cstypes.h"
 
 #include <list>
 #include <vector>
@@ -38,49 +39,6 @@ typedef std::function<void()> Action;
 
 namespace CsLisp
 {
-	class LispException
-	{
-	public:		
-		LispException(const string & txt)
-		{			
-		}
-	};
-
-	template <class T>
-	class IEnumerable : public std::list<T>
-	{
-	public:
-		size_t Count() const
-		{
-			return std::list<T>::size();
-		}
-
-		std::vector<T> ToArray() const
-		{
-			return std::vector<T>(std::list<T>::begin(), std::list<T>::end());
-		}
-
-		const T & First() const
-		{
-			return std::list<T>::front();
-		}
-
-		const T & Last() const
-		{
-			return std::list<T>::back();
-		}
-	};
-
-	template <class T>
-	class List : public IEnumerable<T>
-	{
-	public:
-		void Add(const T & elem)
-		{
-			std::list<T>::push_back(elem);
-		}
-	};
-
 	/// <summary>
 	/// The FUEL lisp tokenizer
 	/// </summary>

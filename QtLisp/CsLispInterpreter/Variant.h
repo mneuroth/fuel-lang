@@ -1,4 +1,4 @@
-﻿/*
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -23,158 +23,160 @@
  * 
  * */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+//using System;
+//using System.Collections;
+//using System.Collections.Generic;
+//using System.Globalization;
+//using System.Linq;
+
+#include "csstring.h"
+#include "cstypes.h"
+#include "csobject.h"
+#include "Token.h"
+#include "Tokenizer.h"
+
+#include <memory>
+#include <math.h>
 
 namespace CsLisp
 {
-    /// <summary>
-    /// Lisp data types.
-    /// </summary>
-    public enum LispType
+// TODO --> forward declaration    
+    struct LispFunctionWrapper
     {
-        Undefined = 0,
-        Nil = 1,
-        Bool = 2,
-        Int = 3,
-        Double = 4,
-        String = 5,
-        List = 6,
-        Function = 7,
-        Symbol = 8,
-        NativeObject = 9,
-        //Array = 10,
-        Error = 999
-    }
-
+		/*public*/ string Signature; // { get; private set; }
+	};
+    
+    class Exception
+    {
+    };
+        
     /// <summary>
     /// Enumeration for unqoute modus
     /// </summary>
-    public enum LispUnQuoteModus
+    /*public*/ enum LispUnQuoteModus
     {
-        None = 0,
-        UnQuote = 1,
-        UnQuoteSplicing = 2
-    }
+        _None = 0,
+        _UnQuote = 1,
+        _UnQuoteSplicing = 2
+    };
 
     /// <summary>
     /// Generic data container for lisp data types.
     /// </summary>
-    public class LispVariant : IComparable
+    /*public*/ class LispVariant : public object // TODO: IComparable
     {
-        #region constants
+        //#region constants
 
-        private const string CanNotConvertTo = "can not convert {0} to {1}";
-        private const string NoOperatorForTypes = "no {0} operator for types {1} and {2}";
+        /*private*/ const static string CanNotConvertTo;
+        /*private*/ const static string NoOperatorForTypes;
 
-        #endregion
+        //#endregion
 
-        #region properties
+        //#region properties
 
-        private static double Tolerance { get; set; }
+    private:
+        /*private*/ static double Tolerance; //{ get; set; }
 
-        public LispUnQuoteModus IsUnQuoted { get; private set; }
+    public:
+        /*public*/ LispUnQuoteModus IsUnQuoted; //{ get; private set; }
 
-        public object Value { get; set; }
+        /*public*/ std::shared_ptr<object> Value; //{ get; set; }
 
-        public LispType Type { get; set; }
+        /*public*/ LispType Type; //{ get; set; }
 
-        public string TypeString
+        /*public*/ string TypeString()
         {
-            get
-            {
-                if (Type == LispType.NativeObject)
+            //get
+            //{
+                if (Type == LispType::_NativeObject)
                 {
-                    return Type+"<"+Value.GetType()+">";                    
+                    return /*Type+*/string("NativeObject<")+Value->GetTypeName()+string(">"); 
                 }
-                return Type.ToString();
-            }
+                return "unknown_type"; //Type.ToString();       // TODO
+            //}
         }
 
-        public LispToken Token { get; private set; }
+        /*public*/ std::shared_ptr<LispToken> Token; // { get; private set; }
 
-        public bool IsNil
+        /*public*/ bool IsNil() const
         {
-            get { return Type == LispType.Nil; }
+            /*get {*/ return Type == LispType::_Nil; //}
         }
 
-        public bool IsError
+        /*public*/ bool IsError() const
         {
-            get { return Type == LispType.Error; }
+            /*get {*/ return Type == LispType::_Error; //}
         }
 
-        public bool IsUndefined
+        /*public*/ bool IsUndefined() const
         {
-            get { return Type == LispType.Undefined; }
+            /*get {*/ return Type == LispType::_Undefined; //}
         }
 
-        public bool IsString
+        /*public*/ bool IsString() const
         {
-            get { return Type == LispType.String; }
+            /*get {*/ return Type == LispType::_String; //}
         }
 
-        public bool IsDouble
+        /*public*/ bool IsDouble() const
         {
-            get { return Type == LispType.Double; }
+            /*get {*/ return Type == LispType::_Double; //}
         }
 
-        public bool IsInt
+        /*public*/ bool IsInt() const
         {
-            get { return Type == LispType.Int; }
+            /*get {*/ return Type == LispType::_Int; //}
         }
 
-        public bool IsNumber
+        /*public*/ bool IsNumber() const
         {
-            get { return IsInt || IsDouble; }
+            /*get {*/ return IsInt() || IsDouble(); //}
         }
 
-        public bool IsBool
+        /*public*/ bool IsBool() const
         {
-            get { return Type == LispType.Bool; }
+            /*get {*/ return Type == LispType::_Bool; //}
         }
 
-        public bool IsList
+        /*public*/ bool IsList() const
         {
-            get { return Type == LispType.List || Type == LispType.Nil; }
+            /*get {*/ return Type == LispType::_List || Type == LispType::_Nil; //}
         }
 
-        public bool IsFunction
+        /*public*/ bool IsFunction() const
         {
-            get { return Type == LispType.Function; }
+            /*get {*/ return Type == LispType::_Function; //}
         }
 
-        public bool IsSymbol
+        /*public*/ bool IsSymbol() const
         {
-            get { return Type == LispType.Symbol; }
+            /*get {*/ return Type == LispType::_Symbol; //}
         }
 
-        public bool IsNativeObject
+        /*public*/ bool IsNativeObject() const
         {
-            get { return Type == LispType.NativeObject; }
+            /*get {*/ return Type == LispType::_NativeObject; //}
         }
 
-        #endregion
+        //#endregion
 
-        #region Constructor
+        //#region Constructor
 
         /// <summary>
         /// Initializes the static elements of the <see cref="LispVariant"/> class.
         /// </summary>
-        static LispVariant()
-        {
-            Tolerance = 1e-8;
-        }
+        //static LispVariant()
+        //{
+        //    Tolerance = 1e-8;
+        //}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LispVariant"/> class.
         /// </summary>
         /// <param name="val">The value.</param>
         /// <remarks>Needed for compiler module and .NET 3.5</remarks>
-        public LispVariant(object val)
-            : this(val, LispUnQuoteModus.None)
+        /*public*/ LispVariant(std::shared_ptr<object> val)
+            : LispVariant(val, LispUnQuoteModus::_None)
         {
         }
 
@@ -184,10 +186,10 @@ namespace CsLisp
         /// <param name="type">The type.</param>
         /// <param name="value">The value.</param>
         /// <remarks>Needed for compiler module and .NET 3.5</remarks>
-        public LispVariant(LispType type, object value)
-            : this(type, value, LispUnQuoteModus.None)
-        {
-        }
+//        /*public*/ LispVariant(LispType type, std::shared_ptr<object> value)
+//            : LispVariant(type, value, LispUnQuoteModus::_None)
+//        {
+//        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LispVariant"/> class.
@@ -195,7 +197,7 @@ namespace CsLisp
         /// <param name="type">The type.</param>
         /// <param name="value">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        public LispVariant(LispType type = LispType.Undefined, object value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus.None)
+        /*public*/ LispVariant(LispType type /*= LispType::_Undefined*/, std::shared_ptr<object> value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
         {
             Type = type;
             Value = value;
@@ -207,273 +209,165 @@ namespace CsLisp
         /// </summary>
         /// <param name="val">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        public LispVariant(object val, LispUnQuoteModus unQuoted /*= LispUnQuoteModus.None*/)
-            : this(TypeOf(val), val, unQuoted)
+        /*public*/ LispVariant(std::shared_ptr<object> val, LispUnQuoteModus unQuoted /*= LispUnQuoteModus::_None*/)
+            : LispVariant(TypeOf(val), val, unQuoted)
         {
-            var value = val as LispVariant;
-            if (value != null)
-            {                
-                Type = value.Type;
-                Value = value.Value;
-                IsUnQuoted = value.IsUnQuoted;
+            //std::shared_ptr<LispVariant> value = std::dynamic_pointer_cast<LispVariant>(val); //val as LispVariant;
+			//if (value /*!= null*/)
+			if (val->IsLispVariant())
+            { 
+				std::shared_ptr<LispVariant> value = val->ToLispVariant();
+                Type = value->Type;
+                Value = value->Value;
+                IsUnQuoted = value->IsUnQuoted;
             }
         }
 
+    protected:
         /// <summary>
         /// Initializes a new instance of the <see cref="LispVariant"/> class.
         /// </summary>
         /// <param name="token">The token.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        internal LispVariant(LispToken token, LispUnQuoteModus unQuoted = LispUnQuoteModus.None)
-            : this(TypeOf(token.Value), token.Value, unQuoted)
+        /*internal*/ LispVariant(std::shared_ptr<LispToken> token, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
+            : LispVariant(TypeOf(token->Value), token->Value, unQuoted)
         {
-            Token = token;
-            if (token.Type == LispTokenType.Nil)
+            std::shared_ptr<LispToken> Token = token;
+            if (token->Type == LispTokenType::Nil)
             {
-                Type = LispType.Nil;
+                Type = LispType::_Nil;
             }
-            if (token.Type == LispTokenType.Symbol)
+            if (token->Type == LispTokenType::Symbol)
             {
-                Type = LispType.Symbol;
+                Type = LispType::_Symbol;
             }
         }
-
+                
+    public:
         /// <summary>
         /// Creates a new value representing an error.
         /// </summary>
         /// <param name="errorMessage">The error message.</param>
         /// <returns>The value</returns>
-        public static LispVariant CreateErrorValue(string errorMessage)
+        /*public*/ static std::shared_ptr<LispVariant> CreateErrorValue(string errorMessage)
         {
-            return new LispVariant(LispType.Error, errorMessage);
+            std::shared_ptr<object> msg = std::make_shared<object>(new object(errorMessage));
+            return std::make_shared<LispVariant>(new LispVariant(LispType::_Error, msg));
         }
 
-        #endregion
+        //#endregion
 
-        #region IComparable
+        //#region IComparable
 
         /// <summary>
         /// Compares to other object.
         /// </summary>
         /// <param name="other">The other.</param>
         /// <returns></returns>
-        public int CompareTo(Object other)
+        /*public*/ int CompareTo(std::shared_ptr<object> other);
+
+        //#endregion
+
+        //#region Casts
+
+        /*public*/ LispFunctionWrapper FunctionValue() const;
+
+        /*public*/ IEnumerable<std::shared_ptr<object>> ListValue() const;
+ 
+        /*public*/ double DoubleValue() const;
+
+        /*public*/ int IntValue() const;
+
+        /*public*/ bool BoolValue() const;
+
+        /*public*/ std::shared_ptr<object> NativeObjectValue() const;
+
+        /*public*/ string NativeObjectStringRepresentation() const;
+
+        /*public*/ bool ToBool() const
         {
-            if (other is LispVariant)
+            if (IsBool())
             {
-                var otherVariant = (LispVariant)other;
-                if (IsNumber && otherVariant.IsNumber)
-                {
-                    if (IsDouble || otherVariant.IsDouble)
-                    {
-                        return ToDouble().CompareTo(otherVariant.ToDouble());
-                    }
-                    return IntValue.CompareTo(otherVariant.IntValue);
-                }
-                // all other types will be compared like a string
-                return String.Compare(StringValue, otherVariant.StringValue, StringComparison.Ordinal);
-            }            
-            return CompareTo(new LispVariant(other));
-        }
-
-        #endregion
-
-        #region Casts
-
-        public LispFunctionWrapper FunctionValue
-        {
-            get
-            {
-                if (Type != LispType.Function)
-                {
-                    throw CreateInvalidCastException("function", "not found");
-                }
-                return (LispFunctionWrapper)Value;
+                return BoolValue();
             }
-        }
-
-        public IEnumerable<object> ListValue
-        {
-            get
+            if (IsInt())
             {
-                // Nil is an empty list () !
-                if (Type == LispType.Nil)
-                {
-                    return new List<object>();
-                }
-                if (Type == LispType.NativeObject && NativeObjectValue is IEnumerable<object>)
-                {
-                    return (IEnumerable<object>)NativeObjectValue;
-                }
-                if (Type != LispType.List)
-                {
-                    throw CreateInvalidCastException("list");
-                }
-                return ((IEnumerable)Value).Cast<object>();
+                return IntValue() != 0;
             }
-        }
-
-        public double DoubleValue
-        {
-            get
+            if (IsDouble())
             {
-                if (Type != LispType.Double)
-                {
-                    throw CreateInvalidCastException("double");
-                }
-                return (double)Value;
-            }
-        }
-
-        public int IntValue
-        {
-            get
-            {
-                if (Type != LispType.Int)
-                {
-                    throw CreateInvalidCastException("int");
-                }
-                return (int)Value;
-            }
-        }
-
-        public bool BoolValue
-        {
-            get
-            {
-                if (Type != LispType.Bool)
-                {
-                    throw CreateInvalidCastException("bool");
-                }
-                return (bool)Value;
-            }
-        }
-
-        public object NativeObjectValue
-        {
-            get
-            {
-                if (Type != LispType.NativeObject && Type != LispType.Nil)
-                {
-                    throw CreateInvalidCastException("native object");
-                }
-                return Value;
-            }
-        }
-
-        public string NativeObjectStringRepresentation
-        {
-            get
-            {
-                string result = string.Empty;
-
-                object native = NativeObjectValue;
-                if (native is IEnumerable<object>)
-                {
-                    var container = (IEnumerable<object>)native;
-                    foreach (var element in container)
-                    {
-                        if (result.Length > 0)
-                        {
-                            result += " ";
-                        }
-                        result += element != null ? element.ToString() : LispToken.Nil;
-                    }
-                    result = "(" + result + ")";
-                }
-                else
-                {
-                    result = native.ToString();
-                }
-
-                return result;
-            }
-        }
-
-        public bool ToBool()
-        {
-            if (IsBool)
-            {
-                return BoolValue;
-            }
-            if (IsInt)
-            {
-                return IntValue != 0;
-            }
-            if (IsDouble)
-            {
-                return Math.Abs(DoubleValue) > Tolerance;
+                return /*Math.A*/fabs(DoubleValue()) > Tolerance;
             }
             throw CreateInvalidCastException("bool", CanNotConvertTo);
         }
 
-        public int ToInt()
+        /*public*/ int ToInt() const
         {
-            if (IsBool)
+            if (IsBool())
             {
-                return BoolValue ? 1 : 0;
+                return BoolValue() ? 1 : 0;
             }
-            if (IsInt)
+            if (IsInt())
             {
-                return IntValue;
+                return IntValue();
             }
-            if (IsDouble)
+            if (IsDouble())
             {
-                return (int) DoubleValue;
+                return (int) DoubleValue();
             }
-            if (IsString)
+            if (IsString())
             {
-                return Convert.ToInt32(StringValue);
+                return /*Convert.ToInt32*/atoi(StringValue().c_str());
             }
             throw CreateInvalidCastException("int", CanNotConvertTo);
         }
 
-        public double ToDouble()
+        /*public*/ double ToDouble() const
         {
-            if (IsBool)
+            if (IsBool())
             {
-                return BoolValue ? 1.0 : 0.0;
+                return BoolValue() ? 1.0 : 0.0;
             }
-            if (IsInt)
+            if (IsInt())
             {
-                return IntValue;
+                return IntValue();
             }
-            if (IsDouble)
+            if (IsDouble())
             {
-                return DoubleValue;
+                return DoubleValue();
             }
-            if (IsString)
+            if (IsString())
             {
-                return Convert.ToDouble(StringValue, CultureInfo.InvariantCulture);
+                return atof(StringValue().c_str()); //Convert.ToDouble(StringValue(), CultureInfo.InvariantCulture);
             }
             throw CreateInvalidCastException("double", CanNotConvertTo);
         }
 
-        public string StringValue
+        /*public*/ string StringValue() const
         {
-            get
-            {
-                return Value.ToString();
-            }
+            //get
+            //{
+                return Value->ToString();
+            //}
         }
 
         /// <summary>
         /// Comverts this value into a string representation used by the compiler module.
         /// </summary>
         /// <returns>The string representation</returns>
-        public string ToStringCompiler()
+        /*public*/ string ToStringCompiler() const
         {
-            if (IsBool)
+            if (IsBool())
             {
-                return BoolValue ? "true" : "false";
+                return BoolValue() ? "true" : "false";
             }
-            if (IsDouble)
+            if (IsDouble())
             {
-                return DoubleValue.ToString("F", CultureInfo.InvariantCulture);
+                return DoubleValue(); //.ToString("F", CultureInfo.InvariantCulture);
             }
-            if (IsString)
+            if (IsString())
             {
-                return "\"" + StringValue + "\"";
+                return "\"" + StringValue() + "\"";
             }
             return ToString();
         }
@@ -482,138 +376,120 @@ namespace CsLisp
         /// Comverts this value into a string representation used by the debugger module.
         /// </summary>
         /// <returns>The string representation</returns>
-        public string ToStringDebugger()
+        /*public*/ string ToStringDebugger() const
         {
-            if (IsString)
+            if (IsString())
             {
-                return "\"" + StringValue + "\"";
+                return "\"" + StringValue() + "\"";
             }
             return ToString();
         }
 
-        public override string ToString()
+        /*public override*/ string ToString() const
         {
-            if (IsString)
+            if (IsString())
             {
-                return StringValue;
+                return StringValue();
             }
-            if (IsInt)
+            if (IsInt())
             {
-                return IntValue.ToString(CultureInfo.InvariantCulture);
+                return IntValue(); //.ToString(CultureInfo.InvariantCulture);
             }
-            if (IsDouble)
+            if (IsDouble())
             {
-                return DoubleValue.ToString(CultureInfo.InvariantCulture);
+                return DoubleValue(); //.ToString(CultureInfo.InvariantCulture);
             }
-            if (IsBool)
+            if (IsBool())
             {
-                return BoolValue ? "#t" : "#f";
+                return BoolValue() ? "#t" : "#f";
             }
-            if (IsNil)
+            if (IsNil())
             {
-                return LispToken.Nil;
+                return LispToken::NilConst;
             }
-            if (IsList)
+            if (IsList())
             {
-                return ExpandContainerToString(ListValue);
+                return ExpandContainerToString(std::make_shared<object>(ListValue()));
             }
-            if (IsFunction)
+            if (IsFunction())
             {
-                return "function " + (FunctionValue.Signature != null ? FunctionValue.Signature : "<unknown>");
+                return "function " + /*(FunctionValue().Signature != null ?*/ FunctionValue().Signature /*: "<unknown>")*/;
             }
-            if (IsSymbol)
+            if (IsSymbol())
             {
-                return Value.ToString();
+                return Value->ToString();
             }
-            if (IsNativeObject)
+            if (IsNativeObject())
             {
-                return NativeObjectStringRepresentation;
+                return NativeObjectStringRepresentation();
             }
-            if (IsUndefined)
+            if (IsUndefined())
             {
                 return "<undefined>";
             }
-            if (IsError)
+            if (IsError())
             {
-                return "Error: " + Value;
+                return "Error: " + Value->ToString();
             }
             return "?";
         }
+        
+        //template <T1, T2, T3>
+        //typedef (*Func<T1,T2,T3>)();
 
-        // used for compiler module
-        public static explicit operator Func<object[], LispScope, LispVariant>(LispVariant variant)
+// TODO
+//        // used for compiler module
+//        /*public*/ static explicit operator Func<object[], LispScope, LispVariant>(LispVariant variant)
+//        {
+//            return variant.FunctionValue.Function;
+//        }
+//
+//        // used for compiler module
+//        /*public*/ static explicit operator Func<LispVariant, LispScope, LispVariant>(LispVariant variant)
+//        {
+//            return (arg1, scope) => variant.FunctionValue.Function(new object[] { arg1 }, scope);
+//        }
+//
+//        // used for compiler module
+//        /*public*/ static explicit operator Func<LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
+//        {
+//            return (arg1, arg2, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2 }, scope);
+//        }
+//
+//        // used for compiler module
+//        /*public*/ static explicit operator Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
+//        {
+//            return (arg1, arg2, arg3, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3 }, scope);
+//        }
+
+		/*private*/ static string ExpandContainerToString(std::shared_ptr<object> maybeContainer);
+
+        /*private*/ static string ExpandItemForContainer(std::shared_ptr<object> item)
         {
-            return variant.FunctionValue.Function;
-        }
-
-        // used for compiler module
-        public static explicit operator Func<LispVariant, LispScope, LispVariant>(LispVariant variant)
-        {
-            return (arg1, scope) => variant.FunctionValue.Function(new object[] { arg1 }, scope);
-        }
-
-        // used for compiler module
-        public static explicit operator Func<LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-        {
-            return (arg1, arg2, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2 }, scope);
-        }
-
-        // used for compiler module
-        public static explicit operator Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-        {
-            return (arg1, arg2, arg3, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3 }, scope);
-        }
-
-        private static string ExpandContainerToString(object maybeContainer)
-        {
-            string ret = string.Empty;
-
-            if (maybeContainer is IEnumerable<object>)
+            if (item->IsLispVariant())
             {
-                var container = (IEnumerable<object>)maybeContainer;
-                foreach (var item in container)
+				std::shared_ptr<LispVariant> variant = item->ToLispVariant();
+                if (variant->IsString())
                 {
-                    if (ret.Length > 0)
-                    {
-                        ret += " ";
-                    }
-                    ret += ExpandContainerToString(item);
-                }
-                ret = "(" + ret + ")";
-            }
-            else
-            {
-                ret += ExpandItemForContainer(maybeContainer);
-            }
-
-            return ret;
-        }
-
-        private static string ExpandItemForContainer(object item)
-        {
-            if (item is LispVariant)
-            {
-                LispVariant variant = (LispVariant)item;
-                if (variant.IsString)
-                {
-                    return variant.ToStringDebugger();
+                    return variant->ToStringDebugger();
                 }
             }
-            return item.ToString();
+            return item->ToString();
         }
 
-        #endregion
+        //#endregion
 
-        public bool SymbolCompare(object other)
+        /*public*/ bool SymbolCompare(std::shared_ptr<object> other)
         {
-            if (other is LispVariant)
+            if (other->IsLispVariant())
             {
-                return Value.Equals(((LispVariant)other).Value);
+				std::shared_ptr<LispVariant> otherVariant = other->ToLispVariant();
+				return Value->Equals(*(otherVariant->Value));
             }
             return false;
         }
 
-        #region overloaded methods
+        //#region overloaded methods
 
         /// <summary>
         /// Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>.
@@ -622,11 +498,12 @@ namespace CsLisp
         /// true if the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>; otherwise, false.
         /// </returns>
         /// <param name="other">The object to compare with the current object. </param><filterpriority>2</filterpriority>
-        public override bool Equals(object other)
+        /*public override*/ bool Equals(std::shared_ptr<object>  other)
         {
-            if (other is LispVariant)
+            if (other->IsLispVariant())
             {
-                return EqualOp(this, (LispVariant)other);
+				std::shared_ptr<LispVariant> otherVariant = other->ToLispVariant();
+				return EqualOp(*this, *otherVariant);
             }
             return false;
         }
@@ -637,233 +514,237 @@ namespace CsLisp
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
+        ///*public override*/ int GetHashCode()
+        //{
+        //    // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
+        //    return base.GetHashCode();
+        //}
+
+        //#endregion
+
+        //#region Operations
+
+        /*public*/ void Add(std::shared_ptr<object>  value)
         {
-            // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
-            return base.GetHashCode();
-        }
-
-        #endregion
-
-        #region Operations
-
-        public void Add(object value)
-        {
-            if (Type != LispType.List)
+            if (Type != LispType::_List)
             {
                 throw CreateInvalidCastException("list");
             }
-            var list = (List<object>)Value;
-            list.Add(value);
+            var list = Value->ToList();
+            list->Add(value);
         }
 
-        public static LispVariant operator +(LispVariant l, LispVariant r)
+        /*public*/ inline /*static*/ LispVariant operator+(const LispVariant & r)
         {
-            if (l.IsString || r.IsString)
+            if (IsString() || r.IsString())
             {
-                return new LispVariant(l.StringValue + r.StringValue);
+                return /*new*/ LispVariant(std::make_shared<object>(StringValue() + r.StringValue()));
             }
-            if (l.IsDouble || r.IsDouble)
+            if (IsDouble() || r.IsDouble())
             {
-                return new LispVariant(l.ToDouble() + r.ToDouble());
+                return /*new*/ LispVariant(std::make_shared<object>(ToDouble() + r.ToDouble()));
             }
-            if (l.IsInt || r.IsInt)
+            if (IsInt() || r.IsInt())
             {
-                return new LispVariant(l.ToInt() + r.ToInt());
+                return /*new*/ LispVariant(std::make_shared<object>(ToInt() + r.ToInt()));
             }
-            if (l.IsList && r.IsList)
+            if (IsList() && r.IsList())
             {
-                var newList = new List<object>();
-                newList.AddRange(l.ListValue);
-                newList.AddRange(r.ListValue);
-                return new LispVariant(newList);
+                var newList = new List<std::shared_ptr<object>>();
+                newList->AddRange(ListValue());
+                newList->AddRange(r.ListValue());
+                return /*new*/ LispVariant(std::make_shared<object>(newList));
             }
-            throw CreateInvalidOperationException("+", l, r);
+            throw CreateInvalidOperationException("+", *this, r);
         }
 
-        public static LispVariant operator -(LispVariant l, LispVariant r)
+        /*public static*/ LispVariant operator -(const LispVariant & r)
         {
-            if (l.IsDouble || r.IsDouble)
+            if (IsDouble() || r.IsDouble())
             {
-                return new LispVariant(l.ToDouble() - r.ToDouble());
+                return /*new*/ LispVariant(std::make_shared<object>(ToDouble() - r.ToDouble()));
             }
-            if (l.IsInt || r.IsInt)
+            if (IsInt() || r.IsInt())
             {
-                return new LispVariant(l.ToInt() - r.ToInt());
+                return /*new*/ LispVariant(std::make_shared<object>(ToInt() - r.ToInt()));
             }
-            throw CreateInvalidOperationException("-", l, r);
+            throw CreateInvalidOperationException("-", *this, r);
         }
 
-        public static LispVariant operator *(LispVariant l, LispVariant r)
+        /*public static*/ LispVariant operator *(const LispVariant & r)
         {
-            if (l.IsDouble || r.IsDouble)
+            if (IsDouble() || r.IsDouble())
             {
-                return new LispVariant(l.ToDouble() * r.ToDouble());
+                return /*new*/ LispVariant(std::make_shared<object>(ToDouble() * r.ToDouble()));
             }
-            if (l.IsInt || r.IsInt)
+            if (IsInt() || r.IsInt())
             {
-                return new LispVariant(l.ToInt() * r.ToInt());
+                return /*new*/ LispVariant(std::make_shared<object>(ToInt() * r.ToInt()));
             }
-            throw CreateInvalidOperationException("*", l, r);
+            throw CreateInvalidOperationException("*", *this, r);
         }
 
-        public static LispVariant operator /(LispVariant l, LispVariant r)
+        /*public static*/ LispVariant operator /(const LispVariant & r)
         {
-            if (l.IsDouble || r.IsDouble)
+            if (IsDouble() || r.IsDouble())
             {
-                return new LispVariant(l.ToDouble() / r.ToDouble());
+                return /*new*/ LispVariant(std::make_shared<object>(ToDouble() / r.ToDouble()));
             }
-            if (l.IsInt || r.IsInt)
+            if (IsInt() || r.IsInt())
             {
-                return new LispVariant(l.ToInt() / r.ToInt());
+                return /*new*/ LispVariant(std::make_shared<object>(ToInt() / r.ToInt()));
             }
-            throw CreateInvalidOperationException("/", l, r);
+            throw CreateInvalidOperationException("/", *this, r);
         }
 
-        public static LispVariant operator <(LispVariant l, LispVariant r)
+        /*public static*/ LispVariant operator <(const LispVariant & r) const
         {
-            if (l.IsDouble || r.IsDouble)
+            if (IsDouble() || r.IsDouble())
             {
-                return new LispVariant(l.ToDouble() < r.ToDouble());
+                return /*new*/ LispVariant(std::make_shared<object>(ToDouble() < r.ToDouble()));
             }
-            if (l.IsInt || r.IsInt)
+            if (IsInt() || r.IsInt())
             {
-                return new LispVariant(l.ToInt() < r.ToInt());
+                return /*new*/ LispVariant(std::make_shared<object>(ToInt() < r.ToInt()));
             }
-            if (l.IsString || r.IsString)
+            if (IsString() || r.IsString())
             {
-                return new LispVariant(String.CompareOrdinal(l.ToString(), r.ToString()) < 0);
+                return /*new*/ LispVariant(std::make_shared<object>(String::CompareOrdinal(ToString(), r.ToString()) < 0));
             }
-            throw CreateInvalidOperationException("< or >", l, r);
+            throw CreateInvalidOperationException("< or >", *this, r);
         }
 
-        public static LispVariant operator >(LispVariant l, LispVariant r)
+        /*public static*/ LispVariant operator >(const LispVariant & r) const
         {
-            return r < l;
+            return r < *this;
         }
 
-        public static LispVariant operator <=(LispVariant l, LispVariant r)
+        /*public static*/ LispVariant operator <=(const LispVariant & r) const
         {
-            if (l.IsDouble || r.IsDouble)
+            if (IsDouble() || r.IsDouble())
             {
-                return new LispVariant(l.ToDouble() <= r.ToDouble());
+                return /*new*/ LispVariant(std::make_shared<object>(ToDouble() <= r.ToDouble()));
             }
-            if (l.IsInt || r.IsInt)
+            if (IsInt() || r.IsInt())
             {
-                return new LispVariant(l.ToInt() <= r.ToInt());
+                return /*new*/ LispVariant(std::make_shared<object>(ToInt() <= r.ToInt()));
             }
-            if (l.IsString || r.IsString)
+            if (IsString() || r.IsString())
             {
-                return new LispVariant(String.CompareOrdinal(l.ToString(), r.ToString()) <= 0);
+                return /*new*/ LispVariant(std::make_shared<object>(String::CompareOrdinal(ToString(), r.ToString()) <= 0));
             }
-            throw CreateInvalidOperationException("<= or >=", l, r);
+            throw CreateInvalidOperationException("<= or >=", *this, r);
         }
 
-        public static LispVariant operator >=(LispVariant l, LispVariant r)
+        /*public static*/ LispVariant operator >=(const LispVariant & r) const
         {
-            return r <= l;
+            return r <= *this;
         }
 
-        public static bool EqualOp(LispVariant l, LispVariant r)
+        /*public*/ static bool EqualOp(const LispVariant & l, const LispVariant & r)
         {
-            if (l.IsNativeObject && r.IsNativeObject)
+            if (l.IsNativeObject() && r.IsNativeObject())
             {
-                return l.NativeObjectValue == r.NativeObjectValue;
+                return l.NativeObjectValue() == r.NativeObjectValue();
             }
-            if (l.IsSymbol || r.IsSymbol)
+            if (l.IsSymbol() || r.IsSymbol())
             {
-                return l.IsSymbol && r.IsSymbol && (l.ToString() == r.ToString());
+                return l.IsSymbol() && r.IsSymbol() && (l.ToString() == r.ToString());
             }
-            if (l.IsBool && r.IsBool)
+            if (l.IsBool() && r.IsBool())
             {
-                return l.BoolValue == r.BoolValue;
+                return l.BoolValue() == r.BoolValue();
             }
-            if (l.IsNil || r.IsNil)
+            if (l.IsNil() || r.IsNil())
             {
-                return l.IsNil && r.IsNil;
+                return l.IsNil() && r.IsNil();
             }
-            if (l.IsList && r.IsList)
+            if (l.IsList() && r.IsList())
             {
-                return l.ListValue.SequenceEqual(r.ListValue);
+                return l.ListValue().SequenceEqual(r.ListValue());
             }
-            if (l.IsUndefined || r.IsUndefined)
+            if (l.IsUndefined() || r.IsUndefined())
             {
-                return l.IsUndefined && r.IsUndefined;
+                return l.IsUndefined() && r.IsUndefined();
             }
-            if (l.IsDouble || r.IsDouble)
+            if (l.IsDouble() || r.IsDouble())
             {
-                return Math.Abs(l.ToDouble() - r.ToDouble()) < Tolerance;
+                return /*Math.A*/fabs(l.ToDouble() - r.ToDouble()) < Tolerance;
             }
-            if (l.IsInt || r.IsInt)
+            if (l.IsInt() || r.IsInt())
             {
                 return l.ToInt() == r.ToInt();
             }
-            if (l.IsString || r.IsString)
+            if (l.IsString() || r.IsString())
             {
                 return l.ToString() == r.ToString();
             }
             throw CreateInvalidOperationException("==", l, r);
         }
 
-        #endregion
+        //#endregion
 
-        #region private methods
+    private:
+        //#region private methods
 
-        private static LispType TypeOf(object obj)
+        /*private*/ static LispType TypeOf(std::shared_ptr<object> obj)
         {
-            if (obj is int)
+            if (obj->IsInt())
             {
-                return LispType.Int;
+                return LispType::_Int;
             }
-            if (obj is double)
+            if (obj->IsDouble())
             {
-                return LispType.Double;
+                return LispType::_Double;
             }
-            if (obj is bool)
+            if (obj->IsBool())
             {
-                return LispType.Bool;
+                return LispType::_Bool;
             }
-            if (obj is string)
+            if (obj->IsString())
             {
-                return LispType.String;
+                return LispType::_String;
             }
-            if (obj is IEnumerable<object>)
+			if (obj->IsIEnumerableOfObject())
             {
-                return LispType.List;
+                return LispType::_List;
             }
-            if (obj is IEnumerable)        // needed for .NET 3.5
+/* TODO
+			if (obj is IEnumerable)        // needed for .NET 3.5
             {
-                return LispType.List;
+                return LispType::_List;
             }
-            if (obj is LispFunctionWrapper)
+			*/
+            if (obj->IsLispFunctionWrapper())
             {
-                return LispType.Function;
-            }
-            if (obj is LispVariant)
+                return LispType::_Function;
+            }			
+            if (obj->IsLispVariant())
             {
-                return ((LispVariant)obj).Type;
+                return obj->ToLispVariant()->Type;
             }
-            if (obj is LispToken)
+            if (obj->IsLispToken())
             {
-                return LispType.Symbol;
+                return LispType::_Symbol;
             }
-            return LispType.Undefined;
+
+            return LispType::_Undefined;
         }
 
-        private Exception CreateInvalidCastException(string name, string msg = "no")
+        /*private*/ LispException CreateInvalidCastException(string name, string msg = "no") const
         {
-            var exception = new LispException(string.Format("Invalid cast for {2}, value={1} {0}", msg, StringValue, name));
+            var exception = /*new*/ LispException(string::Format("Invalid cast for {2}, value={1} {0}", msg, StringValue(), name));
             exception.AddTokenInfos(Token);
             return exception;
         }
 
-        static private Exception CreateInvalidOperationException(string operation, LispVariant l, LispVariant r)
+        static /*private*/ LispException CreateInvalidOperationException(string operation, LispVariant l, LispVariant r)
         {
-            var exception = new LispException(string.Format(NoOperatorForTypes, operation, l.Type, r.Type));
+            var exception = /*new*/ LispException(string::Format(NoOperatorForTypes, operation, l.Type, r.Type));
             exception.AddTokenInfos(l.Token);
             return exception;
         }
 
-        #endregion
-    }
+        //#endregion
+    };
 }

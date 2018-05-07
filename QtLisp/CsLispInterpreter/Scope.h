@@ -23,44 +23,47 @@
  * 
  * */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.IO;
+
+#include "Token.h"
 
 namespace CsLisp
 {
     /// <summary>
     /// The lisp runtime scope. That is something like a stack item.
     /// </summary>
-    public class LispScope : Dictionary<string, object>
+    /*public*/ class LispScope : Dictionary<string, object>
     {
-        #region debugging support
+	public:
+        //#region debugging support
 
         /// <summary>
         /// Gets and sets the debuging modus.
         /// </summary>
-        public ILispDebugger Debugger { get; set; }
+		/*public*/ ILispDebugger Debugger; // { get; set; }
 
         /// <summary>
         /// Gets and sets the tracing modus.
         /// </summary>
-        public bool Tracing { get; set; }
+		/*public*/ bool Tracing; // { get; set; }
 
         /// <summary>
         /// Gets and sets all tokens of the current script,
         /// used for debugging purpose and for showing the 
         /// position of an error.
         /// </summary>
-        public IList<LispToken> Tokens { get; set; }
+		/*public*/ IList<LispToken> Tokens; // { get; set; }
 
         /// <summary>
         /// Gets and sets the next and previous scope,
         /// used for debugging purpose to show the 
         /// call stack
         /// </summary>
-        public LispScope Next { get; private set; }
-        public LispScope Previous { get; set; }
+		/*public*/ LispScope Next; // { get; private set; }
+		/*public*/ LispScope Previous; // { get; set; }
 
         /// <summary>
         /// Gets or sets the scope chain to implement closures.
@@ -68,7 +71,7 @@ namespace CsLisp
         /// <value>
         /// The closure chain.
         /// </value>
-        public LispScope ClosureChain { get; set; }
+		/*public*/ LispScope ClosureChain; // { get; set; }
 
         /// <summary>
         /// Gets or sets the current module name and path.
@@ -76,19 +79,19 @@ namespace CsLisp
         /// <value>
         /// The module name and path.
         /// </value>       
-        public string ModuleName { get; set; }
+		/*public*/ string ModuleName; // { get; set; }
 
         /// <summary>
         /// Gets or sets the current token.
         /// </summary>
-        public LispToken CurrentToken { get; set; }
+		/*public*/ LispToken CurrentToken; // { get; set; }
 
-        public int CurrentLineNo
+        /*public*/ int CurrentLineNo()
         {
-            get
-            {
+            //get
+            //{
                 return CurrentToken != null ? CurrentToken.LineNo : -1;
-            }
+            //}
         }
 
         /// <summary>
@@ -96,29 +99,29 @@ namespace CsLisp
         /// Needed for debugging support --> set function name to LispScope
         /// </summary>
         /// <value> The user data. </value>
-        public object UserData { get; set; }
+        /*public*/ object UserData: // { get; set; }
 
         /// <summary>
         /// Gets or sets the user documentation information.
         /// </summary>
         /// <value>The user documentation.</value>
-        public Tuple<string, string> UserDoc { get; set; }
+		/*public*/ Tuple<string, string> UserDoc; // { get; set; }
 
-        #endregion
+        //#endregion
 
-        #region properties
+        //#region properties
 
         /// <summary>
         /// Gets the name of this scope.
         /// </summary>
         /// <value> The name. </value>
-        public string Name { get; private set; }
+		/*public*/ string Name; // { get; private set; }
 
         /// <summary>
         /// Gets the global scope.
         /// </summary>
         /// <value> The global scope. </value>
-        public LispScope GlobalScope { get; private set; }
+        /*public*/ LispScope GlobalScope { get; private set; }
 
         /// <summary>
         /// Gets the output stream.
@@ -126,7 +129,7 @@ namespace CsLisp
         /// <value>
         /// The output.
         /// </value>
-        public TextWriter Output { get; set; }
+		/*public*/ TextWriter Output; // { get; set; }
 
         /// <summary>
         /// Gets the input stream.
@@ -134,11 +137,11 @@ namespace CsLisp
         /// <value>
         /// The input.
         /// </value>
-        public TextReader Input { get; set; }
+		/*public*/ TextReader Input; // { get; set; }
 
-        #endregion
+        //#endregion
 
-        #region constructor
+        //#region constructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LispScope"/> class.
@@ -146,7 +149,7 @@ namespace CsLisp
         /// <param name="fcnName">Name of the FCN.</param>
         /// <param name="globalScope">The global scope.</param>
         /// <param name="moduleName">The current module name for the scope.</param>
-        public LispScope(string fcnName, LispScope globalScope = null, string moduleName = null)
+        /*public*/ LispScope(string fcnName, LispScope globalScope = null, string moduleName = null)
         {
             Name = fcnName;
             GlobalScope = globalScope ?? this;
@@ -164,22 +167,22 @@ namespace CsLisp
         /// Initializes a new instance of the <see cref="LispScope"/> class.
         /// </summary>
         /// <remarks>Needed for compiler module and .NET 3.5</remarks>
-        public LispScope()
+        /*public*/ LispScope()
             : this(string.Empty)
         {
         }
 
-        #endregion
+        //#endregion
 
-        #region public methods
+        //#region public methods
 
-        public void PushNextScope(LispScope nextScope)
+        /*public*/ void PushNextScope(LispScope nextScope)
         {
             Next = nextScope;
             nextScope.Previous = this;
         }
 
-        public void PopNextScope()
+        /*public*/ void PopNextScope()
         {
             Next.Previous = null;
             Next = null;
@@ -191,7 +194,7 @@ namespace CsLisp
         /// <param name="name">The name.</param>
         /// <param name="closureScopeFound">The closure scope found.</param>
         /// <returns>True if name was found.</returns>
-        public bool IsInClosureChain(string name, out LispScope closureScopeFound)
+        /*public*/ bool IsInClosureChain(string name, out LispScope closureScopeFound)
         {
             closureScopeFound = null;
             if (ClosureChain != null)
@@ -211,7 +214,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="elem">The element.</param>
         /// <returns>Resolved value or null</returns>
-        public object ResolveInScopes(object elem)
+        /*public*/ object ResolveInScopes(object elem)
         {
             object result;
 
@@ -255,7 +258,7 @@ namespace CsLisp
         /// <param name="symbolName">Name of the symbol.</param>
         /// <param name="value">The value.</param>
         /// <exception cref="LispException">Symbol  + symbolName +  not found</exception>
-        public void SetInScopes(string symbolName, object value)
+        /*public*/ void SetInScopes(string symbolName, object value)
         {
             LispScope foundClosureScope;
             if (symbolName != null && ContainsKey(symbolName))
@@ -276,7 +279,7 @@ namespace CsLisp
             }
         }
 
-        public LispToken GetPreviousToken(LispToken token)
+        /*public*/ LispToken GetPreviousToken(LispToken token)
         {
             LispToken previous = null;
             if (Tokens != null)
@@ -293,7 +296,7 @@ namespace CsLisp
             return null;
         }
 
-        public int GetCallStackSize()
+        /*public*/ int GetCallStackSize()
         {
             LispScope current = this;
             int i = 0;
@@ -305,13 +308,13 @@ namespace CsLisp
             return i;
         }
 
-        public void DumpStack(int currentLevel = -1)
+        /*public*/ void DumpStack(int currentLevel = -1)
         {
             string stackInfo = DumpStackToString(currentLevel);
             Output.WriteLine(stackInfo);
         }
 
-        public string DumpStackToString(int currentLevel = -1)
+        /*public*/ string DumpStackToString(int currentLevel = -1)
         {
             string ret = string.Empty;
             LispScope current = this;
@@ -327,12 +330,12 @@ namespace CsLisp
             return ret;
         }
 
-        public void DumpVars()
+        /*public*/ void DumpVars()
         {
             Dump(v => !v.IsFunction || (v.IsFunction && !v.FunctionValue.IsBuiltin));
         }
 
-        public void DumpFunctions()
+        /*public*/ void DumpFunctions()
         {
             Dump(v => v.IsFunction, v => " : module=" + v.FunctionValue.ModuleName);
 
@@ -346,27 +349,27 @@ namespace CsLisp
             });
         }
 
-        public void DumpMacros()
+        /*public*/ void DumpMacros()
         {
             ProcessMetaScope(LispEnvironment.Macros, macro => Output.WriteLine(macro.Key));
         }
 
-        public void DumpBuiltinFunctions()
+        /*public*/ void DumpBuiltinFunctions()
         {
             Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin);
         }
 
-        public void DumpBuiltinFunctionsHelp()
+        /*public*/ void DumpBuiltinFunctionsHelp()
         {
             Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin, v => v.FunctionValue.Documentation, showHelp: true);
         }
 
-        public void DumpBuiltinFunctionsHelpFormated()
+        /*public*/ void DumpBuiltinFunctionsHelpFormated()
         {
             Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin, sort: true, format: v => v.FunctionValue.FormatedDoc);
         }
 
-        public void DumpBuiltinFunctionsHelpHtmlFormated()
+        /*public*/ void DumpBuiltinFunctionsHelpHtmlFormated()
         {
             Output.WriteLine("<html>");
             Output.WriteLine("<head>");
@@ -381,12 +384,12 @@ namespace CsLisp
             Output.WriteLine("</html>");
         }
 
-        public void DumpModules()
+        /*public*/ void DumpModules()
         {
             ProcessMetaScope(LispEnvironment.Modules, module => Output.WriteLine(module.Key));
         }
 
-        public string GetFunctionsHelpFormated(string functionName, Func<string, string, bool> select = null)
+        /*public*/ string GetFunctionsHelpFormated(string functionName, Func<string, string, bool> select = null)
         {
             string result = string.Empty;
             foreach (var key in Keys)
@@ -408,9 +411,9 @@ namespace CsLisp
             return result;
         }
 
-        #endregion
+        //#endregion
 
-        #region private methods
+        //#region private methods
 
         private void ProcessMetaScope(string metaScope, Action<KeyValuePair<string, object>> action)
         {
@@ -466,6 +469,6 @@ namespace CsLisp
             }
         }
 
-        #endregion
-    }
+        //#endregion
+	};
 }

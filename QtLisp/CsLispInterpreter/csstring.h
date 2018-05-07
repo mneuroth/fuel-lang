@@ -77,11 +77,11 @@ namespace CsLisp
 			return (*this).find_first_of(txt);
 		}
 
-		static string Format(const string & txt, const string & args)
+		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "")
 		{
 // TODO
 			//string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
-			//std::strin
+			//std::string
 			return txt;
 		}
 
@@ -92,6 +92,16 @@ namespace CsLisp
 
 		const static string Empty;
 	};
+
+	class String
+	{
+	public:
+		static int CompareOrdinal(const string & a, const string & b)
+		{
+			return strcmp(a.c_str(), b.c_str());
+		}
+	};
+	
 
 //	inline CsLisp::string operator+(const CsLisp::string & s1, const CsLisp::string & s2)
 //	{
