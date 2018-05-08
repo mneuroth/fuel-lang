@@ -4,3 +4,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 include(CsLispInterpreter.pri)
+
+SOURCES += \
+        QtLisp.cpp \
