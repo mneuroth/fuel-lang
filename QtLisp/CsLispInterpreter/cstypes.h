@@ -77,10 +77,10 @@ namespace CsLisp
 
 		bool SequenceEqual(const IEnumerable & other) const
 		{
-			if (size() == other.size())
+            if (this->size() == other.size())
 			{
 				var iter2 = other.begin();
-				for (var iter = begin(); iter != end(); ++iter)
+                for (var iter = this->begin(); iter != this->end(); ++iter)
 				{
 					if (*iter != *iter2)
 					{
@@ -103,7 +103,7 @@ namespace CsLisp
 
 		void AddRange(const IEnumerable<T> & other)
 		{
-			std::list<T>::insert(end(), other.begin(), other.end());
+            std::list<T>::insert(this->end(), other.begin(), other.end());
 		}
 	};
 

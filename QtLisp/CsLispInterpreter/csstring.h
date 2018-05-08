@@ -26,6 +26,7 @@
 #ifndef _CSSTRING_H
 #define _CSSTRING_H
 
+#include <string.h>
 #include <string>
 #include <cctype>
 #include <functional>
