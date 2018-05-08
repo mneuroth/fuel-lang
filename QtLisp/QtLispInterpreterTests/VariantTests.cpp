@@ -81,5 +81,57 @@ namespace QtLispInterpreterTests
 			Assert::IsTrue(variant4->CompareTo(std::make_shared<object>("abc")) == 0);
 			Assert::IsTrue(variant4->CompareTo(std::make_shared<object>("xyz")) < 0);
 		}
+
+		TEST_METHOD(Test_VariantConvert)
+		{
+			std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+			std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
+			std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
+			std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>("4.5")));
+			std::shared_ptr<LispVariant> variant5 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(true)));
+			std::shared_ptr<LispVariant> variant6 = std::make_shared<LispVariant>(LispVariant(LispType::_Int, std::make_shared<object>(0)));
+			Assert::AreEqual(true, variant1->ToBool());
+			Assert::AreEqual(true, variant3->ToBool());
+			Assert::AreEqual(false, variant6->ToBool());
+			Assert::AreEqual(4.5, variant4->ToDouble());
+			Assert::AreEqual(1.0, variant5->ToDouble());
+			Assert::AreEqual(56, variant2->ToInt());
+			Assert::AreEqual(true, variant2->ToBool());
+		}
+
+		TEST_METHOD(Test_VariantOperations)
+		{
+			std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+			std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
+			std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
+			std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(45)));
+			Assert::AreEqual(1890, (*variant3 * *variant4).ToInt());
+			Assert::AreEqual(60.4, (*variant1 + *variant2).ToDouble());
+		}
+
+		TEST_METHOD(Test_VariantEqualOp)
+		{
+			std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+			std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
+			Assert::IsFalse(LispVariant::EqualOp(*variant1, *variant2));
+			Assert::IsTrue(LispVariant::EqualOp(*variant1, *variant1));
+		}
+	
+		TEST_METHOD(Test_VariantCastError)
+		{
+			try
+			{
+				std::shared_ptr<LispVariant> variant = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+				//Assert::IsNotNull(variant);
+				int value = variant->IntValue();
+				Assert::AreEqual(4, value);      // will not be evaluated because of expected exception !
+				Assert::IsTrue(false);
+			}
+			catch (LispException)
+			{
+				Assert::IsTrue(true);
+			}
+		}
+
 	};
 }

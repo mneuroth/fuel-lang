@@ -52,6 +52,11 @@ namespace CsLisp
 		return CompareTo(std::make_shared<object>(LispVariant(other)));
 	}
 
+	int LispVariant::CompareTo(std::shared_ptr<LispVariant> other)
+	{
+		return CompareTo(other->NativeObjectValue());
+	}
+
 	LispFunctionWrapper LispVariant::FunctionValue() const
 	{
 		//get
@@ -81,7 +86,7 @@ namespace CsLisp
 		{
 			throw CreateInvalidCastException("list");
 		}
-		return ToEnumerableOfObject(); // ((IEnumerable)Value).Cast<object>();
+		return Value->ToEnumerableOfObject(); // ((IEnumerable)Value).Cast<object>();
 		//}
 	}
 
@@ -113,7 +118,7 @@ namespace CsLisp
 	{
 		//get
 		//{
-		if (IsBool())
+		if (!IsBool())
 		{
 			throw CreateInvalidCastException("bool");
 		}

@@ -68,7 +68,7 @@ namespace CsLisp
     /// <summary>
     /// Generic data container for lisp data types.
     /// </summary>
-    /*public*/ class LispVariant : public object // TODO: IComparable
+    /*public*/ class LispVariant //: public object // TODO: IComparable
     {
         //#region constants
 
@@ -277,6 +277,8 @@ namespace CsLisp
         /// <param name="other">The other.</param>
         /// <returns></returns>
         /*public*/ int CompareTo(std::shared_ptr<object> other);
+
+		int CompareTo(std::shared_ptr<LispVariant> other);
 
         //#endregion
 

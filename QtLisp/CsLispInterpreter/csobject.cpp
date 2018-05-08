@@ -46,7 +46,7 @@ namespace CsLisp
 
 std::shared_ptr<LispVariant> object::ToLispVariant()
 {
-// TODO
+// TODO ? --> ok ?
 	if (IsLispVariant())
 	{
 		return std::make_shared<LispVariant>(*(m_Data.pVariant));
