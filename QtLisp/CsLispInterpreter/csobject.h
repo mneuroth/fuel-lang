@@ -74,6 +74,7 @@ namespace CsLisp
 		__LispToken = 13,
 		__IEnumerableOfObject = 14,
 		__VoidPtr = 15,
+		__LispScope = 16,
         __Error = 999
     };
 
@@ -203,6 +204,11 @@ namespace CsLisp
 			return m_Type == ObjectType::__LispVariant;
 		}
 
+		bool IsLispScope() const
+		{
+			return m_Type == ObjectType::__LispScope;
+		}
+
 		bool IsLispToken() const
 		{
 			return m_Type == ObjectType::__LispToken;
@@ -219,6 +225,8 @@ namespace CsLisp
 		}
 
 		std::shared_ptr<LispVariant> ToLispVariant();
+
+		std::shared_ptr<LispScope> ToLispScope();
 
 		LispFunctionWrapper ToLispFunctionWrapper();
 

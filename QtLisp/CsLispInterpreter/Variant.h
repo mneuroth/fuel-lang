@@ -1,3 +1,6 @@
+#ifndef _LISP_VARIANT_H
+#define _LISP_VARIANT_H
+
 /*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
@@ -40,21 +43,6 @@
 
 namespace CsLisp
 {
-// TODO --> forward declaration    
-    struct LispFunctionWrapper
-    {
-		LispFunctionWrapper()
-			: Signature("")
-		{
-		}
-
-		/*public*/ string Signature; // { get; private set; }
-	};
-    
-    class Exception
-    {
-    };
-        
     /// <summary>
     /// Enumeration for unqoute modus
     /// </summary>
@@ -762,3 +750,5 @@ namespace CsLisp
         //#endregion
     };
 }
+
+#endif

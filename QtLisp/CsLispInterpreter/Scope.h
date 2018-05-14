@@ -1,4 +1,7 @@
-﻿/*
+﻿#ifndef _LISP_SCOPE_H
+#define _LISP_SCOPE_H
+
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -28,14 +31,44 @@
 //using System.Linq;
 //using System.IO;
 
+#include "cstypes.h"
+#include "csstring.h"
+#include "csobject.h"
 #include "Token.h"
+#include "Variant.h"
+
+#include <memory>
 
 namespace CsLisp
 {
+	class ILispDebugger
+	{
+	};
+
+	class LispEnvironment
+	{
+	public:
+		static bool IsInModules(const string & name, std::shared_ptr<LispScope> globalScope)
+		{
+// TODO
+			return false;
+		}
+
+		static std::shared_ptr<object>  GetFunctionInModules(const string & name, std::shared_ptr<LispScope> globalScope)
+		{
+// TODO
+			return null;
+		}
+
+		static string Macros;
+		static string Modules;
+		static string MetaTag;
+	};
+
     /// <summary>
     /// The lisp runtime scope. That is something like a stack item.
     /// </summary>
-    /*public*/ class LispScope : Dictionary<string, object>
+    /*public*/ class LispScope : public Dictionary<string, std::shared_ptr<object>>, public std::enable_shared_from_this<LispScope>
     {
 	public:
         //#region debugging support
@@ -55,15 +88,15 @@ namespace CsLisp
         /// used for debugging purpose and for showing the 
         /// position of an error.
         /// </summary>
-		/*public*/ IList<LispToken> Tokens; // { get; set; }
+		/*public*/ IList<std::shared_ptr<LispToken>> Tokens; // { get; set; }
 
         /// <summary>
         /// Gets and sets the next and previous scope,
         /// used for debugging purpose to show the 
         /// call stack
         /// </summary>
-		/*public*/ LispScope Next; // { get; private set; }
-		/*public*/ LispScope Previous; // { get; set; }
+		/*public*/ std::shared_ptr<LispScope> Next; // { get; private set; }
+		/*public*/ std::shared_ptr<LispScope> Previous; // { get; set; }
 
         /// <summary>
         /// Gets or sets the scope chain to implement closures.
@@ -71,7 +104,7 @@ namespace CsLisp
         /// <value>
         /// The closure chain.
         /// </value>
-		/*public*/ LispScope ClosureChain; // { get; set; }
+		/*public*/ std::shared_ptr<LispScope> ClosureChain; // { get; set; }
 
         /// <summary>
         /// Gets or sets the current module name and path.
@@ -84,13 +117,13 @@ namespace CsLisp
         /// <summary>
         /// Gets or sets the current token.
         /// </summary>
-		/*public*/ LispToken CurrentToken; // { get; set; }
+		/*public*/ std::shared_ptr<LispToken> CurrentToken; // { get; set; }
 
-        /*public*/ int CurrentLineNo()
+        /*public*/ int CurrentLineNo() const
         {
             //get
             //{
-                return CurrentToken != null ? CurrentToken.LineNo : -1;
+                return CurrentToken ? CurrentToken->LineNo : -1;
             //}
         }
 
@@ -99,7 +132,7 @@ namespace CsLisp
         /// Needed for debugging support --> set function name to LispScope
         /// </summary>
         /// <value> The user data. </value>
-        /*public*/ object UserData: // { get; set; }
+		/*public*/ object UserData; // { get; set; }
 
         /// <summary>
         /// Gets or sets the user documentation information.
@@ -121,7 +154,7 @@ namespace CsLisp
         /// Gets the global scope.
         /// </summary>
         /// <value> The global scope. </value>
-        /*public*/ LispScope GlobalScope { get; private set; }
+		/*public*/ std::shared_ptr<LispScope> GlobalScope; // { get; private set; }
 
         /// <summary>
         /// Gets the output stream.
@@ -149,18 +182,19 @@ namespace CsLisp
         /// <param name="fcnName">Name of the FCN.</param>
         /// <param name="globalScope">The global scope.</param>
         /// <param name="moduleName">The current module name for the scope.</param>
-        /*public*/ LispScope(string fcnName, LispScope globalScope = null, string moduleName = null)
+        /*public*/ LispScope(string fcnName, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null)
         {
             Name = fcnName;
-            GlobalScope = globalScope ?? this;
-            ModuleName = moduleName;
-            if (ModuleName == null && globalScope != null)
+            GlobalScope = globalScope ? globalScope : shared_from_this();
+			ModuleName = moduleName ? *moduleName : string::Empty;
+            if (ModuleName == string::Empty && globalScope != null)
             {
-                ModuleName = globalScope.ModuleName;
+                ModuleName = globalScope->ModuleName;
             }
             CurrentToken = null;
-            Input = Console.In;
-            Output = Console.Out;
+// TODO
+//            Input = Console.In;
+//            Output = Console.Out;
         }
 
         /// <summary>
@@ -168,7 +202,7 @@ namespace CsLisp
         /// </summary>
         /// <remarks>Needed for compiler module and .NET 3.5</remarks>
         /*public*/ LispScope()
-            : this(string.Empty)
+            : LispScope(string::Empty)
         {
         }
 
@@ -176,15 +210,15 @@ namespace CsLisp
 
         //#region public methods
 
-        /*public*/ void PushNextScope(LispScope nextScope)
+        /*public*/ void PushNextScope(std::shared_ptr<LispScope> nextScope)
         {
             Next = nextScope;
-            nextScope.Previous = this;
+            nextScope->Previous = shared_from_this();
         }
 
         /*public*/ void PopNextScope()
         {
-            Next.Previous = null;
+            Next->Previous = null;
             Next = null;
         }
 
@@ -194,17 +228,17 @@ namespace CsLisp
         /// <param name="name">The name.</param>
         /// <param name="closureScopeFound">The closure scope found.</param>
         /// <returns>True if name was found.</returns>
-        /*public*/ bool IsInClosureChain(string name, out LispScope closureScopeFound)
+        /*public*/ bool IsInClosureChain(string name, /*out*/ std::shared_ptr<LispScope> closureScopeFound)
         {
             closureScopeFound = null;
             if (ClosureChain != null)
             {
-                if (ClosureChain.ContainsKey(name))
+                if (ClosureChain->ContainsKey(name))
                 {
                     closureScopeFound = ClosureChain;
                     return true;
                 }
-                return ClosureChain.IsInClosureChain(name, out closureScopeFound);
+                return ClosureChain->IsInClosureChain(name, closureScopeFound);
             }
             return false;
         }
@@ -214,32 +248,32 @@ namespace CsLisp
         /// </summary>
         /// <param name="elem">The element.</param>
         /// <returns>Resolved value or null</returns>
-        /*public*/ object ResolveInScopes(object elem)
+        /*public*/ std::shared_ptr<object> ResolveInScopes(std::shared_ptr<object> elem)
         {
-            object result;
+			std::shared_ptr<object> result;
 
-            var name = elem.ToString();
-            LispScope foundClosureScope;
+            var name = elem->ToString();
+            std::shared_ptr<LispScope> foundClosureScope;
             // first try to resolve in this scope
             if (ContainsKey(name))
             {
-                result = this[name];
+                result = (*this)[name];
             }
             // then try to resolve in closure chain scope(s)
-            else if (IsInClosureChain(name, out foundClosureScope))
+            else if (IsInClosureChain(name, foundClosureScope))
             {
-                result = foundClosureScope[name];
+                result = (*foundClosureScope)[name];
             }
             // then try to resolve in global scope
             else if (GlobalScope != null &&
-                     GlobalScope.ContainsKey(name))
+                     GlobalScope->ContainsKey(name))
             {
-                result = GlobalScope[name];
+                result = (*GlobalScope)[name];
             }
             // then try to resolve in scope of loaded modules
-            else if (LispEnvironment.IsInModules(name, GlobalScope))
+            else if (LispEnvironment::IsInModules(name, GlobalScope))
             {
-                result = LispEnvironment.GetFunctionInModules(name, GlobalScope);
+                result = LispEnvironment::GetFunctionInModules(name, GlobalScope);
             }
             else
             {
@@ -258,20 +292,20 @@ namespace CsLisp
         /// <param name="symbolName">Name of the symbol.</param>
         /// <param name="value">The value.</param>
         /// <exception cref="LispException">Symbol  + symbolName +  not found</exception>
-        /*public*/ void SetInScopes(string symbolName, object value)
+        /*public*/ void SetInScopes(string symbolName, std::shared_ptr<object> value)
         {
-            LispScope foundClosureScope;
-            if (symbolName != null && ContainsKey(symbolName))
+			std::shared_ptr<LispScope> foundClosureScope;
+            if (!string::IsNullOrEmpty(symbolName) && ContainsKey(symbolName))
             {
-                this[symbolName] = value;
+                (*this)[symbolName] = value;
             }
-            else if (symbolName != null && IsInClosureChain(symbolName, out foundClosureScope))
+            else if (!string::IsNullOrEmpty(symbolName) && IsInClosureChain(symbolName, foundClosureScope))
             {
-                foundClosureScope[symbolName] = value;
+                (*foundClosureScope)[symbolName] = value;
             }
-            else if (symbolName != null && GlobalScope != null && GlobalScope.ContainsKey(symbolName))
+            else if (!string::IsNullOrEmpty(symbolName) && GlobalScope != null && GlobalScope->ContainsKey(symbolName))
             {
-                GlobalScope[symbolName] = value;
+                (*GlobalScope)[symbolName] = value;
             }
             else
             {
@@ -279,14 +313,15 @@ namespace CsLisp
             }
         }
 
-        /*public*/ LispToken GetPreviousToken(LispToken token)
+        /*public*/ std::shared_ptr<LispToken> GetPreviousToken(std::shared_ptr<LispToken> token)
         {
-            LispToken previous = null;
-            if (Tokens != null)
+			std::shared_ptr<LispToken> previous = null;
+            //if (Tokens)
             {
-                foreach (var item in Tokens)
+                //foreach (var item in Tokens)
+				for(std::shared_ptr<LispToken> item : Tokens)
                 {
-                    if (item == token)
+                    if (*item == *token)
                     {
                         return previous;
                     }
@@ -296,13 +331,13 @@ namespace CsLisp
             return null;
         }
 
-        /*public*/ int GetCallStackSize()
+        /*public*/ int GetCallStackSize() const
         {
-            LispScope current = this;
+			std::shared_ptr<const LispScope> current = shared_from_this();
             int i = 0;
             do
             {
-                current = current.Previous;
+                current = current->Previous;
                 i++;
             } while (current != null);
             return i;
@@ -316,15 +351,15 @@ namespace CsLisp
 
         /*public*/ string DumpStackToString(int currentLevel = -1)
         {
-            string ret = string.Empty;
-            LispScope current = this;
+            string ret = string::Empty;
+			std::shared_ptr<LispScope> current = shared_from_this();
             int i = GetCallStackSize();
             do
             {
                 string currentItem = currentLevel == i ? "-->" : "   ";
 
-                ret = string.Format("{0,3}{1,5} name={2,-35} lineno={3,-4} module={4}\n", currentItem, i, current.Name, current.CurrentLineNo, current.ModuleName) + ret;
-                current = current.Previous;
+                ret = string::Format("{0,3}{1,5} name={2,-35} lineno={3,-4} module={4}\n", currentItem, i, current->Name, current->CurrentLineNo(), current->ModuleName) + ret;
+                current = current->Previous;
                 i--;
             } while (current != null);
             return ret;
@@ -332,41 +367,42 @@ namespace CsLisp
 
         /*public*/ void DumpVars()
         {
-            Dump(v => !v.IsFunction || (v.IsFunction && !v.FunctionValue.IsBuiltin));
+			Dump([](const LispVariant & v) -> bool { return !v.IsFunction() || (v.IsFunction() && !v.FunctionValue().IsBuiltin()); });
         }
 
         /*public*/ void DumpFunctions()
         {
-            Dump(v => v.IsFunction, v => " : module=" + v.FunctionValue.ModuleName);
+			Dump([](const LispVariant & v)-> bool { v.IsFunction(); }, [](const LispVariant & v) -> string { " : module=" + v.FunctionValue().ModuleName; });
 
-            ProcessMetaScope(LispEnvironment.Modules, module =>
+            ProcessMetaScope(LispEnvironment::Modules, [](KeyValuePair<string, std::shared_ptr<object>> modu) -> void
             {
-                var mod = module.Value as LispScope;
-                if (mod != null)
-                {
-                    mod.DumpFunctions();
-                }
+				//var mod = module.Value as LispScope;
+				if (modu.Value->IsLispScope())
+				{
+					var mod = modu.Value->ToLispScope();
+					mod->DumpFunctions();
+				}
             });
         }
 
         /*public*/ void DumpMacros()
         {
-            ProcessMetaScope(LispEnvironment.Macros, macro => Output.WriteLine(macro.Key));
+			ProcessMetaScope(LispEnvironment::Macros, [this](KeyValuePair<string, std::shared_ptr<object>> macro) -> void { Output.WriteLine(macro.Key); });
         }
 
         /*public*/ void DumpBuiltinFunctions()
         {
-            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin);
+			Dump([](const LispVariant & v) -> bool { return v.IsFunction() && v.FunctionValue().IsBuiltin(); });
         }
 
         /*public*/ void DumpBuiltinFunctionsHelp()
         {
-            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin, v => v.FunctionValue.Documentation, showHelp: true);
+			Dump([](const LispVariant & v) -> bool { return v.IsFunction() && v.FunctionValue().IsBuiltin(); }, [](const LispVariant & v) -> string { return v.FunctionValue().Documentation; }, /*showHelp:*/ true);
         }
 
         /*public*/ void DumpBuiltinFunctionsHelpFormated()
         {
-            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin, sort: true, format: v => v.FunctionValue.FormatedDoc);
+			Dump([](const LispVariant & v) -> bool { return v.IsFunction() && v.FunctionValue().IsBuiltin(); }, null, /*showHelp:*/false, /*sort:*/ true, /*format:*/ [](const LispVariant & v) -> string { return v.FunctionValue().GetFormatedDoc(); });
         }
 
         /*public*/ void DumpBuiltinFunctionsHelpHtmlFormated()
@@ -379,33 +415,34 @@ namespace CsLisp
             Output.WriteLine("</head>");
             Output.WriteLine("<h2>Documentation of builtin functions of the fuel language:</h2>");
             Output.WriteLine("<body>");
-            Dump(v => v.IsFunction && v.FunctionValue.IsBuiltin, sort: true, format: v => v.FunctionValue.HtmlFormatedDoc);
+			Dump([](const LispVariant & v) -> bool { return v.IsFunction() && v.FunctionValue().IsBuiltin(); }, null, /*showHelp:*/false, /*sort:*/ true, /*format:*/[](const LispVariant & v) -> string { return v.FunctionValue().GetHtmlFormatedDoc(); });
             Output.WriteLine("</body>");
             Output.WriteLine("</html>");
         }
 
         /*public*/ void DumpModules()
         {
-            ProcessMetaScope(LispEnvironment.Modules, module => Output.WriteLine(module.Key));
+			ProcessMetaScope(LispEnvironment::Modules, [this](KeyValuePair<string, std::shared_ptr<object>> mod) -> void { return Output.WriteLine(mod.Key); });
         }
 
-        /*public*/ string GetFunctionsHelpFormated(string functionName, Func<string, string, bool> select = null)
+        /*public*/ string GetFunctionsHelpFormated(string functionName, /*Func<string, string, bool>*/std::function<bool(string, string)> select = null)
         {
-            string result = string.Empty;
-            foreach (var key in Keys)
+            string result = string::Empty;
+            //foreach (var key in Keys)
+			for(const string & key : GetKeys())
             {
                 if (select != null)
                 {
                     if (select(key, functionName))
                     {
-                        var value = (LispVariant)this[key];
-                        result += value.FunctionValue.FormatedDoc;                        
+                        var value = /*(LispVariant)*/(*this)[key]->ToLispVariant();
+                        result += value->FunctionValue().GetFormatedDoc();                        
                     }
                 }
                 else if (key.StartsWith(functionName))
                 {
-                    var value = (LispVariant)this[key];
-                    result += value.FunctionValue.FormatedDoc;
+                    var value = /*(LispVariant)*/(*this)[key]->ToLispVariant();
+                    result += value->FunctionValue().GetFormatedDoc();
                 }
             }
             return result;
@@ -415,53 +452,54 @@ namespace CsLisp
 
         //#region private methods
 
-        private void ProcessMetaScope(string metaScope, Action<KeyValuePair<string, object>> action)
+		/*private*/ void ProcessMetaScope(string metaScope, /*Action<KeyValuePair<string, std::shared_ptr<object>>>*/std::function<void(KeyValuePair<string, std::shared_ptr<object>>)> action)
         {
             if (ContainsKey(metaScope))
             {
-                var items = this[metaScope] as LispScope;
-                if (items != null)
+				var items = (*this)[metaScope]; // as LispScope;
+                if (items->IsLispScope())
                 {
-                    foreach (KeyValuePair<string, object> item in items)
-                    {
-                        action(item);
+                    for (/*KeyValuePair<string, std::shared_ptr<object>>*/auto const & item : *(items->ToLispScope()))
+                    {						
+						KeyValuePair<string, std::shared_ptr<object>> temp(item.first, item.second);
+                        action(temp);
                     }
                 }
             }
         }
 
-        private void Dump(Func<LispVariant, bool> select, Func<LispVariant, string> show = null, bool showHelp = false, bool sort = false, Func<LispVariant, string> format = null)
+		/*private*/ void Dump(std::function<bool(const LispVariant &)>/*Func<LispVariant, bool>*/ select, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ show = null, bool showHelp = false, bool sort = false, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ format = null)
         {
-            var keys = Keys.ToList();
+			std::list<LispScope::key_type> keys = GetKeys();
             if (sort)
             {
-                keys.Sort();                
+                keys.sort();                
             }
-            foreach (var key in keys)
+            for (var key : keys)
             {
-                if (!key.StartsWith(LispEnvironment.MetaTag))
+                if (!key.StartsWith(LispEnvironment::MetaTag))
                 {
-                    var value = (LispVariant)this[key];
-                    if (select(value))
+                    var value = /*(LispVariant)*/(*this)[key]->ToLispVariant();
+                    if (select(*value))
                     {
                         if (format != null)
                         {
-                            Output.WriteLine("{0}", format(value));
+                            Output.WriteLine("{0}", format(*value));
                         }
                         else
                         {
-                            string info = show != null ? show(value) : string.Empty;
+                            string info = show != null ? show(*value) : string::Empty;
                             if (showHelp)
                             {
-                                Output.WriteLine("{0,20} --> {1}", key, value.FunctionValue.Signature);
-                                if (!string.IsNullOrEmpty(info))
+                                Output.WriteLine("{0,20} --> {1}", key, value->FunctionValue().Signature);
+                                if (!string::IsNullOrEmpty(info))
                                 {
                                     Output.WriteLine("{0,20}     {1}", "", info);
                                 }
                             }
                             else
                             {
-                                Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value.ToStringDebugger(), value.TypeString, info);
+                                Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value->ToStringDebugger(), value->TypeString(), info);
                             }                            
                         }
                     }
@@ -472,3 +510,5 @@ namespace CsLisp
         //#endregion
 	};
 }
+
+#endif

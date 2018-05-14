@@ -28,6 +28,7 @@
 
 #include <list>
 #include <vector>
+#include <map>
 
 #include "csstring.h"
 
@@ -38,11 +39,12 @@ typedef std::function<void()> Action;
 namespace CsLisp
 {
 	class LispToken;
+	class LispScope;
 
 	class LispException
 	{
 	public:
-		LispException(const string & txt)
+		LispException(const string & txt, LispScope * scope = 0)
 		{
 		}
 
@@ -108,9 +110,82 @@ namespace CsLisp
 	};
 
 	template <class T>
+	class IList : public IEnumerable<T>
+	{
+	public:
+	};
+
+	template <class T>
 	class List : public IEnumerable<T>
 	{
 	public:
+	};
+
+	template <class K, class V>
+	class Dictionary : public std::map<K,V>
+	{
+	public:
+		std::list<K> GetKeys() const;
+
+		bool ContainsKey(const K & key) const;
+	};
+
+	template <class T1, class T2>
+	class Tuple : std::pair<T1, T2>
+	{
+	public:
+	};
+
+	class TextWriter
+	{
+	public:
+		void WriteLine(const string & txt);
+		void WriteLine(const string & txt, const string & txt1);
+		void WriteLine(const string & txt, const string & txt1, const string & txt2);
+		void WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3);
+		void WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3, const string & txt4);
+	};
+
+	class TextReader
+	{
+	};
+
+	template <class K, class V>
+	class KeyValuePair
+	{
+	public:
+		KeyValuePair(K key, V value)
+			: Key(key), Value(value)
+		{
+		}
+
+		K Key;
+		V Value;
+	};
+
+	// TODO --> forward declaration    
+	struct LispFunctionWrapper
+	{
+		LispFunctionWrapper()
+			: Signature("")
+		{
+		}
+
+		/*public*/ string Signature; // { get; private set; }
+
+		/*public*/ string Documentation; // { get; private set; }
+
+		bool IsBuiltin() const;
+
+		string ModuleName;
+
+		/*public*/ string GetFormatedDoc() const;
+
+		/*public*/ string GetHtmlFormatedDoc() const;
+	};
+
+	class Exception
+	{
 	};
 
 	template <class T>

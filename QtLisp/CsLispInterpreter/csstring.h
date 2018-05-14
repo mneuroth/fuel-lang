@@ -38,7 +38,12 @@ namespace CsLisp
 	class string : public std::string
 	{
 	public:
-		string(const char * txt) 
+		string()
+			: std::string()
+		{
+		}
+
+		string(const char * txt)
 			: std::string(txt)
 		{			
 		}
@@ -93,7 +98,7 @@ namespace CsLisp
 			return temp;
 		}
 
-		bool StartsWith(const string & txt)
+		bool StartsWith(const string & txt) const
 		{
 			return compare(0, txt.length(), txt) == 0;
 		}
@@ -108,12 +113,17 @@ namespace CsLisp
 			return (*this).find_first_of(txt);
 		}
 
-		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "")
+		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "", const string & arg4 = "", const string & arg5 = "")
 		{
 // TODO
 			//string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
 			//std::string
 			return txt;
+		}
+
+		static bool IsNullOrEmpty(const string & txt)
+		{
+			return txt.size() == 0;
 		}
 
 		int Length()

@@ -36,6 +36,7 @@
 #include "Token.h"
 #include "Tokenizer.h"
 #include "Variant.h"
+#include "Scope.h"
 
 using namespace CsLisp;
 
@@ -60,6 +61,8 @@ int main()
 
 	std::shared_ptr<object> v3 = std::make_shared<object>(aVariant3);
 	int result = aVariant2.CompareTo(v3);
+
+	LispScope scope;
 
     return 0;
 }

@@ -286,6 +286,8 @@ namespace CsLisp
 
 		//#endregion
 
+		bool operator ==(const LispToken & other) const;
+
 		//#region public methods
 
 		/// <summary>
