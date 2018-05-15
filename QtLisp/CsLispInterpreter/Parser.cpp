@@ -24,3 +24,9 @@
 * */
 
 #include "Parser.h"
+
+using namespace CsLisp;
+
+const string LispParser::BracketsOutOfBalance = "Brackets out of balance";
+const string LispParser::BracketsOutOfBalanceOrUnexpectedScriptCode = BracketsOutOfBalance + " or unexpected script code";
+const string LispParser::UnexpectedToken = "Unexpected token";

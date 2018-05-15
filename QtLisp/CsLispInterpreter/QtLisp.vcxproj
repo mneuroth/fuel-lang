@@ -149,6 +149,7 @@
     <ClInclude Include="csobject.h" />
     <ClInclude Include="csstring.h" />
     <ClInclude Include="cstypes.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Scope.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="csobject.cpp" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="QtLisp.cpp" />
     <ClCompile Include="Scope.cpp" />
     <ClCompile Include="stdafx.cpp">

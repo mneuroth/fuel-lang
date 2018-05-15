@@ -67,6 +67,11 @@ namespace CsLisp
 			return std::vector<T>(std::list<T>::begin(), std::list<T>::end());
 		}
 
+		std::list<T> ToList() const
+		{
+			return std::list<T>(std::list<T>::begin(), std::list<T>::end());
+		}
+
 		const T & First() const
 		{
 			return std::list<T>::front();

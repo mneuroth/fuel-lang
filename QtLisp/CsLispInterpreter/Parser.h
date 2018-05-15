@@ -1,3 +1,6 @@
+#ifndef _LISP_PARSER_H
+#define _LISP_PARSER_H
+
 /*
 * FUEL(isp) is a fast usable embeddable lisp interpreter.
 *
@@ -27,6 +30,7 @@
 
 #include "Token.h"
 #include "Tokenizer.h"
+#include "Variant.h"
 
 namespace CsLisp
 {
@@ -37,9 +41,9 @@ namespace CsLisp
 	{
 		//#region constants
 			
-		const string BracketsOutOfBalance = "Brackets out of balance";
-		const string BracketsOutOfBalanceOrUnexpectedScriptCode = BracketsOutOfBalance + " or unexpected script code";
-		const string UnexpectedToken = "Unexpected token";
+		const static string BracketsOutOfBalance;
+		const static string BracketsOutOfBalanceOrUnexpectedScriptCode;
+		const static string UnexpectedToken;
 
 		//#endregion
 
@@ -54,9 +58,9 @@ namespace CsLisp
 		/// <param name="offset">The position offset.</param>
 		/// <param name="scope">The scope.</param>
 		/// <returns>Abstract syntax tree as container</returns>
-		/*public*/ static IEnumerable<object> Parse(string code, int offset = 0, LispScope * scope = null)
+		/*public*/ static IEnumerable<std::shared_ptr<object>> Parse(string code, int offset = 0, LispScope * scope = null)
 		{
-			List<object> parseResult = null;
+			IEnumerable<std::shared_ptr<object>> parseResult;
 			string moduleName = ""; // string.Empty;
 
 			// set tokens at LispScope to improve debugging and 
@@ -68,7 +72,7 @@ namespace CsLisp
 				moduleName = scope.ModuleName;
 			}
 
-			ParseTokens(moduleName, tokens, 0, ref parseResult, isToplevel: true);
+			ParseTokens(moduleName, tokens, 0, /*ref*/ parseResult, isToplevel: true);
 
 			return parseResult;
 		}
@@ -123,7 +127,7 @@ namespace CsLisp
 					if (nextToken.Type == LispTokenType::ListStart)
 					{
 						List<object> quotedList = null;
-						i = ParseTokens(moduleName, tokens, i + 1, ref quotedList, isToplevel: false);
+						i = ParseTokens(moduleName, tokens, i + 1, /*ref*/ quotedList, isToplevel: false);
 						quote.Add(quotedList);
 					}
 					else
@@ -172,7 +176,7 @@ namespace CsLisp
 		{
 			for (var n = i; n < tokens.Count; n++)
 			{
-				if (tokens[n].Type != LispTokenType.Comment)
+				if (tokens[n].Type != LispTokenType::Comment)
 				{
 					return false;
 				}
@@ -183,3 +187,5 @@ namespace CsLisp
 		//#endregion
 	};
 }
+
+#endif
