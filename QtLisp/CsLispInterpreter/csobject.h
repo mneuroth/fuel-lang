@@ -93,16 +93,16 @@ namespace CsLisp
 		} m_Data;;
         ObjectType m_Type;
 
+		// disable assignment operator
+		object & operator=(const object & other);
+
 	public:
 		explicit object()
 			: m_sValue("?"), m_Type(ObjectType::__Undefined)
 		{
 		}
         
-		explicit object(const object & other)
-			: m_sValue(other.m_sValue), m_Type(other.m_Type)
-		{
-		}
+		explicit object(const object & other);
 
 		explicit object(void * ptr)
 			: m_sValue("NULL"), m_Type(ObjectType::__VoidPtr)
@@ -224,7 +224,7 @@ namespace CsLisp
 			return m_Type == ObjectType::__IEnumerableOfObject;
 		}
 
-		std::shared_ptr<LispVariant> ToLispVariant();
+		std::shared_ptr<LispVariant> ToLispVariant() const;
 
 		std::shared_ptr<LispScope> ToLispScope();
 

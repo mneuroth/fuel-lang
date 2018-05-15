@@ -28,12 +28,24 @@
 
 namespace CsLisp
 {
-
 	object::object(const LispVariant & value)
 		: m_Type(ObjectType::__LispVariant)
 	{
 		m_Data.pVariant = new LispVariant(value);
 		m_sValue = "VARIANT="+m_Data.pVariant->ToString();
+	}
+
+	object::object(const object & other)
+		: m_sValue(other.m_sValue), m_Type(other.m_Type)
+	{
+		if (other.IsLispVariant())
+		{
+			m_Data.pVariant = new LispVariant(*(other.ToLispVariant()));
+		}
+		else
+		{
+			m_Data = other.m_Data;
+		}
 	}
 
 	object::~object()
@@ -44,9 +56,8 @@ namespace CsLisp
 		}
 	}
 
-	std::shared_ptr<LispVariant> object::ToLispVariant()
+	std::shared_ptr<LispVariant> object::ToLispVariant() const
 	{
-	// TODO ? --> ok ?
 		if (IsLispVariant())
 		{
 			return std::make_shared<LispVariant>(*(m_Data.pVariant));
