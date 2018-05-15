@@ -223,7 +223,7 @@ namespace CsLisp
 			IsUnQuoted = other.IsUnQuoted;
 		}
 
-	protected:
+	//protected:
         /// <summary>
         /// Initializes a new instance of the <see cref="LispVariant"/> class.
         /// </summary>

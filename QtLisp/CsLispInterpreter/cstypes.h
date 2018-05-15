@@ -47,6 +47,9 @@ namespace CsLisp
 		LispException(const string & txt, LispScope * scope = 0)
 		{
 		}
+		LispException(const string & txt, std::shared_ptr<LispToken> token, const string & moduleName = "", const string & stackInfo = "not available")
+		{
+		}
 
 		void AddTokenInfos(std::shared_ptr<LispToken> token)
 		{
@@ -114,23 +117,23 @@ namespace CsLisp
 		}
 	};
 
-	template <class T>
-	class IList : public IEnumerable<T>
-	{
-	public:
-	};
+	//template <class T>
+	//class IList : public IEnumerable<T>
+	//{
+	//public:
+	//};
 
-	template <class T>
-	class List : public IEnumerable<T>
-	{
-	public:
-	};
+	//template <class T>
+	//class List : public IEnumerable<T>
+	//{
+	//public:
+	//};
 
 	template <class K, class V>
 	class Dictionary : public std::map<K,V>
 	{
 	public:
-		std::list<K> GetKeys() const;
+		IEnumerable<K> GetKeys() const;
 
 		bool ContainsKey(const K & key) const;
 	};
@@ -189,9 +192,9 @@ namespace CsLisp
 		/*public*/ string GetHtmlFormatedDoc() const;
 	};
 
-	class Exception
-	{
-	};
+	//class Exception
+	//{
+	//};
 
 	template <class T>
 	int CompareToType(T d1, T d2)

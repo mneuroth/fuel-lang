@@ -29,6 +29,7 @@
 #include "Token.h"
 #include "cstypes.h"
 
+#include <memory>
 #include <list>
 #include <vector>
 #include <functional>
@@ -49,9 +50,9 @@ namespace CsLisp
 		/// <param name="code">The code.</param>
 		/// <param name="offset">The position offset (decorated code).</param>
 		/// <returns>Container with tokens</returns>
-		/*public*/ static IEnumerable<LispToken> Tokenize(string code, int offset = 0)
+		/*public*/ static IEnumerable<std::shared_ptr<LispToken>> Tokenize(string code, int offset = 0)
 		{
-			List<LispToken> tokens; // = new List<LispToken>();
+			IEnumerable<std::shared_ptr<LispToken>> tokens; // = new List<LispToken>();
 			string currentToken = string::Empty;
 			int currentTokenStartPos = 0;
 			int lineCount = 1;
@@ -62,7 +63,7 @@ namespace CsLisp
 			/*Action<string, int, int>*/
 			std::function<void(const string &, int, int)> addToken = [&tokens, offset, &isInSymbol, &isInString, &currentToken, &currentTokenStartPos](const string & currentTok, int pos, int line)
 			{
-				tokens.Add(LispToken(currentTok, currentTokenStartPos - offset, pos - offset, line));
+				tokens.Add(std::make_shared<LispToken>(currentTok, currentTokenStartPos - offset, pos - offset, line));
 				isInSymbol = false;
 				isInString = false;
 				currentToken = string::Empty;

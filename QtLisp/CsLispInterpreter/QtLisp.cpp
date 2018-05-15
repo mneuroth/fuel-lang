@@ -37,32 +37,42 @@
 #include "Tokenizer.h"
 #include "Variant.h"
 #include "Scope.h"
+#include "Parser.h"
 
 using namespace CsLisp;
 
 int main()
 {
-	string code = "(+ 1 2 3)";
-	IEnumerable<LispToken> tokens = LispTokenizer::Tokenize(code);
+	//string code = "(+ 1 2 3)";
+	//IEnumerable<std::shared_ptr<LispToken>> tokens = LispTokenizer::Tokenize(code);
 
-	//for each (LispToken elem in tokens)
-	//{
-	//	std::cout << "Elem: " << elem.ToString() << std::endl;
-	//}
+	////for each (LispToken elem in tokens)
+	////{
+	////	std::cout << "Elem: " << elem.ToString() << std::endl;
+	////}
 
-	for_each(tokens.begin(), tokens.end(), [](LispToken elem) { std::cout << "Elem: " << elem.ToString() << std::endl; });
+	//for_each(tokens.begin(), tokens.end(), [](std::shared_ptr<LispToken> elem) { std::cout << "Elem: " << elem->ToString() << std::endl; });
 
-	LispVariant aVariant(LispType::_Nil);
-	std::cout << "Variant: " << aVariant.ToString() << std::endl;
-	LispVariant aVariant2(std::make_shared<object>(42));
-	std::cout << "Variant: " << aVariant2.ToString() << std::endl;
-	LispVariant aVariant3(std::make_shared<object>(43));
-	std::cout << "Variant: " << aVariant3.ToString() << std::endl;
+	//LispVariant aVariant(LispType::_Nil);
+	//std::cout << "Variant: " << aVariant.ToString() << std::endl;
+	//LispVariant aVariant2(std::make_shared<object>(42));
+	//std::cout << "Variant: " << aVariant2.ToString() << std::endl;
+	//LispVariant aVariant3(std::make_shared<object>(43));
+	//std::cout << "Variant: " << aVariant3.ToString() << std::endl;
 
-	std::shared_ptr<object> v3 = std::make_shared<object>(aVariant3);
-	int result = aVariant2.CompareTo(v3);
+	//std::shared_ptr<object> v3 = std::make_shared<object>(aVariant3);
+	//int result = aVariant2.CompareTo(v3);
 
-	LispScope scope;
+	////LispScope scope;
+
+	LispParser parser;
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ast = parser.Parse("(+ 1 2 3)");
+
+	std::cout << "AST:" << std::endl;
+	for (auto e : *ast)
+	{
+		std::cout << "--> " << e->ToString() << std::endl;
+	}
 
     return 0;
 }

@@ -30,42 +30,41 @@ namespace CsLisp
 {
 
 	object::object(const LispVariant & value)
-		: m_sValue("NOT_IMPLEMENTED_YET"), m_Type(ObjectType::__LispVariant)
+		: m_Type(ObjectType::__LispVariant)
 	{
 		m_Data.pVariant = new LispVariant(value);
+		m_sValue = "VARIANT="+m_Data.pVariant->ToString();
 	}
 
 	object::~object()
 	{
-		if (IsLispToken())
+		if (IsLispVariant())
 		{
 			delete m_Data.pVariant;
 		}
 	}
 
-
-std::shared_ptr<LispVariant> object::ToLispVariant()
-{
-// TODO ? --> ok ?
-	if (IsLispVariant())
+	std::shared_ptr<LispVariant> object::ToLispVariant()
 	{
-		return std::make_shared<LispVariant>(*(m_Data.pVariant));
+	// TODO ? --> ok ?
+		if (IsLispVariant())
+		{
+			return std::make_shared<LispVariant>(*(m_Data.pVariant));
+		}
+		return std::make_shared<LispVariant>(LispVariant(LispType::_Nil));
 	}
-	return std::make_shared<LispVariant>(LispVariant(LispType::_Nil));
-}
 
-LispFunctionWrapper object::ToLispFunctionWrapper()
-{
-// TODO
-	LispFunctionWrapper ret;
-	return ret;
-}
+	LispFunctionWrapper object::ToLispFunctionWrapper()
+	{
+	// TODO
+		LispFunctionWrapper ret;
+		return ret;
+	}
 
-IEnumerable<std::shared_ptr<object>> object::ToEnumerableOfObject() const
-{
-// TODO
-	return IEnumerable<std::shared_ptr<object>>();
-}
-
+	IEnumerable<std::shared_ptr<object>> object::ToEnumerableOfObject() const
+	{
+	// TODO
+		return IEnumerable<std::shared_ptr<object>>();
+	}
 }
 

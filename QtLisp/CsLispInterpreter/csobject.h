@@ -138,7 +138,7 @@ namespace CsLisp
 		}
 
 		explicit object(const IEnumerable<std::shared_ptr<object>> & value)
-			: m_sValue("NOT_IMPLEMENTED_YET"), m_Type(ObjectType::__List)
+			: m_sValue("NOT_IMPLEMENTED_YET_LIST"), m_Type(ObjectType::__List)
 		{
 		}
 
@@ -232,7 +232,7 @@ namespace CsLisp
 
 		IEnumerable<std::shared_ptr<object>> ToEnumerableOfObject() const;
 
-		/*std::list<std::shared_ptr<object>> &*/std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList();
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList();
 
 		string ToString() const
 		{

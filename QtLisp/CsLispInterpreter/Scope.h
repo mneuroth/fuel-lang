@@ -38,6 +38,7 @@
 #include "Variant.h"
 
 #include <memory>
+#include <list>
 
 namespace CsLisp
 {
@@ -63,6 +64,10 @@ namespace CsLisp
 		static string Macros;
 		static string Modules;
 		static string MetaTag;
+
+		const static string Quote;
+		const static string Quasiquote;
+
 	};
 
     /// <summary>
@@ -88,7 +93,7 @@ namespace CsLisp
         /// used for debugging purpose and for showing the 
         /// position of an error.
         /// </summary>
-		/*public*/ IList<std::shared_ptr<LispToken>> Tokens; // { get; set; }
+		/*public*/ IEnumerable<std::shared_ptr<LispToken>> Tokens; // { get; set; }
 
         /// <summary>
         /// Gets and sets the next and previous scope,
@@ -470,7 +475,7 @@ namespace CsLisp
 
 		/*private*/ void Dump(std::function<bool(const LispVariant &)>/*Func<LispVariant, bool>*/ select, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ show = null, bool showHelp = false, bool sort = false, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ format = null)
         {
-			std::list<LispScope::key_type> keys = GetKeys();
+			IEnumerable<LispScope::key_type> keys = GetKeys();
             if (sort)
             {
                 keys.sort();                
