@@ -53,7 +53,7 @@ namespace CsLisp
 // TODO: only dummy impl !
 		}
 
-		bool NeedsBreak(LispScope & scope, LispBreakpointPosition & posInfosOfCurrentAstItem)
+        bool NeedsBreak(const LispScope & scope, const LispBreakpointPosition & posInfosOfCurrentAstItem) const
 		{
 // TODO: only dummy impl !
 			return false;
