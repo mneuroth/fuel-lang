@@ -81,11 +81,34 @@ namespace CsLisp
         {
             //get
             //{
-                if (Type == LispType::_NativeObject)
-                {
-                    return /*Type+*/string("NativeObject<")+Value->GetTypeName()+string(">"); 
-                }
-                return "unknown_type"; //Type.ToString();       // TODO
+				switch (Type)
+				{
+					case _Undefined:
+						return "Undefined";
+					case _Nil:
+						return "Nil";
+					case _Bool:
+						return "Bool";
+					case _Int:
+						return "Int";
+					case _Double:
+						return "Double";
+					case _String:
+						return "String";
+					case _List:
+						return "List";
+					case _Function:
+						return "Function";
+					case _Symbol:
+						return "Symbol";
+					case _NativeObject:
+						return /*Type+*/string("NativeObject<") + Value->GetTypeName() + string(">");
+					//_Array = 10,
+					case _Error:
+						return "Error";
+					default:
+						return "unknown_type";
+				}
             //}
         }
 
@@ -274,7 +297,7 @@ namespace CsLisp
 
         /*public*/ LispFunctionWrapper FunctionValue() const;
 
-        /*public*/ IEnumerable<std::shared_ptr<object>> ListValue() const;
+        /*public*/ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ListValue() const;
  
         /*public*/ double DoubleValue() const;
 
@@ -411,7 +434,7 @@ namespace CsLisp
             }
             if (IsList())
             {
-                return ExpandContainerToString(std::make_shared<object>(ListValue()));
+                return ExpandContainerToString(std::make_shared<object>(*(ListValue())));
             }
             if (IsFunction())
             {
@@ -439,7 +462,7 @@ namespace CsLisp
         //template <T1, T2, T3>
         //typedef (*Func<T1,T2,T3>)();
 
-// TODO
+// TODO Func Operatoren realisieren ?
 //        // used for compiler module
 //        /*public*/ static explicit operator Func<object[], LispScope, LispVariant>(LispVariant variant)
 //        {
@@ -553,8 +576,8 @@ namespace CsLisp
             if (IsList() && r.IsList())
             {
                 var newList = new IEnumerable<std::shared_ptr<object>>();
-                newList->AddRange(ListValue());
-                newList->AddRange(r.ListValue());
+                newList->AddRange(*(ListValue()));
+                newList->AddRange(*(r.ListValue()));
                 return /*new*/ LispVariant(std::make_shared<object>(newList));
             }
             throw CreateInvalidOperationException("+", *this, r);
@@ -663,7 +686,7 @@ namespace CsLisp
             }
             if (l.IsList() && r.IsList())
             {
-                return l.ListValue().SequenceEqual(r.ListValue());
+                return l.ListValue()->SequenceEqual(*(r.ListValue()));
             }
             if (l.IsUndefined() || r.IsUndefined())
             {
@@ -711,7 +734,7 @@ namespace CsLisp
             {
                 return LispType::_List;
             }
-/* TODO
+			/* 
 			if (obj is IEnumerable)        // needed for .NET 3.5
             {
                 return LispType::_List;

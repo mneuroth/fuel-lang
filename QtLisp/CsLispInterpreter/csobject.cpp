@@ -25,6 +25,7 @@
 
 #include "csobject.h"
 #include "Variant.h"
+#include "Token.h"
 
 namespace CsLisp
 {
@@ -32,15 +33,31 @@ namespace CsLisp
 		: m_Type(ObjectType::__LispVariant)
 	{
 		m_Data.pVariant = new LispVariant(value);
-		m_sValue = "VARIANT="+m_Data.pVariant->ToString();
+	}
+
+	object::object(const IEnumerable<std::shared_ptr<object>> & value)
+		: m_Type(ObjectType::__List)
+	{
+		m_Data.pList = new IEnumerable<std::shared_ptr<object>>(value);
 	}
 
 	object::object(const object & other)
-		: m_sValue(other.m_sValue), m_Type(other.m_Type)
 	{
+		CleanUpMemory();
+
+		m_Type = other.m_Type;
+
 		if (other.IsLispVariant())
 		{
 			m_Data.pVariant = new LispVariant(*(other.ToLispVariant()));
+		}
+		else if (other.IsList())
+		{
+			m_Data.pList = new IEnumerable<std::shared_ptr<object>>(*(other.ToList()));
+		}
+		else if (other.IsString())
+		{
+			m_Data.pString = new string(other.ToString());
 		}
 		else
 		{
@@ -50,32 +67,174 @@ namespace CsLisp
 
 	object::~object()
 	{
+		CleanUpMemory();
+	}
+
+	void object::CleanUpMemory()
+	{
 		if (IsLispVariant())
 		{
 			delete m_Data.pVariant;
 		}
+		else if (IsList())
+		{
+			delete m_Data.pList;
+		}
+		else if (IsString())
+		{
+			delete m_Data.pString;
+		}
+	}
+
+
+	std::string object::GetTypeName() const 
+	{
+		switch (m_Type)
+		{
+			case __Undefined:
+				return "Undefined";
+			case __Nil:
+				return "Nil";
+			case __Bool:
+				return "Bool";
+			case __Int:
+				return "Int";
+			case __Double:
+				return "Double";
+			case __String:
+				return "String";
+			case __List:
+				return "List";
+			case __Function:
+				return "Function";
+			case __Symbol:
+				return "Symbol";
+			case __NativeObject:
+				return "NativeObject";
+			//__Array = 10,
+			case __LispVariant:
+				return "LispVariant";
+			case __LispFunctionWrapper:
+				return "LispFunctionWrapper";
+			case __LispToken:
+				return "LispToken";
+			case __IEnumerableOfObject:
+				return "IEnumerableOfObject";
+			case __VoidPtr:
+				return "VoidPtr";
+			case __LispScope:
+				return "LispScope";
+			case __Error:
+				return "Error";
+			default:
+				return "<unknown>";
+		}
+	}
+
+	string object::ToString() const
+	{
+		switch (m_Type)
+		{
+		case __Undefined:
+			return "Undefined";
+		case __Nil:
+			return "Nil";
+		case __Bool:
+			return m_Data.b ? "true" : "false";
+		case __Int:
+			return std::to_string(m_Data.i);
+		case __Double:
+			return std::to_string(m_Data.d);
+		case __String:
+			return *(m_Data.pString);
+// TODO --> ToString fuer weitere Datentypen realisieren
+		case __List:
+			return "List";
+		case __Function:
+			return "Function";
+		case __Symbol:
+			return "Symbol";
+		case __NativeObject:
+			return "NativeObject";
+			//__Array = 10,
+		case __LispVariant:
+			return m_Data.pVariant->ToString();
+		case __LispFunctionWrapper:
+			return "LispFunctionWrapper";
+		case __LispToken:
+			return "LispToken";
+		case __IEnumerableOfObject:
+			return "IEnumerableOfObject";
+		case __VoidPtr:
+			return "VoidPtr";
+		case __LispScope:
+			return "LispScope";
+		case __Error:
+			return "Error";
+		default:
+			return "<unknown>";
+		}
+	}
+
+	std::shared_ptr<LispToken> object::ToLispToken() const
+	{
+		if (IsLispToken())
+		{
+			// return a copy 
+// TODO --> Token wrapper in object realisieren 
+			return std::make_shared<LispToken>(LispToken("<unknown>", 0, 0, 0));
+		}
+		return null;
 	}
 
 	std::shared_ptr<LispVariant> object::ToLispVariant() const
 	{
 		if (IsLispVariant())
 		{
+			// return a copy 
 			return std::make_shared<LispVariant>(*(m_Data.pVariant));
 		}
 		return std::make_shared<LispVariant>(LispVariant(LispType::_Nil));
 	}
 
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> object::ToList() const
+	{
+		if (IsList())
+		{
+			// return a copy 
+			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(*(m_Data.pList));
+		}
+		return null;
+	}
+
 	LispFunctionWrapper object::ToLispFunctionWrapper()
 	{
-	// TODO
+// TODO --> ToLispFunctionWrapper realisieren
 		LispFunctionWrapper ret;
 		return ret;
 	}
 
 	IEnumerable<std::shared_ptr<object>> object::ToEnumerableOfObject() const
 	{
-	// TODO
+// TODO --> ToEnumerableOfObject realisieren
 		return IEnumerable<std::shared_ptr<object>>();
 	}
+
+
+	void TextWriter::WriteLine(const string & txt)
+	{
+// TODO --> IMPLEMENT !
+	}
+
+	void TextWriter::WriteLine(const string & txt, const string & txt1)
+	{
+		// TODO --> IMPLEMENT !
+	}
+
+	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2)
+	{
+		// TODO --> IMPLEMENT !
+	}
+
 }
 

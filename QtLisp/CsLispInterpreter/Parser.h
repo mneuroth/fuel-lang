@@ -108,7 +108,7 @@ namespace CsLisp
 					listStack.pop();
 					if (listStack.size() > 0)
 					{
-						listStack.top()->push_back/*Add*/(std::make_shared<object>(object(*temp)));		// TODO: std::shared_ptr<object>
+						listStack.top()->push_back/*Add*/(std::make_shared<object>(object(*temp)));
 						current = listStack.top();
 					}
 					else

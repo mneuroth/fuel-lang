@@ -63,25 +63,7 @@ namespace CsLisp
 		{
 		}
 
-//		string& operator+(const string & other)
-//		{
-//			append(other);
-//			return *this;
-//		}
-
-//		string& operator=(const string & other)
-//		{
-//// TODO
-//			return *this;
-//		}
-//
-//		string& operator=(const char * other)
-//		{
-//// TODO
-//			return *this;
-//		}
-
-		int Length() const
+		size_t Length() const
 		{
 			return size();
 		}
@@ -115,7 +97,7 @@ namespace CsLisp
 
 		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "", const string & arg4 = "", const string & arg5 = "")
 		{
-// TODO
+// TODO --> string.Format realisieren
 			//string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
 			//std::string
 			return txt;

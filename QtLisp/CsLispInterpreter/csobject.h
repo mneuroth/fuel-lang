@@ -36,6 +36,7 @@ namespace CsLisp
 {
 	class LispVariant;
 	struct LispFunctionWrapper;
+	class LispMacroRuntimeEvaluate;
 
     /// <summary>
     /// Lisp data types.
@@ -75,6 +76,7 @@ namespace CsLisp
 		__IEnumerableOfObject = 14,
 		__VoidPtr = 15,
 		__LispScope = 16,
+		__LispMacroRuntimeEvaluate = 100,
         __Error = 999
     };
 
@@ -82,70 +84,73 @@ namespace CsLisp
 	class object
 	{
 	private:
-// TODO --> ersetzte string durch void * fuer diverse typen !!!
-		std::string m_sValue;
+		ObjectType m_Type;
+
 		union DataType
 		{
 			bool   b;
 			int    i;
 			double d;
+			std::string * pString;
 			LispVariant * pVariant;
+			IEnumerable<std::shared_ptr<object>> * pList;
 		} m_Data;;
-        ObjectType m_Type;
+
+		void CleanUpMemory();
 
 		// disable assignment operator
 		object & operator=(const object & other);
 
 	public:
 		explicit object()
-			: m_sValue("?"), m_Type(ObjectType::__Undefined)
+			: m_Type(ObjectType::__Undefined)
 		{
 		}
         
 		explicit object(const object & other);
 
-		explicit object(void * ptr)
-			: m_sValue("NULL"), m_Type(ObjectType::__VoidPtr)
-		{
-		}
+//		explicit object(void * ptr)
+//			: m_Type(ObjectType::__VoidPtr)
+//		{
+//// TODO --> void * pointer behandeln ...
+//		}
 
 		explicit object(const std::string & text)
-			: m_sValue(text), m_Type(ObjectType::__String)
+			: m_Type(ObjectType::__String)
         {
+			m_Data.pString = new std::string(text);
         }
 
 		explicit object(const char * text)
-			: m_sValue(text), m_Type(ObjectType::__String)
+			: m_Type(ObjectType::__String)
 		{
+			m_Data.pString = new std::string(text);
 		}
 
 		explicit object(bool value)
-			: m_sValue(value ? "true" : "false"), m_Type(ObjectType::__Bool)
+			: m_Type(ObjectType::__Bool)
         {
 			m_Data.b = value;
         }
         
 		explicit object(int value)
-			: m_sValue(std::to_string(value)), m_Type(ObjectType::__Int)
+			: m_Type(ObjectType::__Int)
         {
 			m_Data.i = value;
 		}
 
 		explicit object(double value)
-			: m_sValue(std::to_string(value)), m_Type(ObjectType::__Double)
+			: m_Type(ObjectType::__Double)
         {
 			m_Data.d = value;
 		}
 
-		explicit object(const IEnumerable<std::shared_ptr<object>> & value)
-			: m_sValue("NOT_IMPLEMENTED_YET_LIST"), m_Type(ObjectType::__List)
-		{
-		}
+		explicit object(const IEnumerable<std::shared_ptr<object>> & value);
 
 		explicit object(const LispVariant & value);
 
 		~object();
-
+/*
 		object& operator=(const std::string & other)
 		{
 			m_sValue = other;
@@ -163,20 +168,20 @@ namespace CsLisp
 			m_sValue = std::to_string(other);
 			return *this;
 		}
-
+*/
 		operator bool()
 		{
-			return m_sValue == "true";
+			return m_Data.b;
 		}
 
 		operator int()
 		{
-			return stoi(m_sValue);
+			return m_Data.i;
 		}
 
 		operator double()
 		{
-			return stod(m_sValue);
+			return m_Data.d;
 		}
 
 		bool IsBool() const
@@ -204,6 +209,11 @@ namespace CsLisp
 			return m_Type == ObjectType::__LispVariant;
 		}
 
+		bool IsList() const
+		{
+			return m_Type == ObjectType::__List;
+		}
+
 		bool IsLispScope() const
 		{
 			return m_Type == ObjectType::__LispScope;
@@ -224,36 +234,56 @@ namespace CsLisp
 			return m_Type == ObjectType::__IEnumerableOfObject;
 		}
 
+		bool IsLispMacroRuntimeEvaluate() const
+		{
+			return m_Type == ObjectType::__LispMacroRuntimeEvaluate;
+		}
+
 		std::shared_ptr<LispVariant> ToLispVariant() const;
 
-		std::shared_ptr<LispScope> ToLispScope();
+		std::shared_ptr<LispScope> ToLispScope()
+		{
+// TODO: only dummy impl !
+			return 0;
+		}
 
 		LispFunctionWrapper ToLispFunctionWrapper();
 
+		std::shared_ptr<LispToken> ToLispToken() const;
+
 		IEnumerable<std::shared_ptr<object>> ToEnumerableOfObject() const;
 
-		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList();
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList() const;
 
-		string ToString() const
+		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const
 		{
-			return m_sValue;
+// TODO: only dummy impl !
+			return 0;
 		}
+
+		string ToString() const;
         
-        std::string GetTypeName()
-        {
-            return "unknown";       // TODO
-        }
+		std::string GetTypeName() const;
         
         ObjectType GetType() const
         {
             return m_Type;
         }
 
-		bool Equals(const object & other)
+		bool Equals(const object & other) const
 		{
 // TODO --> compare realisieren
 			return false;
 		}
+	};
+
+// TODO: --> temporary here, later in Environment.cpp
+	class LispMacroRuntimeEvaluate
+	{
+	public:
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> FormalArguments;
+
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Expression;
 	};
 }
 

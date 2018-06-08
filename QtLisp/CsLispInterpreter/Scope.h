@@ -42,8 +42,22 @@
 
 namespace CsLisp
 {
+	class LispScope;
+	class LispBreakpointPosition;
+
 	class ILispDebugger
 	{
+	public:
+		void InteractiveLoop(LispScope & initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false)
+		{
+// TODO: only dummy impl !
+		}
+
+		bool NeedsBreak(LispScope & scope, LispBreakpointPosition & posInfosOfCurrentAstItem)
+		{
+// TODO: only dummy impl !
+			return false;
+		}
 	};
 
 	class LispEnvironment
@@ -51,15 +65,47 @@ namespace CsLisp
 	public:
 		static bool IsInModules(const string & name, std::shared_ptr<LispScope> globalScope)
 		{
-// TODO
+// TODO --> IsInModules realisieren
 			return false;
+		}
+
+		/*public*/ static bool IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
+		{
+			return false; // ExistsItem(funcName, scope, Macros);
+		}
+
+		/*public*/ static bool IsExpression(std::shared_ptr<object> item)
+		{
+			return (item->IsLispVariant() /*is LispVariant*/ && item->IsList()) ||
+				(item->IsIEnumerableOfObject());
+		}
+
+		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> GetExpression(std::shared_ptr<object> item)
+		{
+			if (item->IsLispVariant() /*is LispVariant*/ && item->IsList()/*((LispVariant)item).IsList*/)
+			{
+				return item->ToLispVariant()->ListValue(); // ((LispVariant)item).ListValue;
+			}
+			if (item->IsIEnumerableOfObject() /*is IEnumerable<object>*/)
+			{
+				return item->ToList(); // (IEnumerable<object>)item;
+			}
+			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(); // new List<object>();
 		}
 
 		static std::shared_ptr<object>  GetFunctionInModules(const string & name, std::shared_ptr<LispScope> globalScope)
 		{
-// TODO
+// TODO --> GetFunctionInModules realisieren
 			return null;
 		}
+
+		/*public*/ static std::shared_ptr<object> GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
+		{
+			return QueryItem(funcName, scope, Macros);
+		}
+
+		/*private*/ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
+
 
 		static string Macros;
 		static string Modules;
@@ -67,7 +113,6 @@ namespace CsLisp
 
 		const static string Quote;
 		const static string Quasiquote;
-
 	};
 
     /// <summary>
@@ -81,7 +126,7 @@ namespace CsLisp
         /// <summary>
         /// Gets and sets the debuging modus.
         /// </summary>
-		/*public*/ ILispDebugger Debugger; // { get; set; }
+		/*public*/ std::shared_ptr<ILispDebugger> Debugger; // { get; set; }
 
         /// <summary>
         /// Gets and sets the tracing modus.
@@ -190,14 +235,14 @@ namespace CsLisp
         /*public*/ LispScope(string fcnName, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null)
         {
             Name = fcnName;
-            GlobalScope = globalScope ? globalScope : shared_from_this();
 			ModuleName = moduleName ? *moduleName : string::Empty;
-            if (ModuleName == string::Empty && globalScope != null)
+			//GlobalScope = globalScope != null ? globalScope : shared_from_this();
+			if (ModuleName == string::Empty && globalScope != null)
             {
                 ModuleName = globalScope->ModuleName;
             }
             CurrentToken = null;
-// TODO
+// TODO --> Console.In/Out umleiten realisieren !
 //            Input = Console.In;
 //            Output = Console.Out;
         }
@@ -210,6 +255,11 @@ namespace CsLisp
             : LispScope(string::Empty)
         {
         }
+
+		void PrivateInitForCpp(std::shared_ptr<LispScope> globalScope = null)
+		{
+			GlobalScope = globalScope != null ? globalScope : shared_from_this();
+		}
 
         //#endregion
 

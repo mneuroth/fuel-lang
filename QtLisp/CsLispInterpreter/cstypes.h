@@ -31,8 +31,8 @@
 #include <map>
 
 #include "csstring.h"
-
-typedef std::function<void()> Action;
+//#include "csobject.h"
+//#include "Variant.h"
 
 #define var auto
 
@@ -40,6 +40,11 @@ namespace CsLisp
 {
 	class LispToken;
 	class LispScope;
+	class LispVariant;
+	class object;
+
+	typedef std::function<void()> Action;
+	typedef std::function<std::shared_ptr<LispVariant>(object[], LispScope &)> FuncX;
 
 	class LispException
 	{
@@ -135,7 +140,11 @@ namespace CsLisp
 	public:
 		IEnumerable<K> GetKeys() const;
 
-		bool ContainsKey(const K & key) const;
+		bool ContainsKey(const K & key) const
+		{
+// TODO: only dummy impl !
+			return false;
+		}
 	};
 
 	template <class T1, class T2>
@@ -171,13 +180,14 @@ namespace CsLisp
 		V Value;
 	};
 
-	// TODO --> forward declaration    
 	struct LispFunctionWrapper
 	{
 		LispFunctionWrapper()
 			: Signature("")
 		{
 		}
+
+		/*public*/ /*Func<object[], LispScope, LispVariant>*/FuncX Function; // { get; private set; }
 
 		/*public*/ string Signature; // { get; private set; }
 
@@ -190,6 +200,12 @@ namespace CsLisp
 		/*public*/ string GetFormatedDoc() const;
 
 		/*public*/ string GetHtmlFormatedDoc() const;
+
+		bool IsSpecialForm() const
+		{
+// TODO --> only dummy impl !
+			return false;
+		}
 	};
 
 	//class Exception

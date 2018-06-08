@@ -38,6 +38,7 @@
 #include "Variant.h"
 #include "Scope.h"
 #include "Parser.h"
+#include "Interpreter.h"
 
 using namespace CsLisp;
 
@@ -63,16 +64,19 @@ int main()
 	//std::shared_ptr<object> v3 = std::make_shared<object>(aVariant3);
 	//int result = aVariant2.CompareTo(v3);
 
-	////LispScope scope;
-
-	LispParser parser;
-	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ast = parser.Parse("(+ 1 2 3)");
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ast = LispParser::Parse("(+ 1 2 3)");
 
 	std::cout << "AST:" << std::endl;
 	for (auto e : *ast)
 	{
 		std::cout << "--> " << e->ToString() << std::endl;
 	}
+
+	std::shared_ptr<LispScope> globalScope = std::make_shared<LispScope>();
+	// for enable_shared_from_this the object to be shared has to be already constructed and assigned to a smart_pointer 
+	globalScope->PrivateInitForCpp();
+	std::shared_ptr<object> astAsObj = std::make_shared<object>(*ast);
+	std::shared_ptr<LispVariant> result = LispInterpreter::EvalAst(astAsObj, *globalScope);
 
     return 0;
 }

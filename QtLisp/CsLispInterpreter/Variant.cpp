@@ -69,24 +69,24 @@ namespace CsLisp
 		//}
 	}
 
-	IEnumerable<std::shared_ptr<object>> LispVariant::ListValue() const
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispVariant::ListValue() const
 	{
 		//get
 		//{
 			// Nil is an empty list () !
 		if (Type == LispType::_Nil)
 		{
-			return IEnumerable<std::shared_ptr<object>>();
+			return std::make_shared<IEnumerable<std::shared_ptr<object>>>();
 		}
 		if (IsNativeObject() && NativeObjectValue()->IsIEnumerableOfObject())
 		{
-			return NativeObjectValue()->ToEnumerableOfObject();
+			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(NativeObjectValue()->ToEnumerableOfObject());
 		}
 		if (Type != LispType::_List)
 		{
 			throw CreateInvalidCastException("list");
 		}
-		return Value->ToEnumerableOfObject(); // ((IEnumerable)Value).Cast<object>();
+		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(Value->ToEnumerableOfObject()); // ((IEnumerable)Value).Cast<object>();
 		//}
 	}
 
