@@ -102,7 +102,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -159,8 +159,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CsLispInterpreter\csobject.cpp" />
+    <ClCompile Include="..\CsLispInterpreter\Parser.cpp" />
+    <ClCompile Include="..\CsLispInterpreter\Scope.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Token.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Variant.cpp" />
+    <ClCompile Include="ParserTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

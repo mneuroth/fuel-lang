@@ -1,4 +1,4 @@
-#include "stdafx.h"/*
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -22,6 +22,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  * 
  * */
+
+#include "stdafx.h"
 
 #include "CppUnitTest.h"
 
