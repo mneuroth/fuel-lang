@@ -41,6 +41,12 @@ namespace CsLisp
 		m_Data.pList = new IEnumerable<std::shared_ptr<object>>(value);
 	}
 
+	object::object(const LispFunctionWrapper & value)
+		: m_Type(ObjectType::__LispFunctionWrapper)
+	{
+		m_Data.pFunctionWrapper = new LispFunctionWrapper(value);
+	}
+
 	object::object(const object & other)
 	{
 		CleanUpMemory();
@@ -50,6 +56,10 @@ namespace CsLisp
 		if (other.IsLispVariant())
 		{
 			m_Data.pVariant = new LispVariant(*(other.ToLispVariant()));
+		}
+		else if (other.IsLispFunctionWrapper())
+		{
+			m_Data.pFunctionWrapper = new LispFunctionWrapper(other.ToLispFunctionWrapper());
 		}
 		else if (other.IsList())
 		{
@@ -76,6 +86,10 @@ namespace CsLisp
 		{
 			delete m_Data.pVariant;
 		}
+		else if (IsLispFunctionWrapper())
+		{
+			delete m_Data.pFunctionWrapper;
+		}
 		else if (IsList())
 		{
 			delete m_Data.pList;
@@ -85,7 +99,6 @@ namespace CsLisp
 			delete m_Data.pString;
 		}
 	}
-
 
 	std::string object::GetTypeName() const 
 	{
@@ -207,11 +220,13 @@ namespace CsLisp
 		return null;
 	}
 
-	LispFunctionWrapper object::ToLispFunctionWrapper()
+	LispFunctionWrapper object::ToLispFunctionWrapper() const
 	{
-// TODO --> ToLispFunctionWrapper realisieren
-		LispFunctionWrapper ret;
-		return ret;
+		if (IsLispFunctionWrapper())
+		{
+			return *(m_Data.pFunctionWrapper);
+		}
+		throw LispException("Invalid cast to lisp function wrapper.");
 	}
 
 	IEnumerable<std::shared_ptr<object>> object::ToEnumerableOfObject() const

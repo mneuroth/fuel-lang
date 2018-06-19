@@ -44,7 +44,7 @@ namespace CsLisp
 	class object;
 
 	typedef std::function<void()> Action;
-	typedef std::function<std::shared_ptr<LispVariant>(object[], LispScope &)> FuncX;
+	typedef std::function<std::shared_ptr<LispVariant>(std::vector<std::shared_ptr<object>>, LispScope &)> FuncX;
 
 	class LispException
 	{
@@ -142,8 +142,7 @@ namespace CsLisp
 
 		bool ContainsKey(const K & key) const
 		{
-// TODO: only dummy impl !
-			return false;
+			return count(key) == 1;
 		}
 	};
 

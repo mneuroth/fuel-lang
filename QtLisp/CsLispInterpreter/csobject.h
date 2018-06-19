@@ -94,7 +94,8 @@ namespace CsLisp
 			std::string * pString;
 			LispVariant * pVariant;
 			IEnumerable<std::shared_ptr<object>> * pList;
-		} m_Data;;
+			LispFunctionWrapper * pFunctionWrapper;
+		} m_Data;
 
 		void CleanUpMemory();
 
@@ -146,6 +147,8 @@ namespace CsLisp
 		}
 
 		explicit object(const IEnumerable<std::shared_ptr<object>> & value);
+
+		explicit object(const LispFunctionWrapper & value);
 
 		explicit object(const LispVariant & value);
 
@@ -247,7 +250,7 @@ namespace CsLisp
 			return 0;
 		}
 
-		LispFunctionWrapper ToLispFunctionWrapper();
+		LispFunctionWrapper ToLispFunctionWrapper() const;
 
 		std::shared_ptr<LispToken> ToLispToken() const;
 

@@ -61,23 +61,23 @@ namespace CsLisp
         /*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ResolveArgsInScopes(LispScope & scope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, bool compile)
         {
 // TODO --> implement this function !!!
-   //         std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astWithResolvedValues = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
-			//bool * isSpecialFormX = null;
-   //         for (var elem : astAsList)
-   //         {
-			//	std::shared_ptr<object> resolvedElem;
-   //             if ((isSpecialFormX != null && (bool)*isSpecialFormX) || !IsSymbol(elem))
-   //             {
-   //                 resolvedElem = elem;
-   //             }
-   //             else
-   //             {
-   //                 resolvedElem = scope->ResolveInScopes(elem);
-   //             }
-   //             astWithResolvedValues->Add(resolvedElem);
+            std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astWithResolvedValues = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
+			bool * isSpecialFormX = null;
+            for (var elem : *astAsList)
+            {
+				std::shared_ptr<object> resolvedElem;
+                if ((isSpecialFormX != null && (bool)*isSpecialFormX) || !IsSymbol(elem))
+                {
+                    resolvedElem = elem;
+                }
+                else
+                {
+                    resolvedElem = scope.ResolveInScopes(elem);
+                }
+                astWithResolvedValues->Add(resolvedElem);
 
-   //             if (isSpecialFormX == null)
-   //             {
+                if (isSpecialFormX == null)
+                {
 			//		LispFunctionWrapper firstElem;
 			//		std::shared_ptr<object> first = null;
    //                 try
@@ -93,11 +93,10 @@ namespace CsLisp
    //                     }
    //                 }
    //                 isSpecialFormX = firstElem.IsSpecialForm();
-   //             }
+                }
 
-   //         }
-   //         return astWithResolvedValues;
-			return astAsList;
+            }
+            return astWithResolvedValues;
         }
 
         /// <summary>
@@ -203,12 +202,13 @@ namespace CsLisp
             }
 
 			// evaluate arguments, but allow recursive lists
-            var arguments = new object[astWithResolvedValues->Count() - 1];
-            for (var i = 1; i < astWithResolvedValues->Count(); i++)
+			std::vector<std::shared_ptr<object>> arguments(astWithResolvedValues->Count()-1); // = new object[astWithResolvedValues->Count() - 1];
+            for (size_t i = 1; i < astWithResolvedValues->Count(); i++)
             {
                 var needEvaluation = (astWithResolvedValues->ToArray()[i]->IsList() /*is IEnumerable<object>*/) &&
                                      !functionWrapper.IsSpecialForm();
-             // TODO gulp   arguments[i - 1] = needEvaluation ? std::make_shared<object>(EvalAst(astWithResolvedValues->ToArray()[i], scope)) : astWithResolvedValues->ToArray()[i];
+             // TODO gulp   
+				arguments[i - 1] = needEvaluation ? std::make_shared<object>(*EvalAst(astWithResolvedValues->ToArray()[i], scope)) : astWithResolvedValues->ToArray()[i];
             }
 
             // debugger processing
