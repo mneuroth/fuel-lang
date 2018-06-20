@@ -93,8 +93,11 @@ namespace CsLisp
 			double d;
 			std::string * pString;
 			LispVariant * pVariant;
+			LispScope * pScope;
+			LispToken * pToken;
 			IEnumerable<std::shared_ptr<object>> * pList;
 			LispFunctionWrapper * pFunctionWrapper;
+			LispMacroRuntimeEvaluate * pMacro;
 		} m_Data;
 
 		void CleanUpMemory();
@@ -172,17 +175,17 @@ namespace CsLisp
 			return *this;
 		}
 */
-		operator bool()
+		operator bool() const
 		{
 			return m_Data.b;
 		}
 
-		operator int()
+		operator int() const
 		{
 			return m_Data.i;
 		}
 
-		operator double()
+		operator double() const
 		{
 			return m_Data.d;
 		}
@@ -244,11 +247,7 @@ namespace CsLisp
 
 		std::shared_ptr<LispVariant> ToLispVariant() const;
 
-		std::shared_ptr<LispScope> ToLispScope()
-		{
-// TODO: only dummy impl !
-			return 0;
-		}
+		std::shared_ptr<LispScope> ToLispScope() const;
 
 		LispFunctionWrapper ToLispFunctionWrapper() const;
 
@@ -258,11 +257,7 @@ namespace CsLisp
 
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList() const;
 
-		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const
-		{
-// TODO: only dummy impl !
-			return 0;
-		}
+		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const;
 
 		string ToString() const;
         
@@ -273,13 +268,9 @@ namespace CsLisp
             return m_Type;
         }
 
-		bool Equals(const object & other) const
-		{
-// TODO --> compare realisieren
-			return false;
-		}
+		bool Equals(const object & other) const;
 	};
-
+	
 // TODO: --> temporary here, later in Environment.cpp
 	class LispMacroRuntimeEvaluate
 	{

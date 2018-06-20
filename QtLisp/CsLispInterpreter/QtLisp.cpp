@@ -39,6 +39,7 @@
 #include "Scope.h"
 #include "Parser.h"
 #include "Interpreter.h"
+#include "Lisp.h"
 
 using namespace CsLisp;
 
@@ -48,7 +49,7 @@ static object CreateFunction(Func<object[], LispScope, LispVariant> func, string
 	return new LispVariant(new LispFunctionWrapper(func, signature, documentation, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
 }
 */
-
+/*
 static std::shared_ptr<object> CreateFunction(FuncX func)
 {
 	LispFunctionWrapper wrapper;
@@ -77,6 +78,7 @@ std::shared_ptr<LispVariant> Addition(std::vector<std::shared_ptr<object>> args,
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l + *r); });
 }
+*/
 
 int main()
 {
@@ -100,7 +102,8 @@ int main()
 	//std::shared_ptr<object> v3 = std::make_shared<object>(aVariant3);
 	//int result = aVariant2.CompareTo(v3);
 
-	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ast = LispParser::Parse("(+ 1 2 3)");
+	string script = "(+ 1 2 3)";
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ast = LispParser::Parse(script);
 
 	std::cout << "AST:" << std::endl;
 	for (auto e : *ast)
@@ -108,13 +111,18 @@ int main()
 		std::cout << "--> " << e->ToString() << std::endl;
 	}
 
-	std::shared_ptr<LispScope> globalScope = std::make_shared<LispScope>();
-	(*globalScope)["+"] = CreateFunction(&Addition);
+	//std::shared_ptr<LispScope> globalScope = std::make_shared<LispScope>();
+	//(*globalScope)["+"] = CreateFunction(&Addition);
 
 	// for enable_shared_from_this the object to be shared has to be already constructed and assigned to a smart_pointer 
-	globalScope->PrivateInitForCpp();
-	std::shared_ptr<object> astAsObj = std::make_shared<object>(*ast);
-	std::shared_ptr<LispVariant> result = LispInterpreter::EvalAst(astAsObj, *globalScope);
+	//globalScope->PrivateInitForCpp();
+	//std::shared_ptr<object> astAsObj = std::make_shared<object>(*ast);
+	//std::shared_ptr<LispVariant> result = LispInterpreter::EvalAst(astAsObj, *globalScope);
+
+	bool trace = false;
+	bool lengthyErrorOutput = false;
+	string fileName = "test.lisp";
+	std::shared_ptr<LispVariant> result = Lisp::SaveEval(script, /*moduleName:*/ fileName, /*verboseErrorOutput:*/ lengthyErrorOutput, /*tracing:*/ trace);
 
 	std::cout << "result = " << result->ToString() << std::endl;
 

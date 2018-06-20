@@ -60,9 +60,8 @@ namespace CsLisp
         /// <returns></returns>
         /*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ResolveArgsInScopes(LispScope & scope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, bool compile)
         {
-// TODO --> implement this function !!!
             std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astWithResolvedValues = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
-			bool * isSpecialFormX = null;
+			std::shared_ptr<bool> isSpecialFormX = null;
             for (var elem : *astAsList)
             {
 				std::shared_ptr<object> resolvedElem;
@@ -78,21 +77,21 @@ namespace CsLisp
 
                 if (isSpecialFormX == null)
                 {
-			//		LispFunctionWrapper firstElem;
-			//		std::shared_ptr<object> first = null;
-   //                 try
-   //                 {
-   //                     first = astWithResolvedValues->First();
-   //                     firstElem = first->ToLispVariant()->FunctionValue();
-   //                 }
-   //                 catch (LispException)
-   //                 {
-   //                     if (!compile)
-   //                     {
-   //                         throw new LispException("Function \"" + first->ToString() + "\" not found", scope);
-   //                     }
-   //                 }
-   //                 isSpecialFormX = firstElem.IsSpecialForm();
+					LispFunctionWrapper firstElem;
+					std::shared_ptr<object> first = null;
+                    try
+                    {
+                        first = astWithResolvedValues->First();
+                        firstElem = first->ToLispVariant()->FunctionValue();
+                    }
+                    catch (LispException)
+                    {
+                        if (!compile)
+                        {
+                            throw new LispException("Function \"" + first->ToString() + "\" not found"/*, scope*/);
+                        }
+                    }
+                    isSpecialFormX = std::make_shared<bool>(firstElem.IsSpecialForm());
                 }
 
             }
@@ -207,7 +206,6 @@ namespace CsLisp
             {
                 var needEvaluation = (astWithResolvedValues->ToArray()[i]->IsList() /*is IEnumerable<object>*/) &&
                                      !functionWrapper.IsSpecialForm();
-             // TODO gulp   
 				arguments[i - 1] = needEvaluation ? std::make_shared<object>(*EvalAst(astWithResolvedValues->ToArray()[i], scope)) : astWithResolvedValues->ToArray()[i];
             }
 

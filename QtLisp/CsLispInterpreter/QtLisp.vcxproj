@@ -150,6 +150,7 @@
     <ClInclude Include="csstring.h" />
     <ClInclude Include="cstypes.h" />
     <ClInclude Include="Interpreter.h" />
+    <ClInclude Include="Lisp.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Scope.h" />
     <ClInclude Include="stdafx.h" />

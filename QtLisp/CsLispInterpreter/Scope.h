@@ -48,21 +48,16 @@ namespace CsLisp
 	class ILispDebugger
 	{
 	public:
-		void InteractiveLoop(LispScope & initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false)
-		{
-// TODO: only dummy impl !
-		}
+		virtual void InteractiveLoop(LispScope & initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false) = 0;
 
-        bool NeedsBreak(const LispScope & scope, const LispBreakpointPosition & posInfosOfCurrentAstItem) const
-		{
-// TODO: only dummy impl !
-			return false;
-		}
+		virtual bool NeedsBreak(const LispScope & scope, const LispBreakpointPosition & posInfosOfCurrentAstItem) const = 0;
 	};
 
 	class LispEnvironment
 	{
 	public:
+		static std::shared_ptr<LispScope> CreateDefaultScope();
+
 		static bool IsInModules(const string & name, std::shared_ptr<LispScope> globalScope)
 		{
 // TODO --> IsInModules realisieren

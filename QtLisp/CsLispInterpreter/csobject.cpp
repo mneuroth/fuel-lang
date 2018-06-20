@@ -25,6 +25,7 @@
 
 #include "csobject.h"
 #include "Variant.h"
+#include "Scope.h"
 #include "Token.h"
 
 namespace CsLisp
@@ -57,13 +58,25 @@ namespace CsLisp
 		{
 			m_Data.pVariant = new LispVariant(*(other.ToLispVariant()));
 		}
+		else if (other.IsLispScope())
+		{
+			m_Data.pScope = new LispScope(*(other.ToLispScope()));
+		}
 		else if (other.IsLispFunctionWrapper())
 		{
 			m_Data.pFunctionWrapper = new LispFunctionWrapper(other.ToLispFunctionWrapper());
 		}
+		else if (other.IsLispToken())
+		{
+			m_Data.pToken = new LispToken(*(other.ToLispToken()));
+		}
 		else if (other.IsList())
 		{
 			m_Data.pList = new IEnumerable<std::shared_ptr<object>>(*(other.ToList()));
+		}
+		else if (IsLispMacroRuntimeEvaluate())
+		{
+			m_Data.pMacro = new LispMacroRuntimeEvaluate(*(other.ToLispMacroRuntimeEvaluate()));
 		}
 		else if (other.IsString())
 		{
@@ -86,13 +99,25 @@ namespace CsLisp
 		{
 			delete m_Data.pVariant;
 		}
+		else if (IsLispScope())
+		{
+			delete m_Data.pScope;
+		}
 		else if (IsLispFunctionWrapper())
 		{
 			delete m_Data.pFunctionWrapper;
 		}
+		else if (IsLispToken())
+		{
+			delete m_Data.pToken;
+		}
 		else if (IsList())
 		{
 			delete m_Data.pList;
+		}
+		else if (IsLispMacroRuntimeEvaluate())
+		{
+			delete m_Data.pMacro;
 		}
 		else if (IsString())
 		{
@@ -162,7 +187,19 @@ namespace CsLisp
 			return *(m_Data.pString);
 // TODO --> ToString fuer weitere Datentypen realisieren
 		case __List:
-			return "List";
+			{
+				string result = "(";
+				if (IsList())
+				{
+					for (var elem : *(m_Data.pList))
+					{
+						result += elem->ToString();
+						result += ", ";
+					}
+				}
+				result += ")";
+				return result;
+		}
 		case __Function:
 			return "Function";
 		case __Symbol:
@@ -194,8 +231,7 @@ namespace CsLisp
 		if (IsLispToken())
 		{
 			// return a copy 
-// TODO --> Token wrapper in object realisieren 
-			return std::make_shared<LispToken>(LispToken("<unknown>", 0, 0, 0));
+			return std::make_shared<LispToken>(*(m_Data.pToken));
 		}
 		return null;
 	}
@@ -210,12 +246,34 @@ namespace CsLisp
 		return std::make_shared<LispVariant>(LispVariant(LispType::_Nil));
 	}
 
+	std::shared_ptr<LispScope> object::ToLispScope() const
+	{
+		if (IsLispScope())
+		{
+// TODO: ist das wirklich korrekt eine Kopie zu liefern ?
+			// return a copy 
+			return std::make_shared<LispScope>(*(m_Data.pScope));
+		}
+		return null;
+	}
+
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> object::ToList() const
 	{
 		if (IsList())
 		{
 			// return a copy 
 			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(*(m_Data.pList));
+		}
+		return null;
+	}
+
+	std::shared_ptr<LispMacroRuntimeEvaluate> object::ToLispMacroRuntimeEvaluate() const
+	{
+		if (IsLispMacroRuntimeEvaluate())
+		{
+// TODO: ist das wirklich korrekt eine Kopie zu liefern ?
+			// return a copy 
+			return std::make_shared<LispMacroRuntimeEvaluate>(*(m_Data.pMacro));
 		}
 		return null;
 	}
@@ -231,10 +289,65 @@ namespace CsLisp
 
 	IEnumerable<std::shared_ptr<object>> object::ToEnumerableOfObject() const
 	{
-// TODO --> ToEnumerableOfObject realisieren
-		return IEnumerable<std::shared_ptr<object>>();
+		return IEnumerable<std::shared_ptr<object>>(*(m_Data.pList));
 	}
 
+	bool object::Equals(const object & other) const
+	{
+		if (GetType() != other.GetType())
+		{
+			return false;
+		}
+
+		switch (m_Type)
+		{
+			case __Undefined:
+				return true;		// ???
+			case __Nil:
+				return true;
+			case __Bool:
+				return (bool)(*this) == (bool)other;
+			case __Int:
+				return (int)(*this) == (int)other;
+			case __Double:
+				return (double)(*this) == (double)other;
+			case __String:
+				return ToString() == other.ToString();
+			case __List:
+				return ToList() == other.ToList();
+			case __Function:
+// TODO --> not implemented yet !
+				return false;		// ???
+			case __Symbol:
+				return ToString() == other.ToString();
+			case __NativeObject:
+// TODO --> implement for native object...
+				return false;
+			//__Array = 10,
+			case __LispVariant:
+				return ToLispVariant() == other.ToLispVariant();
+			case __LispFunctionWrapper:
+// TODO --> check
+				return &(ToLispFunctionWrapper().Function) == &(other.ToLispFunctionWrapper().Function);
+			case __LispToken:
+				return ToString() == other.ToString();
+			case __IEnumerableOfObject:
+				return ToEnumerableOfObject() == other.ToEnumerableOfObject();
+			case __VoidPtr:
+				return true;
+			case __LispScope:
+				return ToLispScope() == other.ToLispScope();
+			case __Error:
+				return true;		// ???
+			default:
+				return false;
+		}
+	}
+
+	void TextWriter::Write(const string & txt)
+	{
+		// TODO --> IMPLEMENT !
+	}
 
 	void TextWriter::WriteLine(const string & txt)
 	{
@@ -243,12 +356,12 @@ namespace CsLisp
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1)
 	{
-		// TODO --> IMPLEMENT !
+// TODO --> IMPLEMENT !
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2)
 	{
-		// TODO --> IMPLEMENT !
+// TODO --> IMPLEMENT !
 	}
 
 }

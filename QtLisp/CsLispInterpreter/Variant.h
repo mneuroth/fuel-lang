@@ -272,7 +272,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="errorMessage">The error message.</param>
         /// <returns>The value</returns>
-        /*public*/ static std::shared_ptr<LispVariant> CreateErrorValue(string errorMessage)
+        /*public*/ static std::shared_ptr<LispVariant> CreateErrorValue(const string & errorMessage)
         {
             std::shared_ptr<object> msg = std::make_shared<object>(object(errorMessage));
             return std::make_shared<LispVariant>(LispVariant(LispType::_Error, msg));

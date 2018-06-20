@@ -31,8 +31,6 @@
 #include <map>
 
 #include "csstring.h"
-//#include "csobject.h"
-//#include "Variant.h"
 
 #define var auto
 
@@ -51,10 +49,16 @@ namespace CsLisp
 	public:
 		LispException(const string & txt, LispScope * scope = 0)
 		{
+			Message = txt;
 		}
 		LispException(const string & txt, std::shared_ptr<LispToken> token, const string & moduleName = "", const string & stackInfo = "not available")
 		{
+			Message = txt;
 		}
+
+		string Message;
+
+		std::map<string, object> Data;
 
 		void AddTokenInfos(std::shared_ptr<LispToken> token)
 		{
@@ -142,7 +146,7 @@ namespace CsLisp
 
 		bool ContainsKey(const K & key) const
 		{
-			return count(key) == 1;
+            return std::map<K,V>::count(key) == 1;
 		}
 	};
 
@@ -155,6 +159,7 @@ namespace CsLisp
 	class TextWriter
 	{
 	public:
+		void Write(const string & txt);
 		void WriteLine(const string & txt);
 		void WriteLine(const string & txt, const string & txt1);
 		void WriteLine(const string & txt, const string & txt1, const string & txt2);
@@ -181,8 +186,12 @@ namespace CsLisp
 
 	struct LispFunctionWrapper
 	{
+	private:
+		bool m_bIsSpecialForm;
+
+	public:
 		LispFunctionWrapper()
-			: Signature("")
+			: Signature(""), m_bIsSpecialForm(false)
 		{
 		}
 
@@ -202,8 +211,11 @@ namespace CsLisp
 
 		bool IsSpecialForm() const
 		{
-// TODO --> only dummy impl !
-			return false;
+			return m_bIsSpecialForm;
+		}
+		void SetSpecialForm(bool value)
+		{
+			m_bIsSpecialForm = value;
 		}
 	};
 
@@ -222,7 +234,6 @@ namespace CsLisp
 		{
 			return 1;
 		}
-// TODO ggf. auf epsilon gleichheit pruefen
 		return 0;
 	}
 }
