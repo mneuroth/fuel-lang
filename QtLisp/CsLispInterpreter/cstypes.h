@@ -31,8 +31,11 @@
 #include <map>
 
 #include "csstring.h"
+#include "Exception.h"
 
 #define var auto
+
+#define null 0
 
 namespace CsLisp
 {
@@ -43,27 +46,6 @@ namespace CsLisp
 
 	typedef std::function<void()> Action;
 	typedef std::function<std::shared_ptr<LispVariant>(std::vector<std::shared_ptr<object>>, LispScope &)> FuncX;
-
-	class LispException
-	{
-	public:
-		LispException(const string & txt, LispScope * scope = 0)
-		{
-			Message = txt;
-		}
-		LispException(const string & txt, std::shared_ptr<LispToken> token, const string & moduleName = "", const string & stackInfo = "not available")
-		{
-			Message = txt;
-		}
-
-		string Message;
-
-		std::map<string, object> Data;
-
-		void AddTokenInfos(std::shared_ptr<LispToken> token)
-		{
-		}
-	};
 
 	template <class T>
 	class IEnumerable : public std::list<T>

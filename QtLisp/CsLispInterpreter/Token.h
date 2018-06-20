@@ -32,8 +32,6 @@
 #include <stdexcept>
 #include <memory>
 
-#define null 0
-
 #include "csobject.h"
 #include "cstypes.h"
 #include "csstring.h"

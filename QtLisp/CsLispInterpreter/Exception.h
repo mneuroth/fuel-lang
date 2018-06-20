@@ -1,4 +1,7 @@
-﻿/*
+﻿#ifndef _EXCEPTION_H
+#define _EXCEPTION_H
+
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -23,28 +26,39 @@
  * 
  * */
 
-using System;
+//using System;
+
+#include "cstypes.h"
 
 namespace CsLisp
 {
+	class LispScope;
+	class LispToken;
+
     /// <summary>
     /// Exception for the FUEL lisp interpreter
     /// </summary>
-    public class LispException : Exception
+    /*public*/ class LispException //: Exception
     {
-        /// <summary>
+	public:
+		string Message;
+
+		//std::map<string, object> Data;
+		
+		/// <summary>
         /// Initializes a new instance of the <see cref="LispException"/> class.
         /// </summary>
         /// <param name="text">The text.</param>
         /// <param name="scope">The scope.</param>
-        public LispException(string text, LispScope scope = null)
-            : base(text)
+        /*public*/ LispException(const string & text, LispScope * scope = 0)
+            //: base(text)
         {
-            if (scope != null)
-            {
-                this.AddModuleNameAndStackInfos(scope.ModuleName, scope.DumpStackToString());
-                this.AddTokenInfos(scope.CurrentToken);
-            }
+			Message = text;
+			//if (scope != null)
+            //{
+            //    this.AddModuleNameAndStackInfos(scope.ModuleName, scope.DumpStackToString());
+            //    this.AddTokenInfos(scope.CurrentToken);
+            //}
         }
 
         /// <summary>
@@ -54,11 +68,18 @@ namespace CsLisp
         /// <param name="token">The token.</param>
         /// <param name="moduleName">Name of the module.</param>
         /// <param name="stackInfo">The stack information.</param>
-        public LispException(string text, LispToken token, string moduleName, string stackInfo = "not available")
-            : base(text)
+        /*public*/ LispException(const string & text, std::shared_ptr<LispToken> token, const string & moduleName, const string & stackInfo = "not available")
+            //: base(text)
         {
-            this.AddModuleNameAndStackInfos(moduleName, stackInfo);
-            this.AddTokenInfos(token);
+			Message = text;
+			//this.AddModuleNameAndStackInfos(moduleName, stackInfo);
+            //this.AddTokenInfos(token);
         }
-    }
+
+		void AddTokenInfos(std::shared_ptr<LispToken> token)
+		{
+		}
+	};
 }
+
+#endif

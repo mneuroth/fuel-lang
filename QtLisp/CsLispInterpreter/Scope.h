@@ -36,6 +36,7 @@
 #include "csobject.h"
 #include "Token.h"
 #include "Variant.h"
+#include "DebuggerInterface.h"
 
 #include <memory>
 #include <list>
@@ -44,14 +45,6 @@ namespace CsLisp
 {
 	class LispScope;
 	class LispBreakpointPosition;
-
-	class ILispDebugger
-	{
-	public:
-		virtual void InteractiveLoop(LispScope & initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false) = 0;
-
-		virtual bool NeedsBreak(const LispScope & scope, const LispBreakpointPosition & posInfosOfCurrentAstItem) const = 0;
-	};
 
 	class LispEnvironment
 	{

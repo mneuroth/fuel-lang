@@ -1,4 +1,7 @@
-﻿/*
+﻿#ifndef _DEBUGGER_INTERFACE_H
+#define _DEBUGGER_INTERFACE_H
+
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -23,16 +26,20 @@
  * 
  * */
 
-using System.Collections.Generic;
-using System.IO;
+//using System.Collections.Generic;
+//using System.IO;
 
 namespace CsLisp
 {
+	class LispScope;
+	class LispBreakpointPosition;
+
     /// <summary>
     /// The generic debugger interface for the runtime environment.
     /// </summary>
-    public interface ILispDebugger
+    /*public interface*/class ILispDebugger
     {
+	public:
         /// <summary>
         /// Enters the interactive loop.
         /// </summary>
@@ -40,7 +47,7 @@ namespace CsLisp
         /// <param name="currentAst">The current ast.</param>
         /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
-        void InteractiveLoop(LispScope initialTopScope = null, IList<object> currentAst = null, bool startedFromMain = false, bool tracing = false);
+        virtual void InteractiveLoop(const LispScope & initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false) = 0;
 
         /// <summary>
         /// Verifies if the current execution position needes a break,
@@ -51,7 +58,7 @@ namespace CsLisp
         /// The position infos of current ast item.
         /// </param>
         /// <returns>True if a break is needed</returns>
-        bool NeedsBreak(LispScope scope, LispBreakpointPosition posInfosOfCurrentAstItem);
+        virtual bool NeedsBreak(const LispScope & scope, LispBreakpointPosition posInfosOfCurrentAstItem) = 0;
 
         /// <summary>
         /// Enters the loop of the debugger.
@@ -60,16 +67,17 @@ namespace CsLisp
         /// <param name="moduleName">The module name.</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>Value of the last expression</returns>
-        LispVariant DebuggerLoop(string script, string moduleName, bool tracing = false);
+//        LispVariant DebuggerLoop(string script, string moduleName, bool tracing = false);
 
         /// <summary>
         /// Sets the input and output streams for the debugger.
         /// </summary>
         /// <param name="output">The output stream.</param>
         /// <param name="input">The input stream.</param>
-        void SetInputOutputStreams(TextWriter output, TextReader input);
-    }
+//        void SetInputOutputStreams(TextWriter output, TextReader input);
+	};
 
+/*
     /// <summary>
     /// Class representing breakpoint position information.
     /// Item1 is start position in full text,
@@ -107,4 +115,7 @@ namespace CsLisp
             }
         }
     }
+	*/
 }
+
+#endif

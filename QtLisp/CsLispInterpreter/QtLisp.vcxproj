@@ -149,6 +149,8 @@
     <ClInclude Include="csobject.h" />
     <ClInclude Include="csstring.h" />
     <ClInclude Include="cstypes.h" />
+    <ClInclude Include="DebuggerInterface.h" />
+    <ClInclude Include="Exception.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="Lisp.h" />
     <ClInclude Include="Parser.h" />
@@ -161,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="csobject.cpp" />
+    <ClCompile Include="Environment.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="QtLisp.cpp" />
     <ClCompile Include="Scope.cpp" />
