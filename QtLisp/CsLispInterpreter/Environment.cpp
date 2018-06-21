@@ -2,20 +2,92 @@
 #include "Scope.h"
 #include "Interpreter.h"
 
+#include <map>
+
 using namespace CsLisp;
 
+const string If = "if";
+const string While = "while";
+const string Begin = "begin";
+const string Do = "do";
+const string Or = "or";
+const string And = "and";
+const string Fn = "fn";
+const string Def = "def";
+const string Gdef = "gdef";
+const string Setf = "setf";
+const string Defn = "defn";
+const string Gdefn = "gdefn";
+const string MapFcn = "map";
+const string ReduceFcn = "reduce";
+const string DefineMacro = "define-macro";      // == define-macro-eval
+const string DefineMacroEval = "define-macro-eval";
+#if ENABLE_COMPILE_TIME_MACROS 
+const string DefineMacroExpand = "define-macro-expand";
+#endif
+const string Lambda = "lambda";
+const string Tracebuffer = LispEnvironment::MetaTag + "tracebuffer" + LispEnvironment::MetaTag;
+const string Traceon = LispEnvironment::MetaTag + "traceon" + LispEnvironment::MetaTag;
+const string ArgsMeta = LispEnvironment::MetaTag + "args" + LispEnvironment::MetaTag;
+const string AdditionalArgs = "_additionalArgs";
+
+const string ArgsCount = "argscount";
+const string Args = "args";
+
+const string LispEnvironment::Macros = LispEnvironment::MetaTag + "macros" + LispEnvironment::MetaTag;
+const string LispEnvironment::Modules = LispEnvironment::MetaTag + "modules" + LispEnvironment::MetaTag;
+
+const string LispEnvironment::Apply = "apply";
+const string LispEnvironment::Eval = "eval";
+const string LispEnvironment::EvalStr = "evalstr";
 const string LispEnvironment::Quote = "quote";
 const string LispEnvironment::Quasiquote = "quasiquote";
-string LispEnvironment::Macros;
 
-/*private*/ const string MetaTag = "###";
+const string LispEnvironment::Sym = "sym";
+const string LispEnvironment::Str = "str";
+
+
+/*private*/ const string LispEnvironment::MetaTag = "###";
 /*private*/ const string Builtin = "<builtin>";
 
 /*private*/ const string MainScope = "<main>";
 
-/*private*/ const string Lambda = "lambda";
-/*private*/ const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
-/*private*/ const string Traceon = MetaTag + "traceon" + MetaTag;
+bool LispEnvironment::FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> foundValue)
+{
+	foundValue = null;
+
+	std::shared_ptr<object> importedModules = (*(scope->GlobalScope))[LispEnvironment::Modules];
+	for (/*KeyValuePair*/std::pair<string, std::shared_ptr<object>> kv : *(importedModules->ToLispScope()))
+	{
+		var module = /*(LispScope)*/kv.second->ToLispScope();
+		if (module->ContainsKey(funcName))
+		{
+			foundValue = (*module)[funcName];
+			return true;
+		}
+	}
+	return false;
+}
+
+bool LispEnvironment::IsInModules(const string & funcName, std::shared_ptr<LispScope> scope)
+{
+	std::shared_ptr<object> value;
+	return FindFunctionInModules(funcName, scope, value);
+}
+
+std::shared_ptr<object> LispEnvironment::GetFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope)
+{
+	std::shared_ptr<object> result;
+	FindFunctionInModules(funcName, scope, result);
+	return result;
+}
+
+bool LispEnvironment::IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
+{
+	return false;
+	//return ExistsItem(funcName, scope, LispEnvironment::Macros);
+}
+
 
 static std::shared_ptr<object> CreateFunction(FuncX func, const string & signature = /*null*/"", const string & documentation = /*null*/"", bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, const string & moduleName = "Builtin")
 {
@@ -48,6 +120,27 @@ static string GetStringRepresentation(std::vector<std::shared_ptr<object>> args,
 		//old: buffer.Append(text);
 	}
 	return text;
+}
+
+static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispScope * scope, const string & key)
+{
+	if (scope != null &&
+		scope->ContainsKey(key) &&
+		((*scope)[key])->ToLispScope()->ContainsKey(funcName->ToString()))
+	{
+		return (*((*scope)[key]->ToLispScope()))[funcName->ToString()];
+	}
+	return null;
+}
+
+static bool ExistsItem(std::shared_ptr<object> funcName, LispScope * scope, const string & key)
+{
+	if (scope != null &&
+		scope->ContainsKey(key))
+	{
+		return (*scope)[key]->ToLispScope()->ContainsKey(funcName->ToString());
+	}
+	return false;
 }
 
 static std::shared_ptr<LispVariant> Print(std::vector<std::shared_ptr<object>> args, LispScope & scope)

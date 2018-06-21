@@ -1,4 +1,7 @@
-﻿/*
+﻿#ifndef _ENVIRONMENT_H
+#define _ENVIRONMENT_H
+
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -23,16 +26,80 @@
  * 
  * */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+//using System;
+//using System.Collections.Generic;
+//using System.IO;
+//using System.Linq;
+//using System.Reflection;
+//using System.Text;
+
+#include "cstypes.h"
+#include "csstring.h"
+#include "csobject.h"
+
+#include <memory>
+#include <list>
 
 namespace CsLisp
 {
-    /// <summary>
+	class LispScope;
+	class LispBreakpointPosition;
+
+	class LispEnvironment
+	{
+	public:
+		static std::shared_ptr<LispScope> CreateDefaultScope();
+
+		/*public*/ static bool IsExpression(std::shared_ptr<object> item)
+		{
+			return (item->IsLispVariant() /*is LispVariant*/ && item->IsList()) ||
+				(item->IsIEnumerableOfObject());
+		}
+
+		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> GetExpression(std::shared_ptr<object> item)
+		{
+			if (item->IsLispVariant() /*is LispVariant*/ && item->IsList()/*((LispVariant)item).IsList*/)
+			{
+				return item->ToLispVariant()->ListValue(); // ((LispVariant)item).ListValue;
+			}
+			if (item->IsIEnumerableOfObject() /*is IEnumerable<object>*/)
+			{
+				return item->ToList(); // (IEnumerable<object>)item;
+			}
+			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(); // new List<object>();
+		}
+
+		/*public*/ static std::shared_ptr<object> GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
+		{
+			return QueryItem(funcName, scope, Macros);
+		}
+
+		/*private*/ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
+
+
+		static bool FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> foundValue);
+
+		static bool IsInModules(const string & funcName, std::shared_ptr<LispScope> scope);
+		static std::shared_ptr<object> GetFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope);
+		static bool IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
+
+		const static string MetaTag;
+
+		const static string Macros;
+		const static string Modules;
+
+		const static string Apply;
+		const static string Eval;
+		const static string EvalStr;
+		const static string Quote;
+		const static string Quasiquote;
+
+		const static string Sym;
+		const static string Str;
+	};
+
+#ifdef _ORIGINAL_CSHARP_CODE
+	/// <summary>
     /// Class to hold informations about macro expansions at compile time.
     /// </summary>
     internal class LispMacroCompileTimeExpand : Tuple<IEnumerable<object>, IEnumerable<object>>
@@ -1645,4 +1712,7 @@ namespace CsLisp
 
         #endregion
     }
+#endif
 }
+
+#endif

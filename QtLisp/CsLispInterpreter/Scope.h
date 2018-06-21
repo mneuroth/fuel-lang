@@ -36,6 +36,7 @@
 #include "csobject.h"
 #include "Token.h"
 #include "Variant.h"
+#include "Environment.h"
 #include "DebuggerInterface.h"
 
 #include <memory>
@@ -43,66 +44,6 @@
 
 namespace CsLisp
 {
-	class LispScope;
-	class LispBreakpointPosition;
-
-	class LispEnvironment
-	{
-	public:
-		static std::shared_ptr<LispScope> CreateDefaultScope();
-
-		static bool IsInModules(const string & name, std::shared_ptr<LispScope> globalScope)
-		{
-// TODO --> IsInModules realisieren
-			return false;
-		}
-
-		/*public*/ static bool IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
-		{
-			return false; // ExistsItem(funcName, scope, Macros);
-		}
-
-		/*public*/ static bool IsExpression(std::shared_ptr<object> item)
-		{
-			return (item->IsLispVariant() /*is LispVariant*/ && item->IsList()) ||
-				(item->IsIEnumerableOfObject());
-		}
-
-		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> GetExpression(std::shared_ptr<object> item)
-		{
-			if (item->IsLispVariant() /*is LispVariant*/ && item->IsList()/*((LispVariant)item).IsList*/)
-			{
-				return item->ToLispVariant()->ListValue(); // ((LispVariant)item).ListValue;
-			}
-			if (item->IsIEnumerableOfObject() /*is IEnumerable<object>*/)
-			{
-				return item->ToList(); // (IEnumerable<object>)item;
-			}
-			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(); // new List<object>();
-		}
-
-		static std::shared_ptr<object>  GetFunctionInModules(const string & name, std::shared_ptr<LispScope> globalScope)
-		{
-// TODO --> GetFunctionInModules realisieren
-			return null;
-		}
-
-		/*public*/ static std::shared_ptr<object> GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
-		{
-			return QueryItem(funcName, scope, Macros);
-		}
-
-		/*private*/ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
-
-
-		static string Macros;
-		static string Modules;
-		static string MetaTag;
-
-		const static string Quote;
-		const static string Quasiquote;
-	};
-
     /// <summary>
     /// The lisp runtime scope. That is something like a stack item.
     /// </summary>
