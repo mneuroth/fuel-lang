@@ -164,6 +164,7 @@
     <ClCompile Include="..\CsLispInterpreter\Scope.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Token.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Variant.cpp" />
+    <ClCompile Include="LispTests.cpp" />
     <ClCompile Include="ParserTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -109,7 +109,6 @@ static string GetStringRepresentation(std::vector<std::shared_ptr<object>> args,
 			text += separator;
 		}
 		text += item->ToString();
-		text += item->ToString();
 	}
 	if (scope.ContainsKey(Traceon) && (bool)scope[Traceon])
 	{
