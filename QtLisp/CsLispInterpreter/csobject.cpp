@@ -328,7 +328,7 @@ namespace CsLisp
 				return ToLispVariant() == other.ToLispVariant();
 			case __LispFunctionWrapper:
 // TODO --> check
-				return &(ToLispFunctionWrapper().Function) == &(other.ToLispFunctionWrapper().Function);
+                return false; //&(ToLispFunctionWrapper().Function) == &(other.ToLispFunctionWrapper().Function);
 			case __LispToken:
 				return ToString() == other.ToString();
 			case __IEnumerableOfObject:

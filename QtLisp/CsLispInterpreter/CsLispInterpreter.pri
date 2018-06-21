@@ -3,6 +3,7 @@ SOURCES += \
         $$PWD/csobject.cpp \
         $$PWD/Token.cpp \
         $$PWD/Parser.cpp \
+        $$PWD/Environment.cpp \
         $$PWD/Scope.cpp \
         $$PWD/Variant.cpp
 
@@ -14,5 +15,9 @@ HEADERS += \
         $$PWD/Token.h \
         $$PWD/Tokenizer.h \
         $$PWD/Parser.h \
+        $$PWD/Environment.h \
         $$PWD/Scope.h \
-        $$PWD/Variant.h
+        $$PWD/Variant.h \
+        $$PWD/Exception.h \
+        $$PWD/DebuggerInterface.h \
+        $$PWD/Lisp.h
