@@ -192,6 +192,27 @@ static std::shared_ptr<LispVariant> Division(std::vector<std::shared_ptr<object>
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l / *r); });
 }
 
+/*private*/ static void CheckArgs(const string & name, int count, std::vector<std::shared_ptr<object>> args, LispScope & scope)
+{
+	if (count < 0 || args.size() != count)
+	{
+		throw new LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, args.size(), count), &scope);
+	}
+}
+
+
+/*public*/ static std::shared_ptr<LispVariant> if_form(std::vector<std::shared_ptr<object>> args, LispScope & scope)
+{
+	if (!(args.size() == 2 || args.size() == 3))
+	{
+		// throw exception
+		CheckArgs(If, -1, args, scope);
+	}
+
+	var passed = LispInterpreter::EvalAst(args[0], scope)->BoolValue();
+	var elseCode = args.size() > 2 ? args[2] : null;
+	return LispInterpreter::EvalAst(passed ? args[1] : elseCode, scope);
+}
 
 /*public*/ static std::shared_ptr<LispVariant> do_form(std::vector<std::shared_ptr<object>> args, LispScope & scope)
 {
@@ -231,7 +252,9 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["print"] = CreateFunction(Print, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
 	(*scope)["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
 
-	(*scope)["do"] = CreateFunction(&do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)["do"] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+
+	(*scope)[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 
 	scope->PrivateInitForCpp();
 

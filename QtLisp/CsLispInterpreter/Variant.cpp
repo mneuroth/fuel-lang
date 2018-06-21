@@ -122,7 +122,7 @@ namespace CsLisp
 		{
 			throw CreateInvalidCastException("bool");
 		}
-		return (bool)Value;
+		return (bool)(*Value);
 		//}
 	}
 

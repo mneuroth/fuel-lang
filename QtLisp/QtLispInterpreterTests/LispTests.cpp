@@ -50,5 +50,49 @@ namespace QtLispUnitTests
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\")\n (println \"world\"))", 0, "test");
 			Assert::AreEqual("world", result->ToString().c_str());
 		}
+
+		TEST_METHOD(Test_PrintLnMultilines)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\nworld\"))", 0, "test");
+			Assert::AreEqual("hello\nworld", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_PrintTrace)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))", 0, "test");
+			Assert::AreEqual("hello world17", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_If1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if #t (+ 1 2) (- 3 5))", 0, "test");
+			Assert::AreEqual(3, result->ToInt());
+		}
+
+		TEST_METHOD(Test_If2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if #f (* 1 0) (/ 6 3))", 0, "test");
+			Assert::AreEqual(2, result->ToInt());
+		}
+
+		TEST_METHOD(Test_If3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1 0)", 0, "test");
+			Assert::AreEqual(1, result->ToInt());
+		}
+
+		TEST_METHOD(Test_If4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if false 1 0)", 0, "test");
+			Assert::AreEqual(0, result->ToInt());
+		}
+
+		TEST_METHOD(Test_If5)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1)", 0, "test");
+			Assert::AreEqual(1, result->ToInt());
+			result = Lisp::Eval("(if false 1)", 0, "test");
+			Assert::IsNull(result.get());
+		}
 	};
 }
