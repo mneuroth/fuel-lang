@@ -271,7 +271,7 @@ namespace CsLisp
                     return IntValue.CompareTo(otherVariant.IntValue);
                 }
                 // all other types will be compared like a string
-                return String.Compare(StringValue, otherVariant.StringValue, StringComparison.Ordinal);
+                return string.Compare(StringValue, otherVariant.StringValue, StringComparison.Ordinal);
             }            
             return CompareTo(new LispVariant(other));
         }
@@ -732,7 +732,7 @@ namespace CsLisp
             }
             if (l.IsString || r.IsString)
             {
-                return new LispVariant(String.CompareOrdinal(l.ToString(), r.ToString()) < 0);
+                return new LispVariant(string.CompareOrdinal(l.ToString(), r.ToString()) < 0);
             }
             throw CreateInvalidOperationException("< or >", l, r);
         }
@@ -754,7 +754,7 @@ namespace CsLisp
             }
             if (l.IsString || r.IsString)
             {
-                return new LispVariant(String.CompareOrdinal(l.ToString(), r.ToString()) <= 0);
+                return new LispVariant(string.CompareOrdinal(l.ToString(), r.ToString()) <= 0);
             }
             throw CreateInvalidOperationException("<= or >=", l, r);
         }

@@ -44,7 +44,7 @@ namespace CsLisp
         public static IEnumerable<LispToken> Tokenize(string code, int offset = 0)
         {
             var tokens = new List<LispToken>();
-            var currentToken = String.Empty;
+            var currentToken = string.Empty;
             var currentTokenStartPos = 0;
             var lineCount = 1;
             var isInString = false;
@@ -56,7 +56,7 @@ namespace CsLisp
                 tokens.Add(new LispToken(currentTok, currentTokenStartPos - offset, pos - offset, line));
                 isInSymbol = false;
                 isInString = false;
-                currentToken = String.Empty;
+                currentToken = string.Empty;
                 currentTokenStartPos = pos+1;
             };
 
@@ -100,11 +100,11 @@ namespace CsLisp
                     else if (isInSymbol)
                     {
                         addToken(currentToken, i, lineCount);
-                        addToken(String.Empty + ch, i, lineCount);
+                        addToken(string.Empty + ch, i, lineCount);
                     }
                     else
                     {
-                        addToken(String.Empty + ch, i, lineCount);
+                        addToken(string.Empty + ch, i, lineCount);
                     }
                     wasLastBackslash = false;
                 }
@@ -138,7 +138,7 @@ namespace CsLisp
                         if (code[i + 1] == '@')
                         {
                             // process unquotesplicing
-                            string s = String.Empty;
+                            string s = string.Empty;
                             s += ch;
                             i++;
                             s += code[i];
@@ -146,7 +146,7 @@ namespace CsLisp
                         }
                         else
                         {
-                            addToken(String.Empty + ch, i, lineCount);
+                            addToken(string.Empty + ch, i, lineCount);
                         }
                     }
                     wasLastBackslash = false;
@@ -166,7 +166,7 @@ namespace CsLisp
                     {
                         // start string
                         isInString = true;
-                        currentToken = String.Empty;
+                        currentToken = string.Empty;
                     }
                     wasLastBackslash = false;
                 }
@@ -184,7 +184,7 @@ namespace CsLisp
                     wasLastBackslash = false;
                 }
             }
-            if (currentToken != String.Empty)
+            if (currentToken != string.Empty)
             {
                 addToken(currentToken, -1, lineCount);
             }
@@ -214,7 +214,7 @@ namespace CsLisp
         private static int ProcessComment(string code, int i, int lineCount, char ch, Action<string, int, int> addToken)
         {
             int newIndex;
-            var comment = String.Empty + ch + GetRestOfLine(code, i + 1, out newIndex);
+            var comment = string.Empty + ch + GetRestOfLine(code, i + 1, out newIndex);
             addToken(comment, i, lineCount);
             i = newIndex;
             return i;

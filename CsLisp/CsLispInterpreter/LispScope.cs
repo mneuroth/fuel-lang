@@ -258,15 +258,15 @@ namespace CsLisp
         public void SetInScopes(string symbolName, object value)
         {
             LispScope foundClosureScope;
-            if (symbolName != null && ContainsKey(symbolName))
+            if (!string.IsNullOrEmpty(symbolName) && ContainsKey(symbolName))
             {
                 this[symbolName] = value;
             }
-            else if (symbolName != null && IsInClosureChain(symbolName, out foundClosureScope))
+            else if (!string.IsNullOrEmpty(symbolName) && IsInClosureChain(symbolName, out foundClosureScope))
             {
                 foundClosureScope[symbolName] = value;
             }
-            else if (symbolName != null && GlobalScope != null && GlobalScope.ContainsKey(symbolName))
+            else if (!string.IsNullOrEmpty(symbolName) && GlobalScope != null && GlobalScope.ContainsKey(symbolName))
             {
                 GlobalScope[symbolName] = value;
             }

@@ -132,7 +132,7 @@ namespace CsLisp
 
 		static LispUtils()
 		{
-			LibraryPath = String.Empty;
+			LibraryPath = string.Empty;
 #if ENABLE_COMPILE_TIME_MACROS
 		    IsCompileTimeMacroEnabled = true;
 #else
@@ -239,7 +239,7 @@ namespace CsLisp
             {
                 exists = false;
             }
-            return  exists ? File.ReadAllText(fileName) : String.Empty;
+            return  exists ? File.ReadAllText(fileName) : string.Empty;
         }
 
         /// <summary>

@@ -1562,7 +1562,7 @@ namespace CsLisp
 
         private static string GetStringRepresentation(object[] args, LispScope scope, string separator = " ")
         {
-            var text = String.Empty;
+            var text = string.Empty;
             foreach (var item in args)
             {
                 if (text.Length > 0)
