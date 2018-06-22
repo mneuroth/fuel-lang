@@ -124,7 +124,15 @@ namespace CsLisp
 	class Dictionary : public std::map<K,V>
 	{
 	public:
-		IEnumerable<K> GetKeys() const;
+		IEnumerable<K> GetKeys() const
+		{
+			IEnumerable<K> keys;
+			for (auto & kvp : *this)
+			{
+				keys.push_back(kvp.first);
+			}
+			return keys;
+		}
 
 		bool ContainsKey(const K & key) const
 		{
@@ -170,10 +178,13 @@ namespace CsLisp
 	{
 	private:
 		bool m_bIsSpecialForm;
+		bool m_bIsBuiltin;
 
 	public:
 		LispFunctionWrapper()
-			: Signature(""), m_bIsSpecialForm(false)
+			: Signature(""), 
+			  m_bIsSpecialForm(false), 
+			  m_bIsBuiltin(false)
 		{
 		}
 
@@ -183,13 +194,22 @@ namespace CsLisp
 
 		/*public*/ string Documentation; // { get; private set; }
 
-		bool IsBuiltin() const;
+		bool IsBuiltin() const
+		{
+			return m_bIsBuiltin;
+		}
 
 		string ModuleName;
 
-		/*public*/ string GetFormatedDoc() const;
+		/*public*/ string GetFormatedDoc() const
+		{
+			return "<TODO>";
+		}
 
-		/*public*/ string GetHtmlFormatedDoc() const;
+		/*public*/ string GetHtmlFormatedDoc() const
+		{
+			return "<TODO>";
+		}
 
 		bool IsSpecialForm() const
 		{

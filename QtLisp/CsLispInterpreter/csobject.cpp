@@ -364,5 +364,15 @@ namespace CsLisp
 // TODO --> IMPLEMENT !
 	}
 
+	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3)
+	{
+		// TODO --> IMPLEMENT !
+	}
+
+	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3, const string & txt4)
+	{
+		// TODO --> IMPLEMENT !
+	}
+
 }
 
