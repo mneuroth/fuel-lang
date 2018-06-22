@@ -47,7 +47,7 @@ namespace CsLisp
         /// <param name="currentAst">The current ast.</param>
         /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
-        virtual void InteractiveLoop(const LispScope & initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false) = 0;
+        virtual void InteractiveLoop(std::shared_ptr<LispScope> initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false) = 0;
 
         /// <summary>
         /// Verifies if the current execution position needes a break,
@@ -58,7 +58,7 @@ namespace CsLisp
         /// The position infos of current ast item.
         /// </param>
         /// <returns>True if a break is needed</returns>
-        virtual bool NeedsBreak(const LispScope & scope, LispBreakpointPosition posInfosOfCurrentAstItem) = 0;
+        virtual bool NeedsBreak(std::shared_ptr<LispScope> scope, LispBreakpointPosition posInfosOfCurrentAstItem) = 0;
 
         /// <summary>
         /// Enters the loop of the debugger.

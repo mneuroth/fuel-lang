@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClCompile Include="csobject.cpp" />
     <ClCompile Include="Environment.cpp" />
+    <ClCompile Include="Lisp.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="QtLisp.cpp" />
     <ClCompile Include="Scope.cpp" />

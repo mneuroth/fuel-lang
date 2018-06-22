@@ -58,7 +58,7 @@ namespace CsLisp
         /// <param name="astAsList"></param>
         /// <param name="compile"></param>
         /// <returns></returns>
-        /*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ResolveArgsInScopes(LispScope & scope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, bool compile)
+        /*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ResolveArgsInScopes(std::shared_ptr<LispScope> scope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, bool compile)
         {
             std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astWithResolvedValues = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
 			std::shared_ptr<bool> isSpecialFormX = null;
@@ -71,7 +71,7 @@ namespace CsLisp
                 }
                 else
                 {
-                    resolvedElem = scope.ResolveInScopes(elem);
+                    resolvedElem = scope->ResolveInScopes(elem);
                 }
                 astWithResolvedValues->Add(resolvedElem);
 
@@ -105,7 +105,7 @@ namespace CsLisp
         /// <param name="scope">The scope.</param>
         /// <returns>The result of ast evaluation.</returns>
         /// <exception cref="System.Exception">Unexpected macro modus!</exception>
-        /*public*/ static std::shared_ptr<LispVariant> EvalAst(std::shared_ptr<object> ast, LispScope & scope)
+        /*public*/ static std::shared_ptr<LispVariant> EvalAst(std::shared_ptr<object> ast, std::shared_ptr<LispScope> scope)
         {
             if (ast.get() == null)
             {
@@ -120,7 +120,7 @@ namespace CsLisp
                 // evaluate the value for the symbol
                 if (item->IsSymbol())
                 {
-                    item = std::make_shared<LispVariant>(scope.ResolveInScopes(std::make_shared<object>(*item)));
+                    item = std::make_shared<LispVariant>(scope->ResolveInScopes(std::make_shared<object>(*item)));
                 }
                 if (item->IsList() && !item->IsNil())
                 {
@@ -142,10 +142,10 @@ namespace CsLisp
             }
 
             // is this function a macro ==> process the macro and return
-            if (LispEnvironment::IsMacro(astAsList->First(), scope.GlobalScope))
+            if (LispEnvironment::IsMacro(astAsList->First(), scope->GlobalScope))
             {
                 // check the macro modus: evaluate or expand or lambda
-                var macro = LispEnvironment::GetMacro(astAsList->First(), scope.GlobalScope);
+                var macro = LispEnvironment::GetMacro(astAsList->First(), scope->GlobalScope);
 
                 // evaluate macro at run time:
                 if (macro->IsLispMacroRuntimeEvaluate())
@@ -183,7 +183,7 @@ namespace CsLisp
 
             // for debugging: update the current line number at the current scope
             var currentToken = ((LispVariant)(astAsList->First())).Token;
-            scope.CurrentToken = currentToken != null ? currentToken : scope.CurrentToken;
+            scope->CurrentToken = currentToken != null ? currentToken : scope->CurrentToken;
 
             // resolve values via local and global scope
             var astWithResolvedValues = ResolveArgsInScopes(scope, astAsList, false);
@@ -195,9 +195,9 @@ namespace CsLisp
             LispFunctionWrapper functionWrapper = function->ToLispVariant()->FunctionValue();
 
             // trace current function (if tracing is enabled)
-            if (scope.GlobalScope->Tracing)
+            if (scope->GlobalScope->Tracing)
             {
-                scope.GlobalScope->Output.WriteLine("--> {0}", astAsList->First()->ToString());
+                scope->GlobalScope->Output.WriteLine("--> {0}", astAsList->First()->ToString());
             }
 
 			// evaluate arguments, but allow recursive lists
@@ -210,7 +210,7 @@ namespace CsLisp
             }
 
             // debugger processing
-            var debugger = scope.GlobalScope->Debugger;
+            var debugger = scope->GlobalScope->Debugger;
             if (debugger != null && debugger->NeedsBreak(scope, GetPosInfo(astAsList->First()/*[0]*/)))
             {
                 debugger->InteractiveLoop(scope, astAsList);

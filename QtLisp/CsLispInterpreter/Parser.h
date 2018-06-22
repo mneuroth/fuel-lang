@@ -60,7 +60,7 @@ namespace CsLisp
 		/// <param name="offset">The position offset.</param>
 		/// <param name="scope">The scope.</param>
 		/// <returns>Abstract syntax tree as container</returns>
-		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Parse(string code, int offset = 0, LispScope * scope = null)
+		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Parse(string code, int offset = 0, std::shared_ptr<LispScope> scope = null)
 		{
 			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parseResult/* = null*/;
 			string moduleName = ""; // string.Empty;

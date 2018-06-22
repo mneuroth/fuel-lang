@@ -82,15 +82,15 @@ namespace CsLisp
 
 		/*public*/ const string ProgramName = "fuel";
 
-		/*public*/ const string Name = "FUEL(isp)";
-		/*public*/ const string Version = "v0.99.2";
-		/*public*/ const string Date = "20.6.2018";
-		/*public*/ const string Copyright = "(C) by Michael Neuroth";
+		/*public*/ static const string Name;
+		/*public*/ static const string Version;
+		/*public*/ static const string Date;
+		/*public*/ static const string Copyright;
 
-		/*public*/ const string Platform = "C++";
+		/*public*/ static const string Platform;
 
-		/*public*/ const string License = "MIT-License";
-		/*public*/ const string LicenseUrl = "http://opensource.org/licenses/MIT";
+		/*public*/ static const string License;
+		/*public*/ static const string LicenseUrl;
 
 		/*public*/ const string Info = Name + " is a fast usable embeddable lisp interpreter";
 
@@ -108,10 +108,10 @@ namespace CsLisp
 		/// <param name="tracing">if set to <c>true</c> [tracing].</param>
 		/// <param name="nativeItems">The dictionary with native items.</param>
 		/// <returns>The result of the script evaluation</returns>
-		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, LispScope * scope /*= null*/, const string & moduleName /*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/)
+		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, std::shared_ptr<LispScope> scope /*= null*/, const string & moduleName /*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/)
 		{
 			// first create global scope, needed for macro expanding
-			var currentScope = scope==null ? LispEnvironment::CreateDefaultScope().get() : scope;
+			var currentScope = scope==null ? LispEnvironment::CreateDefaultScope() : scope;
 			currentScope->ModuleName = moduleName;
 			currentScope->Tracing = tracing;
 			RegisterNativeObjects(/*nativeItems,*/ *currentScope);
@@ -123,7 +123,7 @@ namespace CsLisp
 #else
 			var expandedAst = std::make_shared<object>(*ast);
 #endif
-			var result = LispInterpreter::EvalAst(expandedAst, *currentScope);
+			var result = LispInterpreter::EvalAst(expandedAst, currentScope);
 			return result;
 		}
 

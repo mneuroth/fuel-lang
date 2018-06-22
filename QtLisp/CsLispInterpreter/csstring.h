@@ -85,12 +85,12 @@ namespace CsLisp
 			return compare(0, txt.length(), txt) == 0;
 		}
 
-		string Substring(int offs, int length = npos)
+		string Substring(int offs, int length = npos) const
 		{
 			return string(substr(offs, length));
 		}
 
-		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/)
+		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
 		{
 			return (*this).find_first_of(txt);
 		}
@@ -111,6 +111,16 @@ namespace CsLisp
 		int Length()
 		{
 			return size();
+		}
+
+		void Append(const string & txt)
+		{
+			append(txt);
+		}
+
+		bool Contains(const string & txt) const
+		{
+			return IndexOf(txt, "invariant_culture") >= 0;
 		}
 
 		const static string Empty;

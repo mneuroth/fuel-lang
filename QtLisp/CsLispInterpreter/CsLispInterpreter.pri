@@ -5,7 +5,8 @@ SOURCES += \
         $$PWD/Parser.cpp \
         $$PWD/Environment.cpp \
         $$PWD/Scope.cpp \
-        $$PWD/Variant.cpp
+        $$PWD/Variant.cpp \
+        $$PWD/Lisp.cpp
 
 HEADERS += \
         $$PWD/csobject.h \

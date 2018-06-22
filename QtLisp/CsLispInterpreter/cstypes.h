@@ -45,7 +45,7 @@ namespace CsLisp
 	class object;
 
 	typedef std::function<void()> Action;
-	typedef std::function<std::shared_ptr<LispVariant>(std::vector<std::shared_ptr<object>>, LispScope &)> FuncX;
+	typedef std::function<std::shared_ptr<LispVariant>(std::vector<std::shared_ptr<object>>, std::shared_ptr<LispScope>)> FuncX;
 
 	template <class T>
 	class IEnumerable : public std::list<T>

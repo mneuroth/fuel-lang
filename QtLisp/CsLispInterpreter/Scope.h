@@ -409,7 +409,7 @@ namespace CsLisp
 			ProcessMetaScope(LispEnvironment::Modules, [this](KeyValuePair<string, std::shared_ptr<object>> mod) -> void { return Output.WriteLine(mod.Key); });
         }
 
-        /*public*/ string GetFunctionsHelpFormated(string functionName, /*Func<string, string, bool>*/std::function<bool(string, string)> select = null)
+        /*public*/ string GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(string, string)> select = null)
         {
             string result = string::Empty;
             //foreach (var key in Keys)
