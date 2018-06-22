@@ -501,7 +501,7 @@ namespace CsLisp
                 for (var i = 0; i < sourceCodeLines.Length; i++)
                 {
                     string breakMark = debugger.HasBreakpointAt(i + 1, moduleName) ? "B " : "  ";
-                    string mark = currentLineNo != null && currentLineNo.Value == i + 1 ? "-->" : String.Empty;
+                    string mark = currentLineNo != null && currentLineNo.Value == i + 1 ? "-->" : string.Empty;
                     debugger.Output.WriteLine("{0,3} {1,2} {2,3} {3}", i + 1, breakMark, mark, sourceCodeLines[i]);
                 }
             }
@@ -577,7 +577,7 @@ namespace CsLisp
                     cmdArgs = rest.Split(' ');
                 }
                 int indexRest = rest.IndexOf(" ", StringComparison.Ordinal);
-                rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : String.Empty;
+                rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : string.Empty;
                 if (cmdArgs.Length > 0)
                 {
                     string lineNumberString = cmdArgs[0];
@@ -590,7 +590,7 @@ namespace CsLisp
                     Tuple<bool, int> val = ConvertToInt(lineNumberString);
                     if (val.Item1)
                     {
-                        debugger.AddBreakpoint(val.Item2, moduleName, rest.Length > 0 ? rest : String.Empty);
+                        debugger.AddBreakpoint(val.Item2, moduleName, rest.Length > 0 ? rest : string.Empty);
                         added = true;
                     }
                 }
