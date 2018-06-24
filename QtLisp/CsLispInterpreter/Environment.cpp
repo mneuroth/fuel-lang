@@ -77,6 +77,14 @@ static string GetStringRepresentation(std::vector<std::shared_ptr<object>> args,
 	return text;
 }
 
+static void CheckArgs(const string & name, int count, std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	if (count < 0 || args.size() != count)
+	{
+		throw new LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, args.size(), count), scope.get());
+	}
+}
+
 // ************************************************************************
 
 static std::shared_ptr<LispVariant> Fuel(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
@@ -177,15 +185,123 @@ static std::shared_ptr<LispVariant> TracePrint(std::vector<std::shared_ptr<objec
 
 static std::shared_ptr<LispVariant> GetTracePrint(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
 {
-	string buffer = (*scope)[Tracebuffer]->ToString(); // var buffer = (StringBuilder)scope[Tracebuffer];
+	string buffer = (*scope)[Tracebuffer]->ToString(); // var buffer = (StringBuilder)(*scope)[Tracebuffer];
 	return std::make_shared<LispVariant>(std::make_shared<object>(buffer));
 }
 
+// TODO --> platform independend implementation of tickcount
 #include <Windows.h>
 static std::shared_ptr<LispVariant> CurrentTickCount(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
 {
 	var value = (int)GetTickCount(); //TODO --> implement in C++ ???  Environment::TickCount;
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+}
+
+static string AddFileExtensionIfNeeded(string fileName)
+{
+	const string extension = ".fuel";
+
+	if (!fileName.EndsWith(extension))
+	{
+		fileName += extension;
+	}
+	return fileName;
+}
+
+static std::shared_ptr<LispVariant> Import(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	std::shared_ptr<LispVariant> result = std::make_shared<LispVariant>();
+/* TODO --> implement
+	for(var modu : args)
+	{
+		string code = string::Empty;
+		string orgModuleFileName = ((LispVariant)modu).StringValue;
+		string fileName = orgModuleFileName;
+		if (!File.Exists(fileName))
+		{
+			// try the given library path (if available)
+			fileName = LispUtils.LibraryPath + Path.DirectorySeparatorChar + orgModuleFileName;
+			fileName = AddFileExtensionIfNeeded(fileName);
+			if (!File.Exists(fileName))
+			{
+				// try default path .\Library\modulename.fuel
+				fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+				fileName = AddFileExtensionIfNeeded(fileName);
+				if (!File.Exists(fileName))
+				{
+					// try default path <fuel.exe-path>\Library\modulename.fuel
+					fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+					fileName = AddFileExtensionIfNeeded(fileName);
+					if (!File.Exists(fileName))
+					{
+						// try environment variable FUELPATH
+						string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+						if (envPath != null)
+						{
+							fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
+							fileName = AddFileExtensionIfNeeded(fileName);
+						}
+					}
+				}
+			}
+		}
+		if (File.Exists(fileName))
+		{
+			code = File.ReadAllText(fileName);
+		}
+		else
+		{
+			// use std lib of fuel from builtin resources
+			if (orgModuleFileName == "fuellib")
+			{
+				code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
+			}
+			else
+			{
+				scope.GlobalScope.Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+			}
+		}
+		if (!string.IsNullOrEmpty(code))
+		{
+			var importScope = new LispScope("import " + fileName, scope.GlobalScope, fileName);
+			scope.PushNextScope(importScope);
+
+			result = Lisp.Eval(code, importScope, fileName);
+
+			// add new module to modules scope
+			((LispScope)scope.GlobalScope[Modules]).Add(fileName, importScope);
+
+			scope.PopNextScope();
+		}
+	}
+*/
+	return result;
+}
+
+static std::shared_ptr<LispVariant> Nop(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return std::make_shared<LispVariant>(LispVariant());
+}
+
+static std::shared_ptr<LispVariant> Return(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return std::make_shared<LispVariant>(LispVariant(args[0]));
+}
+
+static std::shared_ptr<LispVariant> GetType(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("type", 1, args, scope);
+
+	var item = ((LispVariant)args[0]);
+	return std::make_shared<LispVariant>(std::make_shared<object>((int)item.Type));
+}
+
+static std::shared_ptr<LispVariant> GetTypeString(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("typestr", 1, args, scope);
+
+	var item = ((LispVariant)args[0]);
+	return std::make_shared<LispVariant>(std::make_shared<object>(item.TypeString()));
 }
 
 static std::shared_ptr<LispVariant> Print(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
@@ -219,10 +335,21 @@ static std::shared_ptr<LispVariant> ArithmetricOperation(std::vector<std::shared
 	return result;
 }
 
+static std::shared_ptr<LispVariant> CompareOperation(std::vector<std::shared_ptr<object>> args, std::function<std::shared_ptr<LispVariant>(std::shared_ptr<LispVariant>, std::shared_ptr<LispVariant>)> op, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("compare-op", 2, args, scope);
+
+	var arg1 = args[0]->ToLispVariant();
+	var arg2 = args[1]->ToLispVariant();
+	std::shared_ptr<LispVariant> result = op(arg1, arg2);
+	return result;
+}
+
 static std::shared_ptr<LispVariant> Addition(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l + *r); });
 }
+
 static std::shared_ptr<LispVariant> Subtraction(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l - *r); });
@@ -238,12 +365,42 @@ static std::shared_ptr<LispVariant> Division(std::vector<std::shared_ptr<object>
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l / *r); });
 }
 
-static void CheckArgs(const string & name, int count, std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant>Not(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
 {
-	if (count < 0 || args.size() != count)
-	{
-		throw new LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, args.size(), count), scope.get());
-	}
+	CheckArgs("not", 1, args, scope);
+
+	var arg1 = (LispVariant)args[0];
+	return std::make_shared<LispVariant>(std::make_shared<object>(!arg1.BoolValue()));
+}
+
+static std::shared_ptr<LispVariant>LessTest(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l < *r); }, scope);
+}
+
+static std::shared_ptr<LispVariant>GreaterTest(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l > *r); }, scope);
+}
+
+static std::shared_ptr<LispVariant>LessEqualTest(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l <= *r); }, scope);
+}
+
+static std::shared_ptr<LispVariant>GreaterEqualTest(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l >= *r); }, scope);
+}
+
+static std::shared_ptr<LispVariant>EqualTest(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(LispVariant::EqualOp(*l, *r))); }, scope);
+}
+
+static std::shared_ptr<LispVariant>NotEqualTest(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
+{
+	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(!LispVariant::EqualOp(*l, *r))); }, scope);
 }
 
 static std::shared_ptr<LispVariant> if_form(std::vector<std::shared_ptr<object>> args, std::shared_ptr<LispScope> scope)
@@ -388,6 +545,36 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[Tracebuffer] = std::make_shared<object>(""); // new StringBuilder();
 	(*scope)[Traceon] = std::make_shared<object>(false);
 
+	(*scope)["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
+	(*scope)["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
+	(*scope)["help"] = CreateFunction(Help, "(help)", "Returns and shows the available builtin functions.");
+	(*scope)["doc"] = CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s).");
+	(*scope)["searchdoc"] = CreateFunction(SearchDocumentation, "(searchdoc name ...)", "Returns and shows the documentation of functions containing name(s).");
+	(*scope)["htmldoc"] = CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format.");
+	(*scope)["break"] = CreateFunction(Break, "(break)", "Sets a breakpoint in the code.");
+	(*scope)["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
+	(*scope)["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
+	(*scope)["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
+//	(*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
+	(*scope)["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");
+
+	// access to .NET
+//	(*scope)["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static, net-method-name)", "Returns a list of all available method names of the given native class.");
+//	(*scope)["native-fields"] = CreateFunction(GetNativeFields, "(native-fields native-obj|class-name) -> (property-name)", "Returns a list of all available property names of the given native class.");
+//	(*scope)["field"] = CreateFunction(CallField, "(field native-obj|class-name field-name)", "Accesses a field of a native object.");    // access native field
+//	(*scope)["call"] = CreateFunction(CallNative, "(call native-obj|class-name [method-name [args...]]|[args...])", "Calls a method for a native object.");    // call native function
+//	(*scope)["call-static"] = CreateFunction(CallStaticNative, "(call-static class-name method-name [args...])", "Calls a static method for a native object.");    // call native static function
+	// Macro: (register-native full-class-name lisp-name) --> erzeugt konstruktoren und zugriffsmethoden fuer klasse
+	// --> (lisp-name-create args)																																								// --> (lisp-name-method obj args)
+
+	// interpreter functions
+	//(*scope)["type"] = CreateFunction(GetType, "(type expr)", "Returns the type id of the value of the expression.");
+	//(*scope)["typestr"] = CreateFunction(GetTypeString, "(typestr expr)", "Returns a readable string representing the type of the value of the expression.");
+	//(*scope)["nop"] = CreateFunction(Nop, "(nop)", "Does nothing (no operation).");
+	//(*scope)["return"] = CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function.");
+	(*scope)["print"] = CreateFunction(Print, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
+	(*scope)["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
+
 	(*scope)["string"] = CreateFunction(Addition, "(string expr1 expr2 ...)", "see: add");
 	(*scope)["add"] = CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ...");
 	(*scope)["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
@@ -398,8 +585,71 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["div"] = CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ...");
 	(*scope)["/"] = CreateFunction(Division, "(/ expr1 expr2 ...)", "see: div");
 
-	(*scope)["print"] = CreateFunction(Print, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
-	(*scope)["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
+	/*
+	(*scope)["<"] = CreateFunction(LessTest, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese.");
+	(*scope)[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
+	(*scope)["<="] = CreateFunction(LessEqualTest, "(<= expr1 expr2)", "Returns #t if value of expression1 is equal or smaller than value of expression2 and returns #f otherwiese.");
+	(*scope)[">="] = CreateFunction(GreaterEqualTest, "(>= expr1 expr2)", "Returns #t if value of expression1 is equal or larger than value of expression2 and returns #f otherwiese.");
+
+	(*scope)["equal"] = CreateFunction(EqualTest, "(equal expr1 expr2)", "Returns #t if value of expression1 is equal with value of expression2 and returns #f otherwiese.");
+	(*scope)["="] = CreateFunction(EqualTest, "(= expr1 expr2)", "see: equal");
+	(*scope)["=="] = CreateFunction(EqualTest, "(== expr1 expr2)", "see: equal");
+	(*scope)["!="] = CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese.");
+
+	(*scope)["not"] = CreateFunction(Not, "(not expr)", "Returns the inverted bool value of the expression.");
+	(*scope)["!"] = CreateFunction(Not, "(! expr)", "see: not");
+
+	(*scope)["list"] = CreateFunction(CreateList, "(list item1 item2 ...)", "Returns a new list with the given elements.");
+	(*scope)[MapFcn] = CreateFunction(Map, "(map function list)", "Returns a new list with elements, where all elements of the list where applied to the function.");
+	(*scope)[ReduceFcn] = CreateFunction(Reduce, "(reduce function list initial)", "Reduce function.");
+	(*scope)["cons"] = CreateFunction(Cons, "(cons item list)", "Returns a new list containing the item and the elements of the list.");
+	(*scope)["len"] = CreateFunction(Length, "(len list)", "Returns the length of the list.");
+	(*scope)["first"] = CreateFunction(First, "(first list)", "see: car");
+	(*scope)["car"] = CreateFunction(First, "(car list)", "Returns the first element of the list.");
+	(*scope)["rest"] = CreateFunction(Rest, "(rest list)", "see: cdr");
+	(*scope)["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");
+	(*scope)["nth"] = CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list.");
+	(*scope)["append"] = CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements.");
+	(*scope)[Sym] = CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol.");
+	(*scope)[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
+
+	(*scope)[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of command line arguments for this script.");
+	(*scope)[Args] = CreateFunction(ArgsFcn, "(args number)", "Returns the [number] command line argument for this script.");
+	(*scope)[Apply] = CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments.");
+	(*scope)[Eval] = CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast).");
+	(*scope)[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");
+
+	// special forms
+	(*scope)[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", isSpecialForm: true);
+	(*scope)[Or] = CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", isSpecialForm: true);
+	(*scope)[Def] = CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+	(*scope)[Gdef] = CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+	(*scope)[Setf] = CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
+
+	// macros are:
+	// a special form to control evaluation of function parameters inside the macro code
+	// there are two options possible:
+	//  - run time evaluation of macros
+	//  - compile time replacement/expanding of macros
+	(*scope)[DefineMacro] = CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", isSpecialForm: true);
+	// run time evaluation for macros:
+	(*scope)[DefineMacroEval] = CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", isSpecialForm: true);
+	#if ENABLE_COMPILE_TIME_MACROS
+	// compile time expand for macros:
+	(*scope)[DefineMacroExpand] = CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", isSpecialForm: true, isEvalInExpand: true);
+	#endif
+
+	(*scope)[Quote] = CreateFunction(quote_form, "(quote expr)", "Returns expression without evaluating it.", isSpecialForm: true);
+	(*scope)[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", isSpecialForm: true);
+	(*scope)[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", isSpecialForm: true);
+	(*scope)[While] = CreateFunction(while_form, "(while cond block)", "The while loop.", isSpecialForm: true);
+	(*scope)[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", isSpecialForm: true);
+	(*scope)[Begin] = CreateFunction(do_form, "(begin statement1 statement2 ...)", "see: do", isSpecialForm: true);
+	(*scope)[Lambda] = CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", isSpecialForm: true);
+	(*scope)[Fn] = CreateFunction(fn_form, "(fn (arguments) block)", "Returns a function.", isSpecialForm: true);
+	(*scope)[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", isSpecialForm: true);
+	(*scope)[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "Defines a function in the global scope.", isSpecialForm: true);
+	*/
 
 	(*scope)["do"] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 

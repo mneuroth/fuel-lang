@@ -123,6 +123,15 @@ namespace CsLisp
 			return IndexOf(txt, "invariant_culture") >= 0;
 		}
 
+		bool EndsWith(const string & txt)
+		{
+			if (txt.size() > size())
+			{
+				return false;
+			}
+			return std::equal(txt.rbegin(), txt.rend(), txt.rbegin());
+		}
+
 		const static string Empty;
 	};
 

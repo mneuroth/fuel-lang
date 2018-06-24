@@ -160,6 +160,7 @@
   <ItemGroup>
     <ClCompile Include="..\CsLispInterpreter\csobject.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Environment.cpp" />
+    <ClCompile Include="..\CsLispInterpreter\Lisp.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Parser.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Scope.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Token.cpp" />

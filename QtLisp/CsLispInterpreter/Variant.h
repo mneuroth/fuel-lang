@@ -213,7 +213,7 @@ namespace CsLisp
         /// <param name="type">The type.</param>
         /// <param name="value">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
-        /*public*/ explicit LispVariant(LispType type /*= LispType::_Undefined*/, std::shared_ptr<object> value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
+        /*public*/ explicit LispVariant(LispType type = LispType::_Undefined, std::shared_ptr<object> value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
         {
             Type = type;
             Value = value;
