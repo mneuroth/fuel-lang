@@ -509,7 +509,18 @@ namespace CsLisp
             var value = Environment.TickCount;
             return new LispVariant(value);
         }
-        
+
+        private static string AddFileExtensionIfNeeded(string fileName)
+        {
+            const string extension = ".fuel";
+
+            if (!fileName.EndsWith(extension))
+            {
+                fileName += extension;
+            }
+            return fileName;
+        }
+
         private static LispVariant Import(object[] args, LispScope scope)
         {
             LispVariant result = new LispVariant();
@@ -574,21 +585,9 @@ namespace CsLisp
                     ((LispScope)scope.GlobalScope[Modules]).Add(fileName, importScope);
 
                     scope.PopNextScope();
-
                 }
             }
             return result;
-        }
-
-        private static string AddFileExtensionIfNeeded(string fileName)
-        {
-            const string extension = ".fuel";
-
-            if (!fileName.EndsWith(extension))
-            {
-                fileName += extension;
-            }
-            return fileName;
         }
 
         #endregion
