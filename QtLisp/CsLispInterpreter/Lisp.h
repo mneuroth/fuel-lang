@@ -108,7 +108,7 @@ namespace CsLisp
 		/// <param name="tracing">if set to <c>true</c> [tracing].</param>
 		/// <param name="nativeItems">The dictionary with native items.</param>
 		/// <returns>The result of the script evaluation</returns>
-		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, std::shared_ptr<LispScope> scope /*= null*/, const string & moduleName /*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/)
+		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, std::shared_ptr<LispScope> scope = 0/*= null*/, const string & moduleName = "test"/*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/)
 		{
 			// first create global scope, needed for macro expanding
 			var currentScope = scope==null ? LispEnvironment::CreateDefaultScope() : scope;

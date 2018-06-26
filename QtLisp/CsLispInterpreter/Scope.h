@@ -111,7 +111,7 @@ namespace CsLisp
         /// Needed for debugging support --> set function name to LispScope
         /// </summary>
         /// <value> The user data. </value>
-		/*public*/ object UserData; // { get; set; }
+		/*public*/ std::shared_ptr<object> UserData; // { get; set; }
 
         /// <summary>
         /// Gets or sets the user documentation information.
@@ -166,6 +166,10 @@ namespace CsLisp
             Name = fcnName;
 			ModuleName = moduleName ? *moduleName : string::Empty;
 			//GlobalScope = globalScope != null ? globalScope : shared_from_this();
+			if (globalScope.get() != null)
+			{
+				GlobalScope = globalScope;
+			}
 			if (ModuleName == string::Empty && globalScope != null)
             {
                 ModuleName = globalScope->ModuleName;
@@ -212,7 +216,7 @@ namespace CsLisp
         /// <param name="name">The name.</param>
         /// <param name="closureScopeFound">The closure scope found.</param>
         /// <returns>True if name was found.</returns>
-        /*public*/ bool IsInClosureChain(string name, /*out*/ std::shared_ptr<LispScope> closureScopeFound)
+        /*public*/ bool IsInClosureChain(string name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound)
         {
             closureScopeFound = null;
             if (ClosureChain != null)

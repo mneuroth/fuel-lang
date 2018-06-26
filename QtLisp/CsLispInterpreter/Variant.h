@@ -53,6 +53,50 @@ namespace CsLisp
         _UnQuoteSplicing = 2
     };
 
+	inline LispType ConvertObjectTypeToVariantType(ObjectType objType)
+	{
+		switch (objType)
+		{
+			case ObjectType::__Undefined:
+				return LispType::_Undefined;
+			case ObjectType::__Nil:
+				return LispType::_Nil;
+			case ObjectType::__Bool:
+				return LispType::_Bool;
+			case ObjectType::__Int:
+				return LispType::_Int;
+			case ObjectType::__Double:
+				return LispType::_Double;
+			case ObjectType::__String:
+				return LispType::_String;
+			case ObjectType::__List:
+				return LispType::_List;
+			case ObjectType::__Function:
+				return LispType::_Function;
+			case ObjectType::__Symbol:
+				return LispType::_Symbol;
+			case ObjectType::__NativeObject:
+				return LispType::_NativeObject;
+					//__Array = 10,
+			case ObjectType::__LispVariant:
+				return LispType::_Undefined;
+			case ObjectType::__LispFunctionWrapper:
+				return LispType::_Function;
+			case ObjectType::__LispToken:
+				return LispType::_String;
+			case ObjectType::__IEnumerableOfObject:
+				return LispType::_List;
+			case ObjectType::__VoidPtr:
+				return LispType::_Undefined;
+			case ObjectType::__LispScope:
+				return LispType::_Undefined;
+			case ObjectType::__LispMacroRuntimeEvaluate:
+				return LispType::_Undefined;
+			case ObjectType::__Error:
+				return LispType::_Error;
+		}
+	}
+
     /// <summary>
     /// Generic data container for lisp data types.
     /// </summary>
@@ -215,6 +259,7 @@ namespace CsLisp
         /// <param name="unQuoted">The unquoted modus.</param>
         /*public*/ explicit LispVariant(LispType type = LispType::_Undefined, std::shared_ptr<object> value = null, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
         {
+			Token = null;
             Type = type;
             Value = value;
             IsUnQuoted = unQuoted;
@@ -233,14 +278,24 @@ namespace CsLisp
 			if (val->IsLispVariant())
             { 
 				std::shared_ptr<LispVariant> value = val->ToLispVariant();
+				Token = value->Token;
                 Type = value->Type;
                 Value = value->Value;
                 IsUnQuoted = value->IsUnQuoted;
             }
+			else
+			{
+				int i = 0;
+				Token = null;
+				Type = ConvertObjectTypeToVariantType(val->GetType());
+				Value = val;
+				IsUnQuoted = unQuoted;
+			}
         }
 
 		LispVariant(const LispVariant & other)
 		{
+			Token = other.Token;
 			Type = other.Type;
 			Value = other.Value;
 			IsUnQuoted = other.IsUnQuoted;
@@ -255,7 +310,7 @@ namespace CsLisp
         /*internal*/ explicit LispVariant(std::shared_ptr<LispToken> token, LispUnQuoteModus unQuoted = LispUnQuoteModus::_None)
             : LispVariant(TypeOf(token->Value), token->Value, unQuoted)
         {
-            std::shared_ptr<LispToken> Token = token;
+            Token = token;
             if (token->Type == LispTokenType::Nil)
             {
                 Type = LispType::_Nil;

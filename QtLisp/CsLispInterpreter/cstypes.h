@@ -160,6 +160,10 @@ namespace CsLisp
 	class Tuple : std::pair<T1, T2>
 	{
 	public:
+		Tuple(const T1 & val1, const T2 & val2)
+			: std::pair<T1, T2>(val1, val2)
+		{
+		}
 		T1 Item1() const
 		{
 			return std::pair<T1, T2>::first;

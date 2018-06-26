@@ -842,7 +842,7 @@ static IEnumerable<std::shared_ptr<object>> VectorToList(const std::vector<std::
 
 std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	var name = /*(string)*/scope->UserData.ToString();
+	var name = /*(string)*/scope->UserData.get()!=null ? scope->UserData->ToString() : "";
 	var moduleName = scope->ModuleName;
 	var userDoc = scope->UserDoc;
 	var signature = userDoc.get() != null ? userDoc->Item1() : string::Empty/*null*/;
@@ -914,6 +914,96 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 	return std::make_shared<LispVariant>(CreateFunction(fcn, signature, documentation, /*isBuiltin:*/ false, /*isSpecialForm:*/ false,/*isEvalInExpand: */ false, /*moduleName :*/ scope->ModuleName));
 }
 
+// returns token just before the defn statement:
+// item is fcn token, go three tokens before, example:
+// ; comment before defn
+// (defn fcn (x) (+ x 1))
+// --> Comment Token
+static std::shared_ptr<LispToken> GetTokenBeforeDefn(std::shared_ptr<object> item, std::shared_ptr<LispScope> scope)
+{
+	if (item->IsLispVariant() /*is LispVariant*/)
+	{
+		std::shared_ptr<LispVariant> tokenName = item->ToLispVariant();
+		std::shared_ptr<LispToken> token1 = scope->GetPreviousToken(tokenName->Token);
+		std::shared_ptr<LispToken> token2 = scope->GetPreviousToken(token1);
+		std::shared_ptr<LispToken> token3 = scope->GetPreviousToken(token2);
+		return token3;
+	}
+	return null;
+}
+
+static string GetFormalArgsAsString(std::shared_ptr<object> args)
+{
+	string result = string::Empty;
+	IEnumerable<std::shared_ptr<object>> theArgs = args->ToEnumerableOfObject();
+	for(var s : theArgs)
+	{
+		if (result.size() > 0)
+		{
+			result += " ";
+		}
+		result += s->ToString();
+	}
+	return result;
+}
+
+static string GetSignatureFromArgs(std::shared_ptr<object> arg0, const string & name)
+{
+	string signature = "(" + name;
+	string formalArgsAsString = GetFormalArgsAsString(arg0);
+	if (formalArgsAsString.size() > 0)
+	{
+		signature += " ";
+	}
+	signature += formalArgsAsString;
+	signature += ")";
+	return signature;
+}
+
+static void UpdateDocumentationInformationAtScope(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	var documentation = string::Empty;
+	var token = GetTokenBeforeDefn(args[0], scope);
+	if ((token.get() != null) && (token->Type == LispTokenType::Comment))
+	{
+		documentation = token->Value->ToString();
+	}
+	var signature = GetSignatureFromArgs(args[1], args[0]->ToString());
+	scope->UserDoc = std::make_shared<Tuple<string, string>>(signature, documentation);
+}
+
+static std::shared_ptr<LispVariant> defn_form_helper(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & name)
+{
+	CheckArgs(name, 3, args, scope);
+
+	UpdateDocumentationInformationAtScope(args, scope);
+
+	var fn = ((*(scope->GlobalScope))[Fn])->ToLispVariant()->FunctionValue();
+	scope->UserData = std::make_shared<object>(EvalArgIfNeeded(args[0], scope)->ToString());
+
+	std::vector<std::shared_ptr<object>> tempArgs;
+	tempArgs.push_back(args[1]);
+	tempArgs.push_back(args[2]);
+	var resultingFcn = fn.Function(tempArgs, scope);
+	scope->UserData = null;
+
+	var defFcn = ((*(scope->GlobalScope))[name])->ToLispVariant()->FunctionValue();
+	std::vector<std::shared_ptr<object>> tempArgs2;
+	tempArgs2.push_back(args[0]);
+	tempArgs2.push_back(std::make_shared<object>(*resultingFcn));
+	return defFcn.Function(tempArgs2, scope);
+}
+
+static std::shared_ptr<LispVariant> defn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return defn_form_helper(args, scope, Def);
+}
+
+static std::shared_ptr<LispVariant> gdefn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return defn_form_helper(args, scope, Gdef);
+}
+
 // ************************************************************************
 
 bool LispEnvironment::FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> foundValue)
@@ -921,13 +1011,16 @@ bool LispEnvironment::FindFunctionInModules(const string & funcName, std::shared
 	foundValue = null;
 
 	std::shared_ptr<object> importedModules = (*(scope->GlobalScope))[LispEnvironment::Modules];
-	for (/*KeyValuePair*/std::pair<string, std::shared_ptr<object>> kv : *(importedModules->ToLispScope()))
+	if (importedModules.get() != null)
 	{
-		var module = /*(LispScope)*/kv.second->ToLispScope();
-		if (module->ContainsKey(funcName))
+		for (/*KeyValuePair*/std::pair<string, std::shared_ptr<object>> kv : *(importedModules->ToLispScope()))
 		{
-			foundValue = (*module)[funcName];
-			return true;
+			var module = /*(LispScope)*/kv.second->ToLispScope();
+			if (module->ContainsKey(funcName))
+			{
+				foundValue = (*module)[funcName];
+				return true;
+			}
 		}
 	}
 	return false;
@@ -1138,8 +1231,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[Lambda] = CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	
 	(*scope)[Fn] = CreateFunction(fn_form, "(fn (arguments) block)", "Returns a function.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
-	//(*scope)[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
-	//(*scope)[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "Defines a function in the global scope.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);	
+	(*scope)[Defn] = CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)[Gdefn] = CreateFunction(gdefn_form, "(gdefn name (args) block)", "Defines a function in the global scope.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);	
 
 	(*scope)["do"] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 

@@ -68,7 +68,7 @@ namespace CsLisp
 			// set tokens at LispScope to improve debugging and 
 			// support displaying of error position 
 			var tokens = LispTokenizer::Tokenize(code, offset);
-			if (scope != null)
+			if (scope.get() != null)
 			{
 				scope->Tokens = tokens;
 				moduleName = scope->ModuleName;

@@ -41,75 +41,93 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_Comments)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\") ; a comment\n(println; separate lists with comments\n\"world\"));comment in last line", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\") ; a comment\n(println; separate lists with comments\n\"world\"));comment in last line");
 			Assert::AreEqual("world", result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_DoAndPrint)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\")\n (println \"world\"))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\")\n (println \"world\"))");
 			Assert::AreEqual("world", result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_PrintLnMultilines)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\nworld\"))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\nworld\"))");
 			Assert::AreEqual("hello\nworld", result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_PrintTrace)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))");
 			Assert::AreEqual("hello world17", result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_If1)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(if #t (+ 1 2) (- 3 5))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if #t (+ 1 2) (- 3 5))");
 			Assert::AreEqual(3, result->ToInt());
 		}
 
 		TEST_METHOD(Test_If2)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(if #f (* 1 0) (/ 6 3))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if #f (* 1 0) (/ 6 3))");
 			Assert::AreEqual(2, result->ToInt());
 		}
 
 		TEST_METHOD(Test_If3)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1 0)", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1 0)");
 			Assert::AreEqual(1, result->ToInt());
 		}
 
 		TEST_METHOD(Test_If4)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(if false 1 0)", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if false 1 0)");
 			Assert::AreEqual(0, result->ToInt());
 		}
 
 		TEST_METHOD(Test_If5)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1)", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1)");
 			Assert::AreEqual(1, result->ToInt());
-			result = Lisp::Eval("(if false 1)", 0, "test");
+			result = Lisp::Eval("(if false 1)");
 			Assert::IsNull(result.get());
 		}
 
 		TEST_METHOD(Test_While1)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))");
 			Assert::AreEqual(10, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Setf1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (setf (first (list 'a 'b 'c)) 9))");
+			Assert::AreEqual(9, result->ToInt());
 		}
 
 		TEST_METHOD(Test_Defn1)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def g_prn \"START:\") (defn prn (x) (setf g_prn (add g_prn x))) (prn \"34\") (println g_prn))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def g_prn \"START:\") (defn prn (x) (setf g_prn (add g_prn x))) (prn \"34\") (println g_prn))");
 			Assert::AreEqual("START:34", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_DefWithNil)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a nil) (println a))");
+			Assert::AreEqual(LispToken::NilConst.c_str(), result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Fn)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def f (fn (x) (+ x x 1))) (println (f 8)))");
+			Assert::AreEqual(17, result->ToInt());
 		}
 
 		TEST_METHOD(Test_Map)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(map (lambda (x) (+ x 1)) '(1 2 3))", 0, "test");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(map (lambda (x) (+ x 1)) '(1 2 3))");
 			Assert::AreEqual("(2 3 4)", result->ToString().c_str());
 		}
 
