@@ -1062,7 +1062,7 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::GetExpres
 	{
 		return item->ToLispVariant()->ListValue(); // ((LispVariant)item).ListValue;
 	}
-	if (item->IsIEnumerableOfObject() /*is IEnumerable<object>*/)
+	if (item->IsIEnumerableOfObject() /*is IEnumerable<object>*/ || item->IsList())
 	{
 		return item->ToList(); // (IEnumerable<object>)item;
 	}
