@@ -76,6 +76,22 @@ namespace CsLisp
 			return std::list<T>::back();
 		}
 
+		const T & ElementAt(int index) const
+		{
+			std::vector<T> aCopy(begin(), end());
+			return aCopy[index];
+		}
+
+		IEnumerable<T> Skip(int skipNoOfElements)
+		{
+			IEnumerable<T> temp(*this);
+			for (int i = 0; i < skipNoOfElements; i++)
+			{
+				temp.pop_front();
+			}
+			return temp;
+		}
+
 		bool SequenceEqual(const IEnumerable & other) const
 		{
             if (this->size() == other.size())
@@ -144,6 +160,14 @@ namespace CsLisp
 	class Tuple : std::pair<T1, T2>
 	{
 	public:
+		T1 Item1() const
+		{
+			return std::pair<T1, T2>::first;
+		}
+		T2 Item2() const
+		{
+			return std::pair<T1, T2>::second;
+		}
 	};
 
 	class TextWriter

@@ -79,6 +79,20 @@ namespace CsLisp
 		void AddTokenInfos(std::shared_ptr<LispToken> token)
 		{
 		}
+
+		string ToString() const
+		{
+			return "EXCEPTION: " + Message;
+		}
+	};
+
+	/*public*/ class LispStopDebuggerException : LispException
+	{
+	public:
+		LispStopDebuggerException(const string & text = "")
+			: /*base*/LispException(text)
+		{
+		}
 	};
 }
 

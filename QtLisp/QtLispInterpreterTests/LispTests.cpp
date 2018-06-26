@@ -94,5 +94,32 @@ namespace QtLispUnitTests
 			result = Lisp::Eval("(if false 1)", 0, "test");
 			Assert::IsNull(result.get());
 		}
+
+		TEST_METHOD(Test_While1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))", 0, "test");
+			Assert::AreEqual(10, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Defn1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def g_prn \"START:\") (defn prn (x) (setf g_prn (add g_prn x))) (prn \"34\") (println g_prn))", 0, "test");
+			Assert::AreEqual("START:34", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Map)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(map (lambda (x) (+ x 1)) '(1 2 3))", 0, "test");
+			Assert::AreEqual("(2 3 4)", result->ToString().c_str());
+		}
+
+		/*
+		TEST_METHOD(Test_MapError1)
+		//[ExpectedException(typeof(LispException))]
+		public void Test_MapError1()
+		{
+			Lisp.Eval("(map 4 '(1 2 3))");
+		}
+		*/
 	};
 }

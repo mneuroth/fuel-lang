@@ -284,7 +284,15 @@ namespace CsLisp
 
 		//#endregion
 
-		bool operator ==(const LispToken & other) const;
+		bool operator ==(const LispToken & other) const
+		{
+			bool isEqual = Type == other.Type &&
+						   ToString() == other.ToString() &&
+						   StartPos == other.StartPos &&
+						   StopPos == other.StopPos &&
+						   LineNo == other.LineNo;
+			return isEqual;
+		}
 
 		//#region public methods
 

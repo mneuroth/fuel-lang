@@ -117,7 +117,7 @@ namespace CsLisp
         /// Gets or sets the user documentation information.
         /// </summary>
         /// <value>The user documentation.</value>
-		/*public*/ Tuple<string, string> UserDoc; // { get; set; }
+		/*public*/ std::shared_ptr<Tuple<string, string>> UserDoc; // { get; set; }
 
         //#endregion
 
@@ -276,7 +276,7 @@ namespace CsLisp
         /// <param name="symbolName">Name of the symbol.</param>
         /// <param name="value">The value.</param>
         /// <exception cref="LispException">Symbol  + symbolName +  not found</exception>
-        /*public*/ void SetInScopes(string symbolName, std::shared_ptr<object> value)
+        /*public*/ void SetInScopes(const string & symbolName, std::shared_ptr<object> value)
         {
 			std::shared_ptr<LispScope> foundClosureScope;
             if (!string::IsNullOrEmpty(symbolName) && ContainsKey(symbolName))
