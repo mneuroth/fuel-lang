@@ -113,6 +113,119 @@ namespace QtLispUnitTests
 			Assert::AreEqual("START:34", result->ToString().c_str());
 		}
 
+		TEST_METHOD(Test_AddString)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(+ \"abc\" \"def() ; blub\" \"xxx\")");
+			Assert::AreEqual("abcdef() ; blubxxx", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_AddLists)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(+ '(1 2 3) '(\"hello world\" 2.3 42))");
+			string s = result->ToString();
+			Assert::AreEqual("(1 2 3 \"hello world\" 2.300000 42)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_ListFirst)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(first '(1 2 3))");
+			Assert::AreEqual(1, result->ToInt());
+		}
+
+		TEST_METHOD(Test_ListCar)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(car '(\"abc\" 2 3))");
+			Assert::AreEqual("abc", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_ListRest)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(rest '(1 2 3))");
+			Assert::AreEqual("(2 3)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_ListCdr)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(cdr '(\"nix\" 1 2 3))");
+			Assert::AreEqual("(1 2 3)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_ListLength)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(len '(1 2 3))");
+			Assert::AreEqual(3, result->ToInt());
+		}
+
+		TEST_METHOD(Test_ListAppend)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(append (list 4 54 3) (list 7 9))");
+			Assert::AreEqual("(4 54 3 7 9)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_LogicalOperators)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(list (and #t #f) (and #t #t) (or #t #f) (or #f #f) (or #t #f #t))");
+			Assert::AreEqual("(#f #t #t #f #t)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_CompareOperators1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(list (= 1 2) (= 4 4) (== \"blub\" \"blub\") (== #t #f) (equal 3 4))");
+			Assert::AreEqual("(#f #t #t #f #f)", result->ToString().c_str());
+			result = Lisp::Eval("(do (def a ()) (== a ()))");
+			Assert::AreEqual(true, result->BoolValue());
+			result = Lisp::Eval("(do (def a 42) (== a ()))");
+			Assert::AreEqual(false, result->BoolValue());
+			result = Lisp::Eval("(do (def a blub) (def b nix) (== a b))");
+			Assert::AreEqual(false, result->BoolValue());
+			result = Lisp::Eval("(do (def a blub) (def b blub) (== a b))");
+			Assert::AreEqual(true, result->BoolValue());
+			result = Lisp::Eval("(do (def a blub) (def b blub) (== a b))");
+			Assert::AreEqual(true, result->BoolValue());
+			result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 2 3 4)) (== a b))");
+			Assert::AreEqual(false, result->BoolValue());
+			result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 1 2 3)) (== a b))");
+			Assert::AreEqual(true, result->BoolValue());
+			result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 1 (sym 2) 3)) (== a b))");
+			Assert::AreEqual(false, result->BoolValue());
+			result = Lisp::Eval("(do (def a blub) (def b nix) (!= a b))");
+			Assert::AreEqual(true, result->BoolValue());
+			result = Lisp::Eval("(do (def a 7) (def b 7) (!= a b))");
+			Assert::AreEqual(false, result->BoolValue());
+		}
+
+		TEST_METHOD(Test_CompareOperators2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(list (< 1 2) (< 4 1) (> 5 2) (> 1 3) (> 4.0 4.0))");
+			Assert::AreEqual("(#t #f #t #f #f)", result->ToString().c_str());
+			result = Lisp::Eval("(do (def a \"abc\") (def b \"def\") (< a b))");
+			Assert::AreEqual(true, result->BoolValue());
+			result = Lisp::Eval("(do (def a \"abc\") (def b \"abc\") (< a b))");
+			Assert::AreEqual(false, result->BoolValue());
+			result = Lisp::Eval("(do (def a \"abc\") (def b \"def\") (<= a b))");
+			Assert::AreEqual(true, result->BoolValue());
+			result = Lisp::Eval("(do (def a \"abc\") (def b \"abc\") (<= a b))");
+			Assert::AreEqual(true, result->BoolValue());
+		}
+
+		TEST_METHOD(Test_CompareOperators3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(list (<= 1 2) (<= 4 1) (>= 5 2) (>= 1 3) (>= 4.0 4.0) (<= 42 42))");
+			Assert::AreEqual("(#t #f #t #f #t #t)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Not)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(list (! #t) (not #t) (not #f) (! #f))");
+			Assert::AreEqual("(#f #f #t #t)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Arithmetric1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(+ 1 2 3 4)");
+			Assert::AreEqual(10, result->ToInt());
+		}
+
 		TEST_METHOD(Test_DefWithNil)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a nil) (println a))");
@@ -136,7 +249,7 @@ namespace QtLispUnitTests
 		//[ExpectedException(typeof(LispException))]
 		public void Test_MapError1()
 		{
-			Lisp.Eval("(map 4 '(1 2 3))");
+			Lisp::Eval("(map 4 '(1 2 3))");
 		}
 		*/
 	};

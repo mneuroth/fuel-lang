@@ -94,6 +94,8 @@ namespace CsLisp
 				return LispType::_Undefined;
 			case ObjectType::__Error:
 				return LispType::_Error;
+			default:
+				return LispType::_Undefined;
 		}
 	}
 
@@ -614,6 +616,9 @@ namespace CsLisp
             list->Add(value);
         }
 
+		bool operator==(const LispVariant & other) const;
+		bool operator!=(const LispVariant & other) const;
+
         /*public*/ inline /*static*/ LispVariant operator+(const LispVariant & r)
         {
             if (IsString() || r.IsString())
@@ -630,9 +635,9 @@ namespace CsLisp
             }
             if (IsList() && r.IsList())
             {
-                var newList = new IEnumerable<std::shared_ptr<object>>();
-                newList->AddRange(*(ListValue()));
-                newList->AddRange(*(r.ListValue()));
+				IEnumerable<std::shared_ptr<object>> newList;
+				newList.AddRange(*(ListValue()));
+                newList.AddRange(*(r.ListValue()));
                 return /*new*/ LispVariant(std::make_shared<object>(newList));
             }
             throw CreateInvalidOperationException("+", *this, r);

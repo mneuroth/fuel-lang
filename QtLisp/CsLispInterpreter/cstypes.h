@@ -47,6 +47,7 @@ namespace CsLisp
 	typedef std::function<void()> Action;
 	typedef std::function<std::shared_ptr<LispVariant>(std::vector<std::shared_ptr<object>>, std::shared_ptr<LispScope>)> FuncX;
 
+// TODO --> pruefen ob man IEnumerable ueberhaupt braucht oder nicht direct list verwendet --> Komplexitaet reduzieren
 	template <class T>
 	class IEnumerable : public std::list<T>
 	{
@@ -99,7 +100,9 @@ namespace CsLisp
 				var iter2 = other.begin();
                 for (var iter = this->begin(); iter != this->end(); ++iter)
 				{
-					if (*iter != *iter2)
+					const T & val1 = *iter;
+					const T & val2 = *iter2;
+					if (*val1 != *val2)
 					{
 						return false;
 					}

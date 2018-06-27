@@ -93,6 +93,59 @@ namespace CsLisp
 		CleanUpMemory();
 	}
 
+	bool object::operator==(const object & other) const
+	{
+		if (GetType() == other.GetType())
+		{
+			switch (m_Type)
+			{
+				case __Undefined:
+					return true;
+				case __Nil:
+					return true;
+				case __Bool:
+					return (bool)(*this)==(bool)other;
+				case __Int:
+					return (int)(*this) == (int)other;
+				case __Double:
+					return (double)(*this) == (double)other;
+				case __String:
+					return ToString() == other.ToString();
+				case __List:
+					return ToList() == other.ToList();
+				case __Function:
+					return false;
+				case __Symbol:
+					return ToString() == other.ToString();
+				case __NativeObject:
+					return false;
+					//__Array = 10,
+				case __LispVariant:
+					return *(ToLispVariant()) == *(other.ToLispVariant());
+				case __LispFunctionWrapper:
+					return false;
+				case __LispToken:
+					return ToString() == other.ToString();
+				case __IEnumerableOfObject:
+					return *(ToList()) == *(other.ToList());
+				case __VoidPtr:
+					return true;
+				case __LispScope:
+					return *(ToLispScope()) == *(other.ToLispScope());
+				case __Error:
+					return false;
+				default:
+					return false;
+			}
+		}
+		return false;
+	}
+
+	bool object::operator!=(const object & other) const
+	{
+		return !(*this == other);
+	}
+
 	void object::CleanUpMemory()
 	{
 		if (IsLispVariant())
@@ -173,56 +226,58 @@ namespace CsLisp
 	{
 		switch (m_Type)
 		{
-		case __Undefined:
-			return "Undefined";
-		case __Nil:
-			return "Nil";
-		case __Bool:
-			return m_Data.b ? "true" : "false";
-		case __Int:
-			return std::to_string(m_Data.i);
-		case __Double:
-			return std::to_string(m_Data.d);
-		case __String:
-			return *(m_Data.pString);
+			case __Undefined:
+				return "Undefined";
+			case __Nil:
+				return "Nil";
+			case __Bool:
+				return m_Data.b ? "true" : "false";
+			case __Int:
+				return std::to_string(m_Data.i);
+			case __Double:
+				return std::to_string(m_Data.d);
+			case __String:
+				return *(m_Data.pString);
 // TODO --> ToString fuer weitere Datentypen realisieren
-		case __List:
-			{
-				string result = "(";
-				if (IsList())
+			case __List:
 				{
-					for (var elem : *(m_Data.pList))
+					string result;
+					if (IsList())
 					{
-						result += elem->ToString();
-						result += ", ";
+						for (var elem : *(m_Data.pList))
+						{
+							if (result.size() > 0)
+							{
+								result += " ";
+							}
+							result += elem->ToString();
+						}
 					}
-				}
-				result += ")";
-				return result;
-		}
-		case __Function:
-			return "Function";
-		case __Symbol:
-			return "Symbol";
-		case __NativeObject:
-			return "NativeObject";
-			//__Array = 10,
-		case __LispVariant:
-			return m_Data.pVariant->ToString();
-		case __LispFunctionWrapper:
-			return "LispFunctionWrapper";
-		case __LispToken:
-			return "LispToken";
-		case __IEnumerableOfObject:
-			return "IEnumerableOfObject";
-		case __VoidPtr:
-			return "VoidPtr";
-		case __LispScope:
-			return "LispScope";
-		case __Error:
-			return "Error";
-		default:
-			return "<unknown>";
+					return "(" + result + ")";
+			}
+			case __Function:
+				return "Function";
+			case __Symbol:
+				return "Symbol";
+			case __NativeObject:
+				return "NativeObject";
+				//__Array = 10,
+			case __LispVariant:
+				return m_Data.pVariant->ToString();
+			case __LispFunctionWrapper:
+				return "LispFunctionWrapper";
+			case __LispToken:
+				return "LispToken";
+			case __IEnumerableOfObject:
+				return "IEnumerableOfObject";
+			case __VoidPtr:
+				return "VoidPtr";
+			case __LispScope:
+				return "LispScope";
+			case __Error:
+				return "Error";
+			default:
+				return "<unknown>";
 		}
 	}
 

@@ -171,7 +171,7 @@ namespace CsLisp
 	{
 		string ret = string::Empty;
 
-		if (maybeContainer->IsIEnumerableOfObject())
+		if (maybeContainer->IsIEnumerableOfObject() || maybeContainer->IsList())
 		{
 			var container = maybeContainer->ToEnumerableOfObject();
 			for (var item = container.begin(); item != container.end(); item++) // foreach(var item in container)
@@ -190,6 +190,16 @@ namespace CsLisp
 		}
 
 		return ret;
+	}
+
+	bool LispVariant::operator==(const LispVariant & r) const
+	{
+		return *Value == *(r.Value);
+	}
+
+	bool LispVariant::operator!=(const LispVariant & other) const
+	{
+		return !(*this == other);
 	}
 
 }

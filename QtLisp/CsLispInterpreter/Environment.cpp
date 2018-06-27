@@ -95,6 +95,20 @@ static void CheckArgs(const string & name, int count, const std::vector<std::sha
 	}
 }
 
+static const std::vector<std::shared_ptr<object>> GetCallArgs(const std::vector<std::shared_ptr<object>> & args)
+{
+	std::vector<std::shared_ptr<object>> callArgs(args.size() > 1 ? args.size() - 2 : 0);
+	if (args.size() > 2)
+	{
+		//Array.Copy(args, 2, callArgs, 0, args.Length - 2);
+		for (size_t i = 2; i < args.size(); i++)
+		{
+			callArgs[i - 2] = args[i];
+		}
+	}
+	return callArgs;
+}
+
 static std::shared_ptr<object> CreateFunction(FuncX func, const string & signature = /*null*/"", const string & documentation = /*null*/"", bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, const string & moduleName = "Builtin")
 {
 	LispFunctionWrapper wrapper;
@@ -107,7 +121,7 @@ static std::shared_ptr<object> CreateFunction(FuncX func, const string & signatu
 
 static std::shared_ptr<LispVariant> EvalArgIfNeeded(std::shared_ptr<object> arg, std::shared_ptr<LispScope> scope)
 {
-	return (arg->IsIEnumerableOfObject() /*is IEnumerable<object>*/) ? LispInterpreter::EvalAst(arg, scope) : arg->ToLispVariant();
+	return (arg->IsIEnumerableOfObject() /*is IEnumerable<object>*/ || arg->IsList()) ? LispInterpreter::EvalAst(arg, scope) : arg->ToLispVariant();
 }
 
 static std::shared_ptr<LispVariant> def_form_helper(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & name, std::shared_ptr<LispScope> scopeToSet)
@@ -708,6 +722,20 @@ static std::shared_ptr<LispVariant> setf_form(const std::vector<std::shared_ptr<
 	return value;
 }
 
+static std::shared_ptr<LispVariant> definemacroevaluate_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs(DefineMacroEval, 3, args, scope);
+
+	var macros = (*(scope->GlobalScope))[LispEnvironment::Macros]->ToLispScope() /*as LispScope*/;
+	if (macros.get() != null)
+	{
+// TODO --> implement
+//		(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroRuntimeEvaluate(args[1], args[2]));
+	}
+
+	return null;
+}
+
 static std::shared_ptr<LispVariant> quote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs(Quote, 1, args, scope);
@@ -1002,6 +1030,42 @@ static std::shared_ptr<LispVariant> defn_form(const std::vector<std::shared_ptr<
 static std::shared_ptr<LispVariant> gdefn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	return defn_form_helper(args, scope, Gdef);
+}
+
+static std::shared_ptr<LispVariant> CallStaticNative(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	var className = args[0]->ToLispVariant();
+	var methodName = args.size() > 1 ? args[1]->ToString() : string::Empty;
+
+	if (className->IsString() || className->IsSymbol())
+	{
+		var callArgs = GetCallArgs(args);
+
+// TODO --> implement
+		//Type nativeClass = Type.GetType(className.ToString());
+		//if (nativeClass != null)
+		//{
+		//	MethodInfo method;
+		//	try
+		//	{
+		//		method = nativeClass.GetMethod(methodName);
+		//	}
+		//	catch (AmbiguousMatchException)
+		//	{
+		//		// process overloaded methods, try to resolve method via types of given arguments
+		//		// example: Math-Abs, File-Exits, ...
+		//		var callArgsTypes = GetTypes(callArgs);
+		//		method = nativeClass.GetMethod(methodName, callArgsTypes);
+		//	}
+		//	if (method != null)
+		//	{
+		//		ParameterInfo[] parameterInfos = method.GetParameters();
+		//		object result = method.Invoke(null, ConvertAllToNative(callArgs, parameterInfos));
+		//		return new LispVariant(result);
+		//	}
+		//}
+	}
+	//throw new LispException("Bad static method " + methodName + " for class " + className, scope);
 }
 
 // ************************************************************************

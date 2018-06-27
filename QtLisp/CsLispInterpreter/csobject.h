@@ -156,6 +156,10 @@ namespace CsLisp
 		explicit object(const LispVariant & value);
 
 		~object();
+
+		bool operator==(const object & other) const;
+		bool operator!=(const object & other) const;
+
 /*
 		object& operator=(const std::string & other)
 		{
@@ -275,6 +279,11 @@ namespace CsLisp
 	class LispMacroRuntimeEvaluate
 	{
 	public:
+		LispMacroRuntimeEvaluate(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parameters, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression)
+		{
+			Expression = expression;
+		}
+
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> FormalArguments;
 
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Expression;
