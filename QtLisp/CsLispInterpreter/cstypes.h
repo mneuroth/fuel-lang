@@ -78,7 +78,7 @@ namespace CsLisp
 
 		const T & ElementAt(int index) const
 		{
-			std::vector<T> aCopy(begin(), end());
+            std::vector<T> aCopy(std::list<T>::begin(), std::list<T>::end());
 			return aCopy[index];
 		}
 

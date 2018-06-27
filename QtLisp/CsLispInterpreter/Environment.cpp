@@ -568,7 +568,7 @@ static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<obj
 	return result;
 }
 
-static std::shared_ptr<LispVariant> Symbol(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> SymbolFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs(LispEnvironment::Sym, 1, args, scope);
 
@@ -1039,10 +1039,19 @@ std::shared_ptr<object> LispEnvironment::GetFunctionInModules(const string & fun
 	return result;
 }
 
+static bool ExistsItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, const string & key)
+{
+    if (scope.get() != null &&
+        scope->ContainsKey(key))
+    {
+        return (*scope)[key]->ToLispScope()->ContainsKey(funcName->ToString());
+    }
+    return false;
+}
+
 bool LispEnvironment::IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
 {
-	return false;
-	//return ExistsItem(funcName, scope, LispEnvironment::Macros);
+    return ExistsItem(funcName, scope, LispEnvironment::Macros);
 }
 
 std::shared_ptr<object> LispEnvironment::GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope)
@@ -1053,7 +1062,7 @@ std::shared_ptr<object> LispEnvironment::GetMacro(std::shared_ptr<object> funcNa
 bool LispEnvironment::IsExpression(std::shared_ptr<object> item)
 {
 	return (item->IsLispVariant() /*is LispVariant*/ && item->IsList()) ||
-		(item->IsIEnumerableOfObject());
+           (item->IsIEnumerableOfObject());
 }
 
 std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::GetExpression(std::shared_ptr<object> item)
@@ -1099,16 +1108,6 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 	return null;
 }
 
-static bool ExistsItem(std::shared_ptr<object> funcName, LispScope * scope, const string & key)
-{
-	if (scope != null &&
-		scope->ContainsKey(key))
-	{
-		return (*scope)[key]->ToLispScope()->ContainsKey(funcName->ToString());
-	}
-	return false;
-}
-
 /*private static*/ std::shared_ptr<object> LispEnvironment::QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key)
 {
 	if (scope != null &&
@@ -1137,7 +1136,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
 	(*scope)["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
 	(*scope)["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
-//	(*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
+    (*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
 	(*scope)["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");
 
 	// access to .NET
@@ -1192,7 +1191,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");
 	(*scope)["nth"] = CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list.");
 	(*scope)["append"] = CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements.");
-	//(*scope)[Sym] = CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol.");
+    (*scope)[Sym] = CreateFunction(SymbolFcn, "(sym expr)", "Returns the evaluated expression as symbol.");
 	(*scope)[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
 
 	(*scope)[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of command line arguments for this script.");
