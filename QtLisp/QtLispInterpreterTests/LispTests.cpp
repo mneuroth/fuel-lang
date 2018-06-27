@@ -33,6 +33,13 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace CsLisp;
 
+#include <math.h>
+
+double Math_Round(double val)
+{
+	return round(val);
+}
+
 namespace QtLispUnitTests
 {
 	TEST_CLASS(UnitTestLisp)
@@ -95,16 +102,101 @@ namespace QtLispUnitTests
 			Assert::IsNull(result.get());
 		}
 
-		TEST_METHOD(Test_While1)
-		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))");
-			Assert::AreEqual(10, result->ToInt());
-		}
-
 		TEST_METHOD(Test_Setf1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (setf (first (list 'a 'b 'c)) 9))");
 			Assert::AreEqual(9, result->ToInt());
+		}
+
+		TEST_METHOD(Test_DefWithNil)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a nil) (println a))");
+			Assert::AreEqual(LispToken::NilConst.c_str()	, result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Fn)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def f (fn (x) (+ x x 1))) (println (f 8)))");
+			Assert::AreEqual(17, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Gdef)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (gdef z (+ x x))) (f 8) (println z))");
+			Assert::AreEqual(16, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Gdefn)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (gdefn g (x) (+ x x))) (f 2) (g 8))");
+			Assert::AreEqual(16, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Eval1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(eval (list 'def 'x 43))");
+			Assert::AreEqual(43, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Eval2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(eval '(def x 456))");
+			Assert::AreEqual(456, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Eval3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(eval #t)");
+			Assert::AreEqual(true, result->ToBool());
+			result = Lisp::Eval("(eval 42)");
+			Assert::AreEqual(42, result->ToInt());
+		}
+
+		TEST_METHOD(Test_EvalStr)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(evalstr \"(def x 456)\")");
+			Assert::AreEqual(456, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Doc)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(doc 'if)");
+			var s = result->ToString();
+			Assert::IsTrue(s.Contains("-------------------------------------------------"));
+			Assert::IsTrue(s.Contains("if  [special form]"));
+			Assert::IsTrue(s.Contains("Syntax: (if cond then-block [else-block])"));
+			Assert::IsTrue(s.Contains("The if statement."));
+		}
+
+		TEST_METHOD(Test_DocForDefn)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("; this is a fcn documenataion\n(defn blub (x) (+ x 1))\n(doc 'blub)");
+			var s = result->ToString();
+			Assert::IsTrue(s.Contains("-------------------------------------------------"));
+			Assert::IsTrue(s.Contains("blub"));
+			Assert::IsTrue(s.Contains("Syntax: (blub x)"));
+			Assert::IsTrue(s.Contains("; this is a fcn documenataion"));
+		}
+
+		TEST_METHOD(Test_NoAutoDocForDefn)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(defn blub (x y ) (+ x y 1))\n(doc 'blub)");
+			var s = result->ToString();
+			Assert::IsTrue(s.Contains("-------------------------------------------------"));
+			Assert::IsTrue(s.Contains("blub"));
+			Assert::IsTrue(s.Contains("Syntax: (blub x y)"));
+		}
+
+		TEST_METHOD(Test_TickCount)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(tickcount)");
+			Assert::IsTrue(result->IsInt());
+		}
+
+		TEST_METHOD(Test_While1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))");
+			Assert::AreEqual(10, result->ToInt());
 		}
 
 		TEST_METHOD(Test_Defn1)
@@ -226,22 +318,188 @@ namespace QtLispUnitTests
 			Assert::AreEqual(10, result->ToInt());
 		}
 
-		TEST_METHOD(Test_DefWithNil)
+		TEST_METHOD(Test_Arithmetric2)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a nil) (println a))");
-			Assert::AreEqual(LispToken::NilConst.c_str(), result->ToString().c_str());
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(+ 1.1 2.2 3.3 4.3)");
+			int res = (int)Math_Round(result->ToDouble() * 10.0);
+			Assert::AreEqual(109, res);
 		}
 
-		TEST_METHOD(Test_Fn)
+		TEST_METHOD(Test_Arithmetric3)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def f (fn (x) (+ x x 1))) (println (f 8)))");
-			Assert::AreEqual(17, result->ToInt());
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(* 3 8 2)");
+			Assert::AreEqual(48, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Arithmetric4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(/ 1.0 2.0)");
+			int res = (int)Math_Round(result->ToDouble() * 10.0);
+			Assert::AreEqual(5, res);
+		}
+
+		TEST_METHOD(Test_Arithmetric5)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(/ 10 2)");
+			Assert::AreEqual(5, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Arithmetric6)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(- 42 12 6)");
+			Assert::AreEqual(24, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Arithmetric7)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(- 42.5 0.5)");
+			int res = (int)Math_Round(result->ToDouble() * 10.0);
+			Assert::AreEqual(420, res);
+		}
+
+		TEST_METHOD(Test_Arithmetric8)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(sub 42.5 1.5 2.0)");
+			int res = (int)Math_Round(result->ToDouble() * 10.0);
+			Assert::AreEqual(390, res);
+		}
+
+		TEST_METHOD(Test_Arithmetric9)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(div 12 3)");
+			Assert::AreEqual(4, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Arithmetric10)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(mul 2 3 4)");
+			Assert::AreEqual(24, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Arithmetric11)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(add 2 3 4)");
+			Assert::AreEqual(9, result->ToInt());
+		}
+
+		TEST_METHOD(Test_MacrosSetf2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (defn my-setf (x value) (setf x value)) (my-setf a (+ 8 9)) (println a))");
+			Assert::AreEqual(42, result->ToInt());
+		}
+
+		TEST_METHOD(Test_MacrosSetf3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (define-macro-eval my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))");
+			Assert::AreEqual("blubxyz", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a '(42 99 102 \"hello\")) (def b 55) (println (type a)) (println (nth 3 `(1 2 3 ,@a))))");
+			Assert::AreEqual("42", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (println `(1 2 3 ,a)))");
+			Assert::AreEqual("(1 2 3 42)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (def lst (list 6 8 12)) (println (quasiquote (1 2 3 ,a ,@lst))))");
+			Assert::AreEqual("(1 2 3 42 6 8 12)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (def lst (list 6 8 12)) (println (quasiquote (1 2 3 ,a ,lst))))");
+			Assert::AreEqual("(1 2 3 42 (6 8 12))", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quote1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def x 42) (println 'x))");
+			Assert::AreEqual("x", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_String1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(println \"hello \\\\ \\' צהü \n \\\"blub\\\"\")");
+			Assert::AreEqual("hello \\ ' צהü \n \"blub\"", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_String2)
+		{
+			std::shared_ptr<LispVariant>  result = Lisp::Eval("(string \"hello\" \"-\" \"world\")");
+			Assert::AreEqual("hello-world", result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_Map)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(map (lambda (x) (+ x 1)) '(1 2 3))");
 			Assert::AreEqual("(2 3 4)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Reduce1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(reduce (lambda (x y) (+ x y)) '(1 2 3) 0)");
+			Assert::AreEqual(6, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Reduce2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(reduce (lambda (x y) (* x y)) '(2 3 4 5) 2)");
+			Assert::AreEqual(240, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Closure1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn addx (delta) (lambda (x) (+ x delta))) (def addclosure (addx 41)) (println (addclosure 1)))");
+			Assert::AreEqual(42, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Closure2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn g (x) (do (+ x 2))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+			Assert::AreEqual(13, result->	ToInt());
+		}
+
+		TEST_METHOD(Test_RecursiveCall1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn addConst (x a) (+ x a)) (def add2 (lambda (x) (addConst x 2))) (println (addConst 8 2)) (println (add2 4)))");
+			Assert::AreEqual(6, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Return1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (return (+ x x))) (println (f 7)))");
+			Assert::AreEqual(14, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Apply1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(apply (lambda (x) (println \"hello\" x)) '(55))");
+			Assert::AreEqual("hello 55", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Apply2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def f (lambda (x) (+ x x))) (apply f '(5)))");
+			Assert::AreEqual(10, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Apply3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def f '+) (apply f '(5 6 7)))");
+			Assert::AreEqual(18, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Args1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (+ x x))) (f 5 6 7))");
+			Assert::AreEqual(10, result->ToInt());
 		}
 
 		/*

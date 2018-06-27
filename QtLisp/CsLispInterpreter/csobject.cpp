@@ -402,32 +402,55 @@ namespace CsLisp
 	void TextWriter::Write(const string & txt)
 	{
 		// TODO --> IMPLEMENT !
+		if (m_bToString)
+		{
+			m_sText += txt;
+		}
 	}
 
 	void TextWriter::WriteLine(const string & txt)
 	{
 // TODO --> IMPLEMENT !
+		if (m_bToString)
+		{
+			m_sText += txt + "\n";
+		}
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1)
 	{
 // TODO --> IMPLEMENT !
+		if (m_bToString)
+		{
+			m_sText += txt1 + "\n";
+		}
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2)
 	{
 // TODO --> IMPLEMENT !
+		if (m_bToString)
+		{
+			m_sText += txt + "\n";
+		}
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3)
 	{
 		// TODO --> IMPLEMENT !
+		if (m_bToString)
+		{
+			m_sText += txt + "\n";
+		}
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3, const string & txt4)
 	{
 		// TODO --> IMPLEMENT !
+		if (m_bToString)
+		{
+			m_sText += txt + "\n";
+		}
 	}
-
 }
 

@@ -170,10 +170,11 @@ static std::shared_ptr<LispVariant> Help(const std::vector<std::shared_ptr<objec
 
 static std::shared_ptr<LispVariant> DumpDocumentation(std::shared_ptr<LispScope> scope, Action dump)
 {
-	string text; // var text = new StringBuilder();
+	//string text; // var text = new StringBuilder();
 	var tempOutputWriter = scope->GlobalScope->Output;
-// TODO implement	scope->GlobalScope->Output = new StringWriter(text);
+	scope->GlobalScope->Output = TextWriter(true); // StringWriter(text);
 	dump();
+	string text = scope->GlobalScope->Output.GetContent();
 	scope->GlobalScope->Output = tempOutputWriter;
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
@@ -1276,9 +1277,9 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	// there are two options possible:
 	//  - run time evaluation of macros
 	//  - compile time replacement/expanding of macros
-	//(*scope)[DefineMacro] = CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)[DefineMacro] = CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	// run time evaluation for macros:
-	//(*scope)[DefineMacroEval] = CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)[DefineMacroEval] = CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	#if ENABLE_COMPILE_TIME_MACROS
 	// compile time expand for macros:
 	(*scope)[DefineMacroExpand] = CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", /*isSpecialForm:*/ true, /*isEvalInExpand:*/ true);

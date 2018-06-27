@@ -179,7 +179,19 @@ namespace CsLisp
 
 	class TextWriter
 	{
+	private:
+		bool m_bToString;
+		string m_sText;
+
 	public:
+		TextWriter(bool bToString = false)
+			: m_bToString(bToString)
+		{
+		}
+		string GetContent() const
+		{
+			return m_sText;
+		}
 		void Write(const string & txt);
 		void WriteLine(const string & txt);
 		void WriteLine(const string & txt, const string & txt1);
@@ -234,12 +246,16 @@ namespace CsLisp
 
 		/*public*/ string GetFormatedDoc() const
 		{
-			return "<TODO>";
+			const string separator = "\n\n";
+			const string splitter = "-------------------------------------------------" + separator;
+			return GetFormatedHelpString(separator, splitter);
 		}
 
 		/*public*/ string GetHtmlFormatedDoc() const
 		{
-			return "<TODO>";
+			const string separator = "<br><br>";
+			const string splitter = string("<hr>") + string("<br>");
+			return GetFormatedHelpString(separator, splitter, [](const string & s) -> string { return "<b>" + s + "</b>"; }, [](const string & s) -> string { return "<code>" + s + "</code>"; });
 		}
 
 		bool IsSpecialForm() const
@@ -249,6 +265,37 @@ namespace CsLisp
 		void SetSpecialForm(bool value)
 		{
 			m_bIsSpecialForm = value;
+		}
+
+	private:
+		string GetFormatedHelpString(const string & separator, const string & splitter, std::function<string(const string &)> nameDecorator = null, std::function<string(const string &)> syntaxDecorator = null) const 
+		{
+			if (nameDecorator == null)
+			{
+				nameDecorator = [](const string & s) -> string { return s; };
+			}
+			if (syntaxDecorator == null)
+			{
+				syntaxDecorator = [](const string & s) -> string { return s; };
+			}
+			string name = "???";
+			string signature = (!string::IsNullOrEmpty(Signature) ? Signature : string::Empty);
+			if (signature.size() > 0 && signature.StartsWith("("))
+			{
+				int len = signature.IndexOf(" ", "StringComparison.Ordinal");
+				// process commands like: (doc)
+				if (len < 0)
+				{
+					len = signature.IndexOf(")", "StringComparison.Ordinal") - 1;
+				}
+				name = nameDecorator(signature.Substring(1, len));
+			}
+			name += IsSpecialForm() ? " [special form]" : string::Empty;
+			name += separator;
+			string syntax = syntaxDecorator("Syntax: " + signature) + separator;
+			string doc = (!string::IsNullOrEmpty(Documentation) ? Documentation : "<not available>");
+			doc += separator;
+			return splitter + name + syntax + doc + "\n";
 		}
 	};
 
