@@ -502,6 +502,50 @@ namespace QtLispUnitTests
 			Assert::AreEqual(10, result->ToInt());
 		}
 
+		TEST_METHOD(Test_Cons1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(cons 1 2)");
+			Assert::AreEqual("(1 2)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Cons2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(cons 1 '(2 3 4))");
+			Assert::AreEqual("(1 2 3 4)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Cons3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(cons 12)");
+			Assert::AreEqual("(12)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Cons4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(cons)");
+			Assert::AreEqual("()", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Nop)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(nop)");
+			Assert::IsTrue(result->IsUndefined());
+		}
+
+		TEST_METHOD(Test_Symbol)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(sym a)");
+			Assert::IsTrue(result->IsSymbol());
+			Assert::AreEqual("a", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_Str)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(str abc)");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("abc", result->StringValue().c_str());
+		}
+
 		/*
 		TEST_METHOD(Test_MapError1)
 		//[ExpectedException(typeof(LispException))]
