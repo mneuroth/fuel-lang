@@ -42,7 +42,7 @@ double Math_Round(double val)
 
 namespace QtLispUnitTests
 {
-	TEST_CLASS(UnitTestLisp)
+	TEST_CLASS(UnitTestLispInterpreter)
 	{
 	public:
 
@@ -546,13 +546,123 @@ namespace QtLispUnitTests
 			Assert::AreEqual("abc", result->StringValue().c_str());
 		}
 
-		/*
 		TEST_METHOD(Test_MapError1)
-		//[ExpectedException(typeof(LispException))]
-		public void Test_MapError1()
 		{
-			Lisp::Eval("(map 4 '(1 2 3))");
+			try
+			{
+				Lisp::Eval("(map 4 '(1 2 3))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
 		}
-		*/
+
+		TEST_METHOD(TestLispException)
+		{
+			try
+			{
+				Lisp::Eval("(println \"hello\"))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_LispVariantToString)
+		{
+			LispVariant result(std::make_shared<object>("hello"));
+			string s = result.ToString();
+			Assert::AreEqual("hello", s.c_str());
+		}
+
+		TEST_METHOD(Test_LispScope1)
+		{
+			LispScope scope;
+			var result = scope.GetPreviousToken(std::make_shared<LispToken>("a", 0, 0, 1));
+			Assert::IsNull(result.get());
+		}
+
+		TEST_METHOD(Test_LispTokenToString)
+		{
+			LispToken token("(", 0, 1, 1);
+			string s = token.ToString();
+			Assert::AreEqual("(", s.c_str());
+		}
+
+		TEST_METHOD(Test_Type1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(type 7)");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(3, result->IntValue());
+		}
+
+		TEST_METHOD(Test_Type2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(type #f)");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(2, result->IntValue());
+		}
+
+		TEST_METHOD(Test_Type3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(type '(2 3 1))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(6, result->IntValue());
+		}
+
+		TEST_METHOD(Test_Type4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(type aSymbol)");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(8, result->IntValue());
+		}
+
+		TEST_METHOD(Test_Type5)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(type \"a string\")");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(5, result->IntValue());
+		}
+
+		TEST_METHOD(Test_TypeStr)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(typestr 1.23)");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("Double", result->Value->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Fuel)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(fuel)");
+			Assert::IsTrue(result->IsString());
+			Assert::IsTrue(result->StringValue().Contains("fuel version"));
+		}
+
+		TEST_METHOD(Test_Copyright)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(copyright)");
+			Assert::IsTrue(result->IsString());
+			Assert::IsTrue(result->StringValue().Contains("Copyright: MIT-License"));
+		}
+
+		TEST_METHOD(Test_Help)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(help)");
+			Assert::IsTrue(result->IsString());
+			Assert::IsTrue(result->StringValue().Contains("available functions:"));
+		}
+
 	};
 }

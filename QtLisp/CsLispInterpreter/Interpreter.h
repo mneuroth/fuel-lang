@@ -88,7 +88,7 @@ namespace CsLisp
                     {
                         if (!compile)
                         {
-                            throw new LispException("Function \"" + first->ToString() + "\" not found"/*, scope*/);
+                            throw LispException("Function \"" + first->ToString() + "\" not found"/*, scope*/);
                         }
                     }
                     isSpecialFormX = std::make_shared<bool>(firstElem.IsSpecialForm());
@@ -178,7 +178,7 @@ namespace CsLisp
                 //    return new LispVariant();
                 //}
 
-                throw new LispException("Unexpected macro modus!");
+                throw LispException("Unexpected macro modus!");
             }
 
             // for debugging: update the current line number at the current scope

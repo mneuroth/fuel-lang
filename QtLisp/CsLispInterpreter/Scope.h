@@ -297,7 +297,7 @@ namespace CsLisp
             }
             else
             {
-                throw new LispException("Symbol " + symbolName + " not found", this);
+                throw LispException("Symbol " + symbolName + " not found", this);
             }
         }
 

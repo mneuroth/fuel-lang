@@ -32,7 +32,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace LispUnitTests
 {
     [TestClass]
-    public class LispInterpreterTest
+    public class CsLispInterpreterTests
     {
         #region interperter tests
 

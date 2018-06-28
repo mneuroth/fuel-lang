@@ -220,7 +220,7 @@ namespace CsLisp
 			case '\\':
 				return '\\';
 			}
-			throw new LispException(string::Format(string("Invalid character after backslash {0}"), string(ch)));
+			throw LispException(string::Format(string("Invalid character after backslash {0}"), string(ch)));
 		}
 
 		/*private*/ static int ProcessComment(string code, int i, int lineCount, char ch, /*Action<string, int, int>*/std::function<void(const string &, int, int)> addToken)

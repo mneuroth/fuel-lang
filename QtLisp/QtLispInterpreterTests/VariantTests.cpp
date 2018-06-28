@@ -36,7 +36,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace CsLisp;
 
-namespace QtLispInterpreterTests
+namespace QtLispUnitTests
 {
 	TEST_CLASS(UnitTestVariant)
 	{

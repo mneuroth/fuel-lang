@@ -82,7 +82,7 @@ static std::shared_ptr<LispVariant> CheckForFunction(const string & functionName
 	var function = arg0->ToLispVariant();
 	if (!function->IsFunction())
 	{
-		throw new LispException("No function in " + functionName, scope.get());
+		throw LispException("No function in " + functionName, scope.get());
 	}
 	return function;
 }
@@ -91,7 +91,7 @@ static void CheckArgs(const string & name, int count, const std::vector<std::sha
 {
 	if (count < 0 || args.size() != count)
 	{
-		throw new LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, (int)args.size(), count), scope.get());
+		throw LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, (int)args.size(), count), scope.get());
 	}
 }
 
@@ -132,7 +132,7 @@ static std::shared_ptr<LispVariant> def_form_helper(const std::vector<std::share
 	var symbol = EvalArgIfNeeded(args[0], scope);
 	if (!(symbol->IsSymbol() || symbol->IsString()))
 	{
-		throw new LispException("Symbol expected", scope.get());
+		throw LispException("Symbol expected", scope.get());
 	}
 	var value = LispInterpreter::EvalAst(args[1], scope);
 	var ret = std::make_shared<object>(*value);
@@ -630,7 +630,7 @@ static std::shared_ptr<LispVariant> ArgsFcn(const std::vector<std::shared_ptr<ob
 	{
 		return std::make_shared<LispVariant>(array[index]);
 	}
-	throw new LispException(string::Format("Index out of range in args function (index={0} max={1})", index, (int)array.size()));
+	throw LispException(string::Format("Index out of range in args function (index={0} max={1})", index, (int)array.size()));
 }
 
 static std::shared_ptr<LispVariant> ApplyFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -648,7 +648,7 @@ static std::shared_ptr<LispVariant> ApplyFcn(const std::vector<std::shared_ptr<o
 		return result;
 	}
 
-	throw new LispException("Expected list as arguments in apply", scope.get());
+	throw LispException("Expected list as arguments in apply", scope.get());
 }
 
 static std::shared_ptr<LispVariant> EvalFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -858,7 +858,7 @@ static std::shared_ptr<LispVariant> do_form(const std::vector<std::shared_ptr<ob
 	{
 		if (!(statement->IsIEnumerableOfObject() || statement->IsList() /*is IEnumerable<object>*/))
 		{
-			throw new LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariant()->Token, scope->ModuleName, scope->DumpStackToString());
+			throw LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariant()->Token, scope->ModuleName, scope->DumpStackToString());
 		}
 		result = LispInterpreter::EvalAst(statement, scope);
 	}
@@ -1073,7 +1073,7 @@ static std::shared_ptr<LispVariant> CallStaticNative(const std::vector<std::shar
 		//	}
 		//}
 	}
-	//throw new LispException("Bad static method " + methodName + " for class " + className, scope);
+	//throw LispException("Bad static method " + methodName + " for class " + className, scope);
 }
 
 // ************************************************************************
@@ -1164,7 +1164,7 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::CheckForL
 	}
 	if (!value->IsList())
 	{
-		throw new LispException("No list in " + functionName, scope->GetPreviousToken(((LispVariant)listObj).Token), scope->ModuleName, scope->DumpStackToString());
+		throw LispException("No list in " + functionName, scope->GetPreviousToken(((LispVariant)listObj).Token), scope->ModuleName, scope->DumpStackToString());
 	}
 	return value->ListValue();
 }

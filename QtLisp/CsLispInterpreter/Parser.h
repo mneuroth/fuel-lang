@@ -115,7 +115,7 @@ namespace CsLisp
 					{
 						if (isToplevel && i + 1<tokens.size() && !OnlyCommentTokensFrom(tokens, i + 1))
 						{
-							throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
+							throw LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
 						}
 						return i;
 					}
@@ -159,7 +159,7 @@ namespace CsLisp
 				{
 					if (current == null)
 					{
-						throw new LispException(UnexpectedToken, token, moduleName);
+						throw LispException(UnexpectedToken, token, moduleName);
 					}
 					current->push_back/*Add*/(std::make_shared<object>(object(LispVariant(std::make_shared<LispToken>(*token)))));
 				}
@@ -168,7 +168,7 @@ namespace CsLisp
 			if (isToplevel && tokens.size()>0)
 			{
 				std::shared_ptr<LispToken> token = tokens.back/*Last*/();
-				throw new LispException(BracketsOutOfBalance, token, moduleName);
+				throw LispException(BracketsOutOfBalance, token, moduleName);
 			}
 
 			return i;
