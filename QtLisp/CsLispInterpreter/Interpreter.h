@@ -84,7 +84,7 @@ namespace CsLisp
                         first = astWithResolvedValues->First();
                         firstElem = first->ToLispVariant()->FunctionValue();
                     }
-                    catch (LispException)
+                    catch (LispException exc)
                     {
                         if (!compile)
                         {
@@ -199,10 +199,10 @@ namespace CsLisp
             {
                 scope->GlobalScope->Output.WriteLine("--> {0}", astAsList->First()->ToString());
             }
-
+			
 			// evaluate arguments, but allow recursive lists
 			std::vector<std::shared_ptr<object>> arguments(astWithResolvedValues->Count()-1); // = new object[astWithResolvedValues->Count() - 1];
-            for (size_t i = 1; i < astWithResolvedValues->Count(); i++)
+			for (size_t i = 1; i < astWithResolvedValues->Count(); i++)
             {
                 var needEvaluation = (astWithResolvedValues->ToArray()[i]->IsList() /*is IEnumerable<object>*/) &&
                                      !functionWrapper.IsSpecialForm();

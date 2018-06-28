@@ -80,7 +80,7 @@ namespace CsLisp
 	public:
 		//#region constants
 
-		/*public*/ const string ProgramName = "fuel";
+		/*public*/ static const string ProgramName;
 
 		/*public*/ static const string Name;
 		/*public*/ static const string Version;
@@ -92,7 +92,7 @@ namespace CsLisp
 		/*public*/ static const string License;
 		/*public*/ static const string LicenseUrl;
 
-		/*public*/ const string Info = Name + " is a fast usable embeddable lisp interpreter";
+		/*public*/ static const string Info;
 
 		//#endregion
 
@@ -136,7 +136,7 @@ namespace CsLisp
 		/// <param name="verboseErrorOutput">if set to <c>true</c> [verbose error output].</param>
 		/// <param name="tracing">if set to <c>true</c> [tracing].</param>
 		/// <returns>The result</returns>
-		/*public*/ static std::shared_ptr<LispVariant> SaveEval(const string & lispCode, const string & moduleName /*= null*/, bool verboseErrorOutput = false, bool tracing = false)
+		/*public*/ static std::shared_ptr<LispVariant> SaveEval(const string & lispCode, const string & moduleName = /* null*/ "main", bool verboseErrorOutput = false, bool tracing = false)
 		{
 			std::shared_ptr<LispVariant> result;
 			try

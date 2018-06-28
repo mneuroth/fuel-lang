@@ -28,6 +28,8 @@
 #include "Scope.h"
 #include "Token.h"
 
+#include <iostream>
+
 namespace CsLisp
 {
 	object::object(const LispVariant & value)
@@ -406,6 +408,17 @@ namespace CsLisp
 		{
 			m_sText += txt;
 		}
+		std::cout << txt;
+	}
+
+	void TextWriter::WriteLine()
+	{
+// TODO --> IMPLEMENT !
+		if (m_bToString)
+		{
+			m_sText += "\n";
+		}
+		std::cout << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt)
@@ -415,6 +428,7 @@ namespace CsLisp
 		{
 			m_sText += txt + "\n";
 		}
+		std::cout << txt << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1)
@@ -424,6 +438,7 @@ namespace CsLisp
 		{
 			m_sText += txt1 + "\n";
 		}
+		std::cout << txt1 << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2)
@@ -433,6 +448,7 @@ namespace CsLisp
 		{
 			m_sText += txt + "\n";
 		}
+		std::cout << txt << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3)
@@ -442,6 +458,7 @@ namespace CsLisp
 		{
 			m_sText += txt + "\n";
 		}
+		std::cout << txt << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3, const string & txt4)
@@ -451,6 +468,7 @@ namespace CsLisp
 		{
 			m_sText += txt + "\n";
 		}
+		std::cout << txt << std::endl;
 	}
 }
 

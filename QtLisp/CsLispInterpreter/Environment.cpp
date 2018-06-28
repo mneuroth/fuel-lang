@@ -116,6 +116,7 @@ static std::shared_ptr<object> CreateFunction(FuncX func, const string & signatu
 	wrapper.Signature = signature;
 	wrapper.Documentation = documentation;
 	wrapper.SetSpecialForm(isSpecialForm);
+	wrapper.SetBuiltin(isBuiltin);
 	return std::make_shared<object>(LispVariant(LispType::_Function, std::make_shared<object>(wrapper)));
 }
 
@@ -521,7 +522,8 @@ static std::shared_ptr<LispVariant> Cons(const std::vector<std::shared_ptr<objec
 		var item2 = args[1]->ToLispVariant();
 		if (item2->IsList())
 		{
-			for(var item : *(item2->ListValue()))
+			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> l = item2->ListValue();
+			for(var item : *l)
 			{
 				list.Add(item);
 			}
@@ -565,7 +567,8 @@ static std::shared_ptr<LispVariant> Nth(const std::vector<std::shared_ptr<object
 
 	var index = args[0]->ToLispVariant()->IntValue();
 	var elements = args[1]->ToLispVariant()->ListValue();
-	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements->ElementAt(index))));
+	var val = elements->ElementAt(index);
+	return std::make_shared<LispVariant>(std::make_shared<object>(*val));
 }
 
 static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -727,11 +730,15 @@ static std::shared_ptr<LispVariant> definemacroevaluate_form(const std::vector<s
 {
 	CheckArgs(DefineMacroEval, 3, args, scope);
 
-	var macros = (*(scope->GlobalScope))[LispEnvironment::Macros]->ToLispScope() /*as LispScope*/;
-	if (macros.get() != null)
+	auto dict = (*(scope->GlobalScope));
+	if (dict.find(LispEnvironment::Macros) != dict.end())
 	{
-// TODO --> implement
-//		(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroRuntimeEvaluate(args[1], args[2]));
+		var macros = dict[LispEnvironment::Macros]->ToLispScope() /*as LispScope*/;
+		if (macros.get() != null)
+		{
+			// TODO --> implement
+			//		(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroRuntimeEvaluate(args[1], args[2]));
+		}
 	}
 
 	return null;

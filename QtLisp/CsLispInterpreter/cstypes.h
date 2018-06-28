@@ -77,7 +77,7 @@ namespace CsLisp
 			return std::list<T>::back();
 		}
 
-		const T & ElementAt(int index) const
+		const T ElementAt(int index) const
 		{
             std::vector<T> aCopy(std::list<T>::begin(), std::list<T>::end());
 			return aCopy[index];
@@ -124,6 +124,18 @@ namespace CsLisp
 		void AddRange(const IEnumerable<T> & other)
 		{
             std::list<T>::insert(this->end(), other.begin(), other.end());
+		}
+
+		// for debugging...
+		string DumpList()
+		{
+			string ret = "(";
+			for (var elem : *this)
+			{
+				ret += elem->ToString();
+				ret += ",";
+			}
+			return ret + ")";
 		}
 	};
 
@@ -193,6 +205,7 @@ namespace CsLisp
 			return m_sText;
 		}
 		void Write(const string & txt);
+		void WriteLine();
 		void WriteLine(const string & txt);
 		void WriteLine(const string & txt, const string & txt1);
 		void WriteLine(const string & txt, const string & txt1, const string & txt2);
@@ -240,6 +253,10 @@ namespace CsLisp
 		bool IsBuiltin() const
 		{
 			return m_bIsBuiltin;
+		}
+		void SetBuiltin(bool val)
+		{
+			m_bIsBuiltin = val;
 		}
 
 		string ModuleName;

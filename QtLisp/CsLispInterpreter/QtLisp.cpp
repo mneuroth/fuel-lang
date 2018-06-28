@@ -80,7 +80,7 @@ std::shared_ptr<LispVariant> Addition(std::vector<std::shared_ptr<object>> args,
 }
 */
 
-int main()
+int main_test()
 {
 	//string code = "(+ 1 2 3)";
 	//IEnumerable<std::shared_ptr<LispToken>> tokens = LispTokenizer::Tokenize(code);
@@ -103,6 +103,7 @@ int main()
 	//int result = aVariant2.CompareTo(v3);
 
 	string script = "(+ 1 2 3)";
+	script = "(map (lambda (x) (+ x 1)) '(1 2 3))";
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ast = LispParser::Parse(script);
 
 	std::cout << "AST:" << std::endl;
