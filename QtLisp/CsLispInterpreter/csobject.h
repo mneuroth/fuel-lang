@@ -155,6 +155,10 @@ namespace CsLisp
 
 		explicit object(const LispVariant & value);
 
+		explicit object(const LispMacroRuntimeEvaluate & value);
+
+		explicit object(const LispScope & value);
+
 		~object();
 
 		bool operator==(const object & other) const;
@@ -251,7 +255,9 @@ namespace CsLisp
 
 		std::shared_ptr<LispVariant> ToLispVariant() const;
 
-		std::shared_ptr<LispScope> ToLispScope() const;
+		//std::shared_ptr<LispScope> ToLispScope() const;
+
+		LispScope * object::GetLispScopeRef() const;
 
 		LispFunctionWrapper ToLispFunctionWrapper() const;
 
@@ -281,6 +287,7 @@ namespace CsLisp
 	public:
 		LispMacroRuntimeEvaluate(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parameters, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression)
 		{
+			FormalArguments = parameters;
 			Expression = expression;
 		}
 

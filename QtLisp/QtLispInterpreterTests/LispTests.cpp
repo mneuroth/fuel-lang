@@ -382,6 +382,109 @@ namespace QtLispUnitTests
 			Assert::AreEqual(9, result->ToInt());
 		}
 
+		TEST_METHOD(Test_MacrosEvaluateNested)
+		{
+			const string macroExpandScript = "(do\
+			(define-macro-eval first-macro\
+				(a b)\
+				(do\
+					(println first-macro)\
+					(def i 1)\
+					(+ a b i)\
+				)\
+			)\
+\
+			(define-macro-eval second-macro\
+				(x y)\
+			    (do\
+					(println second-macro)\
+					(* x y (first-macro (+ x 1) (+ y 2)))\
+				)\
+			)\
+\
+			(def m (second-macro 4 3))\
+		)";
+
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+				Assert::AreEqual("132", result->ToString().c_str());
+
+				//string s = cr.ToString().Trim();
+				//Assert::IsTrue(s.Contains("first-macro"));
+				//Assert::IsTrue(s.Contains("second-macro"));
+			}
+		}
+
+		TEST_METHOD(Test_MacrosEvaluateRecursive)
+		{
+			const string macroExpandScript = "(do\
+			(define-macro-eval first-macro\
+				(a b)\
+				(do\
+					(println first-macro)\
+					(def i 1)\
+					(+ a b i)\
+				)\
+			)\
+\
+			(define-macro-eval second-macro\
+				(x y)\
+				(do\
+					(println second-macro)\
+					(* x y (first-macro x (+ y 4)))\
+				)\
+			)\
+\
+			(def m (second-macro 4 3))\
+		)";
+
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+				Assert::AreEqual("144", result->ToString().c_str());
+
+				//string s = cr.ToString().Trim();
+				//Assert.IsTrue(s.Contains("first-macro"));
+				//Assert.IsTrue(s.Contains("second-macro"));
+			}
+		}
+
+
+		TEST_METHOD(Test_MacrosEvaluateDoubleMacroCall)
+		{
+			const string macroExpandScript = "(do\
+			(define-macro-eval first-macro\
+				(a b)\
+				(do\
+					(println first-macro)\
+					(def i 1)\
+					(+ a b i)\
+				)\
+			)\
+\
+			(define-macro-eval second-macro\
+				(x y)\
+				(do\
+					(println second-macro)\
+					(* x y)\
+				)\
+			)\
+\
+			(def m (second-macro 4 (first-macro 6 3)))\
+		)";
+
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+				Assert::AreEqual("40", result->ToString().c_str());
+
+				//string s = cr.ToString().Trim();
+				//Assert.IsTrue(s.Contains("first-macro"));
+				//Assert.IsTrue(s.Contains("second-macro"));
+			}
+		}
+
 		TEST_METHOD(Test_MacrosSetf2)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (defn my-setf (x value) (setf x value)) (my-setf a (+ 8 9)) (println a))");
@@ -466,6 +569,23 @@ namespace QtLispUnitTests
 			Assert::AreEqual(13, result->	ToInt());
 		}
 
+		TEST_METHOD(Test_Closure3)
+		{
+			try
+			{
+				Lisp::Eval("(do (defn g (x) (do (+ x 2 i))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
 		TEST_METHOD(Test_RecursiveCall1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn addConst (x a) (+ x a)) (def add2 (lambda (x) (addConst x 2))) (println (addConst 8 2)) (println (add2 4)))");
@@ -500,6 +620,40 @@ namespace QtLispUnitTests
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (+ x x))) (f 5 6 7))");
 			Assert::AreEqual(10, result->ToInt());
+		}
+
+		TEST_METHOD(Test_Args2)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (args 0)) (println (args 1)) (println (args 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))");
+				Assert::AreEqual(10, result->ToInt());
+
+				//string s = cr.ToString().Trim();
+				//Assert.AreEqual(true, s.Contains("count= 3"));
+				//Assert.AreEqual(true, s.Contains("5"));
+				//Assert.AreEqual(true, s.Contains("6"));
+				//Assert.AreEqual(true, s.Contains("7"));
+				//Assert.AreEqual(true, s.Contains("additional= 7"));
+			}
+		}
+
+		TEST_METHOD(Test_Args3)
+		{
+			try
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (args 7) (+ x x))) (f 5 6 7))");
+				Assert::AreEqual(10, result->ToInt());
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
 		}
 
 		TEST_METHOD(Test_Cons1)
@@ -551,6 +705,329 @@ namespace QtLispUnitTests
 			try
 			{
 				Lisp::Eval("(map 4 '(1 2 3))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_MapError2)
+		{
+			try
+			{
+				Lisp::Eval("(map (lambda (x) (+ x 1)) 4)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_ReduceError1)
+		{
+			try
+			{
+				Lisp::Eval("(reduce \"blub\" '(1 2 3) 0)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_ReduceError2)
+		{
+			try
+			{
+				Lisp::Eval("(reduce (lambda (x y) (+ x y))  \"test\" 0)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_SetfError)
+		{
+			try
+			{
+				Lisp::Eval("(setf a 2.0)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_Parser1)
+		{
+			try
+			{
+				Lisp::Eval("(println \"hello\"))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_Parser2)
+		{
+			try
+			{
+				Lisp::Eval("((println \"hello\")");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_Parser3)
+		{
+			try
+			{
+				Lisp::Eval("(blub 1 2 3)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_NotError)
+		{
+			try
+			{
+				Lisp::Eval("(not a 2.0)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_CompareError1)
+		{
+			try
+			{
+				Lisp::Eval("(> 2.0)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_CompareError2)
+		{
+			try
+			{
+				Lisp::Eval("(> 2.0 5 234)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_ScriptToLong)
+		{
+			try
+			{
+				Lisp::Eval("(setf a 2.0) asdf");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_DefError)
+		{
+			try
+			{
+				Lisp::Eval("(def 1 2)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_DoError)
+		{
+			try
+			{
+				Lisp::Eval("(do (def a 2) blub (setf a 5))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_IfError)
+		{
+			try
+			{
+				Lisp::Eval("(if #t 1 2 3)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_FunctionNotFound)
+		{
+			try
+			{
+				Lisp::Eval("(unknown-fcn 1 2 3)");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_BracketsOutOfBalance1)
+		{
+			try
+			{
+				Lisp::Eval("(do (println 2)))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_BracketsOutOfBalance2)
+		{
+			try
+			{
+				Lisp::Eval("(do ( (println 2))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_UnexpectedToken1)
+		{
+			try
+			{
+				Lisp::Eval("blub (do (println 2))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_UnexpectedTokenButIsBracketsOutOfBalance)
+		{
+			try
+			{
+				Lisp::Eval("(do (println 2)) asfd");
 				Assert::IsTrue(false);
 			}
 			catch (const CsLisp::LispException &)
@@ -663,6 +1140,5 @@ namespace QtLispUnitTests
 			Assert::IsTrue(result->IsString());
 			Assert::IsTrue(result->StringValue().Contains("available functions:"));
 		}
-
 	};
 }

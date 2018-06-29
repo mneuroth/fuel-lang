@@ -49,6 +49,11 @@ namespace CsLisp
     /// </summary>
     /*public*/ class LispScope : public Dictionary<string, std::shared_ptr<object>>, public std::enable_shared_from_this<LispScope>
     {
+	private:
+
+		// disable assignment operator
+		LispScope & operator=(const LispScope & other);
+
 	public:
         //#region debugging support
 
@@ -189,6 +194,26 @@ namespace CsLisp
         {
         }
 
+/*
+		LispScope(const LispScope & other)
+			: Dictionary<string, std::shared_ptr<object>>(other)
+		{
+			Debugger = other.Debugger;
+			Tracing = other.Tracing;
+			Tokens = other.Tokens;
+			Next = other.Next;
+			Previous = other.Previous;
+			ClosureChain = other.ClosureChain;
+			ModuleName = other.ModuleName;
+			CurrentToken = other.CurrentToken;
+			UserData = other.UserData;
+			UserDoc = other.UserDoc;
+			Name = other.Name;
+			GlobalScope = other.GlobalScope;
+			Output = other.Output;
+			Input = other.Input;
+		}
+*/
 		void PrivateInitForCpp(std::shared_ptr<LispScope> globalScope = null)
 		{
 			GlobalScope = globalScope != null ? globalScope : shared_from_this();
@@ -367,7 +392,7 @@ namespace CsLisp
 				//var mod = module.Value as LispScope;
 				if (modu.Value->IsLispScope())
 				{
-					var mod = modu.Value->ToLispScope();
+					var mod = modu.Value->GetLispScopeRef();
 					mod->DumpFunctions();
 				}
             });
@@ -447,7 +472,7 @@ namespace CsLisp
 				var items = (*this)[metaScope]; // as LispScope;
                 if (items->IsLispScope())
                 {
-                    for (/*KeyValuePair<string, std::shared_ptr<object>>*/auto const & item : *(items->ToLispScope()))
+                    for (/*KeyValuePair<string, std::shared_ptr<object>>*/auto const & item : *(items->GetLispScopeRef()))
                     {						
 						KeyValuePair<string, std::shared_ptr<object>> temp(item.first, item.second);
                         action(temp);

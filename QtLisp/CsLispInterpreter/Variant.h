@@ -429,7 +429,11 @@ namespace CsLisp
         {
             //get
             //{
-                return Value->ToString();
+			if (Value != null)
+			{
+				return Value->ToString();
+			}
+			return "null";	// string::Empty;
             //}
         }
 
@@ -816,14 +820,14 @@ namespace CsLisp
             return LispType::_Undefined;
         }
 
-        /*private*/ LispException CreateInvalidCastException(string name, string msg = "no") const
+        /*private*/ LispException CreateInvalidCastException(const string & name, const string & msg = "no") const
         {
             var exception = /*new*/ LispException(string::Format("Invalid cast for {2}, value={1} {0}", msg, StringValue(), name));
             exception.AddTokenInfos(Token);
             return exception;
         }
 
-        static /*private*/ LispException CreateInvalidOperationException(string operation, LispVariant l, LispVariant r)
+        static /*private*/ LispException CreateInvalidOperationException(const string & operation, const LispVariant & l, const LispVariant & r)
         {
             var exception = /*new*/ LispException(string::Format(NoOperatorForTypes, operation, l.Type, r.Type));
             exception.AddTokenInfos(l.Token);

@@ -67,14 +67,14 @@ namespace CsLisp
         /// <param name="moduleName">The module name.</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>Value of the last expression</returns>
-//        LispVariant DebuggerLoop(string script, string moduleName, bool tracing = false);
+        virtual std::shared_ptr<LispVariant> DebuggerLoop(const string & script, const string & moduleName, bool tracing = false) = 0;
 
         /// <summary>
         /// Sets the input and output streams for the debugger.
         /// </summary>
         /// <param name="output">The output stream.</param>
         /// <param name="input">The input stream.</param>
-//        void SetInputOutputStreams(TextWriter output, TextReader input);
+        virtual void SetInputOutputStreams(const TextWriter & output, const TextReader & input) = 0;
 	};
 
 /*

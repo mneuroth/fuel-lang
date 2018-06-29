@@ -50,6 +50,18 @@ namespace CsLisp
 		m_Data.pFunctionWrapper = new LispFunctionWrapper(value);
 	}
 
+	object::object(const LispMacroRuntimeEvaluate & value)
+		: m_Type(ObjectType::__LispMacroRuntimeEvaluate)
+	{
+		m_Data.pMacro = new LispMacroRuntimeEvaluate(value);
+	}
+
+	object::object(const LispScope & value)
+		: m_Type(ObjectType::__LispScope)
+	{
+		m_Data.pScope = new LispScope(value);
+	}
+
 	object::object(const object & other)
 	{
 		CleanUpMemory();
@@ -62,7 +74,7 @@ namespace CsLisp
 		}
 		else if (other.IsLispScope())
 		{
-			m_Data.pScope = new LispScope(*(other.ToLispScope()));
+			m_Data.pScope = new LispScope(*(other.GetLispScopeRef()));
 		}
 		else if (other.IsLispFunctionWrapper())
 		{
@@ -133,7 +145,7 @@ namespace CsLisp
 				case __VoidPtr:
 					return true;
 				case __LispScope:
-					return *(ToLispScope()) == *(other.ToLispScope());
+					return *(GetLispScopeRef()) == *(other.GetLispScopeRef());
 				case __Error:
 					return false;
 				default:
@@ -303,16 +315,25 @@ namespace CsLisp
 		return std::make_shared<LispVariant>(LispVariant(LispType::_Nil));
 	}
 
-	std::shared_ptr<LispScope> object::ToLispScope() const
+	LispScope * object::GetLispScopeRef() const
 	{
 		if (IsLispScope())
 		{
-// TODO: ist das wirklich korrekt eine Kopie zu liefern ?
-			// return a copy 
-			return std::make_shared<LispScope>(*(m_Data.pScope));
+			return m_Data.pScope;
 		}
 		return null;
 	}
+
+//	std::shared_ptr<LispScope> object::ToLispScope() const
+//	{
+//		if (IsLispScope())
+//		{
+//// TODO: ist das wirklich korrekt eine Kopie zu liefern ?
+//			// return a copy 
+//			return std::make_shared<LispScope>(*(m_Data.pScope));
+//		}
+//		return null;
+//	}
 
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> object::ToList() const
 	{
@@ -393,7 +414,7 @@ namespace CsLisp
 			case __VoidPtr:
 				return true;
 			case __LispScope:
-				return ToLispScope() == other.ToLispScope();
+				return *(GetLispScopeRef()) == *(other.GetLispScopeRef());
 			case __Error:
 				return true;		// ???
 			default:

@@ -112,7 +112,7 @@ namespace CsLisp
                 return null;
             }
 
-            std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList;
+            std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
 
             if (ast->IsLispVariant())
             {
@@ -340,7 +340,7 @@ namespace CsLisp
                 else if (LispEnvironment::IsExpression(elem))
                 {
 					std::shared_ptr<IEnumerable<std::shared_ptr<object>>> temp = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment::GetExpression(elem)/*.ToArray()*/, /*ref*/ replacedAnything);
-                    (*ret).AddRange(*temp);
+                    (*ret).Add(std::make_shared<object>(*temp));
                 }
                 // current element is not the symbol which should by replaced !
                 else
@@ -357,9 +357,10 @@ namespace CsLisp
             for (var formalArgument : *formalArguments)
             {
 				std::shared_ptr<object> value;
-                if (astAsList->ToArray()[i]->IsIEnumerableOfObject())
+				auto elem = astAsList->ToArray()[i];
+                if (elem->IsIEnumerableOfObject() || elem->IsList())
                 {
-                    value = astAsList->ToArray()[i];
+                    value = elem;
                 }
                 else
                 {

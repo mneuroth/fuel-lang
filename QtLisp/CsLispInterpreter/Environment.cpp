@@ -27,16 +27,17 @@ const string DefineMacroEval = "define-macro-eval";
 const string DefineMacroExpand = "define-macro-expand";
 #endif
 const string Lambda = "lambda";
-const string Tracebuffer = LispEnvironment::MetaTag + "tracebuffer" + LispEnvironment::MetaTag;
-const string Traceon = LispEnvironment::MetaTag + "traceon" + LispEnvironment::MetaTag;
-const string ArgsMeta = LispEnvironment::MetaTag + "args" + LispEnvironment::MetaTag;
+const string MetaTag = "###";
+const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
+const string Traceon = MetaTag + "traceon" + MetaTag;
+const string ArgsMeta = MetaTag + "args" + MetaTag;
 const string AdditionalArgs = "_additionalArgs";
 
 const string ArgsCount = "argscount";
 const string Args = "args";
 
-const string LispEnvironment::Macros = LispEnvironment::MetaTag + "macros" + LispEnvironment::MetaTag;
-const string LispEnvironment::Modules = LispEnvironment::MetaTag + "modules" + LispEnvironment::MetaTag;
+const string LispEnvironment::Macros = MetaTag + "macros" + MetaTag;
+const string LispEnvironment::Modules = MetaTag + "modules" + MetaTag;
 
 const string LispEnvironment::Apply = "apply";
 const string LispEnvironment::Eval = "eval";
@@ -48,7 +49,7 @@ const string LispEnvironment::Sym = "sym";
 const string LispEnvironment::Str = "str";
 
 
-/*private*/ const string LispEnvironment::MetaTag = "###";
+/*private*/ const string LispEnvironment::MetaTag = MetaTag;
 /*private*/ const string Builtin = "<builtin>";
 
 /*private*/ const string MainScope = "<main>";
@@ -616,7 +617,7 @@ static std::shared_ptr<LispVariant> ArgsCountFcn(const std::vector<std::shared_p
 {
 	CheckArgs(LispEnvironment::Apply, 0, args, scope);
 
-	int cnt = (*scope)[ArgsMeta]->ToLispVariant()->ListValue()->Count();
+	int cnt = (*scope)[ArgsMeta]->ToList()->Count();
 	return std::make_shared<LispVariant>(std::make_shared<object>(cnt));
 }
 
@@ -625,7 +626,7 @@ static std::shared_ptr<LispVariant> ArgsFcn(const std::vector<std::shared_ptr<ob
 	CheckArgs(LispEnvironment::Apply, 1, args, scope);
 
 	var index = args[0]->ToLispVariant()->IntValue();
-	var array = (*scope)[ArgsMeta]->ToLispVariant()->ListValue()->ToArray();
+	var array = (*scope)[ArgsMeta]->ToList()->ToArray();
 	if (index >= 0 && index < (int)array.size())
 	{
 		return std::make_shared<LispVariant>(array[index]);
@@ -733,11 +734,10 @@ static std::shared_ptr<LispVariant> definemacroevaluate_form(const std::vector<s
 	auto dict = (*(scope->GlobalScope));
 	if (dict.find(LispEnvironment::Macros) != dict.end())
 	{
-		var macros = dict[LispEnvironment::Macros]->ToLispScope() /*as LispScope*/;
-		if (macros.get() != null)
+		var macros = dict[LispEnvironment::Macros]->GetLispScopeRef() /*as LispScope*/;
+		if (macros != null)
 		{
-			// TODO --> implement
-			//		(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroRuntimeEvaluate(args[1], args[2]));
+			(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroRuntimeEvaluate(std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObject()), std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[2]->ToEnumerableOfObject())));
 		}
 	}
 
@@ -772,7 +772,7 @@ std::shared_ptr<object> UnQuoteIfNeeded(std::shared_ptr<object> item, bool & isS
 
 static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToEnumerable(std::shared_ptr<object> obj)
 {
-	if (obj->IsIEnumerableOfObject() /*enumerable != null*/)
+	if (obj->IsIEnumerableOfObject() /*enumerable != null*/ || obj->IsList())
 	{
 		var enumerable = obj->ToEnumerableOfObject() /*as IEnumerable<object>*/;
 		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(enumerable);
@@ -1085,9 +1085,10 @@ bool LispEnvironment::FindFunctionInModules(const string & funcName, std::shared
 	std::shared_ptr<object> importedModules = (*(scope->GlobalScope))[LispEnvironment::Modules];
 	if (importedModules.get() != null)
 	{
-		for (/*KeyValuePair*/std::pair<string, std::shared_ptr<object>> kv : *(importedModules->ToLispScope()))
+		auto tempScope = importedModules->GetLispScopeRef();
+		for (/*KeyValuePair*/std::pair<string, std::shared_ptr<object>> kv : *tempScope)
 		{
-			var module = /*(LispScope)*/kv.second->ToLispScope();
+			var module = /*(LispScope)*/kv.second->GetLispScopeRef();
 			if (module->ContainsKey(funcName))
 			{
 				foundValue = (*module)[funcName];
@@ -1116,7 +1117,7 @@ static bool ExistsItem(std::shared_ptr<object> funcName, std::shared_ptr<LispSco
     if (scope.get() != null &&
         scope->ContainsKey(key))
     {
-        return (*scope)[key]->ToLispScope()->ContainsKey(funcName->ToString());
+        return (*scope)[key]->GetLispScopeRef()->ContainsKey(funcName->ToString());
     }
     return false;
 }
@@ -1134,7 +1135,7 @@ std::shared_ptr<object> LispEnvironment::GetMacro(std::shared_ptr<object> funcNa
 bool LispEnvironment::IsExpression(std::shared_ptr<object> item)
 {
 	return (item->IsLispVariant() /*is LispVariant*/ && item->IsList()) ||
-           (item->IsIEnumerableOfObject());
+           (item->IsIEnumerableOfObject()) || (item->IsList());
 }
 
 std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::GetExpression(std::shared_ptr<object> item)
@@ -1173,9 +1174,9 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 {
 	if (scope != null &&
 		scope->ContainsKey(key) &&
-		((*scope)[key])->ToLispScope()->ContainsKey(funcName->ToString()))
+		((*scope)[key])->GetLispScopeRef()->ContainsKey(funcName->ToString()))
 	{
-		return (*((*scope)[key]->ToLispScope()))[funcName->ToString()];
+		return (*((*scope)[key]->GetLispScopeRef()))[funcName->ToString()];
 	}
 	return null;
 }
@@ -1184,9 +1185,9 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 {
 	if (scope != null &&
 		scope->ContainsKey(key) &&
-		((*scope)[key])->ToLispScope()->ContainsKey(funcName->ToString()))
+		((*scope)[key])->GetLispScopeRef()->ContainsKey(funcName->ToString()))
 	{
-		return (*((*scope)[key])->ToLispScope())[funcName->ToString()];
+		return (*((*scope)[key])->GetLispScopeRef())[funcName->ToString()];
 	}
 	return null;
 }
@@ -1195,6 +1196,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 {
 	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>();
 
+	(*scope)[Modules] = std::make_shared<object>(LispScope(Modules, scope));
+	(*scope)[Macros] = std::make_shared<object>(LispScope(Macros, scope));
 	(*scope)[Tracebuffer] = std::make_shared<object>(""); // new StringBuilder();
 	(*scope)[Traceon] = std::make_shared<object>(false);
 
