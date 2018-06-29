@@ -257,7 +257,7 @@ namespace CsLisp
 
 		//std::shared_ptr<LispScope> ToLispScope() const;
 
-		LispScope * object::GetLispScopeRef() const;
+        LispScope * GetLispScopeRef() const;
 
 		LispFunctionWrapper ToLispFunctionWrapper() const;
 

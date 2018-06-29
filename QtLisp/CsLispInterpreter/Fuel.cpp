@@ -35,6 +35,7 @@
 #include "csobject.h"
 #include "Lisp.h"
 #include "DebuggerInterface.h"
+#include "Debugger.h"
 
 namespace CsLisp
 {

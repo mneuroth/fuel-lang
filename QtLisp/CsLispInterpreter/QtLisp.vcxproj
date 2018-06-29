@@ -151,6 +151,7 @@
     <ClInclude Include="csobject.h" />
     <ClInclude Include="csstring.h" />
     <ClInclude Include="cstypes.h" />
+    <ClInclude Include="Debugger.h" />
     <ClInclude Include="DebuggerInterface.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Exception.h" />

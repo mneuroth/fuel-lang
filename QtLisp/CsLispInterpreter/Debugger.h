@@ -1,4 +1,7 @@
-﻿/*
+﻿#ifndef _DEBUGGER_H
+#define _DEBUGGER_H
+
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -23,44 +26,71 @@
  * 
  * */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+//using System;
+//using System.Collections.Generic;
+//using System.IO;
+//using System.Linq;
+
+#include "cstypes.h"
+#include "DebuggerInterface.h"
+#include "Lisp.h"
+#include "Environment.h"
+
+#include <list>
 
 namespace CsLisp
 {
-    /// <summary>
+	// ********************************************************************
+	/*internal*/ struct LispBreakpointInfo
+	{
+	public:
+		/*internal*/ LispBreakpointInfo(int lineNo, const string & moduleName, const string & condition)
+			//    : this()
+		{
+			LineNo = lineNo;
+			ModuleName = moduleName;
+			Condition = condition;
+		}
+
+		/*internal*/ int LineNo; // { get; set; }
+
+		/*internal*/ string ModuleName; // { get; set; }
+
+		/*internal*/ string Condition; // { get; set; }
+	};
+	
+	/// <summary>
     /// The debugger module for FUEL. 
     /// Enabled command line debugging for FUEL.
     /// </summary>
-    public class LispDebugger : ILispDebugger
+    /*public*/ class LispDebugger : ILispDebugger
     {
-        #region constants
+	private:
+        //#region constants
 
-        private const string Prompt = Lisp.Name + "> ";
+        /*private*/ const string Prompt = Lisp::Name + "> ";
 
-        private const string DbgPrompt = Lisp.Name + "-DBG> ";
+        /*private*/ const string DbgPrompt = Lisp::Name + "-DBG> ";
 
-        #endregion
+        //#endregion
 
-        #region properties
+        //#region properties
 
-        private bool IsProgramStop { get; set; }
+		/*private*/ bool IsProgramStop; // { get; set; }
 
-        private Func<LispScope, bool> IsStopStepFcn { get; set; }
+		/*private*/ std::function<bool(LispScope)> IsStopStepFcn; // { get; set; }
 
-        private List<LispBreakpointInfo> Breakpoints { get; set; }
+		/*private*/ std::list<LispBreakpointInfo> Breakpoints; // { get; set; }
 
-        private string CommandLineScript { get; set; }
+		/*private*/ string CommandLineScript; // { get; set; }
 
-        private TextWriter Output { get; set; }
+		/*private*/ TextWriter Output; // { get; set; }
 
-        private TextReader Input { get; set; }
+		/*private*/ TextReader Input; // { get; set; }
 
-        #endregion
+        //#endregion
 
-        #region constructor
+        //#region constructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LispDebugger"/> class.
@@ -68,18 +98,18 @@ namespace CsLisp
         /// <remarks>
         /// Public constructor needed for dynamic loading in fuel.exe.
         /// </remarks>
-        public LispDebugger()
+        /*public*/ LispDebugger()
         {
-            Breakpoints = new List<LispBreakpointInfo>();
-            Output = Console.Out;
-            Input = Console.In;
-            CommandLineScript = string.Empty;
+            Breakpoints = std::list<LispBreakpointInfo>();
+            Output = /*Console.Out*/TextWriter();
+            Input = /*Console.In*/TextReader();
+            CommandLineScript = string::Empty;
             Reset();
         }
 
-        #endregion
+        //#endregion
 
-        #region public methods
+        //#region public methods
 
         /// <summary>
         /// Processing of the interactive loop of the debugger.
@@ -91,14 +121,14 @@ namespace CsLisp
         /// <returns>True if program should be restarted.</returns>
         /// <exception cref="LispStopDebuggerException"></exception>
         /// <exception cref="CsLisp.LispStopDebuggerException"></exception>
-        public static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, bool startedFromMain = false, bool tracing = false)
+		/*public*/ static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, bool startedFromMain = false, bool tracing = false)
         {
             startedFromMain = startedFromMain || debugger == null;
             if (debugger == null)
             {
                 debugger = new LispDebugger();
             }
-            var globalScope = initialTopScope != null ? initialTopScope.GlobalScope : LispEnvironment.CreateDefaultScope();
+            var globalScope = initialTopScope != null ? initialTopScope.GlobalScope : LispEnvironment::CreateDefaultScope();
             // do not switch off tracing if already enabled
             if (!globalScope.Tracing)
             {
@@ -154,7 +184,7 @@ namespace CsLisp
                     if (items.Length > 1)
                     {
                         string docCmd = "(doc '" + items[1] + ")";
-                        LispVariant result = Lisp.Eval(docCmd, currentScope, currentScope.ModuleName);
+                        LispVariant result = Lisp::Eval(docCmd, currentScope, currentScope.ModuleName);
                         debugger.Output.WriteLine("{0}", result);
                     }
                     else
@@ -168,7 +198,7 @@ namespace CsLisp
                     if (items.Length > 1)
                     {
                         string docCmd = "(searchdoc '" + items[1] + ")";
-                        LispVariant result = Lisp.Eval(docCmd, currentScope, currentScope.ModuleName);
+                        LispVariant result = Lisp::Eval(docCmd, currentScope, currentScope.ModuleName);
                         debugger.Output.WriteLine("{0}", result);
                     }
                     else
@@ -190,9 +220,9 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
-                    var script = LispUtils.ReadFileOrEmptyString(currentScope.ModuleName);
+                    var script = LispUtils::ReadFileOrEmptyString(currentScope.ModuleName);
                     // use the script given on command line if no valid module name was set
-                    if (string.IsNullOrEmpty(script))
+                    if (string::IsNullOrEmpty(script))
                     {
                         script = debugger.CommandLineScript;
                     }
@@ -255,16 +285,16 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("version") || cmd.Equals("ver"))
                 {
-                    LispUtils.ShowVersion(debugger.Output);
+                    LispUtils::ShowVersion(debugger.Output);
                 }
                 else
                 {
                     try
                     {
-                        LispVariant result = Lisp.Eval(cmd, currentScope, currentScope.ModuleName);
+                        LispVariant result = Lisp::Eval(cmd, currentScope, currentScope.ModuleName);
                         debugger.Output.WriteLine("result={0}", result);
                     }
-                    catch (Exception ex)
+                    catch (LispException & ex)
                     {
                         debugger.Output.WriteLine("Exception: " + ex.Message);
                     }
@@ -274,14 +304,14 @@ namespace CsLisp
             return bRestart;
         }
 
-        #endregion
+        //#endregion
 
-        #region LispDebuggerInterface
+        //#region LispDebuggerInterface
 
         /// <summary>
         /// See interface.
         /// </summary>
-        public void InteractiveLoop(LispScope initialTopScope, IList<object> currentAst = null, bool startedFromMain = false, bool tracing = false)
+		/*public*/ void InteractiveLoop(LispScope initialTopScope, IList<object> currentAst = null, bool startedFromMain = false, bool tracing = false)
         {
             if (currentAst != null)
             {
@@ -297,7 +327,7 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public bool NeedsBreak(LispScope scope, LispBreakpointPosition posInfosOfCurrentAstItem)
+		/*public*/ bool NeedsBreak(LispScope scope, LispBreakpointPosition posInfosOfCurrentAstItem)
         {
             if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item3, scope.ModuleName, scope))
             {
@@ -310,7 +340,7 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public LispVariant DebuggerLoop(string script, string moduleName, bool tracing = false)
+		/*public*/ LispVariant DebuggerLoop(string script, string moduleName, bool tracing = false)
         {
             LispVariant result = null;
             var bRestart = true;
@@ -322,21 +352,21 @@ namespace CsLisp
                     CommandLineScript = script;
                 }
 
-                var globalScope = LispEnvironment.CreateDefaultScope();
+                var globalScope = LispEnvironment::CreateDefaultScope();
                 globalScope.Input = Input;
                 globalScope.Output = Output;
                 globalScope.Debugger = this;                
 
                 try
                 {
-                    result = Lisp.Eval(script, globalScope, moduleName, tracing: tracing);
+                    result = Lisp::Eval(script, globalScope, moduleName, tracing: tracing);
                     Reset();
                 }
                 catch (LispStopDebuggerException)
                 {
                     bRestart = false;
                 }
-                catch (Exception exception)
+                catch (LispException & exception)
                 {
                     Output.WriteLine("\nException: {0}", exception);
                     string stackInfo = exception.Data.Contains(LispUtils.StackInfo) ? (string)exception.Data[LispUtils.StackInfo] : string.Empty;
@@ -351,7 +381,7 @@ namespace CsLisp
                     // process empty script --> just start interactive loop
                     if (result == null)
                     {
-                        bRestart = InteractiveLoop(this, globalScope, startedFromMain: true);
+                        bRestart = InteractiveLoop(this, globalScope, /*startedFromMain:*/ true);
                     }
                 }
 
@@ -364,23 +394,24 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        public void SetInputOutputStreams(TextWriter output, TextReader input)
+        /*public*/ void SetInputOutputStreams(const TextWriter & output, const TextReader & input)
         {
             Output = output;
             Input = input;            
         }
 
-        #endregion
+        //#endregion
 
-        #region private methods
+	private:
+        //#region private methods
 
-        private void Reset()
+		/*private*/ void Reset()
         {
             IsProgramStop = true;
-            IsStopStepFcn = (scope) => true;
+			IsStopStepFcn = [](LispScope scope) -> bool { return true; };
         }
 
-        private bool HitsBreakpoint(int lineNo, string moduleName, LispScope scope)
+		/*private*/ bool HitsBreakpoint(int lineNo, string moduleName, LispScope scope)
         {
             foreach (var breakpoint in Breakpoints)
             {
@@ -391,7 +422,7 @@ namespace CsLisp
                     {
                         try
                         {
-                            LispVariant result = Lisp.Eval(breakpoint.Condition, scope, scope.ModuleName);
+                            LispVariant result = Lisp::Eval(breakpoint.Condition, scope, scope.ModuleName);
                             return result.BoolValue;
                         }
                         catch
@@ -406,12 +437,12 @@ namespace CsLisp
             return false;
         }
 
-        private bool HasBreakpointAt(int lineNo, string moduleName)
+		/*private*/ bool HasBreakpointAt(int lineNo, string moduleName)
         {
             return HitsBreakpoint(lineNo, moduleName, null);
         }
 
-        private void AddBreakpoint(int lineNo, string moduleName, string condition)
+		/*private*/ void AddBreakpoint(int lineNo, string moduleName, string condition)
         {
             var newItem = new LispBreakpointInfo(lineNo, moduleName, condition);
             var index = Breakpoints.FindIndex(elem => (elem.LineNo == lineNo) && (elem.ModuleName == moduleName));
@@ -426,7 +457,7 @@ namespace CsLisp
             }
         }
 
-        private bool ClearBreakpoint(int no)
+		/*private*/ bool ClearBreakpoint(int no)
         {
             var index = no - 1;
             if (index >= 0 && index < Breakpoints.Count())
@@ -437,38 +468,38 @@ namespace CsLisp
             return false;
         }
 
-        private void ClearAllBreakpoints()
+		/*private*/ void ClearAllBreakpoints()
         {
             Breakpoints.Clear();
         }
 
         // ReSharper disable once UnusedParameter.Local
-        private void DoStep(LispScope currentScope)
+		/*private*/ void DoStep(LispScope currentScope)
         {
             IsStopStepFcn = (scope) => true;
             IsProgramStop = true;
         }
 
-        private void DoStepOver(LispScope currentScope)
+		/*private*/ void DoStepOver(LispScope currentScope)
         {
             var currentCallStackSize = currentScope.GetCallStackSize();
             IsStopStepFcn = (scope) => currentCallStackSize >= scope.GetCallStackSize();
             IsProgramStop = true;
         }
 
-        private void DoStepOut(LispScope currentScope)
+		/*private*/ void DoStepOut(LispScope currentScope)
         {
             var currentCallStackSize = currentScope.GetCallStackSize();
             IsStopStepFcn = (scope) => currentCallStackSize - 1 >= scope.GetCallStackSize();
             IsProgramStop = true;
         }
 
-        private void DoRun()
+		/*private*/ void DoRun()
         {
             IsProgramStop = false;
         }
 
-        private void ShowBreakpoints()
+		/*private*/ void ShowBreakpoints()
         {
             Output.WriteLine("Breakpoints:");
             var no = 1;
@@ -479,7 +510,7 @@ namespace CsLisp
             }
         }
 
-        private static bool IsSameModule(string moduleName1, string moduleName2)
+		/*private*/ static bool IsSameModule(string moduleName1, string moduleName2)
         {
             // if one module name is not set --> handle as same module
             if (string.IsNullOrEmpty(moduleName1) || string.IsNullOrEmpty(moduleName2))
@@ -493,7 +524,7 @@ namespace CsLisp
             return module1.Name.Equals(module2.Name);
         }
 
-        private static void ShowSourceCode(LispDebugger debugger, string sourceCode, string moduleName, int? currentLineNo)
+		/*private*/ static void ShowSourceCode(LispDebugger debugger, string sourceCode, string moduleName, int? currentLineNo)
         {
             if (debugger != null)
             {
@@ -507,7 +538,7 @@ namespace CsLisp
             }
         }
 
-        private static void ClearBreakpoints(LispDebugger debugger, string cmd)
+		/*private*/ static void ClearBreakpoints(LispDebugger debugger, string cmd)
         {
             if (debugger != null)
             {
@@ -552,7 +583,7 @@ namespace CsLisp
         /// <param name="debugger">The debugger.</param>
         /// <param name="cmd">The command.</param>
         /// <param name="currentModuleName">Name of the current module.</param>
-        private static void AddBreakpoint(LispDebugger debugger, string cmd, string currentModuleName)
+		/*private*/ static void AddBreakpoint(LispDebugger debugger, string cmd, string currentModuleName)
         {
             bool added = false;
             if (debugger != null)
@@ -601,7 +632,7 @@ namespace CsLisp
             }
         }
 
-        private static string GetStringLiteral(string text, out int stopPos)
+		/*private*/ static string GetStringLiteral(string text, out int stopPos)
         {
             string result = string.Empty;
             stopPos = text.Length;
@@ -623,7 +654,7 @@ namespace CsLisp
             return result;
         }
 
-        private static void ShowInteractiveCmds(TextWriter output)
+        /*private*/ static void ShowInteractiveCmds(TextWriter output)
         {
             output.WriteLine();
             output.WriteLine("help for interactive loop:");
@@ -655,7 +686,7 @@ namespace CsLisp
             output.WriteLine();
         }
 
-        private static Tuple<bool, int> ConvertToInt(string value)
+        /*private*/ static Tuple<bool, int> ConvertToInt(string value)
         {
             var result = 0;
             var ok = true;
@@ -670,24 +701,8 @@ namespace CsLisp
             return new Tuple<bool, int>(ok, result);
         }
 
-        #endregion
-    }
-
-    // ********************************************************************
-    internal struct LispBreakpointInfo
-    {
-        internal LispBreakpointInfo(int lineNo, string moduleName, string condition)
-            : this()
-        {
-            LineNo = lineNo;
-            ModuleName = moduleName;
-            Condition = condition;
-        }
-
-        internal int LineNo { get; set; }
-
-        internal string ModuleName { get; set; }
-
-        internal string Condition { get; set; }
-    }
+        //#endregion
+	};
 }
+
+#endif
