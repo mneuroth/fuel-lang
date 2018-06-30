@@ -40,6 +40,7 @@
 
 #include <memory>
 #include <math.h>
+#include <cstdlib>
 
 namespace CsLisp
 {
