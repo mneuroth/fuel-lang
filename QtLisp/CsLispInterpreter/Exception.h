@@ -30,10 +30,13 @@
 
 #include "cstypes.h"
 
+#include <map>
+
 namespace CsLisp
 {
 	class LispScope;
 	class LispToken;
+	class object;
 
     /// <summary>
     /// Exception for the FUEL lisp interpreter
@@ -79,6 +82,8 @@ namespace CsLisp
 		void AddTokenInfos(std::shared_ptr<LispToken> token)
 		{
 		}
+
+		std::map<string, std::shared_ptr<object>> Data;
 
 		string ToString() const
 		{

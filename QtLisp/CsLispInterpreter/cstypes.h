@@ -29,6 +29,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <tuple>
 
 #include "csstring.h"
 #include "Exception.h"
@@ -186,6 +187,28 @@ namespace CsLisp
 		T2 Item2() const
 		{
 			return std::pair<T1, T2>::second;
+		}
+	};
+
+	template <class T1, class T2, class T3>
+	class Tuple3 : public std::tuple<T1, T2, T3>
+	{
+	public:
+		Tuple3(const T1 & val1, const T2 & val2, const T3 & val3)
+			: std::tuple<T1, T2, T3>(val1, val2, val3)
+		{
+		}
+		T1 Item1() const
+		{
+			return std::get<0>(*this);
+		}
+		T2 Item2() const
+		{
+			return std::get<1>(*this);
+		}
+		T3 Item3() const
+		{
+			return std::get<2>(*this);
 		}
 	};
 

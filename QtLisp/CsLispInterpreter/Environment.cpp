@@ -36,8 +36,13 @@ const string AdditionalArgs = "_additionalArgs";
 const string ArgsCount = "argscount";
 const string Args = "args";
 
-const string LispEnvironment::Macros = MetaTag + "macros" + MetaTag;
-const string LispEnvironment::Modules = MetaTag + "modules" + MetaTag;
+/*private*/ const string Builtin = "<builtin>";
+
+/*private*/ const string MainScope = "<main>";
+
+const string LispEnvironment::MetaTag = /*MetaTag*/"###";
+const string LispEnvironment::Macros = LispEnvironment::MetaTag + "macros" + LispEnvironment::MetaTag;
+const string LispEnvironment::Modules = LispEnvironment::MetaTag + "modules" + LispEnvironment::MetaTag;
 
 const string LispEnvironment::Apply = "apply";
 const string LispEnvironment::Eval = "eval";
@@ -47,12 +52,6 @@ const string LispEnvironment::Quasiquote = "quasiquote";
 
 const string LispEnvironment::Sym = "sym";
 const string LispEnvironment::Str = "str";
-
-
-/*private*/ const string LispEnvironment::MetaTag = MetaTag;
-/*private*/ const string Builtin = "<builtin>";
-
-/*private*/ const string MainScope = "<main>";
 
 // ************************************************************************
 
@@ -92,7 +91,7 @@ static void CheckArgs(const string & name, int count, const std::vector<std::sha
 {
 	if (count < 0 || args.size() != count)
 	{
-		throw LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, (int)args.size(), count), scope.get());
+		throw LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, std::to_string((int)args.size()), std::to_string(count), std::to_string((long)scope.get())));
 	}
 }
 
@@ -246,11 +245,33 @@ static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_
 	return std::make_shared<LispVariant>(std::make_shared<object>(buffer));
 }
 
-// TODO --> platform independend implementation of tickcount
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
+#else
+// see https://www.c-plusplus.net/forum/topic/153559/gettickcount-für-linux
+uint64_t getTimeMs(void)
+{
+	struct timeval tv;
+
+	gettimeofday(&tv, 0);
+	return uint64_t(tv.tv_sec) * 1000 + tv.tv_usec / 1000;
+}
+#include <sys/sysinfo.h>
+long getTickCount() // Zeit seit dem Booten in Sekunden
+{
+	struct sysinfo si;
+	if (sysinfo(&si) == 0) return si.uptime;
+
+	return -1;
+}
+#endif
 static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	var value = (int)GetTickCount(); //TODO --> implement in C++ ???  Environment::TickCount;
+#if defined(_WIN32) || defined(_WIN64)
+	var value = (int)GetTickCount();
+#else
+	var value = getTimeMs();
+#endif
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
 }
 
@@ -921,10 +942,10 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 		{
 			ret = LispInterpreter:: EvalAst(args[1], childScope);
 		}
-		catch (LispStopDebuggerException)
+		catch (LispStopDebuggerException & exc)
 		{
 			// forward a debugger stop exception to stop the debugger loop
-			throw;
+			throw exc;
 		}
 		catch (LispException ex)
 		{
@@ -938,7 +959,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 			{
 				scope->GlobalScope->Output.WriteLine(ex.ToString());
 
-//TODO				debugger->InteractiveLoop(/*initialTopScope: */childScope, /*currentAst :*/ /*(IEnumerable<object>)*/std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]) /*new List<object> { info.Item2 }*/);
+				debugger->InteractiveLoop(/*initialTopScope: */childScope, /*currentAst :*/ /*(IEnumerable<object>)*/std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObject()) /*new List<object> { info.Item2 }*/);
 			}
 
 			throw;

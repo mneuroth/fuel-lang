@@ -35,6 +35,7 @@
 namespace CsLisp
 {
 	class LispVariant;
+	class LispScope;
 	struct LispFunctionWrapper;
 	class LispMacroRuntimeEvaluate;
 
@@ -279,21 +280,6 @@ namespace CsLisp
         }
 
 		bool Equals(const object & other) const;
-	};
-	
-// TODO: --> temporary here, later in Environment.cpp
-	class LispMacroRuntimeEvaluate
-	{
-	public:
-		LispMacroRuntimeEvaluate(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parameters, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression)
-		{
-			FormalArguments = parameters;
-			Expression = expression;
-		}
-
-		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> FormalArguments;
-
-		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Expression;
 	};
 }
 

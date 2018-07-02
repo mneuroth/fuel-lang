@@ -44,14 +44,14 @@ namespace CsLisp
 		return std::find(container.begin(), container.end(), search) != container.end();
 	}
 
-	static void ShowVersion(TextWriter & output)
+	/*static*/ void ShowVersion(TextWriter & output)
 	{
 		output.WriteLine();
 		output.WriteLine(Lisp::Name + " " + Lisp::Version + " (for " + Lisp::Platform + ") from " + Lisp::Date + ", " + Lisp::Copyright);
 		output.WriteLine();
 	}
 
-	static void ShowAbout(TextWriter & output)
+	/*static*/ void ShowAbout(TextWriter & output)
 	{
 		ShowVersion(output);
 		output.WriteLine(Lisp::Info);
@@ -65,7 +65,7 @@ namespace CsLisp
 		return result;
 	}
 
-	static string ReadFileOrEmptyString(const string & fileName)
+	/*static*/ string ReadFileOrEmptyString(const string & fileName)
 	{
 		std::ifstream ifs(fileName);
 		std::string content = std::string((std::istreambuf_iterator<char>(ifs)),(std::istreambuf_iterator<char>()));
@@ -101,7 +101,7 @@ namespace CsLisp
 			var lengthyErrorOutput = false;
 			var result = std::make_shared<LispVariant>();
 //			var startTickCount = Environment.TickCount;
-//			var debugger = TryGetDebugger();
+			var debugger = TryGetDebugger();
 
 			if (Contains(args, "-m"))
 			{
@@ -135,12 +135,12 @@ namespace CsLisp
 			{
 				trace = true;
 			}
-// TODO --> implement for C++
 			if (Contains(args, "-e"))
 			{
 				script = /*LispUtils.*/GetScriptFilesFromProgramArgs(args)[0]/*.FirstOrDefault()*/;
 				loadFiles = false;
 			}
+// TODO --> implement for C++
 			//var libPath = args.Where(v = > v.StartsWith("-l=")).Select(v = > v).ToArray();
 			//if (libPath.Length > 0)
 			//{
@@ -159,35 +159,37 @@ namespace CsLisp
 			}
 
 			// handle options for debugger
-			//if (debugger != null)
-			//{
-			//	debugger->SetInputOutputStreams(output, input);
-			//	if (Contains(args, "-i"))
-			//	{
-			//		InteractiveLoopHeader(output);
-			//		debugger->InteractiveLoop(/*startedFromMain:*/ true, /*tracing :*/ trace);
-			//		loadFiles = false;
-			//		wasDebugging = true;
-			//	}
-			//	if (Contains(args, "-d"))
-			//	{
-			//		var fileName = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
-			//		// process -e option if script is given via command line
-			//		if (string::IsNullOrEmpty(script))
-			//		{
-			//			script = LispUtils.ReadFileOrEmptyString(fileName);
-			//		}
-			//		else
-			//		{
-			//			fileName = "command-line";
-			//		}
+			if (debugger != null)
+			{
+				debugger->SetInputOutputStreams(output, input);
+				if (Contains(args, "-i"))
+				{
+					InteractiveLoopHeader(output);
+					debugger->InteractiveLoop(null, null, /*startedFromMain:*/ true, /*tracing :*/ trace);
+					loadFiles = false;
+					wasDebugging = true;
+				}
+				if (Contains(args, "-d"))
+				{
+					//var fileName = /*LispUtils.*/GetScriptFilesFromProgramArgs(args)./*FirstOrDefault()*/front();
+					var scriptFiles = GetScriptFilesFromProgramArgs(args);
+					var fileName = scriptFiles.size() > 0 ? scriptFiles.front() : string::Empty;
+					// process -e option if script is given via command line
+					if (string::IsNullOrEmpty(script))
+					{
+						script = /*LispUtils.*/ReadFileOrEmptyString(fileName);
+					}
+					else
+					{
+						fileName = "command-line";
+					}
 
-			//		InteractiveLoopHeader(output);
-			//		result = debugger.DebuggerLoop(script, fileName, /*tracing:*/ trace);
-			//		loadFiles = false;
-			//		wasDebugging = true;
-			//	}
-			//}
+					InteractiveLoopHeader(output);
+					result = debugger->DebuggerLoop(script, fileName, /*tracing:*/ trace);
+					loadFiles = false;
+					wasDebugging = true;
+				}
+			}
 
 			if (loadFiles)
 			{
@@ -247,16 +249,16 @@ namespace CsLisp
 			output.WriteLine("  -m          : measure execution time");
 			output.WriteLine("  -t          : enable tracing");
 			output.WriteLine("  -x          : exhaustive error output");
-			//if (TryGetDebugger() != null)
-			//{
-			//	output.WriteLine("  -i          : interactive shell");
-			//	output.WriteLine("  -d          : start debugger");
-			//}
-			//else
-			//{
-			//	output.WriteLine();
-			//	output.WriteLine("Info: no debugger support installed !");
-			//}
+			if (TryGetDebugger() != null)
+			{
+				output.WriteLine("  -i          : interactive shell");
+				output.WriteLine("  -d          : start debugger");
+			}
+			else
+			{
+				output.WriteLine();
+				output.WriteLine("Info: no debugger support installed !");
+			}
 			//if (TryGetCompiler() != null)
 			//{
 			//	output.WriteLine("  -c          : compile program");
@@ -286,6 +288,12 @@ namespace CsLisp
 		//{
 		//	return TryGetClassFromDll<ILispDebugger>("FuelDebugger.dll", "CsLisp.LispDebugger");
 		//}
+
+		static std::shared_ptr<ILispDebugger> TryGetDebugger()
+		{
+			std::shared_ptr<LispDebugger> dbg = std::make_shared<LispDebugger>();
+			return dbg;
+		}
 
 		//template<T>
 		///*private*/ static T TryGetClassFromDll(const string & dllName, const string & className)

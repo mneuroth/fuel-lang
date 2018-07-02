@@ -45,6 +45,20 @@ namespace CsLisp
 	class LispScope;
 	class LispBreakpointPosition;
 
+	class LispMacroRuntimeEvaluate
+	{
+	public:
+		LispMacroRuntimeEvaluate(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parameters, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression)
+		{
+			FormalArguments = parameters;
+			Expression = expression;
+		}
+
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> FormalArguments;
+
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Expression;
+	};
+
 	class LispEnvironment
 	{
 	public:

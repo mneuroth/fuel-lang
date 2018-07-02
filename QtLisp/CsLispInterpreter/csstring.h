@@ -32,6 +32,7 @@
 #include <functional>
 #include <memory>
 #include <algorithm>
+#include <vector>
 
 namespace CsLisp
 {
@@ -95,12 +96,55 @@ namespace CsLisp
 			return (*this).find_first_of(txt);
 		}
 
+		static string ReplaceIn(string temp, const string & findText, const string & arg)
+		{
+			auto pos = temp.find(findText);
+			if (pos != std::string::npos)
+			{
+				temp = temp.replace(pos, pos + arg.size(), arg);
+			}
+			return temp;
+		}
+
+		static string ReplaceInWithFill(string temp, const string & findText, const string & arg)
+		{
+			auto pos = temp.find(findText);
+			if (pos != std::string::npos)
+			{
+				auto pos2 = temp.find("}", pos + 1);
+				if (pos2 != std::string::npos)
+				{
+					string len = temp.substr(pos + 3, pos2 - pos - findText.size());
+					int l = std::stoi(len);
+					if (l > 0)
+					{
+						temp = temp.replace(pos, pos2 - pos + 1, std::string(l - arg.size(), ' ') + arg);
+					}
+					else
+					{
+						temp = temp.replace(pos, pos2 - pos + 1, arg + std::string(abs(l) - arg.size(), ' '));
+					}
+				}
+			}
+			return temp;
+		}
+
 		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "", const string & arg4 = "", const string & arg5 = "")
 		{
 // TODO --> string.Format realisieren
 			//string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
-			//std::string
-			return txt;
+			string temp = txt;
+			temp = ReplaceIn(temp, "{0}", arg1);
+			temp = ReplaceInWithFill(temp, "{0,", arg1);
+			temp = ReplaceIn(temp, "{1}", arg2);
+			temp = ReplaceInWithFill(temp, "{1,", arg2);
+			temp = ReplaceIn(temp, "{2}", arg3);
+			temp = ReplaceInWithFill(temp, "{2,", arg3);
+			temp = ReplaceIn(temp, "{3}", arg4);
+			temp = ReplaceInWithFill(temp, "{3,", arg4);
+			temp = ReplaceIn(temp, "{4}", arg5);
+			temp = ReplaceInWithFill(temp, "{4,", arg5);
+			return temp;
 		}
 
 		static bool IsNullOrEmpty(const string & txt)
@@ -160,6 +204,11 @@ namespace CsLisp
 			output.push_back(s.substr(prev_pos, pos - prev_pos)); // Last word
 
 			return output;
+		}
+
+		int LastIndexOf(const string & text, const string & compareMethod)
+		{
+			return find_last_of(text);
 		}
 
 		const static string Empty;

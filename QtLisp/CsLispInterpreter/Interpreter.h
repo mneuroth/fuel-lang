@@ -31,14 +31,16 @@
 //using System.Linq;
 
 #include "csobject.h"
+#include "cstypes.h"
 #include "Scope.h"
 
 namespace CsLisp
 {
-	class LispBreakpointPosition
+	class LispBreakpointPosition : public Tuple3<int, int, int>
 	{
 	public:
 		/*public*/ LispBreakpointPosition(int start, int stop, int lineNumber)
+			: Tuple3<int, int, int>(start, stop, lineNumber)
 		{
 		}
 	};

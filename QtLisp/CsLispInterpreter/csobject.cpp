@@ -424,7 +424,6 @@ namespace CsLisp
 
 	void TextWriter::Write(const string & txt)
 	{
-		// TODO --> IMPLEMENT !
 		if (m_bToString)
 		{
 			m_sText += txt;
@@ -434,7 +433,6 @@ namespace CsLisp
 
 	void TextWriter::WriteLine()
 	{
-// TODO --> IMPLEMENT !
 		if (m_bToString)
 		{
 			m_sText += "\n";
@@ -444,7 +442,6 @@ namespace CsLisp
 
 	void TextWriter::WriteLine(const string & txt)
 	{
-// TODO --> IMPLEMENT !
 		if (m_bToString)
 		{
 			m_sText += txt + "\n";
@@ -454,42 +451,49 @@ namespace CsLisp
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1)
 	{
-// TODO --> IMPLEMENT !
+		string temp = string::Format(txt, txt1);
 		if (m_bToString)
 		{
-			m_sText += txt1 + "\n";
+			m_sText += temp + "\n";
 		}
-		std::cout << txt1 << std::endl;
+		std::cout << temp << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2)
 	{
-// TODO --> IMPLEMENT !
+		string temp = string::Format(txt, txt1, txt2);
 		if (m_bToString)
 		{
-			m_sText += txt + "\n";
+			m_sText += temp + "\n";
 		}
-		std::cout << txt << std::endl;
+		std::cout << temp << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3)
 	{
-		// TODO --> IMPLEMENT !
+		string temp = string::Format(txt, txt1, txt2, txt3);
 		if (m_bToString)
 		{
-			m_sText += txt + "\n";
+			m_sText += temp + "\n";
 		}
-		std::cout << txt << std::endl;
+		std::cout << temp << std::endl;
 	}
 
 	void TextWriter::WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3, const string & txt4)
 	{
-		// TODO --> IMPLEMENT !
+		string temp = string::Format(txt, txt1, txt2, txt3, txt4);
 		if (m_bToString)
 		{
-			m_sText += txt + "\n";
+			m_sText += temp + "\n";
 		}
-		std::cout << txt << std::endl;
+		std::cout << temp << std::endl;
+	}
+
+	string TextReader::ReadLine()
+	{
+		string input;
+		std::getline(std::cin, input);
+		return input;
 	}
 }
 

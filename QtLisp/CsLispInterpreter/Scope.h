@@ -60,7 +60,8 @@ namespace CsLisp
         /// <summary>
         /// Gets and sets the debuging modus.
         /// </summary>
-		/*public*/ std::shared_ptr<ILispDebugger> Debugger; // { get; set; }
+//		/*public*/ std::shared_ptr<ILispDebugger> Debugger; // { get; set; }
+		/*public*/ ILispDebugger * Debugger; // { get; set; }
 
         /// <summary>
         /// Gets and sets the tracing modus.
@@ -168,6 +169,7 @@ namespace CsLisp
         /// <param name="moduleName">The current module name for the scope.</param>
         /*public*/ LispScope(string fcnName, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null)
         {
+			Debugger = null;
             Name = fcnName;
 			ModuleName = moduleName ? *moduleName : string::Empty;
 			//GlobalScope = globalScope != null ? globalScope : shared_from_this();
@@ -192,6 +194,7 @@ namespace CsLisp
         /*public*/ LispScope()
             : LispScope(string::Empty)
         {
+			Debugger = null;
         }
 
 /*
@@ -385,7 +388,7 @@ namespace CsLisp
 
         /*public*/ void DumpFunctions()
         {
-			Dump([](const LispVariant & v)-> bool { v.IsFunction(); }, [](const LispVariant & v) -> string { " : module=" + v.FunctionValue().ModuleName; });
+			Dump([](const LispVariant & v)-> bool { return v.IsFunction(); }, [](const LispVariant & v) -> string { return " : module=" + v.FunctionValue().ModuleName; });
 
             ProcessMetaScope(LispEnvironment::Modules, [](KeyValuePair<string, std::shared_ptr<object>> modu) -> void
             {
