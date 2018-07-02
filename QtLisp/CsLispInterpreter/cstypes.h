@@ -223,6 +223,10 @@ namespace CsLisp
 			: m_bToString(bToString)
 		{
 		}
+		void EnableToString()
+		{
+			m_bToString = true;
+		}
 		string GetContent() const
 		{
 			return m_sText;

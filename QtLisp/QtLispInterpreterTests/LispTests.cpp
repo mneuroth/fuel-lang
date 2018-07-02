@@ -407,12 +407,15 @@ namespace QtLispUnitTests
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output.EnableToString();
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("132", result->ToString().c_str());
 
 				//string s = cr.ToString().Trim();
-				//Assert::IsTrue(s.Contains("first-macro"));
-				//Assert::IsTrue(s.Contains("second-macro"));
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("first-macro"));
+				Assert::IsTrue(s.Contains("second-macro"));
 			}
 		}
 

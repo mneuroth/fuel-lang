@@ -458,7 +458,7 @@ namespace CsLisp
         {
             var newItem = /*new*/ LispBreakpointInfo(lineNo, moduleName, condition);
             //var index = Breakpoints.FindIndex(elem => (elem.LineNo == lineNo) && (elem.ModuleName == moduleName));
-			var indexIter = std::find_if(Breakpoints.begin(), Breakpoints.end(), [lineNo, moduleName](auto elem) -> bool { return (elem.LineNo == lineNo) && (elem.ModuleName == moduleName); });
+            var indexIter = std::find_if(Breakpoints.begin(), Breakpoints.end(), [lineNo, moduleName](const LispBreakpointInfo & elem) -> bool { return (elem.LineNo == lineNo) && (elem.ModuleName == moduleName); });
 			int index = indexIter != Breakpoints.end() ? indexIter - Breakpoints.begin() : -1;
             if (index >= 0)
             {
@@ -490,21 +490,21 @@ namespace CsLisp
         // ReSharper disable once UnusedParameter.Local
 		/*private*/ void DoStep(std::shared_ptr<LispScope> currentScope)
         {
-			IsStopStepFcn = [](auto scope) -> bool { return true; };
+            IsStopStepFcn = [](std::shared_ptr<LispScope> scope) -> bool { return true; };
             IsProgramStop = true;
         }
 
 		/*private*/ void DoStepOver(std::shared_ptr<LispScope> currentScope)
         {
             var currentCallStackSize = currentScope->GetCallStackSize();
-			IsStopStepFcn = [currentCallStackSize](auto scope) -> bool { return currentCallStackSize >= scope->GetCallStackSize(); };
+            IsStopStepFcn = [currentCallStackSize](std::shared_ptr<LispScope> scope) -> bool { return currentCallStackSize >= scope->GetCallStackSize(); };
             IsProgramStop = true;
         }
 
 		/*private*/ void DoStepOut(std::shared_ptr<LispScope> currentScope)
         {
             var currentCallStackSize = currentScope->GetCallStackSize();
-			IsStopStepFcn = [currentCallStackSize](auto scope) -> bool { return currentCallStackSize - 1 >= scope->GetCallStackSize(); };
+            IsStopStepFcn = [currentCallStackSize](std::shared_ptr<LispScope> scope) -> bool { return currentCallStackSize - 1 >= scope->GetCallStackSize(); };
             IsProgramStop = true;
         }
 
