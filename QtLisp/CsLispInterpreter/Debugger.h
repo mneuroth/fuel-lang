@@ -78,7 +78,7 @@ namespace CsLisp
 
 		/*private*/ bool IsProgramStop; // { get; set; }
 
-		/*private*/ std::function<bool(LispScope)> IsStopStepFcn; // { get; set; }
+		/*private*/ std::function<bool(std::shared_ptr<LispScope>)> IsStopStepFcn; // { get; set; }
 
 		/*private*/ std::list<LispBreakpointInfo> Breakpoints; // { get; set; }
 
@@ -112,27 +112,27 @@ namespace CsLisp
         //#region public methods
 
         /// <summary>
-        /// Processing of the interactive loop of the debugger.
+        /// Processing of the interactive loop of the debugger->
         /// </summary>
-        /// <param name="debugger">The debugger.</param>
+        /// <param name="debugger">The debugger-></param>
         /// <param name="initialTopScope">The initial top scope.</param>
         /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
         /// <returns>True if program should be restarted.</returns>
         /// <exception cref="LispStopDebuggerException"></exception>
         /// <exception cref="CsLisp.LispStopDebuggerException"></exception>
-		/*public*/ static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, bool startedFromMain = false, bool tracing = false)
+		/*public*/ static bool InteractiveLoop(LispDebugger * debugger = null, std::shared_ptr<LispScope> initialTopScope = null, bool startedFromMain = false, bool tracing = false)
         {
             startedFromMain = startedFromMain || debugger == null;
             if (debugger == null)
             {
                 debugger = new LispDebugger();
             }
-            var globalScope = initialTopScope != null ? initialTopScope.GlobalScope : LispEnvironment::CreateDefaultScope();
+            var globalScope = initialTopScope != null ? initialTopScope->GlobalScope : LispEnvironment::CreateDefaultScope();
             // do not switch off tracing if already enabled
-            if (!globalScope.Tracing)
+            if (!globalScope->Tracing)
             {
-                globalScope.Tracing = tracing;                
+                globalScope->Tracing = tracing;                
             }
             var topScope = initialTopScope != null ? initialTopScope : globalScope;
             var currentScope = topScope;
@@ -140,16 +140,16 @@ namespace CsLisp
             var bRestart = false;
             do
             {
-                debugger.Output.Write(debugger != null ? DbgPrompt : Prompt);
+                debugger->Output.Write(debugger != null ? DbgPrompt : Prompt);
 
                 // Warning:
                 // QProcess and .NET >3.5 does not work correclty reading from input !!!
                 // see: http://www.qtcentre.org/threads/62415-QProcess-not-communicating-with-net-framework-gt-3-5
                 // ==> CsLisp is now using .NET 3.5 !
-                var cmd = debugger.Input.ReadLine();
-                cmd = cmd != null ? cmd.Trim() : null;
+                var cmd = debugger->Input.ReadLine();
+                cmd = /*cmd != null ?*/ cmd.Trim() /*: null*/;
 
-                if (cmd == null || cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
+                if (/*cmd == null ||*/ cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
                 {
                     bContinueWithNextStatement = true;
                     bRestart = false;
@@ -160,55 +160,55 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("help") || cmd.Equals("h"))
                 {
-                    ShowInteractiveCmds(debugger.Output);
+                    ShowInteractiveCmds(debugger->Output);
                 }
                 else if (cmd.Equals("about"))
                 {
-                    LispUtils.ShowAbout(debugger.Output);
+                    LispUtils.ShowAbout(debugger->Output);
                 }
                 else if (cmd.Equals("funcs"))
                 {
-                    globalScope.DumpFunctions();
+                    globalScope->DumpFunctions();
                 }
                 else if (cmd.Equals("macros"))
                 {
-                    globalScope.DumpMacros();
+                    globalScope->DumpMacros();
                 }
                 else if (cmd.Equals("builtins"))
                 {
-                    globalScope.DumpBuiltinFunctions();
+                    globalScope->DumpBuiltinFunctions();
                 }
                 else if (cmd.StartsWith("doc"))
                 {
                     var items = cmd.Split(' ');
-                    if (items.Length > 1)
+                    if (items.size() > 1)
                     {
                         string docCmd = "(doc '" + items[1] + ")";
-                        LispVariant result = Lisp::Eval(docCmd, currentScope, currentScope.ModuleName);
-                        debugger.Output.WriteLine("{0}", result);
+						std::shared_ptr<LispVariant> result = Lisp::Eval(docCmd, currentScope, currentScope->ModuleName);
+                        debugger->Output.WriteLine(string("{0}"), result->ToString());
                     }
                     else
                     {
-                        globalScope.DumpBuiltinFunctionsHelp();                        
+                        globalScope->DumpBuiltinFunctionsHelp();                        
                     }
                 }
                 else if (cmd.StartsWith("searchdoc"))
                 {
                     var items = cmd.Split(' ');
-                    if (items.Length > 1)
+                    if (items.size() > 1)
                     {
                         string docCmd = "(searchdoc '" + items[1] + ")";
-                        LispVariant result = Lisp::Eval(docCmd, currentScope, currentScope.ModuleName);
-                        debugger.Output.WriteLine("{0}", result);
+                        std::shared_ptr<LispVariant> result = Lisp::Eval(docCmd, currentScope, currentScope->ModuleName);
+                        debugger->Output.WriteLine(string("{0}"), result->ToString());
                     }
                     else
                     {
-                        globalScope.DumpBuiltinFunctionsHelp();
+                        globalScope->DumpBuiltinFunctionsHelp();
                     }
                 }
                 else if (cmd.Equals("modules"))
                 {
-                    globalScope.DumpModules();
+                    globalScope->DumpModules();
                 }
                 else if (cmd.StartsWith("clear"))
                 {
@@ -216,67 +216,67 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("stack") || cmd.StartsWith("k"))
                 {
-                    topScope.DumpStack(currentScope.GetCallStackSize());
+                    topScope->DumpStack(currentScope->GetCallStackSize());
                 }
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
-                    var script = LispUtils::ReadFileOrEmptyString(currentScope.ModuleName);
+                    var script = LispUtils::ReadFileOrEmptyString(currentScope->ModuleName);
                     // use the script given on command line if no valid module name was set
                     if (string::IsNullOrEmpty(script))
                     {
-                        script = debugger.CommandLineScript;
+                        script = debugger->CommandLineScript;
                     }
-                    ShowSourceCode(debugger, script, currentScope.ModuleName, currentScope.CurrentLineNo);
+                    ShowSourceCode(debugger, script, currentScope->ModuleName, currentScope->CurrentLineNo);
                 }
                 else if (cmd.StartsWith("list") || cmd.StartsWith("t"))
                 {
-                    debugger.ShowBreakpoints();
+                    debugger->ShowBreakpoints();
                 }
                 else if (cmd.StartsWith("break ") || cmd.StartsWith("b "))
                 {
-                    AddBreakpoint(debugger, cmd, currentScope.ModuleName);
+                    AddBreakpoint(debugger, cmd, currentScope->ModuleName);
                 }
                 else if (cmd.Equals("up") || cmd.StartsWith("u"))
                 {
-                    if (currentScope.Next != null)
+                    if (currentScope->Next != null)
                     {
-                        currentScope = currentScope.Next;
+                        currentScope = currentScope->Next;
                     }
                 }
                 else if (cmd.Equals("down") || cmd.StartsWith("d"))
                 {
-                    if (currentScope.Previous != null)
+                    if (currentScope->Previous != null)
                     {
-                        currentScope = currentScope.Previous;
+                        currentScope = currentScope->Previous;
                     }
                 }
                 else if (cmd.Equals("step") || cmd.Equals("s"))
                 {
-                    debugger.DoStep(currentScope);
+                    debugger->DoStep(currentScope);
                     bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("over") || cmd.Equals("v"))
                 {
-                    debugger.DoStepOver(currentScope);
+                    debugger->DoStepOver(currentScope);
                     bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("out") || cmd.Equals("o"))
                 {
-                    debugger.DoStepOut(currentScope);
+                    debugger->DoStepOut(currentScope);
                     bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("run") || cmd.Equals("r"))
                 {
-                    debugger.DoRun();
+                    debugger->DoRun();
                     bContinueWithNextStatement = true;
                 }
                 else if (cmd.Equals("locals") || cmd.StartsWith("l"))
                 {
-                    currentScope.DumpVars();
+                    currentScope->DumpVars();
                 }
                 else if (cmd.Equals("globals") || cmd.StartsWith("g"))
                 {
-                    globalScope.DumpVars();
+                    globalScope->DumpVars();
                 }
                 else if (cmd.Equals("restart"))
                 {
@@ -285,18 +285,18 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("version") || cmd.Equals("ver"))
                 {
-                    LispUtils::ShowVersion(debugger.Output);
+                    LispUtils::ShowVersion(debugger->Output);
                 }
                 else
                 {
                     try
                     {
-                        LispVariant result = Lisp::Eval(cmd, currentScope, currentScope.ModuleName);
-                        debugger.Output.WriteLine("result={0}", result);
+                        std::shared_ptr<LispVariant> result = Lisp::Eval(cmd, currentScope, currentScope->ModuleName);
+                        debugger->Output.WriteLine("result={0}", result->ToString());
                     }
                     catch (LispException & ex)
                     {
-                        debugger.Output.WriteLine("Exception: " + ex.Message);
+                        debugger->Output.WriteLine("Exception: " + ex.Message);
                     }
                 }
             } while (!bContinueWithNextStatement);
@@ -311,14 +311,14 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-		/*public*/ void InteractiveLoop(LispScope initialTopScope, IList<object> currentAst = null, bool startedFromMain = false, bool tracing = false)
+		/*public*/ virtual void InteractiveLoop(std::shared_ptr<LispScope> initialTopScope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false)
         {
             if (currentAst != null)
             {
-                var lineNumber = initialTopScope != null ? initialTopScope.CurrentLineNo : -1;
-                var startPos = initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
-                var stopPos = initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
-                var moduleName = initialTopScope != null ? initialTopScope.ModuleName : "?";
+                var lineNumber = initialTopScope != null ? initialTopScope->CurrentLineNo : -1;
+                var startPos = initialTopScope != null ? initialTopScope->CurrentToken->StartPos : -1;
+                var stopPos = initialTopScope != null ? initialTopScope->CurrentToken->StopPos : -1;
+                var moduleName = initialTopScope != null ? initialTopScope->ModuleName : "?";
                 Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName);
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
@@ -327,9 +327,9 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-		/*public*/ bool NeedsBreak(LispScope scope, LispBreakpointPosition posInfosOfCurrentAstItem)
+		/*public*/ virtual bool NeedsBreak(std::shared_ptr<LispScope> scope, LispBreakpointPosition posInfosOfCurrentAstItem)
         {
-            if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item3, scope.ModuleName, scope))
+            if ((IsProgramStop && IsStopStepFcn(scope)) || HitsBreakpoint(posInfosOfCurrentAstItem.Item3, scope->ModuleName, scope))
             {
                 IsProgramStop = false;
                 return true;
@@ -340,22 +340,22 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-		/*public*/ LispVariant DebuggerLoop(string script, string moduleName, bool tracing = false)
+		/*public*/ virtual std::shared_ptr<LispVariant> DebuggerLoop(const string & script, const string & moduleName, bool tracing = false)
         {
-            LispVariant result = null;
+			std::shared_ptr<LispVariant> result = null;
             var bRestart = true;
             while (bRestart)
             {
                 // save the source code if the script is transfered via command line
-                if (moduleName == LispUtils.CommandLineModule)
+                if (moduleName == LispUtils::CommandLineModule)
                 {
                     CommandLineScript = script;
                 }
 
                 var globalScope = LispEnvironment::CreateDefaultScope();
-                globalScope.Input = Input;
-                globalScope.Output = Output;
-                globalScope.Debugger = this;                
+                globalScope->Input = Input;
+                globalScope->Output = Output;
+                globalScope->Debugger = this;                
 
                 try
                 {
@@ -368,10 +368,10 @@ namespace CsLisp
                 }
                 catch (LispException & exception)
                 {
-                    Output.WriteLine("\nException: {0}", exception);
-                    string stackInfo = exception.Data.Contains(LispUtils.StackInfo) ? (string)exception.Data[LispUtils.StackInfo] : string.Empty;
+                    Output.WriteLine("\nException: {0}", exception.ToString());
+                    string stackInfo = exception.Data.Contains(LispUtils.StackInfo) ? (string)exception.Data[LispUtils.StackInfo] : string::Empty;
                     Output.WriteLine("\nStack:\n{0}", stackInfo);
-                    bRestart = InteractiveLoop(this, globalScope, startedFromMain: true);
+                    bRestart = InteractiveLoop(this, globalScope, /*startedFromMain:*/ true);
                 }
 
                 if (bRestart)
@@ -385,7 +385,7 @@ namespace CsLisp
                     }
                 }
 
-                globalScope.Debugger = null;
+                globalScope->Debugger = null;
             }
 
             return result;
@@ -408,22 +408,22 @@ namespace CsLisp
 		/*private*/ void Reset()
         {
             IsProgramStop = true;
-			IsStopStepFcn = [](LispScope scope) -> bool { return true; };
+			IsStopStepFcn = [](std::shared_ptr<LispScope> scope) -> bool { return true; };
         }
 
-		/*private*/ bool HitsBreakpoint(int lineNo, string moduleName, LispScope scope)
+		/*private*/ bool HitsBreakpoint(int lineNo, string moduleName, std::shared_ptr<LispScope> scope)
         {
-            foreach (var breakpoint in Breakpoints)
+            for (var breakpoint : Breakpoints)
             {
-                bool isSameModule = IsSameModule(breakpoint.ModuleName, scope != null ? scope.ModuleName : moduleName);
+                bool isSameModule = IsSameModule(breakpoint.ModuleName, scope != null ? scope->ModuleName : moduleName);
                 if (isSameModule && (lineNo == breakpoint.LineNo))
                 {
                     if (breakpoint.Condition.Length > 0 && scope != null)
                     {
                         try
                         {
-                            LispVariant result = Lisp::Eval(breakpoint.Condition, scope, scope.ModuleName);
-                            return result.BoolValue;
+                            std::shared_ptr<LispVariant> result = Lisp::Eval(breakpoint.Condition, scope, scope->ModuleName);
+                            return result->BoolValue();
                         }
                         catch
                         {
@@ -474,23 +474,23 @@ namespace CsLisp
         }
 
         // ReSharper disable once UnusedParameter.Local
-		/*private*/ void DoStep(LispScope currentScope)
+		/*private*/ void DoStep(std::shared_ptr<LispScope> currentScope)
         {
-            IsStopStepFcn = (scope) => true;
+			IsStopStepFcn = [](auto scope) -> { return true; };
             IsProgramStop = true;
         }
 
-		/*private*/ void DoStepOver(LispScope currentScope)
+		/*private*/ void DoStepOver(std::shared_ptr<LispScope> currentScope)
         {
-            var currentCallStackSize = currentScope.GetCallStackSize();
-            IsStopStepFcn = (scope) => currentCallStackSize >= scope.GetCallStackSize();
+            var currentCallStackSize = currentScope->GetCallStackSize();
+			IsStopStepFcn = [](auto scope) -> { return currentCallStackSize >= scope.GetCallStackSize(); };
             IsProgramStop = true;
         }
 
-		/*private*/ void DoStepOut(LispScope currentScope)
+		/*private*/ void DoStepOut(std::shared_ptr<LispScope> currentScope)
         {
-            var currentCallStackSize = currentScope.GetCallStackSize();
-            IsStopStepFcn = (scope) => currentCallStackSize - 1 >= scope.GetCallStackSize();
+            var currentCallStackSize = currentScope->GetCallStackSize();
+			IsStopStepFcn = [](auto scope) -> { return currentCallStackSize - 1 >= scope.GetCallStackSize(); };
             IsProgramStop = true;
         }
 
@@ -503,7 +503,7 @@ namespace CsLisp
         {
             Output.WriteLine("Breakpoints:");
             var no = 1;
-            foreach (var breakpoint in Breakpoints)
+            for (var breakpoint : Breakpoints)
             {
                 Output.WriteLine("#{0,-3} line={1,-5} module={2,-25} condition={3}", no, breakpoint.LineNo, breakpoint.ModuleName, breakpoint.Condition);
                 no++;
@@ -513,7 +513,7 @@ namespace CsLisp
 		/*private*/ static bool IsSameModule(string moduleName1, string moduleName2)
         {
             // if one module name is not set --> handle as same module
-            if (string.IsNullOrEmpty(moduleName1) || string.IsNullOrEmpty(moduleName2))
+            if (string::IsNullOrEmpty(moduleName1) || string::IsNullOrEmpty(moduleName2))
             {
                 return true;
             }
@@ -524,21 +524,21 @@ namespace CsLisp
             return module1.Name.Equals(module2.Name);
         }
 
-		/*private*/ static void ShowSourceCode(LispDebugger debugger, string sourceCode, string moduleName, int? currentLineNo)
+		/*private*/ static void ShowSourceCode(LispDebugger * debugger, const string & sourceCode, const string & moduleName, int/*?*/ currentLineNo)
         {
             if (debugger != null)
             {
-                string[] sourceCodeLines = sourceCode.Split('\n');
-                for (var i = 0; i < sourceCodeLines.Length; i++)
+                var sourceCodeLines = sourceCode.Split('\n');
+                for (var i = 0; i < sourceCodeLines.size(); i++)
                 {
-                    string breakMark = debugger.HasBreakpointAt(i + 1, moduleName) ? "B " : "  ";
-                    string mark = currentLineNo != null && currentLineNo.Value == i + 1 ? "-->" : string.Empty;
-                    debugger.Output.WriteLine("{0,3} {1,2} {2,3} {3}", i + 1, breakMark, mark, sourceCodeLines[i]);
+                    string breakMark = debugger->HasBreakpointAt(i + 1, moduleName) ? "B " : "  ";
+                    string mark = /*currentLineNo != null &&*/ currentLineNo.Value == i + 1 /*? "-->" : string::Empty*/;
+                    debugger->Output.WriteLine("{0,3} {1,2} {2,3} {3}", i + 1, breakMark, mark, sourceCodeLines[i]);
                 }
             }
         }
 
-		/*private*/ static void ClearBreakpoints(LispDebugger debugger, string cmd)
+		/*private*/ static void ClearBreakpoints(LispDebugger * debugger, const string & cmd)
         {
             if (debugger != null)
             {
@@ -546,26 +546,26 @@ namespace CsLisp
                 if (rest.Length > 0)
                 {
                     Tuple<bool, int> val = ConvertToInt(rest);
-                    if (!val.Item1 || !debugger.ClearBreakpoint(val.Item2))
+                    if (!val.Item1 || !debugger->ClearBreakpoint(val.Item2))
                     {
-                        debugger.Output.WriteLine("Warning: no breakpoint cleared");
+                        debugger->Output.WriteLine("Warning: no breakpoint cleared");
                     }
                 }
                 else
                 {
-                    debugger.Output.WriteLine("Really delete all breakpoints? (y/n)");
+                    debugger->Output.WriteLine("Really delete all breakpoints? (y/n)");
 					string answer;
                     do
                     {
-                        answer = debugger.Input.ReadLine();
-                        if (answer != null)
+                        answer = debugger->Input.ReadLine();
+                        //if (answer != null)
                         {
                             answer = answer.ToUpper();
                         }
 					} while (!(answer == "Y" || answer == "N" || answer == "YES" || answer == "NO"));
 					if (answer == "Y" || answer == "YES")
                     {
-                        debugger.ClearAllBreakpoints();
+                        debugger->ClearAllBreakpoints();
                     }
                 }
             }
@@ -580,22 +580,22 @@ namespace CsLisp
         /// break modulename:7 condition --&gt; breakpoint with line number, module name and condition
         /// break "modulename with spaces":7 condition --&gt; breakpoint with line number, module name and condition
         /// </summary>
-        /// <param name="debugger">The debugger.</param>
+        /// <param name="debugger">The debugger-></param>
         /// <param name="cmd">The command.</param>
         /// <param name="currentModuleName">Name of the current module.</param>
-		/*private*/ static void AddBreakpoint(LispDebugger debugger, string cmd, string currentModuleName)
+		/*private*/ static void AddBreakpoint(LispDebugger * debugger, const string & cmd, const string & currentModuleName)
         {
             bool added = false;
             if (debugger != null)
             {
-                var cmdArgs = new string[0];
+                std::vector<string> cmdArgs/* = new string[0]*/;
                 string moduleName = currentModuleName;
-                string rest = cmd.Substring(cmd.IndexOf(" ", StringComparison.Ordinal)).Trim();
+                string rest = cmd.Substring(cmd.IndexOf(" ", "StringComparison.Ordinal")).Trim();
                 if (rest.StartsWith("\""))
                 {
                     // process: filename:linenumber
                     int iStopPos;
-                    moduleName = GetStringLiteral(rest.Substring(1), out iStopPos);
+                    moduleName = GetStringLiteral(rest.Substring(1), /*out*/ iStopPos);
                     rest = rest.Substring(iStopPos + 2); // adjust for the two "
                     if (rest.StartsWith(":"))
                     {
@@ -607,12 +607,12 @@ namespace CsLisp
                     // process: linennumber
                     cmdArgs = rest.Split(' ');
                 }
-                int indexRest = rest.IndexOf(" ", StringComparison.Ordinal);
-                rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : string.Empty;
-                if (cmdArgs.Length > 0)
+                int indexRest = rest.IndexOf(" ", "StringComparison.Ordinal");
+                rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : string::Empty;
+                if (cmdArgs.size() > 0)
                 {
                     string lineNumberString = cmdArgs[0];
-                    int posModuleSeparator = cmdArgs[0].LastIndexOf(":", StringComparison.Ordinal);
+                    int posModuleSeparator = cmdArgs[0].LastIndexOf(":", "StringComparison.Ordinal");
                     if (posModuleSeparator >= 0)
                     {
                         lineNumberString = cmdArgs[0].Substring(posModuleSeparator + 1);
@@ -621,20 +621,20 @@ namespace CsLisp
                     Tuple<bool, int> val = ConvertToInt(lineNumberString);
                     if (val.Item1)
                     {
-                        debugger.AddBreakpoint(val.Item2, moduleName, rest.Length > 0 ? rest : string.Empty);
+                        debugger->AddBreakpoint(val.Item2, moduleName, rest.Length > 0 ? rest : string::Empty);
                         added = true;
                     }
                 }
             }
             if (!added && debugger != null)
             {
-                debugger.Output.WriteLine("Warning: no breakpoint set or modified");
+                debugger->Output.WriteLine("Warning: no breakpoint set or modified");
             }
         }
 
-		/*private*/ static string GetStringLiteral(string text, out int stopPos)
+		/*private*/ static string GetStringLiteral(string text, /*out*/ int & stopPos)
         {
-            string result = string.Empty;
+            string result = string::Empty;
             stopPos = text.Length;
 
             int i = 0;
@@ -686,19 +686,19 @@ namespace CsLisp
             output.WriteLine();
         }
 
-        /*private*/ static Tuple<bool, int> ConvertToInt(string value)
+        /*private*/ static Tuple<bool, int> ConvertToInt(const string & value)
         {
             var result = 0;
             var ok = true;
             try
             {
-                result = Convert.ToInt32(value);
+                result = /*Convert.ToInt32*/atoi(value.c_str());
             }
-            catch (FormatException)
+            catch (/*FormatException*/...)
             {
                 ok = false;
             }
-            return new Tuple<bool, int>(ok, result);
+            return /*new*/ Tuple<bool, int>(ok, result);
         }
 
         //#endregion

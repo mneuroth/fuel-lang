@@ -215,6 +215,8 @@ namespace CsLisp
 
 	class TextReader
 	{
+	public:
+		string ReadLine();
 	};
 
 	template <class K, class V>

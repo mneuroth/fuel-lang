@@ -132,6 +132,36 @@ namespace CsLisp
 			return std::equal(txt.rbegin(), txt.rend(), txt.rbegin());
 		}
 
+		string Trim() const
+		{
+			// https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+			string s = *this;
+			s.erase(s.begin(), std::find_if_not(s.begin(), s.end(), [](char c) { return std::isspace(c); }));
+			s.erase(std::find_if_not(s.rbegin(), s.rend(), [](char c) { return std::isspace(c); }).base(), s.end());
+			return s;
+		}
+
+		std::vector<string> Split(const string & seperator) const
+		{
+			// https://stackoverflow.com/questions/5167625/splitting-a-c-stdstring-using-tokens-e-g
+			string s = *this;
+			std::vector<string> output;
+
+			std::string::size_type prev_pos = 0, pos = 0;
+			while ((pos = s.find(seperator, pos)) != std::string::npos)
+			{
+				std::string substring(s.substr(prev_pos, pos - prev_pos));
+
+				output.push_back(substring);
+
+				prev_pos = ++pos;
+			}
+
+			output.push_back(s.substr(prev_pos, pos - prev_pos)); // Last word
+
+			return output;
+		}
+
 		const static string Empty;
 	};
 
