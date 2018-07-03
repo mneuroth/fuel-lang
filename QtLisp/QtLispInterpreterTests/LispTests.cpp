@@ -108,6 +108,12 @@ namespace QtLispUnitTests
 			Assert::AreEqual(9, result->ToInt());
 		}
 
+		TEST_METHOD(Test_Def1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (def (nth 2 (list 'a 'b 'c)) 9) (+ c 2))");
+			Assert::AreEqual(11, result->ToInt());
+		}
+
 		TEST_METHOD(Test_DefWithNil)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a nil) (println a))");
@@ -407,12 +413,10 @@ namespace QtLispUnitTests
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope();
-				scope->Output.EnableToString();
+				var scope = LispEnvironment::CreateDefaultScope(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("132", result->ToString().c_str());
 
-				//string s = cr.ToString().Trim();
 				string s = scope->Output.GetContent().Trim();
 				Assert::IsTrue(s.Contains("first-macro"));
 				Assert::IsTrue(s.Contains("second-macro"));
@@ -444,12 +448,13 @@ namespace QtLispUnitTests
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("144", result->ToString().c_str());
 
-				//string s = cr.ToString().Trim();
-				//Assert.IsTrue(s.Contains("first-macro"));
-				//Assert.IsTrue(s.Contains("second-macro"));
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("first-macro"));
+				Assert::IsTrue(s.Contains("second-macro"));
 			}
 		}
 
@@ -479,12 +484,13 @@ namespace QtLispUnitTests
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("40", result->ToString().c_str());
 
-				//string s = cr.ToString().Trim();
-				//Assert.IsTrue(s.Contains("first-macro"));
-				//Assert.IsTrue(s.Contains("second-macro"));
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("first-macro"));
+				Assert::IsTrue(s.Contains("second-macro"));
 			}
 		}
 
@@ -601,6 +607,18 @@ namespace QtLispUnitTests
 			Assert::AreEqual(14, result->ToInt());
 		}
 
+		TEST_METHOD(Test_Call1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def obj 0) (setf obj (call \"CsLisp.DummyNative\")) (println obj (type obj)) (call obj \"Test\"))");
+			Assert::AreEqual(42, result->ToInt());
+		}
+
+		TEST_METHOD(Test_CallStatic)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (call-static \"System.IO.File\" Exists \"dummy\"))");
+			Assert::AreEqual(false, result->ToBool());
+		}
+
 		TEST_METHOD(Test_Apply1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(apply (lambda (x) (println \"hello\" x)) '(55))");
@@ -629,15 +647,16 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (args 0)) (println (args 1)) (println (args 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))");
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (args 0)) (println (args 1)) (println (args 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))", scope);
 				Assert::AreEqual(10, result->ToInt());
 
-				//string s = cr.ToString().Trim();
-				//Assert.AreEqual(true, s.Contains("count= 3"));
-				//Assert.AreEqual(true, s.Contains("5"));
-				//Assert.AreEqual(true, s.Contains("6"));
-				//Assert.AreEqual(true, s.Contains("7"));
-				//Assert.AreEqual(true, s.Contains("additional= 7"));
+				string s = scope->Output.GetContent().Trim();
+				Assert::AreEqual(true, s.Contains("count= 3"));
+				Assert::AreEqual(true, s.Contains("5"));
+				Assert::AreEqual(true, s.Contains("6"));
+				Assert::AreEqual(true, s.Contains("7"));
+				Assert::AreEqual(true, s.Contains("additional= 7"));
 			}
 		}
 
@@ -1143,5 +1162,54 @@ namespace QtLispUnitTests
 			Assert::IsTrue(result->IsString());
 			Assert::IsTrue(result->StringValue().Contains("available functions:"));
 		}
+
+		TEST_METHOD(Test_Import)
+		//[DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (println x))))", scope);
+				Assert::IsTrue(result->IsInt());
+				Assert::AreEqual(3, result->IntValue());
+
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("1"));
+				Assert::IsTrue(s.Contains("7"));
+				Assert::IsTrue(s.Contains("7"));
+			}
+		}
+
+		TEST_METHOD(Test_Import2)
+		//[DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (foreach '(1 4 6) (lambda (x) (println x))))", scope);
+				Assert::IsTrue(result->IsInt());
+				Assert::AreEqual(3, result->IntValue());    // is last value of internal loop variable in foreach
+
+				// test results
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("1"));
+				Assert::IsTrue(s.Contains("4"));
+				Assert::IsTrue(s.Contains("6"));
+			}
+		}
+
+		TEST_METHOD(Test_Break)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(break)", scope);
+				Assert::IsTrue(result->IsUndefined());
+
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("no debugger support"));
+			}
+		}
+
 	};
 }

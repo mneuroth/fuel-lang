@@ -167,7 +167,7 @@ namespace CsLisp
         /// <param name="fcnName">Name of the FCN.</param>
         /// <param name="globalScope">The global scope.</param>
         /// <param name="moduleName">The current module name for the scope.</param>
-        /*public*/ LispScope(string fcnName, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null)
+        /*public*/ LispScope(string fcnName = string::Empty, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null)
         {
 			Debugger = null;
             Name = fcnName;
@@ -191,11 +191,11 @@ namespace CsLisp
         /// Initializes a new instance of the <see cref="LispScope"/> class.
         /// </summary>
         /// <remarks>Needed for compiler module and .NET 3.5</remarks>
-        /*public*/ LispScope()
-            : LispScope(string::Empty)
-        {
-			Debugger = null;
-        }
+   //     /*public*/ LispScope()
+   //         : LispScope(string::Empty)
+   //     {
+			//Debugger = null;
+   //     }
 
 /*
 		LispScope(const LispScope & other)

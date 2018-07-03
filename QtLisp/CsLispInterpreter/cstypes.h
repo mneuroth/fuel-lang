@@ -223,9 +223,9 @@ namespace CsLisp
 			: m_bToString(bToString)
 		{
 		}
-		void EnableToString()
+		void EnableToString(bool value = true)
 		{
-			m_bToString = true;
+			m_bToString = value;
 		}
 		string GetContent() const
 		{

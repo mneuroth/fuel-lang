@@ -699,7 +699,7 @@ namespace CsLisp
             }
             if (IsString() || r.IsString())
             {
-                return /*new*/ LispVariant(std::make_shared<object>(String::CompareOrdinal(ToString(), r.ToString()) < 0));
+                return /*new*/ LispVariant(std::make_shared<object>(string::CompareOrdinal(ToString(), r.ToString()) < 0));
             }
             throw CreateInvalidOperationException("< or >", *this, r);
         }
@@ -721,7 +721,7 @@ namespace CsLisp
             }
             if (IsString() || r.IsString())
             {
-                return /*new*/ LispVariant(std::make_shared<object>(String::CompareOrdinal(ToString(), r.ToString()) <= 0));
+                return /*new*/ LispVariant(std::make_shared<object>(string::CompareOrdinal(ToString(), r.ToString()) <= 0));
             }
             throw CreateInvalidOperationException("<= or >=", *this, r);
         }

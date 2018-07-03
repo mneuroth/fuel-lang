@@ -47,7 +47,7 @@ namespace CsLisp
 				return CompareToType<int>(ToInt(), otherVariant->ToInt());
 			}
 			// all other types will be compared like a string
-			return String::CompareOrdinal(StringValue(), otherVariant->StringValue()/*, StringComparison.Ordinal*/);
+			return string::CompareOrdinal(StringValue(), otherVariant->StringValue()/*, StringComparison.Ordinal*/);
 		}
 		return CompareTo(std::make_shared<object>(LispVariant(other)));
 	}

@@ -43,7 +43,7 @@ namespace CsLisp
 {
 	void ShowAbout(TextWriter & output);
 	void ShowVersion(TextWriter & output);
-	string ReadFileOrEmptyString(const string & fileName);
+	extern string ReadFileOrEmptyString(const string & fileName);
 
 	// ********************************************************************
 	/*internal*/ struct LispBreakpointInfo

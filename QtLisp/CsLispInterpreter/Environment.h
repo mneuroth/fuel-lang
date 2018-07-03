@@ -45,6 +45,8 @@ namespace CsLisp
 	class LispScope;
 	class LispBreakpointPosition;
 
+	extern string ReadFileOrEmptyString(const string & fileName);
+
 	class LispMacroRuntimeEvaluate
 	{
 	public:
@@ -73,7 +75,7 @@ namespace CsLisp
 		static std::shared_ptr<LispVariant> quasiquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope);
 		static std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope);
 
-		static std::shared_ptr<LispScope> CreateDefaultScope();
+		static std::shared_ptr<LispScope> CreateDefaultScope(bool redirectOutputToString = false);
 
 		static bool FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> foundValue);
 

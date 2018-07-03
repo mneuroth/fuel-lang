@@ -65,12 +65,7 @@ namespace CsLisp
 		return result;
 	}
 
-	/*static*/ string ReadFileOrEmptyString(const string & fileName)
-	{
-		std::ifstream ifs(fileName);
-		std::string content = std::string((std::istreambuf_iterator<char>(ifs)),(std::istreambuf_iterator<char>()));
-		return string(content);
-	}
+	extern string ReadFileOrEmptyString(const string & fileName);
 
 	/// <summary>
 	/// Fast Usable Embeddable Lisp Interpreter and Compiler (FUEL).

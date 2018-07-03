@@ -131,8 +131,6 @@ namespace CsLisp
 
 		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "", const string & arg4 = "", const string & arg5 = "")
 		{
-// TODO --> string.Format realisieren
-			//string s = std::str(std::format("%2% %2% %1%\n") % "world" % "hello");
 			string temp = txt;
 			temp = ReplaceIn(temp, "{0}", arg1);
 			temp = ReplaceInWithFill(temp, "{0,", arg1);
@@ -211,25 +209,13 @@ namespace CsLisp
 			return find_last_of(text);
 		}
 
-		const static string Empty;
-	};
-
-	class String
-	{
-	public:
 		static int CompareOrdinal(const string & a, const string & b)
 		{
 			return strcmp(a.c_str(), b.c_str());
 		}
-	};
-	
 
-//	inline CsLisp::string operator+(const CsLisp::string & s1, const CsLisp::string & s2)
-//	{
-//		CsLisp::string s = s1;
-//		s.append(s2);
-//		return s;
-//	}
+		const static string Empty;
+	};
 }
 
 #endif

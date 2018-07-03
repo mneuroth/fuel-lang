@@ -4,6 +4,7 @@
 #include "Lisp.h"
 
 #include <map>
+#include <fstream>
 
 using namespace CsLisp;
 
@@ -54,6 +55,22 @@ const string LispEnvironment::Sym = "sym";
 const string LispEnvironment::Str = "str";
 
 // ************************************************************************
+
+static bool File_Exists(const string & fileName)
+{
+	std::ifstream infile(fileName);
+	return infile.good();
+}
+
+namespace CsLisp
+{
+	string ReadFileOrEmptyString(const string & fileName)
+	{
+		std::ifstream ifs(fileName);
+		std::string content = std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+		return string(content);
+	}
+}
 
 static string GetStringRepresentation(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, string separator = " ")
 {
@@ -288,71 +305,78 @@ static string AddFileExtensionIfNeeded(string fileName)
 
 static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
+#ifdef _WIN32
+	const std::string DirectorySeparatorChar("\\");
+#else
+	const std::string DirectorySeparatorChar("/");
+#endif
+
 	std::shared_ptr<LispVariant> result = std::make_shared<LispVariant>();
-/* TODO --> implement
+/* TODO --> implement*/
 	for(var modu : args)
 	{
 		string code = string::Empty;
-		string orgModuleFileName = ((LispVariant)modu).StringValue;
+		string orgModuleFileName = modu->ToLispVariant()->StringValue();
 		string fileName = orgModuleFileName;
-		if (!File.Exists(fileName))
+		if (!File_Exists(fileName))
 		{
 			// try the given library path (if available)
-			fileName = LispUtils.LibraryPath + Path.DirectorySeparatorChar + orgModuleFileName;
+			fileName = /* TODO LispUtils.LibraryPath + Path.DirectorySeparatorChar +*/ orgModuleFileName;
 			fileName = AddFileExtensionIfNeeded(fileName);
-			if (!File.Exists(fileName))
+			if (!File_Exists(fileName))
 			{
 				// try default path .\Library\modulename.fuel
-				fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+				fileName = "." + /*Path.*/DirectorySeparatorChar + "Library" + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
 				fileName = AddFileExtensionIfNeeded(fileName);
-				if (!File.Exists(fileName))
+				if (!File_Exists(fileName))
 				{
 					// try default path <fuel.exe-path>\Library\modulename.fuel
-					fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+		// TODO			fileName = AppDomain.CurrentDomain.BaseDirectory + /*Path.*/DirectorySeparatorChar + "Library" + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
 					fileName = AddFileExtensionIfNeeded(fileName);
-					if (!File.Exists(fileName))
+					if (!File_Exists(fileName))
 					{
 						// try environment variable FUELPATH
-						string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+						char * envPath = null; // TODO getenv("FUELPATH");
+						//string envPath = Environment.GetEnvironmentVariable("FUELPATH");
 						if (envPath != null)
 						{
-							fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
+							fileName = envPath + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
 							fileName = AddFileExtensionIfNeeded(fileName);
 						}
 					}
 				}
 			}
 		}
-		if (File.Exists(fileName))
+		if (File_Exists(fileName))
 		{
-			code = File.ReadAllText(fileName);
+			code = ReadFileOrEmptyString(fileName);
 		}
 		else
 		{
 			// use std lib of fuel from builtin resources
 			if (orgModuleFileName == "fuellib")
 			{
-				code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
+		// TODO		code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
 			}
 			else
 			{
-				scope.GlobalScope.Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+				scope->GlobalScope->Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
 			}
 		}
-		if (!string.IsNullOrEmpty(code))
+		if (!string::IsNullOrEmpty(code))
 		{
-			var importScope = new LispScope("import " + fileName, scope.GlobalScope, fileName);
-			scope.PushNextScope(importScope);
+			var importScope = std::make_shared<LispScope>("import " + fileName, scope->GlobalScope, std::make_shared<string>(fileName));
+			scope->PushNextScope(importScope);
 
-			result = Lisp.Eval(code, importScope, fileName);
+			result = Lisp::Eval(code, importScope, fileName);
 
 			// add new module to modules scope
-			((LispScope)scope.GlobalScope[Modules]).Add(fileName, importScope);
+			(*(((*(scope->GlobalScope))[LispEnvironment::Modules])->GetLispScopeRef()))[fileName] = std::make_shared<object>(*importScope); // .Add(fileName, importScope);
 
-			scope.PopNextScope();
+			scope->PopNextScope();
 		}
 	}
-*/
+/**/
 	return result;
 }
 
@@ -1213,9 +1237,10 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 	return null;
 }
 
-std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
+std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope(bool redirectOutputToString)
 {
 	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>();
+	scope->Output.EnableToString(redirectOutputToString);
 
 	(*scope)[Modules] = std::make_shared<object>(LispScope(Modules, scope));
 	(*scope)[Macros] = std::make_shared<object>(LispScope(Macros, scope));
