@@ -39,6 +39,8 @@
 
 namespace CsLisp
 {
+	extern string LispUtils_LibraryPath;
+
 	bool Contains(const std::vector<string> & container, const string & search)
 	{
 		return std::find(container.begin(), container.end(), search) != container.end();
@@ -135,13 +137,13 @@ namespace CsLisp
 				script = /*LispUtils.*/GetScriptFilesFromProgramArgs(args)[0]/*.FirstOrDefault()*/;
 				loadFiles = false;
 			}
-// TODO --> implement for C++
-			//var libPath = args.Where(v = > v.StartsWith("-l=")).Select(v = > v).ToArray();
-			//if (libPath.Length > 0)
-			//{
-			//	string libraryPath = libPath.First().Substring(3);
-			//	LispUtils.LibraryPath = libraryPath;
-			//}
+			//org: var libPath = args.Where(v = > v.StartsWith("-l=")).Select(v = > v).ToArray();
+			var libPath = std::vector<string>(std::find_if(args.begin(), args.end(), [](const string & v) -> bool { return v.StartsWith("-l="); }), args.end());
+			if (libPath.size() > 0)
+			{
+				string libraryPath = libPath.front().Substring(3);
+				LispUtils_LibraryPath = libraryPath;
+			}
 
 			// handle options for compiler
 			if (Contains(args, "-c"))

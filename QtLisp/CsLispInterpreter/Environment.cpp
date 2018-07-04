@@ -64,6 +64,8 @@ static bool File_Exists(const string & fileName)
 
 namespace CsLisp
 {
+	string LispUtils_LibraryPath = string::Empty;
+
 	string ReadFileOrEmptyString(const string & fileName)
 	{
 		std::ifstream ifs(fileName);
@@ -303,6 +305,11 @@ static string AddFileExtensionIfNeeded(string fileName)
 	return fileName;
 }
 
+namespace CsLisp
+{
+	extern string LispUtils_LibraryPath;
+}
+
 static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 #ifdef _WIN32
@@ -321,23 +328,23 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 		if (!File_Exists(fileName))
 		{
 			// try the given library path (if available)
-			fileName = /* TODO LispUtils.LibraryPath + Path.DirectorySeparatorChar +*/ orgModuleFileName;
+			fileName = LispUtils_LibraryPath + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
 			fileName = AddFileExtensionIfNeeded(fileName);
 			if (!File_Exists(fileName))
 			{
 				// try default path .\Library\modulename.fuel
 				fileName = "." + /*Path.*/DirectorySeparatorChar + "Library" + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
-				fileName = AddFileExtensionIfNeeded(fileName);
+				fileName = AddFileExtensionIfNeeded(fileName);		
 				if (!File_Exists(fileName))
 				{
-					// try default path <fuel.exe-path>\Library\modulename.fuel
-		// TODO			fileName = AppDomain.CurrentDomain.BaseDirectory + /*Path.*/DirectorySeparatorChar + "Library" + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
-					fileName = AddFileExtensionIfNeeded(fileName);
-					if (!File_Exists(fileName))
+		//			// try default path <fuel.exe-path>\Library\modulename.fuel
+		//// TODO			fileName = AppDomain.CurrentDomain.BaseDirectory + /*Path.*/DirectorySeparatorChar + "Library" + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
+		//			fileName = AddFileExtensionIfNeeded(fileName);
+		//			if (!File_Exists(fileName))
 					{
 						// try environment variable FUELPATH
-						char * envPath = null; // TODO getenv("FUELPATH");
 						//string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+						char * envPath = getenv("FUELPATH");
 						if (envPath != null)
 						{
 							fileName = envPath + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
@@ -676,7 +683,7 @@ static std::shared_ptr<LispVariant> ArgsFcn(const std::vector<std::shared_ptr<ob
 	{
 		return std::make_shared<LispVariant>(array[index]);
 	}
-	throw LispException(string::Format("Index out of range in args function (index={0} max={1})", index, (int)array.size()));
+	throw LispException(string::Format("Index out of range in args function (index={0} max={1})", std::to_string(index), std::to_string((int)array.size())));
 }
 
 static std::shared_ptr<LispVariant> ApplyFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)

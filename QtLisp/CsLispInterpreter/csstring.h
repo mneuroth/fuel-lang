@@ -101,7 +101,7 @@ namespace CsLisp
 			auto pos = temp.find(findText);
 			if (pos != std::string::npos)
 			{
-				temp = temp.replace(pos, pos + arg.size(), arg);
+				temp = temp.replace(pos, findText.size(), arg);
 			}
 			return temp;
 		}
@@ -118,11 +118,13 @@ namespace CsLisp
 					int l = std::stoi(len);
 					if (l > 0)
 					{
-						temp = temp.replace(pos, pos2 - pos + 1, std::string(l - arg.size(), ' ') + arg);
+						int count = l - arg.size();
+						temp = temp.replace(pos, pos2 - pos + 1, std::string(count > 0 ? count : 0, ' ') + arg);
 					}
 					else
 					{
-						temp = temp.replace(pos, pos2 - pos + 1, arg + std::string(abs(l) - arg.size(), ' '));
+						int count = abs(l) - arg.size();
+						temp = temp.replace(pos, pos2 - pos + 1, arg + std::string(count > 0 ? count : 0, ' '));
 					}
 				}
 			}
