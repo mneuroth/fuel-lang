@@ -173,7 +173,7 @@ namespace CsLisp
 			{
 				return false;
 			}
-			return std::equal(txt.rbegin(), txt.rend(), txt.rbegin());
+			return std::equal(txt.rbegin(), txt.rend(), rbegin());
 		}
 
 		string Trim() const

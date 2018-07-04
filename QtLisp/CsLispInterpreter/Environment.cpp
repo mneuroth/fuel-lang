@@ -319,7 +319,6 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 #endif
 
 	std::shared_ptr<LispVariant> result = std::make_shared<LispVariant>();
-/* TODO --> implement*/
 	for(var modu : args)
 	{
 		string code = string::Empty;
@@ -383,7 +382,6 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 			scope->PopNextScope();
 		}
 	}
-/**/
 	return result;
 }
 
@@ -1130,7 +1128,7 @@ static std::shared_ptr<LispVariant> CallStaticNative(const std::vector<std::shar
 
 // ************************************************************************
 
-bool LispEnvironment::FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> foundValue)
+bool LispEnvironment::FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> & foundValue)
 {
 	foundValue = null;
 

@@ -77,7 +77,7 @@ namespace CsLisp
 
 		static std::shared_ptr<LispScope> CreateDefaultScope(bool redirectOutputToString = false);
 
-		static bool FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> foundValue);
+		static bool FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> & foundValue);
 
 		static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
 
