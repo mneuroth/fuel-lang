@@ -56,6 +56,12 @@ namespace CsLisp
 		m_Data.pMacro = new LispMacroRuntimeEvaluate(value);
 	}
 
+	object::object(const LispMacroCompileTimeExpand & value)
+		: m_Type(ObjectType::__LispMacroCompileTimeExpand)
+	{
+		m_Data.pCompileMacro = new LispMacroCompileTimeExpand(value);
+	}
+
 	object::object(const LispScope & value)
 		: m_Type(ObjectType::__LispScope)
 	{
@@ -64,8 +70,6 @@ namespace CsLisp
 
 	object::object(const object & other)
 	{
-		CleanUpMemory();
-
 		m_Type = other.m_Type;
 
 		if (other.IsLispVariant())
@@ -91,6 +95,10 @@ namespace CsLisp
 		else if (IsLispMacroRuntimeEvaluate())
 		{
 			m_Data.pMacro = new LispMacroRuntimeEvaluate(*(other.ToLispMacroRuntimeEvaluate()));
+		}
+		else if (IsLispMacroCompileTimeExpand())
+		{
+			m_Data.pCompileMacro = new LispMacroCompileTimeExpand(*(other.ToLispMacroCompileTimeExpand()));
 		}
 		else if (other.IsString())
 		{
@@ -185,6 +193,10 @@ namespace CsLisp
 		else if (IsLispMacroRuntimeEvaluate())
 		{
 			delete m_Data.pMacro;
+		}
+		else if (IsLispMacroCompileTimeExpand())
+		{
+			delete m_Data.pCompileMacro;
 		}
 		else if (IsString())
 		{
@@ -352,6 +364,18 @@ namespace CsLisp
 // TODO: ist das wirklich korrekt eine Kopie zu liefern ?
 			// return a copy 
 			return std::make_shared<LispMacroRuntimeEvaluate>(*(m_Data.pMacro));
+		}
+		return null;
+	}
+
+
+	std::shared_ptr<LispMacroCompileTimeExpand> object::ToLispMacroCompileTimeExpand() const
+	{
+		if (IsLispMacroCompileTimeExpand())
+		{
+// TODO: ist das wirklich korrekt eine Kopie zu liefern ?
+			// return a copy 
+			return std::make_shared<LispMacroCompileTimeExpand>(*(m_Data.pCompileMacro));
 		}
 		return null;
 	}

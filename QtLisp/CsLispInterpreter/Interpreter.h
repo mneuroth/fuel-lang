@@ -36,11 +36,11 @@
 
 namespace CsLisp
 {
-	class LispBreakpointPosition : public Tuple3<int, int, int>
+	class LispBreakpointPosition : public Tuple3<size_t, size_t, size_t>
 	{
 	public:
-		/*public*/ LispBreakpointPosition(int start, int stop, int lineNumber)
-			: Tuple3<int, int, int>(start, stop, lineNumber)
+		/*public*/ LispBreakpointPosition(size_t start, size_t stop, size_t lineNumber)
+			: Tuple3<size_t, size_t, size_t>(start, stop, lineNumber)
 		{
 		}
 	};
@@ -222,11 +222,11 @@ namespace CsLisp
             return functionWrapper.Function(arguments, scope);
 		}
 
-#if ENABLE_COMPILE_TIME_MACROS 
+#ifdef ENABLE_COMPILE_TIME_MACROS 
 
-        public static object ExpandMacros(object ast, LispScope globalScope)
+		/*public*/ static std::shared_ptr<object> ExpandMacros(std::shared_ptr<object> ast, std::shared_ptr<LispScope> globalScope)
         {
-            object result = ast;
+			std::shared_ptr<object> result = ast;
             bool anyMacroReplaced;
             do
             {
@@ -236,33 +236,33 @@ namespace CsLisp
             return result;
         }
 
-        private static object ExpandMacros(object ast, LispScope globalScope, /*ref*/ bool anyMacroReplaced)
+        /*private*/ static std::shared_ptr<object> ExpandMacros(std::shared_ptr<object> ast, std::shared_ptr<LispScope> globalScope, /*ref*/ bool & anyMacroReplaced)
         {
-            if (ast == null || ast is LispVariant)
+            if (ast == null || ast->IsLispVariant())
             {
                 return ast;
             }
 
-            var astAsList = ((IEnumerable<object>)ast).ToList();
-            if (astAsList.Count == 0)
+            var astAsList = ast->ToEnumerableOfObject();
+            if (astAsList.size() == 0)
             {
                 return ast;
             }
 
             // compile time macro: process define-macro statements ==> call special form, this will add macro to global scope as side effect
-            var function = astAsList.First();
-            var functionName = function.ToString();
-            if (globalScope != null && globalScope.ContainsKey(functionName))
+            var function = astAsList.front();
+            var functionName = function->ToString();
+            if (globalScope != null && globalScope->ContainsKey(functionName))
             {
-                var fcn = ((LispVariant)globalScope[functionName]).FunctionValue;
-                if (fcn.IsEvalInExpand)
+                var fcn = (*globalScope)[functionName]->ToLispVariant()->FunctionValue();
+                if (fcn.IsEvalInExpand())
                 {
-                    var args = new std::shared_ptr<IEnumerable<std::shared_ptr<object>>>(astAsList);
-                    args.RemoveAt(0);
+                    var args = std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList);
+                    args->RemoveAt(0);
 
                     // process compile time macro definition 
                     //   --> side effect: add macro definition to internal macro scope
-                    fcn.Function(args.ToArray(), globalScope);
+                    fcn.Function(args->ToArray(), globalScope);
 
                     // compile time macros definitions will be removed from code in expand macro phase
                     // because only the side effect above is needed for further macro replacements
@@ -271,30 +271,30 @@ namespace CsLisp
             }
 
             // compile time macros: process macro expansion in an expression which calls a macro
-            if (LispEnvironment.IsMacro(function, globalScope))
+            if (LispEnvironment::IsMacro(function, globalScope))
             {
-                var macro = LispEnvironment.GetMacro(function, globalScope);
-                if (macro is LispMacroCompileTimeExpand)
+                var macro = LispEnvironment::GetMacro(function, globalScope);
+                if (macro->IsLispMacroCompileTimeExpand())
                 {
-                    var macroExpand = (LispMacroCompileTimeExpand)macro;
-                    return ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, /*ref*/ anyMacroReplaced);
+                    var macroExpand = macro->ToLispMacroCompileTimeExpand();
+                    return std::make_shared<object>(*ReplaceFormalArgumentsInExpression(macroExpand->FormalArguments, std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList), macroExpand->Expression, /*ref*/ anyMacroReplaced));
                 }
             }
 
-            var expandedAst = new std::shared_ptr<IEnumerable<std::shared_ptr<object>>>();
+            var expandedAst = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
             // Expand recursively and handle enumarations (make them flat !)
-            foreach (var elem in astAsList)
+            for (var elem : astAsList)
             {
                 var expandResult = ExpandMacros(elem, globalScope);
                 // ignore code which is removed in nacri expand phase
                 if (expandResult != null)
                 {
-                    expandedAst.Add(expandResult);                    
+                    expandedAst->Add(expandResult);                    
                 }
             }
 
-            return expandedAst;
-        }
+            return std::make_shared<object>(*expandedAst);
+		}
 #endif
 
         //#endregion

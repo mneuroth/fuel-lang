@@ -50,18 +50,18 @@ namespace CsLisp
 		/// <param name="code">The code.</param>
 		/// <param name="offset">The position offset (decorated code).</param>
 		/// <returns>Container with tokens</returns>
-		/*public*/ static IEnumerable<std::shared_ptr<LispToken>> Tokenize(string code, int offset = 0)
+		/*public*/ static IEnumerable<std::shared_ptr<LispToken>> Tokenize(string code, size_t offset = 0)
 		{
 			IEnumerable<std::shared_ptr<LispToken>> tokens; // = new List<LispToken>();
 			string currentToken = string::Empty;
-			int currentTokenStartPos = 0;
-			int lineCount = 1;
+			size_t currentTokenStartPos = 0;
+			size_t lineCount = 1;
 			bool isInString = false;
 			bool isInSymbol = false;
 			bool wasLastBackslash = false;
 
 			/*Action<string, int, int>*/
-			std::function<void(const string &, int, int)> addToken = [&tokens, offset, &isInSymbol, &isInString, &currentToken, &currentTokenStartPos](const string & currentTok, int pos, int line)
+			std::function<void(const string &, size_t, size_t)> addToken = [&tokens, offset, &isInSymbol, &isInString, &currentToken, &currentTokenStartPos](const string & currentTok, size_t pos, size_t line)
 			{
 				tokens.Add(std::make_shared<LispToken>(currentTok, currentTokenStartPos - offset, pos - offset, line));
 				isInSymbol = false;
@@ -70,7 +70,7 @@ namespace CsLisp
 				currentTokenStartPos = pos + 1;
 			};
 
-			for (int i = 0; i < code.Length(); i++)
+			for (size_t i = 0; i < code.Length(); i++)
 			{
 				char ch = code[i];
 				if (Char_IsWhiteSpace(ch))
@@ -223,19 +223,19 @@ namespace CsLisp
 			throw LispException(string::Format(string("Invalid character after backslash {0}"), string(ch)));
 		}
 
-		/*private*/ static int ProcessComment(string code, int i, int lineCount, char ch, /*Action<string, int, int>*/std::function<void(const string &, int, int)> addToken)
+		/*private*/ static size_t ProcessComment(string code, size_t i, size_t lineCount, char ch, /*Action<string, size_t, size_t>*/std::function<void(const string &, size_t, size_t)> addToken)
 		{
-			int newIndex;
+			size_t newIndex;
 			string comment = string::Empty + string(ch) + GetRestOfLine(code, i + 1, /*out*/ newIndex);
 			addToken(comment, i, lineCount);
 			i = newIndex;
 			return i;
 		}
 
-		/*private*/ static string GetRestOfLine(string code, int i, /*out*/ int & newIndex)
+		/*private*/ static string GetRestOfLine(string code, size_t i, /*out*/ size_t & newIndex)
 		{
 			string rest = code.Substring(i);
-			int pos = rest.IndexOf("\n", "StringComparison.InvariantCulture");
+			size_t pos = rest.IndexOf("\n", "StringComparison.InvariantCulture");
 			if (pos > 0)
 			{
 				newIndex = i + pos;

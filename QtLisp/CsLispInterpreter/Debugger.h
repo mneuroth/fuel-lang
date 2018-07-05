@@ -49,7 +49,7 @@ namespace CsLisp
 	/*internal*/ struct LispBreakpointInfo
 	{
 	public:
-		/*internal*/ LispBreakpointInfo(int lineNo, const string & moduleName, const string & condition)
+		/*internal*/ LispBreakpointInfo(size_t lineNo, const string & moduleName, const string & condition)
 			//    : this()
 		{
 			LineNo = lineNo;
@@ -57,7 +57,7 @@ namespace CsLisp
 			Condition = condition;
 		}
 
-		/*internal*/ int LineNo; // { get; set; }
+		/*internal*/ size_t LineNo; // { get; set; }
 
 		/*internal*/ string ModuleName; // { get; set; }
 
@@ -372,7 +372,7 @@ namespace CsLisp
                     result = Lisp::Eval(script, globalScope, moduleName, /*tracing:*/ tracing);
                     Reset();
                 }
-                catch (LispStopDebuggerException & exc)
+                catch (LispStopDebuggerException & /*exc*/)
                 {
                     bRestart = false;
                 }
@@ -423,7 +423,7 @@ namespace CsLisp
 			IsStopStepFcn = [](std::shared_ptr<LispScope> scope) -> bool { return true; };
         }
 
-		/*private*/ bool HitsBreakpoint(int lineNo, const string & moduleName, std::shared_ptr<LispScope> scope)
+		/*private*/ bool HitsBreakpoint(size_t lineNo, const string & moduleName, std::shared_ptr<LispScope> scope)
         {
             for (var breakpoint : Breakpoints)
             {
@@ -439,7 +439,7 @@ namespace CsLisp
                         }
                         catch(...)
                         {
-                            Output.WriteLine("Error: bad condition for line {0}: {1}", breakpoint.LineNo, breakpoint.Condition);
+                            Output.WriteLine("Error: bad condition for line {0}: {1}", std::to_string(breakpoint.LineNo), breakpoint.Condition);
                             return false;
                         } 
                     }
@@ -449,17 +449,17 @@ namespace CsLisp
             return false;
         }
 
-		/*private*/ bool HasBreakpointAt(int lineNo, string moduleName)
+		/*private*/ bool HasBreakpointAt(size_t lineNo, string moduleName)
         {
             return HitsBreakpoint(lineNo, moduleName, null);
         }
 
-		/*private*/ void AddBreakpoint(int lineNo, string moduleName, string condition)
+		/*private*/ void AddBreakpoint(size_t lineNo, string moduleName, string condition)
         {
             var newItem = /*new*/ LispBreakpointInfo(lineNo, moduleName, condition);
             //var index = Breakpoints.FindIndex(elem => (elem.LineNo == lineNo) && (elem.ModuleName == moduleName));
             var indexIter = std::find_if(Breakpoints.begin(), Breakpoints.end(), [lineNo, moduleName](const LispBreakpointInfo & elem) -> bool { return (elem.LineNo == lineNo) && (elem.ModuleName == moduleName); });
-			int index = indexIter != Breakpoints.end() ? indexIter - Breakpoints.begin() : -1;
+			size_t index = indexIter != Breakpoints.end() ? indexIter - Breakpoints.begin() : -1;
             if (index >= 0)
             {
                 // replace existing item for this line
@@ -519,7 +519,7 @@ namespace CsLisp
             var no = 1;
             for (var breakpoint : Breakpoints)
             {
-                Output.WriteLine("#{0,-3} line={1,-5} module={2,-25} condition={3}", no, breakpoint.LineNo, breakpoint.ModuleName, breakpoint.Condition);
+                Output.WriteLine("#{0,-3} line={1,-5} module={2,-25} condition={3}", std::to_string(no), std::to_string(breakpoint.LineNo), breakpoint.ModuleName, breakpoint.Condition);
                 no++;
             }
         }
@@ -539,7 +539,7 @@ namespace CsLisp
 			return moduleName1 == moduleName2;
         }
 
-		/*private*/ static void ShowSourceCode(LispDebugger * debugger, const string & sourceCode, const string & moduleName, int/*?*/ currentLineNo)
+		/*private*/ static void ShowSourceCode(LispDebugger * debugger, const string & sourceCode, const string & moduleName, size_t/*?*/ currentLineNo)
         {
             if (debugger != null)
             {
@@ -609,7 +609,7 @@ namespace CsLisp
                 if (rest.StartsWith("\""))
                 {
                     // process: filename:linenumber
-                    int iStopPos;
+                    size_t iStopPos;
                     moduleName = GetStringLiteral(rest.Substring(1), /*out*/ iStopPos);
                     rest = rest.Substring(iStopPos + 2); // adjust for the two "
                     if (rest.StartsWith(":"))
@@ -622,12 +622,12 @@ namespace CsLisp
                     // process: linennumber
                     cmdArgs = rest.Split(' ');
                 }
-                int indexRest = rest.IndexOf(" ", "StringComparison.Ordinal");
+                size_t indexRest = rest.IndexOf(" ", "StringComparison.Ordinal");
                 rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : string::Empty;
                 if (cmdArgs.size() > 0)
                 {
                     string lineNumberString = cmdArgs[0];
-                    int posModuleSeparator = cmdArgs[0].LastIndexOf(":", "StringComparison.Ordinal");
+                    size_t posModuleSeparator = cmdArgs[0].LastIndexOf(":", "StringComparison.Ordinal");
                     if (posModuleSeparator >= 0)
                     {
                         lineNumberString = cmdArgs[0].Substring(posModuleSeparator + 1);
@@ -646,8 +646,8 @@ namespace CsLisp
                 debugger->Output.WriteLine("Warning: no breakpoint set or modified");
             }
         }
-
-		/*private*/ static string GetStringLiteral(const string & text, /*out*/ int & stopPos)
+		
+		/*private*/ static string GetStringLiteral(const string & text, /*out*/ size_t & stopPos)
         {
             string result = string::Empty;
             stopPos = text.size();

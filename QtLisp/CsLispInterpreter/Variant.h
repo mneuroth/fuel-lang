@@ -795,7 +795,7 @@ namespace CsLisp
             {
                 return LispType::_String;
             }
-			if (obj->IsIEnumerableOfObject())
+			if (obj->IsIEnumerableOfObject() || obj->IsList())
             {
                 return LispType::_List;
             }

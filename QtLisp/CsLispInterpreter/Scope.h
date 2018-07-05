@@ -104,7 +104,7 @@ namespace CsLisp
         /// </summary>
 		/*public*/ std::shared_ptr<LispToken> CurrentToken; // { get; set; }
 
-        /*public*/ int CurrentLineNo() const
+        /*public*/ size_t CurrentLineNo() const
         {
             //get
             //{
@@ -374,7 +374,7 @@ namespace CsLisp
             {
                 string currentItem = currentLevel == i ? "-->" : "   ";
 
-                ret = string::Format("{0,3}{1,5} name={2,-35} lineno={3,-4} module={4}\n", currentItem, i, current->Name, current->CurrentLineNo(), current->ModuleName) + ret;
+                ret = string::Format("{0,3}{1,5} name={2,-35} lineno={3,-4} module={4}\n", currentItem, std::to_string(i), current->Name, std::to_string(current->CurrentLineNo()), current->ModuleName) + ret;
                 current = current->Previous;
                 i--;
             } while (current != null);

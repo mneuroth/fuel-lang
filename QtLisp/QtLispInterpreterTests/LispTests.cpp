@@ -494,6 +494,177 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_MacrosExpand1)
+		{
+#ifdef ENABLE_COMPILE_TIME_MACROS
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (define-macro-expand blub (x y) (println x y)) (println (quote (1 2 3))) (blub 3 4))");
+			Assert::AreEqual("3 4", result->ToString().c_str());
+#else
+			Assert.IsTrue(true);
+#endif
+		}
+
+		TEST_METHOD(Test_MacrosExpand2)
+		{
+			const string macroExpandScript = "(do\
+				(define-macro-expand first-macro\
+					(a b)\
+					(do\
+						(def i 1)\
+						(+ a b i)\
+					)\
+				)\
+\
+				(define-macro-expand second-macro\
+					(x y)\
+					(do\
+						(* x y (first-macro x y))\
+					)\
+				)\
+\
+				(def m (second-macro 4 3))\
+			)";
+#ifdef ENABLE_COMPILE_TIME_MACROS
+			std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+			Assert::AreEqual("96", result->ToString().c_str());
+#else
+			Assert::IsTrue(true);
+#endif
+		}
+
+		TEST_METHOD(Test_MacrosExpandNested)
+		{
+			const string macroExpandScript = "(do\
+				(define-macro-expand first-macro\
+					(a b)\
+					(do\
+						(println first-macro)\
+						(def i 1)\
+						(+ a b i)\
+					)\
+				)\
+\
+				(define-macro-expand second-macro\
+					(x y)\
+					(do\
+						(println second-macro)\
+							(* x y (first-macro (+ x 1) (+ y 2)))\
+						)\
+					)\
+\
+				(def m (second-macro 4 3))\
+			)";
+
+#ifdef ENABLE_COMPILE_TIME_MACROS
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+				Assert::AreEqual("132", result->ToString().c_str());
+
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("first-macro"));
+				Assert::IsTrue(s.Contains("second-macro"));
+			}
+#else
+			Assert::IsTrue(true);
+#endif
+		}
+
+		TEST_METHOD(Test_MacrosExpandRecursive)
+		{
+			const string macroExpandScript = "(do\
+				(define-macro-expand first-macro\
+					(a b)\
+					(do\
+						(println first-macro)\
+						(def i 1)\
+						(+ a b i)\
+					)\
+				)\
+\
+				(define-macro-expand second-macro\
+					(x y)\
+					(do\
+						(println second-macro)\
+						(* x y (first-macro x (+ y 4)))\
+					)\
+				)\
+\
+				(def m (second-macro 4 3))\
+			)";
+
+#ifdef ENABLE_COMPILE_TIME_MACROS
+				//using (ConsoleRedirector cr = new ConsoleRedirector())
+				{
+					var scope = LispEnvironment::CreateDefaultScope(true);
+					std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+					Assert::AreEqual("144", result->ToString().c_str());
+
+					string s = scope->Output.GetContent().Trim();
+					Assert::IsTrue(s.Contains("first-macro"));
+					Assert::IsTrue(s.Contains("second-macro"));
+				}
+#else
+				Assert::IsTrue(true);
+#endif
+		}
+
+
+		TEST_METHOD(Test_MacrosExpandDoubleMacroCall)
+		{
+			const string macroExpandScript = "(do\
+				(define-macro-expand first-macro\
+					(a b)\
+					(do\
+						(println first-macro)\
+						(def i 1)\
+						(+ a b i)\
+					)\
+				)\
+\
+				(define-macro-expand second-macro\
+					(x y)\
+					(do\
+						(println second-macro)\
+						(* x y)\
+					)\
+				)\
+\
+				(def m (second-macro 4 (first-macro 6 3)))\
+			)";
+
+#ifdef ENABLE_COMPILE_TIME_MACROS
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+				Assert::AreEqual("40", result->ToString().c_str());
+
+				string s = scope->Output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("first-macro"));
+				Assert::IsTrue(s.Contains("second-macro"));
+			}
+#else
+			Assert::IsTrue(true);
+#endif
+		}
+
+		TEST_METHOD(Test_MacrosSetf1)
+		{
+#ifdef ENABLE_COMPILE_TIME_MACROS
+			{
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result =
+					Lisp::Eval(
+						"(do (def a 42) (define-macro-expand my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))", scope);
+				Assert::AreEqual("blubxyz", result->ToString().c_str());
+			}
+#else
+			Assert::IsTrue(true);
+#endif
+		}
+
 		TEST_METHOD(Test_MacrosSetf2)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (defn my-setf (x value) (setf x value)) (my-setf a (+ 8 9)) (println a))");
@@ -1062,23 +1233,6 @@ namespace QtLispUnitTests
 			}
 		}
 
-		TEST_METHOD(TestLispException)
-		{
-			try
-			{
-				Lisp::Eval("(println \"hello\"))");
-				Assert::IsTrue(false);
-			}
-			catch (const CsLisp::LispException &)
-			{
-				Assert::IsTrue(true);
-			}
-			catch (...)
-			{
-				Assert::IsTrue(false);
-			}
-		}
-
 		TEST_METHOD(Test_LispVariantToString)
 		{
 			LispVariant result(std::make_shared<object>("hello"));
@@ -1140,6 +1294,20 @@ namespace QtLispUnitTests
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(typestr 1.23)");
 			Assert::IsTrue(result->IsString());
 			Assert::AreEqual("Double", result->Value->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Vars)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				var scope = LispEnvironment::CreateDefaultScope(true);
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 4) (def b \"asdf\") (vars))", scope);
+				Assert::IsTrue(result->IsUndefined());
+
+				string s = scope->Output.GetContent().Trim();
+				Assert::AreEqual(true, s.Contains("a --> 4"));
+				Assert::AreEqual(true, s.Contains("b --> \"asdf\""));
+			}
 		}
 
 		TEST_METHOD(Test_Fuel)

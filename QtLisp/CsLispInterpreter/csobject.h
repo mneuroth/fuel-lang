@@ -38,6 +38,7 @@ namespace CsLisp
 	class LispScope;
 	struct LispFunctionWrapper;
 	class LispMacroRuntimeEvaluate;
+	class LispMacroCompileTimeExpand;
 
     /// <summary>
     /// Lisp data types.
@@ -78,6 +79,7 @@ namespace CsLisp
 		__VoidPtr = 15,
 		__LispScope = 16,
 		__LispMacroRuntimeEvaluate = 100,
+		__LispMacroCompileTimeExpand = 101,
         __Error = 999
     };
 
@@ -99,6 +101,7 @@ namespace CsLisp
 			IEnumerable<std::shared_ptr<object>> * pList;
 			LispFunctionWrapper * pFunctionWrapper;
 			LispMacroRuntimeEvaluate * pMacro;
+			LispMacroCompileTimeExpand * pCompileMacro;
 		} m_Data;
 
 		void CleanUpMemory();
@@ -111,7 +114,12 @@ namespace CsLisp
 			: m_Type(ObjectType::__Undefined)
 		{
 		}
-        
+
+		//explicit object(ObjectType objType)
+		//	: m_Type(objType)
+		//{
+		//}
+
 		explicit object(const object & other);
 
 //		explicit object(void * ptr)
@@ -157,6 +165,8 @@ namespace CsLisp
 		explicit object(const LispVariant & value);
 
 		explicit object(const LispMacroRuntimeEvaluate & value);
+
+		explicit object(const LispMacroCompileTimeExpand & value);
 
 		explicit object(const LispScope & value);
 
@@ -254,6 +264,11 @@ namespace CsLisp
 			return m_Type == ObjectType::__LispMacroRuntimeEvaluate;
 		}
 
+		bool IsLispMacroCompileTimeExpand() const
+		{
+			return m_Type == ObjectType::__LispMacroCompileTimeExpand;
+		}
+
 		std::shared_ptr<LispVariant> ToLispVariant() const;
 
 		//std::shared_ptr<LispScope> ToLispScope() const;
@@ -269,6 +284,8 @@ namespace CsLisp
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList() const;
 
 		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const;
+
+		std::shared_ptr<LispMacroCompileTimeExpand> ToLispMacroCompileTimeExpand() const;
 
 		string ToString() const;
         

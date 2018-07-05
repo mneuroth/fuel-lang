@@ -86,12 +86,12 @@ namespace CsLisp
 			return compare(0, txt.length(), txt) == 0;
 		}
 
-		string Substring(int offs, int length = npos) const
+		string Substring(size_t offs, size_t length = npos) const
 		{
 			return string(substr(offs, length));
 		}
 
-		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
+		size_t IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
 		{
 			return (*this).find_first_of(txt);
 		}
@@ -118,12 +118,12 @@ namespace CsLisp
 					int l = std::stoi(len);
 					if (l > 0)
 					{
-						int count = l - arg.size();
+						size_t count = l - arg.size();
 						temp = temp.replace(pos, pos2 - pos + 1, std::string(count > 0 ? count : 0, ' ') + arg);
 					}
 					else
 					{
-						int count = abs(l) - arg.size();
+						size_t count = abs(l) - arg.size();
 						temp = temp.replace(pos, pos2 - pos + 1, arg + std::string(count > 0 ? count : 0, ' '));
 					}
 				}
@@ -152,7 +152,7 @@ namespace CsLisp
 			return txt.size() == 0;
 		}
 
-		int Length()
+		size_t Length()
 		{
 			return size();
 		}
@@ -206,7 +206,7 @@ namespace CsLisp
 			return output;
 		}
 
-		int LastIndexOf(const string & text, const string & compareMethod)
+		size_t LastIndexOf(const string & text, const string & compareMethod)
 		{
 			return find_last_of(text);
 		}

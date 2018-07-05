@@ -61,7 +61,7 @@ namespace CsLisp
 		Nil = 13,
 	};
 
-	inline bool Int32_TryParse(const string & txt, int & outValue)
+	inline bool Int32_TryParse(const string & txt, size_t & outValue)
 	{
 		try
 		{
@@ -177,7 +177,7 @@ namespace CsLisp
 		/// <value>
 		/// The start position.
 		/// </value>
-		/*public*/ int StartPos; // { get; set; }
+		/*public*/ size_t StartPos; // { get; set; }
 
 		/// <summary>
 		/// Gets or sets the stop position of the token.
@@ -185,7 +185,7 @@ namespace CsLisp
 		/// <value>
 		/// The stop position.
 		/// </value>
-		/*public*/ int StopPos; // { get; set; }
+		/*public*/ size_t StopPos; // { get; set; }
 
 		/// <summary>
 		/// Gets or sets the line no of the token.
@@ -193,7 +193,7 @@ namespace CsLisp
 		/// <value>
 		/// The line no.
 		/// </value>
-		/*public*/ int LineNo; // { get; set; }
+		/*public*/ size_t LineNo; // { get; set; }
 
 		//#endregion
 
@@ -206,9 +206,9 @@ namespace CsLisp
 		/// <param name="start">The start position.</param>
 		/// <param name="stop">The stop position.</param>
 		/// <param name="lineNo">The line no.</param>
-		/*public*/ LispToken(string text, int start, int stop, int lineNo)
+		/*public*/ LispToken(string text, size_t start, size_t stop, size_t lineNo)
 		{
-			int intValue;
+			size_t intValue;
 			double doubleValue;
 
 			StartPos = start;
@@ -248,7 +248,7 @@ namespace CsLisp
 			else if (Int32_TryParse(text, /*out*/ intValue))
 			{
 				Type = /*LispTokenType::*/Int;
-				Value = std::make_shared<object>(intValue);
+				Value = std::make_shared<object>((int)intValue);
 			}
 			else if (Double_TryParse(text, "NumberStyles.Any", "CultureInfo.InvariantCulture", /*out*/ doubleValue))
 			{

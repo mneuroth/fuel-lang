@@ -60,7 +60,7 @@ namespace CsLisp
 		/// <param name="offset">The position offset.</param>
 		/// <param name="scope">The scope.</param>
 		/// <returns>Abstract syntax tree as container</returns>
-		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Parse(string code, int offset = 0, std::shared_ptr<LispScope> scope = null)
+		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Parse(string code, size_t offset = 0, std::shared_ptr<LispScope> scope = null)
 		{
 			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parseResult/* = null*/;
 			string moduleName = ""; // string.Empty;
@@ -84,7 +84,7 @@ namespace CsLisp
 	private:
 		//#region private methods
 
-		/*private*/ static int ParseTokens(string moduleName, std::vector<std::shared_ptr<LispToken>> tokens, int startIndex, /*ref*/ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> & parseResult, bool isToplevel)
+		/*private*/ static size_t ParseTokens(string moduleName, std::vector<std::shared_ptr<LispToken>> tokens, size_t startIndex, /*ref*/ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> & parseResult, bool isToplevel)
 		{
 			size_t i;
 			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> current = null;
@@ -174,7 +174,7 @@ namespace CsLisp
 			return i;
 		}
 
-		/*private*/ static bool OnlyCommentTokensFrom(const std::vector<std::shared_ptr<LispToken>> & tokens, int i)
+		/*private*/ static bool OnlyCommentTokensFrom(const std::vector<std::shared_ptr<LispToken>> & tokens, size_t i)
 		{
 			for (size_t n = i; n < tokens.size(); n++)
 			{

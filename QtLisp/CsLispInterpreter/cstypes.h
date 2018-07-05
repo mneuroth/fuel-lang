@@ -34,6 +34,8 @@
 #include "csstring.h"
 #include "Exception.h"
 
+#define ENABLE_COMPILE_TIME_MACROS
+
 #define var auto
 
 #define null 0
@@ -92,6 +94,19 @@ namespace CsLisp
 				temp.pop_front();
 			}
 			return temp;
+		}
+
+		void RemoveAt(int index)
+		{
+			IEnumerable<T>::iterator iter = begin();
+			for (int i = 0; i < index; i++)
+			{
+				iter++;
+			}
+			if (iter != end())
+			{
+				erase(iter);
+			}
 		}
 
 		bool SequenceEqual(const IEnumerable & other) const
@@ -263,12 +278,14 @@ namespace CsLisp
 	{
 	private:
 		bool m_bIsSpecialForm;
+		bool m_bIsEvalInExpand;
 		bool m_bIsBuiltin;
 
 	public:
 		LispFunctionWrapper()
 			: Signature(""), 
 			  m_bIsSpecialForm(false), 
+			  m_bIsEvalInExpand(false),
 			  m_bIsBuiltin(false)
 		{
 		}
@@ -312,6 +329,14 @@ namespace CsLisp
 		{
 			m_bIsSpecialForm = value;
 		}
+		bool IsEvalInExpand() const
+		{
+			return m_bIsEvalInExpand;
+		}
+		void SetEvalInExpand(bool value)
+		{
+			m_bIsEvalInExpand = value;
+		}
 
 	private:
 		string GetFormatedHelpString(const string & separator, const string & splitter, std::function<string(const string &)> nameDecorator = null, std::function<string(const string &)> syntaxDecorator = null) const 
@@ -328,7 +353,7 @@ namespace CsLisp
 			string signature = (!string::IsNullOrEmpty(Signature) ? Signature : string::Empty);
 			if (signature.size() > 0 && signature.StartsWith("("))
 			{
-				int len = signature.IndexOf(" ", "StringComparison.Ordinal");
+				size_t len = signature.IndexOf(" ", "StringComparison.Ordinal");
 				// process commands like: (doc)
 				if (len < 0)
 				{

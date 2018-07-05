@@ -24,7 +24,7 @@ const string MapFcn = "map";
 const string ReduceFcn = "reduce";
 const string DefineMacro = "define-macro";      // == define-macro-eval
 const string DefineMacroEval = "define-macro-eval";
-#if ENABLE_COMPILE_TIME_MACROS 
+#ifdef ENABLE_COMPILE_TIME_MACROS 
 const string DefineMacroExpand = "define-macro-expand";
 #endif
 const string Lambda = "lambda";
@@ -106,11 +106,11 @@ static std::shared_ptr<LispVariant> CheckForFunction(const string & functionName
 	return function;
 }
 
-static void CheckArgs(const string & name, int count, const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static void CheckArgs(const string & name, size_t count, const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	if (count < 0 || args.size() != count)
 	{
-		throw LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, std::to_string((int)args.size()), std::to_string(count), std::to_string((long)scope.get())));
+		throw LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, std::to_string(args.size()), std::to_string(count)), scope.get());
 	}
 }
 
@@ -135,6 +135,7 @@ static std::shared_ptr<object> CreateFunction(FuncX func, const string & signatu
 	wrapper.Signature = signature;
 	wrapper.Documentation = documentation;
 	wrapper.SetSpecialForm(isSpecialForm);
+	wrapper.SetEvalInExpand(isEvalInExpand);
 	wrapper.SetBuiltin(isBuiltin);
 	return std::make_shared<object>(LispVariant(LispType::_Function, std::make_shared<object>(wrapper)));
 }
@@ -248,7 +249,7 @@ static std::shared_ptr<LispVariant> Vars(const std::vector<std::shared_ptr<objec
 {
 	scope->GlobalScope->Output.WriteLine("variables:");
 	scope->DumpVars();
-	return std::make_shared<LispVariant>(std::make_shared<object>(ObjectType::__Undefined));
+	return std::make_shared<LispVariant>(LispVariant());
 }
 
 static std::shared_ptr<LispVariant> TracePrint(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -667,8 +668,8 @@ static std::shared_ptr<LispVariant> ArgsCountFcn(const std::vector<std::shared_p
 {
 	CheckArgs(LispEnvironment::Apply, 0, args, scope);
 
-	int cnt = (*scope)[ArgsMeta]->ToList()->Count();
-	return std::make_shared<LispVariant>(std::make_shared<object>(cnt));
+	size_t cnt = (*scope)[ArgsMeta]->ToList()->Count();
+	return std::make_shared<LispVariant>(std::make_shared<object>((int)cnt));
 }
 
 static std::shared_ptr<LispVariant> ArgsFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -793,6 +794,26 @@ static std::shared_ptr<LispVariant> definemacroevaluate_form(const std::vector<s
 
 	return null;
 }
+
+#ifdef ENABLE_COMPILE_TIME_MACROS 
+
+// (define-macro-expand name (args) (expression))
+static std::shared_ptr<LispVariant> definemacroexpand_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs(DefineMacroExpand, 3, args, scope);
+
+	var macros = ((*(scope->GlobalScope))[LispEnvironment::Macros])->GetLispScopeRef();
+	if (macros != null)
+	{
+		// allow macros in macros --> recursive call for ExpandMacros()
+		std::shared_ptr<object> result = LispInterpreter::ExpandMacros(std::make_shared<object>(*LispEnvironment::GetExpression(args[2])), scope);
+		(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroCompileTimeExpand(LispEnvironment::GetExpression(args[1]), std::make_shared<IEnumerable<std::shared_ptr<object>>>(result->ToEnumerableOfObject())));
+	}
+
+	return null;
+}
+
+#endif
 
 static std::shared_ptr<LispVariant> quote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
@@ -951,7 +972,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 
 		// support args function for accessing all given parameters
 		(*childScope)[ArgsMeta] = std::make_shared<object>(IEnumerable<std::shared_ptr<object>>(VectorToList(localArgs)));
-		int formalArgsCount = formalArgs.size();
+		size_t formalArgsCount = formalArgs.size();
 		if ((int)localArgs.size() > formalArgsCount)
 		{
 			//var additionalArgs = new object[localArgs.size() - formalArgsCount];
@@ -1341,10 +1362,10 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope(bool redirectOutp
 	(*scope)[DefineMacro] = CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	// run time evaluation for macros:
 	(*scope)[DefineMacroEval] = CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
-	#if ENABLE_COMPILE_TIME_MACROS
+#ifdef ENABLE_COMPILE_TIME_MACROS
 	// compile time expand for macros:
-	(*scope)[DefineMacroExpand] = CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", /*isSpecialForm:*/ true, /*isEvalInExpand:*/ true);
-	#endif
+	(*scope)[DefineMacroExpand] = CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", /*isSpecialForm:*/ true, /*isSpecialForm:*/ false, /*isEvalInExpand:*/ true);
+#endif
 
 	(*scope)[Quote] = CreateFunction(quote_form, "(quote expr)", "Returns expression without evaluating it.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);

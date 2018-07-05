@@ -47,10 +47,13 @@ namespace CsLisp
 
 	extern string ReadFileOrEmptyString(const string & fileName);
 
-	class LispMacroRuntimeEvaluate
+	/// <summary>
+	/// Class to hold informations about macro expansions at compile time.
+	/// </summary>
+	class LispMacroCompileTimeExpand
 	{
 	public:
-		LispMacroRuntimeEvaluate(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parameters, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression)
+		LispMacroCompileTimeExpand(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parameters, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression)
 		{
 			FormalArguments = parameters;
 			Expression = expression;
@@ -59,6 +62,18 @@ namespace CsLisp
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> FormalArguments;
 
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Expression;
+	};
+
+	/// <summary>
+	/// Class to hold informations about macro expansions at run time.
+	/// </summary>
+	class LispMacroRuntimeEvaluate : public LispMacroCompileTimeExpand
+	{
+	public:
+		LispMacroRuntimeEvaluate(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parameters, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression)
+			: LispMacroCompileTimeExpand(parameters, expression)
+		{
+		}
 	};
 
 	class LispEnvironment
@@ -1029,25 +1044,25 @@ namespace CsLisp
             return null;
         }
 
-#if ENABLE_COMPILE_TIME_MACROS 
+	#if ENABLE_COMPILE_TIME_MACROS 
 
-        // (define-macro-expand name (args) (expression))
-        private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
-        {
-            CheckArgs(DefineMacroExpand, 3, args, scope);
+			// (define-macro-expand name (args) (expression))
+			private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
+			{
+				CheckArgs(DefineMacroExpand, 3, args, scope);
 
-            var macros = scope.GlobalScope[Macros] as LispScope;
-            if (macros != null)
-            {
-                // allow macros in macros --> recursive call for ExpandMacros()
-                object result = LispInterpreter.ExpandMacros(GetExpression(args[2]), scope);
-                macros[args[0].ToString()] = new LispMacroCompileTimeExpand(GetExpression(args[1]), result as IEnumerable<object>);
-            }
+				var macros = scope.GlobalScope[Macros] as LispScope;
+				if (macros != null)
+				{
+					// allow macros in macros --> recursive call for ExpandMacros()
+					object result = LispInterpreter.ExpandMacros(GetExpression(args[2]), scope);
+					macros[args[0].ToString()] = new LispMacroCompileTimeExpand(GetExpression(args[1]), result as IEnumerable<object>);
+				}
 
-            return null;
-        }
+				return null;
+			}
 
-#endif
+	#endif
 
         public static LispVariant quote_form(object[] args, LispScope scope)
         {

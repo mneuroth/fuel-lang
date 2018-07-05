@@ -65,7 +65,7 @@
 namespace CsLisp
 {
 // TODO --> move into CsUtils.cpp
-	/*public*/ static string DecorateWithBlock(string code, int & offset)
+	/*public*/ static string DecorateWithBlock(string code, size_t & offset)
 	{
 		const string block = "(do ";
 		offset = block.Length();
@@ -115,11 +115,11 @@ namespace CsLisp
 			currentScope->ModuleName = moduleName;
 			currentScope->Tracing = tracing;
 			RegisterNativeObjects(/*nativeItems,*/ *currentScope);
-			int offset = 0;
+			size_t offset = 0;
 			string code = /*LispUtils.*/DecorateWithBlock(lispCode, /*out*/ offset);
 			var ast = LispParser::Parse(code, offset, currentScope);
-#if ENABLE_COMPILE_TIME_MACROS 
-			var expandedAst = LispInterpreter.ExpandMacros(ast, currentScope);
+#ifdef ENABLE_COMPILE_TIME_MACROS 
+			var expandedAst = std::make_shared<object>(*(LispInterpreter::ExpandMacros(std::make_shared<object>(*ast), currentScope)));
 #else
 			var expandedAst = std::make_shared<object>(*ast);
 #endif
