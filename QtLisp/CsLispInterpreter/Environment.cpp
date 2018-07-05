@@ -977,7 +977,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 		{
 			//var additionalArgs = new object[localArgs.size() - formalArgsCount];
 			std::vector<std::shared_ptr<object>> additionalArgs(localArgs.size() - formalArgsCount);
-			for (int n = 0; n < (int)localArgs.size() - formalArgsCount; n++)
+			for (size_t n = 0; n < localArgs.size() - formalArgsCount; n++)
 			{
 				additionalArgs[n] = localArgs[n + formalArgsCount];
 			}
@@ -997,7 +997,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 			// forward a debugger stop exception to stop the debugger loop
 			throw exc;
 		}
-		catch (LispException ex)
+		catch (LispException & ex)
 		{
 			// add the stack info and module name to the data of the exception
 // TODO --> implement for debugger
@@ -1012,7 +1012,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 				debugger->InteractiveLoop(/*initialTopScope: */childScope, /*currentAst :*/ /*(IEnumerable<object>)*/std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObject()) /*new List<object> { info.Item2 }*/);
 			}
 
-			throw;
+			throw ex;
 		}
 		localScope->PopNextScope();
 		return ret;

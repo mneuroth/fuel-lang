@@ -308,7 +308,11 @@ namespace CsLisp
                     {
                         debugger->Output.WriteLine("Exception: " + ex.Message);
                     }
-                }
+					catch (...)
+					{
+						debugger->Output.WriteLine("Native Exception");
+					}
+				}
             } while (!bContinueWithNextStatement);
 
             return bRestart;
@@ -385,6 +389,10 @@ namespace CsLisp
                     Output.WriteLine("\nStack:\n{0}", stackInfo);
                     bRestart = InteractiveLoop(this, globalScope, /*startedFromMain:*/ true);
                 }
+				catch (...)
+				{
+					Output.WriteLine("\nNative Exception...");
+				}
 
                 if (bRestart)
                 {

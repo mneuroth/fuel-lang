@@ -118,12 +118,12 @@ namespace CsLisp
 					int l = std::stoi(len);
 					if (l > 0)
 					{
-						size_t count = l - arg.size();
+						int count = l - (int)arg.size();
 						temp = temp.replace(pos, pos2 - pos + 1, std::string(count > 0 ? count : 0, ' ') + arg);
 					}
 					else
 					{
-						size_t count = abs(l) - arg.size();
+						int count = abs(l) - (int)arg.size();
 						temp = temp.replace(pos, pos2 - pos + 1, arg + std::string(count > 0 ? count : 0, ' '));
 					}
 				}

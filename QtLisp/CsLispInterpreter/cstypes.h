@@ -98,14 +98,14 @@ namespace CsLisp
 
 		void RemoveAt(int index)
 		{
-			IEnumerable<T>::iterator iter = begin();
+            typename IEnumerable<T>::iterator iter = std::list<T>::begin();
 			for (int i = 0; i < index; i++)
 			{
 				iter++;
 			}
-			if (iter != end())
+            if (iter != std::list<T>::end())
 			{
-				erase(iter);
+                std::list<T>::erase(iter);
 			}
 		}
 
