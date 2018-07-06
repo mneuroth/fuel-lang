@@ -59,6 +59,27 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_MainFileErrorDetailed)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-x");
+				args.push_back("scripts\\error.fuel");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output.GetContent().Trim();
+				Assert::IsTrue(s.Contains("Error executing script"));
+				Assert::IsTrue(s.Contains("printx"));
+				Assert::IsTrue(s.Contains("not found"));
+				Assert::IsTrue(s.Contains("Callstack"));
+				Assert::IsTrue(s.Contains("Exception in"));
+			}
+		}
+
 		TEST_METHOD(Test_MainHelp)
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -69,6 +90,7 @@ namespace QtLispUnitTests
 				std::vector<string> args;
 				args.push_back("-h");
 				Fuel::MainExtended(args, output, input);
+
 				string s = output.GetContent().Trim();
 				Assert::IsTrue(s.StartsWith(Lisp::Name));
 			}

@@ -91,7 +91,7 @@ namespace CsLisp
 			return string(substr(offs, length));
 		}
 
-		size_t IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
+		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
 		{
 			return (*this).find_first_of(txt);
 		}
