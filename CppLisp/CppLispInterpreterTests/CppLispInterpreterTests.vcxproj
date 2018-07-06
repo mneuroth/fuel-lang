@@ -120,8 +120,8 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"</Command
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>mkdir "$(TargetDir)scripts"
+xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -167,8 +167,8 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"</Command
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>mkdir "$(TargetDir)scripts"
+xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
