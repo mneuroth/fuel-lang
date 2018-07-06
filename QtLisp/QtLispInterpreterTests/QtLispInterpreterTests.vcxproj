@@ -93,6 +93,7 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,6 +134,7 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -175,13 +177,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CsLispInterpreter\csobject.cpp" />
+    <ClCompile Include="..\CsLispInterpreter\Debugger.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Environment.cpp" />
+    <ClCompile Include="..\CsLispInterpreter\fuel.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Lisp.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Parser.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Scope.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Token.cpp" />
+    <ClCompile Include="..\CsLispInterpreter\Utils.cpp" />
     <ClCompile Include="..\CsLispInterpreter\Variant.cpp" />
     <ClCompile Include="InterpreterTests.cpp" />
+    <ClCompile Include="MainTest.cpp" />
     <ClCompile Include="ParserTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

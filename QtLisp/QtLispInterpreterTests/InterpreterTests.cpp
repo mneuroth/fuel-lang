@@ -1366,6 +1366,23 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_BadForeach)
+		{
+			try
+			{
+				Lisp::Eval("(do (import fuellib) (foreach))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
 		TEST_METHOD(Test_Break)
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
