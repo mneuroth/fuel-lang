@@ -7,6 +7,7 @@ SOURCES += \
         $$PWD/Scope.cpp \
         $$PWD/Variant.cpp \
         $$PWD/Debugger.cpp \
+        $$PWD/Utils.cpp \
         $$PWD/Lisp.cpp
 
 HEADERS += \
@@ -23,4 +24,5 @@ HEADERS += \
         $$PWD/Exception.h \
         $$PWD/DebuggerInterface.h \
         $$PWD/Debugger.h \
+        $$PWD/Utils.h \
         $$PWD/Lisp.h

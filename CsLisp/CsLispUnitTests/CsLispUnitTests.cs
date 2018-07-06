@@ -1262,6 +1262,13 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_BadForeach()
+        {
+            Lisp.Eval("(do (import fuellib) (foreach))");
+        }
+
+        [TestMethod]
         [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
         public void Test_CreateNative()
         {

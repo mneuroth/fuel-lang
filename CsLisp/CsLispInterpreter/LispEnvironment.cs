@@ -1078,6 +1078,12 @@ namespace CsLisp
                     // add formal arguments to current scope
                     var i = 0;
                     var formalArgs = (args[0] is LispVariant ? ((LispVariant)args[0]).ListValue : GetExpression(args[0])).ToArray();
+
+                    if (formalArgs.Length > localArgs.Length)
+                    {
+                        throw new LispException("Invalid number of arguments");
+                    }
+
                     foreach (var arg in formalArgs)
                     {
                         childScope[arg.ToString()] = localArgs[i];

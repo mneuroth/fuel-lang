@@ -964,13 +964,14 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 		// add formal arguments to current scope
 		var i = 0;
 		var formalArgs = (args[0]->IsLispVariant() /*is LispVariant*/ ? args[0]->ToLispVariant()->ListValue() : GetExpression(args[0]))->ToArray();
+		
+		if (formalArgs.size() > localArgs.size())
+		{
+			throw LispException("Invalid number of arguments");
+		}
+
 		for(var arg : formalArgs)
 		{
-			if (!childScope->ContainsKey(arg->ToString()))
-			{
-				throw LispException("Invalid number of arguments");
-			}
-
 			(*childScope)[arg->ToString()] = localArgs[i];
 			i++;
 		}

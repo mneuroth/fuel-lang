@@ -183,6 +183,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     <ClInclude Include="DebuggerInterface.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Exception.h" />
+    <ClInclude Include="fuel.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="Lisp.h" />
     <ClInclude Include="Parser.h" />
@@ -191,6 +192,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="Tokenizer.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="Variant.h" />
   </ItemGroup>
   <ItemGroup>
@@ -209,6 +211,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Token.cpp" />
+    <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Variant.cpp" />
   </ItemGroup>
   <ItemGroup>
