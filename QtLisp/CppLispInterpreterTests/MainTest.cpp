@@ -27,7 +27,7 @@
 
 #include "CppUnitTest.h"
 
-#include "../CsLispInterpreter/fuel.h"
+#include "../CppLispInterpreter/fuel.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

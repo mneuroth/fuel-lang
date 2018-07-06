@@ -27,7 +27,7 @@
 
 #include "CppUnitTest.h"
 
-#include "../CsLispInterpreter/Parser.h"
+#include "../CppLispInterpreter/Parser.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

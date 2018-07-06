@@ -28,9 +28,9 @@
 
 #include <memory>
 
-#include "../CsLispInterpreter/csstring.h"
-#include "../CsLispInterpreter/csobject.h"
-#include "../CsLispInterpreter/Variant.h"
+#include "../CppLispInterpreter/csstring.h"
+#include "../CppLispInterpreter/csobject.h"
+#include "../CppLispInterpreter/Variant.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

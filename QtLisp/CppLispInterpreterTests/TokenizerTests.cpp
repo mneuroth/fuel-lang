@@ -27,11 +27,11 @@
 
 #include "CppUnitTest.h"
 
-#include "../CsLispInterpreter/csstring.h"
-#include "../CsLispInterpreter/csobject.h"
-#include "../CsLispInterpreter/Tokenizer.h"
-#include "../CsLispInterpreter/Token.h"
-#include "../CsLispInterpreter/Tokenizer.h"
+#include "../CppLispInterpreter/csstring.h"
+#include "../CppLispInterpreter/csobject.h"
+#include "../CppLispInterpreter/Tokenizer.h"
+#include "../CppLispInterpreter/Token.h"
+#include "../CppLispInterpreter/Tokenizer.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

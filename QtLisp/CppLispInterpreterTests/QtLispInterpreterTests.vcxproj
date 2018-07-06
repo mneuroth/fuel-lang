@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -176,16 +176,16 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\CsLispInterpreter\csobject.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Debugger.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Environment.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\fuel.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Lisp.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Parser.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Scope.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Token.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Utils.cpp" />
-    <ClCompile Include="..\CsLispInterpreter\Variant.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\csobject.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Debugger.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Environment.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\fuel.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Lisp.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Parser.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Scope.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Token.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Utils.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Variant.cpp" />
     <ClCompile Include="InterpreterTests.cpp" />
     <ClCompile Include="MainTest.cpp" />
     <ClCompile Include="ParserTests.cpp" />
@@ -199,7 +199,7 @@
     <ClCompile Include="VariantTests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CsLispInterpreter\QtLisp.vcxproj">
+    <ProjectReference Include="..\CppLispInterpreter\QtLisp.vcxproj">
       <Project>{9aa445a5-ef08-4e35-9471-2487f57c46e6}</Project>
     </ProjectReference>
   </ItemGroup>
