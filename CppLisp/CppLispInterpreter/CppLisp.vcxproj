@@ -173,9 +173,6 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="csobject.h" />
     <ClInclude Include="csstring.h" />
     <ClInclude Include="cstypes.h" />
