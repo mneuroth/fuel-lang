@@ -329,11 +329,11 @@ namespace CsLisp
         {
             if (currentAst != null)
             {
-                var lineNumber = initialTopScope != null ? initialTopScope->CurrentLineNo() : -1;
-                var startPos = initialTopScope != null ? initialTopScope->CurrentToken->StartPos : -1;
-                var stopPos = initialTopScope != null ? initialTopScope->CurrentToken->StopPos : -1;
+                var lineNumber = initialTopScope != null ? initialTopScope->CurrentLineNo() : 0;
+                var startPos = initialTopScope != null ? initialTopScope->CurrentToken->StartPos : 0;
+                var stopPos = initialTopScope != null ? initialTopScope->CurrentToken->StopPos : 0;
                 var moduleName = initialTopScope != null ? initialTopScope->ModuleName : "?";
-                Output.WriteLine("--> " + (*((*currentAst).begin()))->ToString()/*[0]*/ + " line=" + std::to_string(lineNumber) + " start=" + std::to_string(startPos) + " stop=" + std::to_string(stopPos) + " module=" + moduleName);
+                Output.WriteLine("--> " + (*((*currentAst).begin()))->ToString()/*[0]*/ + " line=" + std::to_string((int)lineNumber) + " start=" + std::to_string((int)startPos) + " stop=" + std::to_string((int)stopPos) + " module=" + moduleName);
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
         }
