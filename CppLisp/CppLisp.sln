@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppLisp", ".\CppLispInterpreter\CppLisp.vcxproj", "{9AA445A5-EF08-4E35-9471-2487F57C46E6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QtLispInterpreterTests", ".\CppLispInterpreterTests\QtLispInterpreterTests.vcxproj", "{301B7812-A1AD-4BDD-8B30-E941879A29A6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppLispInterpreterTests", ".\CppLispInterpreterTests\CppLispInterpreterTests.vcxproj", "{301B7812-A1AD-4BDD-8B30-E941879A29A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
