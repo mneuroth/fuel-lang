@@ -52,7 +52,7 @@ namespace CsLisp
                      MainExtended(args, /*Console.Out, Console.In*/writer, reader);
 		}
 
-		/*public*/ static void MainExtended(std::vector<string> args, TextWriter & output, TextReader & input)
+		/*public*/ static void MainExtended(std::vector<string> args, TextWriter & output, TextReader & input, string * pRedirectToString = 0)
 		{
 			if (args.size() == 0)
 			{
@@ -179,7 +179,7 @@ namespace CsLisp
 					//}
 					//else
 					{
-						result = Lisp::SaveEval(script, /*moduleName:*/ fileName, /*verboseErrorOutput:*/ lengthyErrorOutput, /*tracing:*/ trace);
+						result = Lisp::SaveEval(script, /*moduleName:*/ fileName, /*verboseErrorOutput:*/ lengthyErrorOutput, /*tracing:*/ trace, /*pRedirectToString:*/ pRedirectToString);
 					}
 				}
 			}

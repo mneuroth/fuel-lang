@@ -108,10 +108,10 @@ namespace CsLisp
 		/// <param name="tracing">if set to <c>true</c> [tracing].</param>
 		/// <param name="nativeItems">The dictionary with native items.</param>
 		/// <returns>The result of the script evaluation</returns>
-		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, std::shared_ptr<LispScope> scope = 0/*= null*/, const string & moduleName = "test"/*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/)
+		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, std::shared_ptr<LispScope> scope = 0/*= null*/, const string & moduleName = "test"/*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/, string * pRedirectToString = 0)
 		{
 			// first create global scope, needed for macro expanding
-			var currentScope = scope==null ? LispEnvironment::CreateDefaultScope() : scope;
+			var currentScope = scope==null ? LispEnvironment::CreateDefaultScope(pRedirectToString != 0) : scope;
 			currentScope->ModuleName = moduleName;
 			currentScope->Tracing = tracing;
 			RegisterNativeObjects(/*nativeItems,*/ *currentScope);
@@ -124,6 +124,10 @@ namespace CsLisp
 			var expandedAst = std::make_shared<object>(*ast);
 #endif
 			var result = LispInterpreter::EvalAst(expandedAst, currentScope);
+			if (pRedirectToString != 0)
+			{
+				*pRedirectToString = currentScope->Output.GetContent();
+			}
 			return result;
 		}
 
@@ -136,17 +140,22 @@ namespace CsLisp
 		/// <param name="verboseErrorOutput">if set to <c>true</c> [verbose error output].</param>
 		/// <param name="tracing">if set to <c>true</c> [tracing].</param>
 		/// <returns>The result</returns>
-		/*public*/ static std::shared_ptr<LispVariant> SaveEval(const string & lispCode, const string & moduleName = /* null*/ "main", bool verboseErrorOutput = false, bool tracing = false)
+		/*public*/ static std::shared_ptr<LispVariant> SaveEval(const string & lispCode, const string & moduleName = /* null*/ "main", bool verboseErrorOutput = false, bool tracing = false, string * pRedirectToString = 0)
 		{
 			std::shared_ptr<LispVariant> result;
 			try
 			{
-				result = Eval(lispCode, /*scope:*/ null, /*moduleName :*/ moduleName, /*tracing :*/ tracing);
+				result = Eval(lispCode, /*scope:*/ null, /*moduleName :*/ moduleName, /*tracing :*/ tracing, /*redirectToString*/ pRedirectToString);
 			}
 			catch (LispException exc)
 			{
 				/*Console.WriteLine*/ //std::cout << string::Format("\nError executing script.\n\n{0} --> line={1} start={2} stop={3} module={4}", exc.Message, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.StartPos], exc.Data[LispUtils.StopPos], exc.Data[LispUtils.ModuleName]) << std::endl;
-				std::cout << string::Format("\nError executing script.\n\n{0} --> line={1} start={2} stop={3} module={4}", exc.Message/*, exc.Data["blub!"].ToString()*//*, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.StartPos], exc.Data[LispUtils.StopPos], exc.Data[LispUtils.ModuleName]*/) << std::endl;
+				string errMsg = string::Format("\nError executing script.\n\n{0} --> line={1} start={2} stop={3} module={4}", exc.Message/*, exc.Data["blub!"].ToString()*//*, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.StartPos], exc.Data[LispUtils.StopPos], exc.Data[LispUtils.ModuleName]*/);
+				std::cout << errMsg << std::endl;
+				if (pRedirectToString != 0)
+				{
+					*pRedirectToString += errMsg + "\n";
+				}
 // TODO --> implement stack trace for exception
 //				var stackInfo = exc.Data[LispUtils.StackInfo];
 //				Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : "<not available>");                if (verboseErrorOutput)

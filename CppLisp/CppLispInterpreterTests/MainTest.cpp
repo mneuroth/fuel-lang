@@ -69,9 +69,9 @@ namespace QtLispUnitTests
 				std::vector<string> args;
 				args.push_back("-x");
 				args.push_back("scripts\\error.fuel");
-				Fuel::MainExtended(args, output, input);
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
 
-				string s = output.GetContent().Trim();
 				Assert::IsTrue(s.Contains("Error executing script"));
 				Assert::IsTrue(s.Contains("printx"));
 				Assert::IsTrue(s.Contains("not found"));

@@ -91,9 +91,9 @@ namespace CsLisp
 			return string(substr(offs, length));
 		}
 
-		int IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
+		size_t IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
 		{
-			return (*this).find_first_of(txt);
+			return find_first_of(txt);
 		}
 
 		static string ReplaceIn(string temp, const string & findText, const string & arg)
@@ -164,7 +164,7 @@ namespace CsLisp
 
 		bool Contains(const string & txt) const
 		{
-			return IndexOf(txt, "invariant_culture") >= 0;
+			return IndexOf(txt, "invariant_culture") != string::npos;
 		}
 
 		bool EndsWith(const string & txt)
