@@ -47,7 +47,9 @@ namespace CsLisp
 	public:
 		/*public*/ static void Main(std::vector<string> args)
 		{
-			MainExtended(args, /*Console.Out, Console.In*/TextWriter(), TextReader());
+                     TextWriter writer;
+                     TextReader reader;
+                     MainExtended(args, /*Console.Out, Console.In*/writer, reader);
 		}
 
 		/*public*/ static void MainExtended(std::vector<string> args, TextWriter & output, TextReader & input)
