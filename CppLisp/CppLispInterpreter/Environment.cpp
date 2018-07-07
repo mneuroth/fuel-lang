@@ -268,6 +268,7 @@ static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else
+#include <sys/sysinfo.h>
 // see https://www.c-plusplus.net/forum/topic/153559/gettickcount-für-linux
 uint64_t getTimeMs(void)
 {
@@ -276,7 +277,7 @@ uint64_t getTimeMs(void)
 	gettimeofday(&tv, 0);
 	return uint64_t(tv.tv_sec) * 1000 + tv.tv_usec / 1000;
 }
-#include <sys/sysinfo.h>
+
 long getTickCount() // Zeit seit dem Booten in Sekunden
 {
 	struct sysinfo si;

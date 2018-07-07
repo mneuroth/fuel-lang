@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <stdlib.h>
+
 namespace CsLisp
 {
 	class string : public std::string
