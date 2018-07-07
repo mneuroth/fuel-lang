@@ -268,7 +268,8 @@ static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else
-#include <sys/sysinfo.h>
+//#include <sys/sysinfo.h>
+#include <sys/time.h>
 // see https://www.c-plusplus.net/forum/topic/153559/gettickcount-für-linux
 uint64_t getTimeMs(void)
 {
@@ -277,7 +278,7 @@ uint64_t getTimeMs(void)
 	gettimeofday(&tv, 0);
 	return uint64_t(tv.tv_sec) * 1000 + tv.tv_usec / 1000;
 }
-
+/*
 long getTickCount() // Zeit seit dem Booten in Sekunden
 {
 	struct sysinfo si;
@@ -285,13 +286,14 @@ long getTickCount() // Zeit seit dem Booten in Sekunden
 
 	return -1;
 }
+*/
 #endif
 static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 #if defined(_WIN32) || defined(_WIN64)
 	var value = (int)GetTickCount();
 #else
-	var value = getTimeMs();
+    var value = (int)getTimeMs();
 #endif
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
 }
