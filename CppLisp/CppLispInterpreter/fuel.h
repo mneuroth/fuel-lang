@@ -186,7 +186,7 @@ namespace CsLisp
 			else if (!string::IsNullOrEmpty(script) && !wasDebugging)
 			{
 				// process -e option
-				result = Lisp::SaveEval(script);
+				result = Lisp::SaveEval(script, /*moduleName:*/ "cmdline", /*verboseErrorOutput:*/ false, /*tracing:*/ false, /*pRedirectToString:*/ pRedirectToString);
 			}
 
 			if (trace)

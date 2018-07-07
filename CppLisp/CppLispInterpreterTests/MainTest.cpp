@@ -54,8 +54,43 @@ namespace QtLispUnitTests
 				TextReader input;
 				output.EnableToString(true);
 				Fuel::MainExtended(std::vector<string>(), output, input);
+
 				string s = output.GetContent().Trim();
 				Assert::IsTrue(s.StartsWith(Lisp::Name));
+			}
+		}
+
+		TEST_METHOD(Test_MainFile)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("scripts\\simple.fuel");
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
+
+				Assert::IsTrue(s.StartsWith("hello world !"));
+			}
+		}
+
+		TEST_METHOD(Test_MainFileError)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("scripts\\error.fuel");
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
+
+				Assert::IsTrue(s.Contains("Error executing script"));
+				Assert::IsTrue(s.Contains("printx"));
+				Assert::IsTrue(s.Contains("not found"));
 			}
 		}
 
@@ -106,9 +141,99 @@ namespace QtLispUnitTests
 				std::vector<string> args;
 				args.push_back("-v");
 				Fuel::MainExtended(args, output, input);
+
 				string s = output.GetContent().Trim();
 				Assert::IsTrue(s.StartsWith(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date));
 			}
 		}
+
+		TEST_METHOD(Test_MainExecute)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(print (+ 1 2))");
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
+				
+				Assert::IsTrue(s == "3");
+			}
+		}
+
+		TEST_METHOD(Test_MainExecuteAutoBlockDecorate)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(println \"hello world\") (println \"done.\")");
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
+
+				Assert::IsTrue(s.Contains("hello world"));
+				Assert::IsTrue(s.Contains("done"));
+			}
+		}
+
+		TEST_METHOD(Test_MainInteractiveImport)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
+			//{
+			//	TextWriter output;
+			//	TextReader input;
+			//	output.EnableToString(true);
+			//	std::vector<string> args;
+			//	args.push_back("-i");
+			//	string s;
+			//	Fuel::MainExtended(args, output, input, &s);
+
+			//	Assert::IsTrue(s.Contains(".\\Library\\fuellib.fuel"));
+			//	Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
+			//}
+// TODO --> input umleiten realisieren
+			Assert::IsTrue(false);
+		}
+
+		TEST_METHOD(Test_MultiPrintLn)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("TestData\\multiprintln.fuel");
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
+
+				Assert::IsTrue(s.Contains("hello\nworld\ndone."));
+			}
+		}
+
+		TEST_METHOD(Test_WriteAndReadFile)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("TestData\\writereadfile.fuel");
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
+
+				Assert::IsTrue(s.Contains("exists file =  #t"));
+				Assert::IsTrue(s.Contains("test non existing file =  #f"));
+				Assert::IsTrue(s.Contains("is equal =  #t"));
+			}
+		}
+
 	};
 }
