@@ -129,7 +129,8 @@ namespace CsLisp
             {
                 Console.WriteLine("\nError executing script.\n\n{0} --> line={1} start={2} stop={3} module={4}", exc.Message, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.StartPos], exc.Data[LispUtils.StopPos], exc.Data[LispUtils.ModuleName]);
                 var stackInfo = exc.Data[LispUtils.StackInfo];
-                Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : "<not available>");                if (verboseErrorOutput)
+                Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : "<not available>");
+                if (verboseErrorOutput)
                 {
                     Console.WriteLine("\nNative callstack:");
                     Console.WriteLine("Exception in eval(): {0} \ndata={1}", exc, exc.Data);
