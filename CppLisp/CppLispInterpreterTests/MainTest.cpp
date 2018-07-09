@@ -50,12 +50,12 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				Fuel::MainExtended(std::vector<string>(), output, input);
 
-				string s = output.GetContent().Trim();
+				string s = output->GetContent().Trim();
 				Assert::IsTrue(s.StartsWith(Lisp::Name));
 			}
 		}
@@ -64,9 +64,9 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("scripts\\simple.fuel");
 				string s;
@@ -80,9 +80,9 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("scripts\\error.fuel");
 				string s;
@@ -98,9 +98,9 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("-x");
 				args.push_back("scripts\\error.fuel");
@@ -119,14 +119,14 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("-h");
 				Fuel::MainExtended(args, output, input);
 
-				string s = output.GetContent().Trim();
+				string s = output->GetContent().Trim();
 				Assert::IsTrue(s.StartsWith(Lisp::Name));
 			}
 		}
@@ -135,14 +135,14 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("-v");
 				Fuel::MainExtended(args, output, input);
 
-				string s = output.GetContent().Trim();
+				string s = output->GetContent().Trim();
 				Assert::IsTrue(s.StartsWith(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date));
 			}
 		}
@@ -151,9 +151,9 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("-e");
 				args.push_back("(print (+ 1 2))");
@@ -168,9 +168,9 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("-e");
 				args.push_back("(println \"hello world\") (println \"done.\")");
@@ -186,14 +186,14 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("-i");
 				string s;
 				string useForInput = "(import fuellib)\nmacros\nmodules\nfuncs\n";
-		//TODO		Fuel::MainExtended(args, output, input, &s, &useForInput);
+//TODO		Fuel::MainExtended(args, output, input, &s, &useForInput);
 
 				Assert::IsTrue(s.Contains(".\\Library\\fuellib.fuel"));
 				Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
@@ -204,9 +204,9 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("TestData\\multiprintln.fuel");
 				string s;
@@ -220,14 +220,15 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("TestData\\writereadfile.fuel");
 				string s;
 				Fuel::MainExtended(args, output, input, &s);
 
+// TODO --> does not work for C++ yet
 				Assert::IsTrue(s.Contains("exists file =  #t"));
 				Assert::IsTrue(s.Contains("test non existing file =  #f"));
 				Assert::IsTrue(s.Contains("is equal =  #t"));
@@ -238,14 +239,15 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				TextWriter output;
-				TextReader input;
-				output.EnableToString(true);
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("TestData\\teststdlib.fuel");
 				string s;
 				Fuel::MainExtended(args, output, input, &s);
 
+// TODO --> does not work for C++ yet
 				Assert::IsTrue(s.Contains("DictCount= 2"));
 				Assert::IsTrue(s.Contains("NewDictCount= 0"));
 				Assert::IsTrue(s.Contains("DirListType= List"));

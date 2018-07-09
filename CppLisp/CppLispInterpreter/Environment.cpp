@@ -185,7 +185,7 @@ static std::shared_ptr<LispVariant> Help(const std::vector<std::shared_ptr<objec
 		string s = cmd + "\n";
 		helpText.Append(s);
 	}
-	scope->GlobalScope->Output.WriteLine(helpText);
+	scope->GlobalScope->Output->WriteLine(helpText);
 	return std::make_shared<LispVariant>(std::make_shared<object>(helpText));
 }
 
@@ -193,9 +193,9 @@ static std::shared_ptr<LispVariant> DumpDocumentation(std::shared_ptr<LispScope>
 {
 	//string text; // var text = new StringBuilder();
 	var tempOutputWriter = scope->GlobalScope->Output;
-	scope->GlobalScope->Output = TextWriter(true); // StringWriter(text);
+	scope->GlobalScope->Output = std::make_shared<TextWriter>(true); // StringWriter(text);
 	dump();
-	string text = scope->GlobalScope->Output.GetContent();
+	string text = scope->GlobalScope->Output->GetContent();
 	scope->GlobalScope->Output = tempOutputWriter;
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
@@ -209,7 +209,7 @@ static std::shared_ptr<LispVariant> DoSearchDocumentation(const std::vector<std:
 		{
 			help += scope->GetFunctionsHelpFormated(item->ToString(), select);
 		}
-		return DumpDocumentation(scope, [help, scope]() -> void { scope->GlobalScope->Output.WriteLine("{0}", help); });
+		return DumpDocumentation(scope, [help, scope]() -> void { scope->GlobalScope->Output->WriteLine("{0}", help); });
 	}
 	return DumpDocumentation(scope, [scope]() -> void { scope->GlobalScope->DumpBuiltinFunctionsHelpFormated(); });
 }
@@ -231,7 +231,7 @@ static std::shared_ptr<LispVariant> SearchDocumentation(const std::vector<std::s
 
 static std::shared_ptr<LispVariant> Break(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	scope->GlobalScope->Output.WriteLine("break -> call stack:");
+	scope->GlobalScope->Output->WriteLine("break -> call stack:");
 	scope->DumpStack(scope->GetCallStackSize());
 	var debugger = scope->GlobalScope->Debugger;
 	if (debugger != null)
@@ -240,14 +240,14 @@ static std::shared_ptr<LispVariant> Break(const std::vector<std::shared_ptr<obje
 	}
 	else
 	{
-		scope->GlobalScope->Output.WriteLine("Warning: can not break, because no debugger support availabe!");
+		scope->GlobalScope->Output->WriteLine("Warning: can not break, because no debugger support availabe!");
 	}
 	return std::make_shared<LispVariant>(std::make_shared<object>(LispVariant(LispType::_Undefined)));;
 }
 
 static std::shared_ptr<LispVariant> Vars(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	scope->GlobalScope->Output.WriteLine("variables:");
+	scope->GlobalScope->Output->WriteLine("variables:");
 	scope->DumpVars();
 	return std::make_shared<LispVariant>(LispVariant());
 }
@@ -370,7 +370,7 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 			}
 			else
 			{
-				scope->GlobalScope->Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+				scope->GlobalScope->Output->WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
 			}
 		}
 		if (!string::IsNullOrEmpty(code))
@@ -418,14 +418,14 @@ static std::shared_ptr<LispVariant> GetTypeString(const std::vector<std::shared_
 static std::shared_ptr<LispVariant> Print(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	var text = GetStringRepresentation(args, scope);
-	scope->GlobalScope->Output.Write(text);
+	scope->GlobalScope->Output->Write(text);
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
 static std::shared_ptr<LispVariant> PrintLn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	var text = GetStringRepresentation(args, scope);
-	scope->GlobalScope->Output.WriteLine(text);
+	scope->GlobalScope->Output->WriteLine(text);
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
@@ -1016,7 +1016,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 			var debugger = scope->GlobalScope->Debugger;
 			if (debugger != null)
 			{
-				scope->GlobalScope->Output.WriteLine(ex.ToString());
+				scope->GlobalScope->Output->WriteLine(ex.ToString());
 
 				debugger->InteractiveLoop(/*initialTopScope: */childScope, /*currentAst :*/ /*(IEnumerable<object>)*/std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObject()) /*new List<object> { info.Item2 }*/);
 			}
@@ -1275,7 +1275,7 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope(bool redirectOutputToString)
 {
 	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>();
-	scope->Output.EnableToString(redirectOutputToString);
+	scope->Output->EnableToString(redirectOutputToString);
 
 	(*scope)[Modules] = std::make_shared<object>(LispScope(Modules, scope));
 	(*scope)[Macros] = std::make_shared<object>(LispScope(Macros, scope));

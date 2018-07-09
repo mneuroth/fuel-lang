@@ -41,8 +41,8 @@
 
 namespace CsLisp
 {
-	void ShowAbout(TextWriter & output);
-	void ShowVersion(TextWriter & output);
+	void ShowAbout(std::shared_ptr<TextWriter> output);
+	void ShowVersion(std::shared_ptr<TextWriter> output);
 	extern string ReadFileOrEmptyString(const string & fileName);
 
 	// ********************************************************************
@@ -89,9 +89,9 @@ namespace CsLisp
 
 		/*private*/ string CommandLineScript; // { get; set; }
 
-		/*private*/ TextWriter Output; // { get; set; }
+		/*private*/ std::shared_ptr<TextWriter> Output; // { get; set; }
 
-		/*private*/ TextReader Input; // { get; set; }
+		/*private*/ std::shared_ptr<TextReader> Input; // { get; set; }
 
         //#endregion
 
@@ -107,8 +107,8 @@ namespace CsLisp
         /*public*/ LispDebugger()
         {
             Breakpoints = std::vector<LispBreakpointInfo>();
-            Output = /*Console.Out*/TextWriter();
-            Input = /*Console.In*/TextReader();
+            Output = /*Console.Out*/std::make_shared<TextWriter>();
+            Input = /*Console.In*/std::make_shared<TextReader>();
             CommandLineScript = string::Empty;
             Reset();
         }
@@ -146,12 +146,12 @@ namespace CsLisp
             }
 			if (pRedirectToString != 0)
 			{
-				globalScope->Output.EnableToString(true);
+				globalScope->Output->EnableToString(true);
 			}
 			if (pRedirectFromString != 0)
 			{
-				globalScope->Input.SetContent(*pRedirectFromString);
-				globalScope->Input.EnableFromString(true);
+				globalScope->Input->SetContent(*pRedirectFromString);
+				globalScope->Input->EnableFromString(true);
 			}
             var topScope = initialTopScope != null ? initialTopScope : globalScope;
             var currentScope = topScope;
@@ -159,13 +159,13 @@ namespace CsLisp
             var bRestart = false;
             do
             {
-                debugger->Output.Write(debugger != null ? DbgPrompt : Prompt);
+                debugger->Output->Write(debugger != null ? DbgPrompt : Prompt);
 
                 // Warning:
                 // QProcess and .NET >3.5 does not work correclty reading from input !!!
                 // see: http://www.qtcentre.org/threads/62415-QProcess-not-communicating-with-net-framework-gt-3-5
                 // ==> CsLisp is now using .NET 3.5 !
-                var cmd = debugger->Input.ReadLine();
+                var cmd = debugger->Input->ReadLine();
                 cmd = /*cmd != null ?*/ cmd.Trim() /*: null*/;
 
                 if (/*cmd == null ||*/ cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
@@ -204,7 +204,7 @@ namespace CsLisp
                     {
                         string docCmd = "(doc '" + items[1] + ")";
 						std::shared_ptr<LispVariant> result = Lisp::Eval(docCmd, currentScope, currentScope->ModuleName);
-                        debugger->Output.WriteLine(string("{0}"), result->ToString());
+                        debugger->Output->WriteLine(string("{0}"), result->ToString());
                     }
                     else
                     {
@@ -218,7 +218,7 @@ namespace CsLisp
                     {
                         string docCmd = "(searchdoc '" + items[1] + ")";
                         std::shared_ptr<LispVariant> result = Lisp::Eval(docCmd, currentScope, currentScope->ModuleName);
-                        debugger->Output.WriteLine(string("{0}"), result->ToString());
+                        debugger->Output->WriteLine(string("{0}"), result->ToString());
                     }
                     else
                     {
@@ -311,22 +311,22 @@ namespace CsLisp
                     try
                     {
                         std::shared_ptr<LispVariant> result = Lisp::Eval(cmd, currentScope, currentScope->ModuleName);
-                        debugger->Output.WriteLine("result={0}", result->ToString());
+                        debugger->Output->WriteLine("result={0}", result->ToString());
                     }
                     catch (LispException & ex)
                     {
-                        debugger->Output.WriteLine("Exception: " + ex.Message);
+                        debugger->Output->WriteLine("Exception: " + ex.Message);
                     }
 					catch (...)
 					{
-						debugger->Output.WriteLine("Native Exception");
+						debugger->Output->WriteLine("Native Exception");
 					}
 				}
             } while (!bContinueWithNextStatement);
 
 			if (pRedirectToString != 0)
 			{
-				*pRedirectToString = globalScope->Output.GetContent();
+				*pRedirectToString = globalScope->Output->GetContent();
 			}
 
             return bRestart;
@@ -347,7 +347,7 @@ namespace CsLisp
                 var startPos = initialTopScope != null ? initialTopScope->CurrentToken->StartPos : 0;
                 var stopPos = initialTopScope != null ? initialTopScope->CurrentToken->StopPos : 0;
                 var moduleName = initialTopScope != null ? initialTopScope->ModuleName : "?";
-                Output.WriteLine("--> " + (*((*currentAst).begin()))->ToString()/*[0]*/ + " line=" + std::to_string((int)lineNumber) + " start=" + std::to_string((int)startPos) + " stop=" + std::to_string((int)stopPos) + " module=" + moduleName);
+                Output->WriteLine("--> " + (*((*currentAst).begin()))->ToString()/*[0]*/ + " line=" + std::to_string((int)lineNumber) + " start=" + std::to_string((int)startPos) + " stop=" + std::to_string((int)stopPos) + " module=" + moduleName);
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing, pRedirectToString, pRedirectFromString);
         }
@@ -396,21 +396,21 @@ namespace CsLisp
                 }
                 catch (LispException & exception)
                 {
-                    Output.WriteLine("\nException: {0}", exception.ToString());
+                    Output->WriteLine("\nException: {0}", exception.ToString());
 // TODO --> implement...
                     //string stackInfo = exception.Data.Contains(/*LispUtils.StackInfo*/"StackInfo") ? (string)exception.Data[/*LispUtils.StackInfo*/"StackInfo"] : string::Empty;
 					string stackInfo = "<TODO>";
-                    Output.WriteLine("\nStack:\n{0}", stackInfo);
+                    Output->WriteLine("\nStack:\n{0}", stackInfo);
                     bRestart = InteractiveLoop(this, globalScope, /*startedFromMain:*/ true);
                 }
 				catch (...)
 				{
-					Output.WriteLine("\nNative Exception...");
+					Output->WriteLine("\nNative Exception...");
 				}
 
                 if (bRestart)
                 {
-                    Output.WriteLine("restart program");
+                    Output->WriteLine("restart program");
 
                     // process empty script --> just start interactive loop
                     if (result == null)
@@ -428,7 +428,7 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-        /*public*/ void SetInputOutputStreams(const TextWriter & output, const TextReader & input)
+        /*public*/ void SetInputOutputStreams(std::shared_ptr<TextWriter> output, std::shared_ptr<TextReader> input)
         {
             Output = output;
             Input = input;            
@@ -461,7 +461,7 @@ namespace CsLisp
                         }
                         catch(...)
                         {
-                            Output.WriteLine("Error: bad condition for line {0}: {1}", std::to_string(breakpoint.LineNo), breakpoint.Condition);
+                            Output->WriteLine("Error: bad condition for line {0}: {1}", std::to_string(breakpoint.LineNo), breakpoint.Condition);
                             return false;
                         } 
                     }
@@ -537,11 +537,11 @@ namespace CsLisp
 
 		/*private*/ void ShowBreakpoints()
         {
-            Output.WriteLine("Breakpoints:");
+            Output->WriteLine("Breakpoints:");
             var no = 1;
             for (var breakpoint : Breakpoints)
             {
-                Output.WriteLine("#{0,-3} line={1,-5} module={2,-25} condition={3}", std::to_string(no), std::to_string(breakpoint.LineNo), breakpoint.ModuleName, breakpoint.Condition);
+                Output->WriteLine("#{0,-3} line={1,-5} module={2,-25} condition={3}", std::to_string(no), std::to_string(breakpoint.LineNo), breakpoint.ModuleName, breakpoint.Condition);
                 no++;
             }
         }
@@ -570,7 +570,7 @@ namespace CsLisp
                 {
                     string breakMark = debugger->HasBreakpointAt(i + 1, moduleName) ? "B " : "  ";
                     string mark = std::to_string(/*currentLineNo != null &&*/ currentLineNo/*.Value*/ == i + 1 /*? "-->" : string::Empty*/);
-                    debugger->Output.WriteLine("{0,3} {1,2} {2,3} {3}", std::to_string(i + 1), breakMark, mark, sourceCodeLines[i]);
+                    debugger->Output->WriteLine("{0,3} {1,2} {2,3} {3}", std::to_string(i + 1), breakMark, mark, sourceCodeLines[i]);
                 }
             }
         }
@@ -585,16 +585,16 @@ namespace CsLisp
                     Tuple<bool, int> val = ConvertToInt(rest);
                     if (!val.Item1() || !debugger->ClearBreakpoint(val.Item2()))
                     {
-                        debugger->Output.WriteLine("Warning: no breakpoint cleared");
+                        debugger->Output->WriteLine("Warning: no breakpoint cleared");
                     }
                 }
                 else
                 {
-                    debugger->Output.WriteLine("Really delete all breakpoints? (y/n)");
+                    debugger->Output->WriteLine("Really delete all breakpoints? (y/n)");
 					string answer;
                     do
                     {
-                        answer = debugger->Input.ReadLine();
+                        answer = debugger->Input->ReadLine();
                         //if (answer != null)
                         {
                             answer = answer.ToUpper();
@@ -665,7 +665,7 @@ namespace CsLisp
             }
             if (!added && debugger != null)
             {
-                debugger->Output.WriteLine("Warning: no breakpoint set or modified");
+                debugger->Output->WriteLine("Warning: no breakpoint set or modified");
             }
         }
 		
@@ -691,36 +691,36 @@ namespace CsLisp
             return result;
         }
 
-        /*private*/ static void ShowInteractiveCmds(TextWriter output)
+        /*private*/ static void ShowInteractiveCmds(std::shared_ptr<TextWriter> output)
         {
-            output.WriteLine();
-            output.WriteLine("help for interactive loop:");
-            output.WriteLine();
-            output.WriteLine("  (h)elp                       : show this help");
-            output.WriteLine("  version                      : show of this interpreter");
-            output.WriteLine("  about                        : show informations about this interpreter");
-            output.WriteLine("  (c)ode                       : show the program code");
-            output.WriteLine("  stac(k)                      : show the current call stack");
-            output.WriteLine("  (u)p                         : go one step up in call stack");
-            output.WriteLine("  (d)own                       : go one step down in call stack");
-            output.WriteLine("  (r)un                        : execute the program");
-            output.WriteLine("  (s)tep                       : step into function");
-            output.WriteLine("  o(v)er                       : step over function");
-            output.WriteLine("  (o)ut                        : step out of function");
-            output.WriteLine("  (b)reak [module:]line [cond] : set a breakpoint in line no with condition cond");
-            output.WriteLine("  clear [no]                   : clears a breakpoint with number no or clears all");
-            output.WriteLine("  lis(t)                       : shows all breakpoints");
-            output.WriteLine("  restart                      : restart program");
-            output.WriteLine("  (l)ocals                     : show all local variables of current scope");
-            output.WriteLine("  (g)lobals                    : show all global variables");
-            output.WriteLine("  modules                      : show all available modules");
-            output.WriteLine("  builtins                     : show all builtin functions");
-            output.WriteLine("  funcs                        : show all available functions");
-            output.WriteLine("  macros                       : show all available macros");
-            output.WriteLine("  doc [function]               : show documentation for all or only given function(s)");
-            output.WriteLine("  searchdoc name               : show documentation for function(s) containing name");
-            output.WriteLine("  exit                         : exit the interactive loop");
-            output.WriteLine();
+            output->WriteLine();
+            output->WriteLine("help for interactive loop:");
+            output->WriteLine();
+            output->WriteLine("  (h)elp                       : show this help");
+            output->WriteLine("  version                      : show of this interpreter");
+            output->WriteLine("  about                        : show informations about this interpreter");
+            output->WriteLine("  (c)ode                       : show the program code");
+            output->WriteLine("  stac(k)                      : show the current call stack");
+            output->WriteLine("  (u)p                         : go one step up in call stack");
+            output->WriteLine("  (d)own                       : go one step down in call stack");
+            output->WriteLine("  (r)un                        : execute the program");
+            output->WriteLine("  (s)tep                       : step into function");
+            output->WriteLine("  o(v)er                       : step over function");
+            output->WriteLine("  (o)ut                        : step out of function");
+            output->WriteLine("  (b)reak [module:]line [cond] : set a breakpoint in line no with condition cond");
+            output->WriteLine("  clear [no]                   : clears a breakpoint with number no or clears all");
+            output->WriteLine("  lis(t)                       : shows all breakpoints");
+            output->WriteLine("  restart                      : restart program");
+            output->WriteLine("  (l)ocals                     : show all local variables of current scope");
+            output->WriteLine("  (g)lobals                    : show all global variables");
+            output->WriteLine("  modules                      : show all available modules");
+            output->WriteLine("  builtins                     : show all builtin functions");
+            output->WriteLine("  funcs                        : show all available functions");
+            output->WriteLine("  macros                       : show all available macros");
+            output->WriteLine("  doc [function]               : show documentation for all or only given function(s)");
+            output->WriteLine("  searchdoc name               : show documentation for function(s) containing name");
+            output->WriteLine("  exit                         : exit the interactive loop");
+            output->WriteLine();
         }
 
         /*private*/ static Tuple<bool, int> ConvertToInt(const string & value)

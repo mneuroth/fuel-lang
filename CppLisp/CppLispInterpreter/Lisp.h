@@ -116,8 +116,8 @@ namespace CsLisp
 			currentScope->Tracing = tracing;
 			if (pRedirectFromString != 0)
 			{
-				currentScope->Input.SetContent(*pRedirectFromString);
-				currentScope->Input.EnableFromString(true);
+				currentScope->Input->SetContent(*pRedirectFromString);
+				currentScope->Input->EnableFromString(true);
 			}
 			RegisterNativeObjects(/*nativeItems,*/ *currentScope);
 			size_t offset = 0;
@@ -131,7 +131,7 @@ namespace CsLisp
 			var result = LispInterpreter::EvalAst(expandedAst, currentScope);
 			if (pRedirectToString != 0)
 			{
-				*pRedirectToString = currentScope->Output.GetContent();
+				*pRedirectToString = currentScope->Output->GetContent();
 			}
 			return result;
 		}

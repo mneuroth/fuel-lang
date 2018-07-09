@@ -199,7 +199,7 @@ namespace CsLisp
             // trace current function (if tracing is enabled)
             if (scope->GlobalScope->Tracing)
             {
-                scope->GlobalScope->Output.WriteLine("--> {0}", astAsList->First()->ToString());
+                scope->GlobalScope->Output->WriteLine("--> {0}", astAsList->First()->ToString());
             }
 			
 			// evaluate arguments, but allow recursive lists

@@ -147,7 +147,7 @@ namespace CsLisp
         /// <value>
         /// The output.
         /// </value>
-		/*public*/ TextWriter Output; // { get; set; }
+		/*public*/ std::shared_ptr<TextWriter> Output; // { get; set; }
 
         /// <summary>
         /// Gets the input stream.
@@ -155,7 +155,7 @@ namespace CsLisp
         /// <value>
         /// The input.
         /// </value>
-		/*public*/ TextReader Input; // { get; set; }
+		/*public*/ std::shared_ptr<TextReader> Input; // { get; set; }
 
         //#endregion
 
@@ -183,8 +183,8 @@ namespace CsLisp
             }
             CurrentToken = null;
 // TODO --> Console.In/Out umleiten realisieren !
-//            Input = Console.In;
-//            Output = Console.Out;
+			Input = /*Console.In;*/std::make_shared<TextReader>();
+			Output = /*Console.Out*/std::make_shared<TextWriter>();
         }
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace CsLisp
         /*public*/ void DumpStack(int currentLevel = -1)
         {
             string stackInfo = DumpStackToString(currentLevel);
-            Output.WriteLine(stackInfo);
+            Output->WriteLine(stackInfo);
         }
 
         /*public*/ string DumpStackToString(int currentLevel = -1)
@@ -403,7 +403,7 @@ namespace CsLisp
 
         /*public*/ void DumpMacros()
         {
-			ProcessMetaScope(LispEnvironment::Macros, [this](KeyValuePair<string, std::shared_ptr<object>> macro) -> void { Output.WriteLine(macro.Key); });
+			ProcessMetaScope(LispEnvironment::Macros, [this](KeyValuePair<string, std::shared_ptr<object>> macro) -> void { Output->WriteLine(macro.Key); });
         }
 
         /*public*/ void DumpBuiltinFunctions()
@@ -423,22 +423,22 @@ namespace CsLisp
 
         /*public*/ void DumpBuiltinFunctionsHelpHtmlFormated()
         {
-            Output.WriteLine("<html>");
-            Output.WriteLine("<head>");
-            Output.WriteLine("<title>");
-            Output.WriteLine("Documentation of fuel language");
-            Output.WriteLine("</title>");
-            Output.WriteLine("</head>");
-            Output.WriteLine("<h2>Documentation of builtin functions of the fuel language:</h2>");
-            Output.WriteLine("<body>");
+            Output->WriteLine("<html>");
+            Output->WriteLine("<head>");
+            Output->WriteLine("<title>");
+            Output->WriteLine("Documentation of fuel language");
+            Output->WriteLine("</title>");
+            Output->WriteLine("</head>");
+            Output->WriteLine("<h2>Documentation of builtin functions of the fuel language:</h2>");
+            Output->WriteLine("<body>");
 			Dump([](const LispVariant & v) -> bool { return v.IsFunction() && v.FunctionValue().IsBuiltin(); }, null, /*showHelp:*/false, /*sort:*/ true, /*format:*/[](const LispVariant & v) -> string { return v.FunctionValue().GetHtmlFormatedDoc(); });
-            Output.WriteLine("</body>");
-            Output.WriteLine("</html>");
+            Output->WriteLine("</body>");
+            Output->WriteLine("</html>");
         }
 
         /*public*/ void DumpModules()
         {
-			ProcessMetaScope(LispEnvironment::Modules, [this](KeyValuePair<string, std::shared_ptr<object>> mod) -> void { return Output.WriteLine(mod.Key); });
+			ProcessMetaScope(LispEnvironment::Modules, [this](KeyValuePair<string, std::shared_ptr<object>> mod) -> void { return Output->WriteLine(mod.Key); });
         }
 
         /*public*/ string GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(string, string)> select = null)
@@ -500,22 +500,22 @@ namespace CsLisp
                     {
                         if (format != null)
                         {
-                            Output.WriteLine("{0}", format(*value));
+                            Output->WriteLine("{0}", format(*value));
                         }
                         else
                         {
                             string info = show != null ? show(*value) : string::Empty;
                             if (showHelp)
                             {
-                                Output.WriteLine("{0,20} --> {1}", key, value->FunctionValue().Signature);
+                                Output->WriteLine("{0,20} --> {1}", key, value->FunctionValue().Signature);
                                 if (!string::IsNullOrEmpty(info))
                                 {
-                                    Output.WriteLine("{0,20}     {1}", "", info);
+                                    Output->WriteLine("{0,20}     {1}", "", info);
                                 }
                             }
                             else
                             {
-                                Output.WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value->ToStringDebugger(), value->TypeString(), info);
+                                Output->WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value->ToStringDebugger(), value->TypeString(), info);
                             }                            
                         }
                     }

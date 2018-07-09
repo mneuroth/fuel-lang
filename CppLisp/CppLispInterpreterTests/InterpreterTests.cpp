@@ -417,7 +417,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("132", result->ToString().c_str());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("first-macro"));
 				Assert::IsTrue(s.Contains("second-macro"));
 			}
@@ -452,7 +452,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("144", result->ToString().c_str());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("first-macro"));
 				Assert::IsTrue(s.Contains("second-macro"));
 			}
@@ -488,7 +488,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("40", result->ToString().c_str());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("first-macro"));
 				Assert::IsTrue(s.Contains("second-macro"));
 			}
@@ -562,7 +562,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("132", result->ToString().c_str());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("first-macro"));
 				Assert::IsTrue(s.Contains("second-macro"));
 			}
@@ -601,7 +601,7 @@ namespace QtLispUnitTests
 					std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 					Assert::AreEqual("144", result->ToString().c_str());
 
-					string s = scope->Output.GetContent().Trim();
+					string s = scope->Output->GetContent().Trim();
 					Assert::IsTrue(s.Contains("first-macro"));
 					Assert::IsTrue(s.Contains("second-macro"));
 				}
@@ -641,7 +641,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("40", result->ToString().c_str());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("first-macro"));
 				Assert::IsTrue(s.Contains("second-macro"));
 			}
@@ -822,7 +822,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (args 0)) (println (args 1)) (println (args 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))", scope);
 				Assert::AreEqual(10, result->ToInt());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::AreEqual(true, s.Contains("count= 3"));
 				Assert::AreEqual(true, s.Contains("5"));
 				Assert::AreEqual(true, s.Contains("6"));
@@ -1304,7 +1304,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 4) (def b \"asdf\") (vars))", scope);
 				Assert::IsTrue(result->IsUndefined());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::AreEqual(true, s.Contains("a --> 4"));
 				Assert::AreEqual(true, s.Contains("b --> \"asdf\""));
 			}
@@ -1341,7 +1341,7 @@ namespace QtLispUnitTests
 				Assert::IsTrue(result->IsInt());
 				Assert::AreEqual(3, result->IntValue());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("1"));
 				Assert::IsTrue(s.Contains("7"));
 				Assert::IsTrue(s.Contains("7"));
@@ -1359,7 +1359,7 @@ namespace QtLispUnitTests
 				Assert::AreEqual(3, result->IntValue());    // is last value of internal loop variable in foreach
 
 				// test results
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("1"));
 				Assert::IsTrue(s.Contains("4"));
 				Assert::IsTrue(s.Contains("6"));
@@ -1391,7 +1391,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(break)", scope);
 				Assert::IsTrue(result->IsUndefined());
 
-				string s = scope->Output.GetContent().Trim();
+				string s = scope->Output->GetContent().Trim();
 				Assert::IsTrue(s.Contains("no debugger support"));
 			}
 		}

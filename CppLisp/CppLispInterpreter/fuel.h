@@ -47,12 +47,12 @@ namespace CsLisp
 	public:
 		/*public*/ static void Main(std::vector<string> args)
 		{
-			TextWriter writer;
-			TextReader reader;
+			std::shared_ptr<TextWriter> writer = std::make_shared<TextWriter>();
+			std::shared_ptr<TextReader> reader = std::make_shared<TextReader>();
 			MainExtended(args, /*Console.Out, Console.In*/writer, reader);
 		}
 
-		/*public*/ static void MainExtended(std::vector<string> args, TextWriter & output, TextReader & input, string * pRedirectToString = 0, string * pRedirectFromString = 0)
+		/*public*/ static void MainExtended(std::vector<string> args, std::shared_ptr<TextWriter> output, std::shared_ptr<TextReader> input, string * pRedirectToString = 0, string * pRedirectFromString = 0)
 		{
 			if (args.size() == 0)
 			{
@@ -78,7 +78,7 @@ namespace CsLisp
 			}
 			if (Contains(args, "-v"))
 			{
-				output.WriteLine(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date);
+				output->WriteLine(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date);
 				return;
 			}
 			if (Contains(args, "-h"))
@@ -177,7 +177,7 @@ namespace CsLisp
 					//else if (showCompileOutput && compiler != null)
 					//{
 					//	result = compiler.CompileToCsCode(script);
-					//	output.WriteLine(result.StringValue);
+					//	output->WriteLine(result.StringValue);
 					//}
 					//else
 					{
@@ -193,61 +193,61 @@ namespace CsLisp
 
 			if (trace)
 			{
-				output.WriteLine(string("Result=") + result->ToString());
+				output->WriteLine(string("Result=") + result->ToString());
 			}
 			//if (measureTime)
 			//{
-			//	output.WriteLine("Execution time = {0} s", (Environment.TickCount - startTickCount) * 0.001);
+			//	output->WriteLine("Execution time = {0} s", (Environment.TickCount - startTickCount) * 0.001);
 			//}
 		}
 
 	private:
 		//#region private methods
 
-		/*private*/ static void Usage(TextWriter & output)
+		/*private*/ static void Usage(std::shared_ptr<TextWriter> output)
 		{
 			/*LispUtils.*/ShowAbout(output);
-			output.WriteLine("usage:");
-			output.WriteLine(">" + Lisp::ProgramName + " [options] [script_file_name]");
-			output.WriteLine();
-			output.WriteLine("options:");
-			output.WriteLine("  -v          : show version");
-			output.WriteLine("  -h          : show help");
-			output.WriteLine("  -e \"script\" : execute given script");
-			output.WriteLine("  -l=\"path\"   : path to library");
-			output.WriteLine("  --doc       : show language documentation");
-			output.WriteLine("  --html      : show language documentation in html");
-			output.WriteLine("  -m          : measure execution time");
-			output.WriteLine("  -t          : enable tracing");
-			output.WriteLine("  -x          : exhaustive error output");
+			output->WriteLine("usage:");
+			output->WriteLine(">" + Lisp::ProgramName + " [options] [script_file_name]");
+			output->WriteLine();
+			output->WriteLine("options:");
+			output->WriteLine("  -v          : show version");
+			output->WriteLine("  -h          : show help");
+			output->WriteLine("  -e \"script\" : execute given script");
+			output->WriteLine("  -l=\"path\"   : path to library");
+			output->WriteLine("  --doc       : show language documentation");
+			output->WriteLine("  --html      : show language documentation in html");
+			output->WriteLine("  -m          : measure execution time");
+			output->WriteLine("  -t          : enable tracing");
+			output->WriteLine("  -x          : exhaustive error output");
 			if (TryGetDebugger() != null)
 			{
-				output.WriteLine("  -i          : interactive shell");
-				output.WriteLine("  -d          : start debugger");
+				output->WriteLine("  -i          : interactive shell");
+				output->WriteLine("  -d          : start debugger");
 			}
 			else
 			{
-				output.WriteLine();
-				output.WriteLine("Info: no debugger support installed !");
+				output->WriteLine();
+				output->WriteLine("Info: no debugger support installed !");
 			}
 			//if (TryGetCompiler() != null)
 			//{
-			//	output.WriteLine("  -c          : compile program");
-			//	output.WriteLine("  -s          : show C# compiler output");
+			//	output->WriteLine("  -c          : compile program");
+			//	output->WriteLine("  -s          : show C# compiler output");
 			//}
 			//else
 			//{
-			//	output.WriteLine();
-			//	output.WriteLine("Info: no compiler support installed !");
+			//	output->WriteLine();
+			//	output->WriteLine("Info: no compiler support installed !");
 			//}
-			output.WriteLine();
+			output->WriteLine();
 		}
 
-		/*private*/ static void InteractiveLoopHeader(TextWriter & output)
+		/*private*/ static void InteractiveLoopHeader(std::shared_ptr<TextWriter> output)
 		{
 			/*LispUtils.*/ShowVersion(output);
-			output.WriteLine("Type \"help\" for informations.");
-			output.WriteLine();
+			output->WriteLine("Type \"help\" for informations.");
+			output->WriteLine();
 		}
 
 		///*private*/ static ILispCompiler TryGetCompiler()

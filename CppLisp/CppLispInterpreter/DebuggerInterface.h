@@ -74,7 +74,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="output">The output stream.</param>
         /// <param name="input">The input stream.</param>
-        virtual void SetInputOutputStreams(const TextWriter & output, const TextReader & input) = 0;
+        virtual void SetInputOutputStreams(std::shared_ptr<TextWriter> output, std::shared_ptr<TextReader> input) = 0;
 	};
 
 /*
