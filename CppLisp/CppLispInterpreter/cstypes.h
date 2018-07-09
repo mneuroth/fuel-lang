@@ -230,8 +230,8 @@ namespace CsLisp
 	class TextWriter
 	{
 	private:
-		bool m_bToString;
-		string m_sText;
+		bool	m_bToString;
+		string	m_sText;
 
 	public:
 		TextWriter(bool bToString = false)
@@ -257,7 +257,28 @@ namespace CsLisp
 
 	class TextReader
 	{
+	private:
+		bool								m_bFromString;
+		string								m_sText;
+		std::vector<string>					m_aAllLines;
+		std::vector<string>::const_iterator m_aCurrentPos;
+
 	public:
+		TextReader(const string & txt = string::Empty)
+		{
+			m_bFromString = !string::IsNullOrEmpty(txt);
+			SetContent(txt);
+		}
+		void EnableFromString(bool value = true)
+		{
+			m_bFromString = value;
+		}
+		void SetContent(const string & txt)
+		{
+			m_sText = txt;
+			m_aAllLines = txt.Split("\n");
+			m_aCurrentPos = m_aAllLines.begin();
+		}
 		string ReadLine();
 	};
 

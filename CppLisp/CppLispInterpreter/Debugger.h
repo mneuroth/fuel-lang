@@ -131,7 +131,7 @@ namespace CsLisp
         /// <returns>True if program should be restarted.</returns>
         /// <exception cref="LispStopDebuggerException"></exception>
         /// <exception cref="CsLisp.LispStopDebuggerException"></exception>
-		/*public*/ static bool InteractiveLoop(LispDebugger * debugger = null, std::shared_ptr<LispScope> initialTopScope = null, bool startedFromMain = false, bool tracing = false)
+		/*public*/ static bool InteractiveLoop(LispDebugger * debugger = null, std::shared_ptr<LispScope> initialTopScope = null, bool startedFromMain = false, bool tracing = false, string * pRedirectToString = 0, string * pRedirectFromString = 0)
         {
             startedFromMain = startedFromMain || debugger == null;
             if (debugger == null)
@@ -144,6 +144,15 @@ namespace CsLisp
             {
                 globalScope->Tracing = tracing;                
             }
+			if (pRedirectToString != 0)
+			{
+				globalScope->Output.EnableToString(true);
+			}
+			if (pRedirectFromString != 0)
+			{
+				globalScope->Input.SetContent(*pRedirectFromString);
+				globalScope->Input.EnableFromString(true);
+			}
             var topScope = initialTopScope != null ? initialTopScope : globalScope;
             var currentScope = topScope;
             var bContinueWithNextStatement = false;
@@ -315,6 +324,11 @@ namespace CsLisp
 				}
             } while (!bContinueWithNextStatement);
 
+			if (pRedirectToString != 0)
+			{
+				*pRedirectToString = globalScope->Output.GetContent();
+			}
+
             return bRestart;
         }
 
@@ -325,7 +339,7 @@ namespace CsLisp
         /// <summary>
         /// See interface.
         /// </summary>
-		/*public*/ virtual void InteractiveLoop(std::shared_ptr<LispScope> initialTopScope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false)
+		/*public*/ virtual void InteractiveLoop(std::shared_ptr<LispScope> initialTopScope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false, string * pRedirectToString = 0, string * pRedirectFromString = 0)
         {
             if (currentAst != null)
             {
@@ -335,7 +349,7 @@ namespace CsLisp
                 var moduleName = initialTopScope != null ? initialTopScope->ModuleName : "?";
                 Output.WriteLine("--> " + (*((*currentAst).begin()))->ToString()/*[0]*/ + " line=" + std::to_string((int)lineNumber) + " start=" + std::to_string((int)startPos) + " stop=" + std::to_string((int)stopPos) + " module=" + moduleName);
             }
-            InteractiveLoop(this, initialTopScope, startedFromMain, tracing);
+            InteractiveLoop(this, initialTopScope, startedFromMain, tracing, pRedirectToString, pRedirectFromString);
         }
 
         /// <summary>

@@ -8,6 +8,7 @@ SOURCES += \
         $$PWD/Variant.cpp \
         $$PWD/Debugger.cpp \
         $$PWD/Utils.cpp \
+        $$PWD/Exception.cpp \
         $$PWD/Lisp.cpp
 
 HEADERS += \

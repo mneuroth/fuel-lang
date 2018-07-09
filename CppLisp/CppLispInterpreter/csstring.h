@@ -95,7 +95,7 @@ namespace CsLisp
 
 		size_t IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
 		{
-			return find_first_of(txt);
+            return find(txt);
 		}
 
 		static string ReplaceIn(string temp, const string & findText, const string & arg)

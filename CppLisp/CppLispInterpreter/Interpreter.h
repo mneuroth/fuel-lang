@@ -90,7 +90,7 @@ namespace CsLisp
                     {
                         if (!compile)
                         {
-                            throw LispException("Function \"" + first->ToString() + "\" not found"/*, scope*/);
+                            throw LispException("Function \"" + first->ToString() + "\" not found", scope.get());
                         }
                     }
                     isSpecialFormX = std::make_shared<bool>(firstElem.IsSpecialForm());

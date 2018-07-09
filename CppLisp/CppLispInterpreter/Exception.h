@@ -53,16 +53,7 @@ namespace CsLisp
         /// </summary>
         /// <param name="text">The text.</param>
         /// <param name="scope">The scope.</param>
-        /*public*/ LispException(const string & text, LispScope * scope = 0)
-            //: base(text)
-        {
-			Message = text;
-			//if (scope != null)
-            //{
-            //    this.AddModuleNameAndStackInfos(scope.ModuleName, scope.DumpStackToString());
-            //    this.AddTokenInfos(scope.CurrentToken);
-            //}
-        }
+		/*public*/ LispException(const string & text, LispScope * scope = 0);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LispException" /> class.
@@ -71,17 +62,10 @@ namespace CsLisp
         /// <param name="token">The token.</param>
         /// <param name="moduleName">Name of the module.</param>
         /// <param name="stackInfo">The stack information.</param>
-        /*public*/ LispException(const string & text, std::shared_ptr<LispToken> token, const string & moduleName, const string & stackInfo = "not available")
-            //: base(text)
-        {
-			Message = text;
-			//this.AddModuleNameAndStackInfos(moduleName, stackInfo);
-            //this.AddTokenInfos(token);
-        }
+		/*public*/ LispException(const string & text, std::shared_ptr<LispToken> token, const string & moduleName, const string & stackInfo = "not available");
 
-		void AddTokenInfos(std::shared_ptr<LispToken> token)
-		{
-		}
+		void AddModuleNameAndStackInfos(const string & moduleName, const string & stackInfo);
+		void AddTokenInfos(std::shared_ptr<LispToken> token);
 
 		std::map<string, std::shared_ptr<object>> Data;
 

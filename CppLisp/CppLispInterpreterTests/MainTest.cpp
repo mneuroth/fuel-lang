@@ -185,20 +185,19 @@ namespace QtLispUnitTests
 		TEST_METHOD(Test_MainInteractiveImport)
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
-			//{
-			//	TextWriter output;
-			//	TextReader input;
-			//	output.EnableToString(true);
-			//	std::vector<string> args;
-			//	args.push_back("-i");
-			//	string s;
-			//	Fuel::MainExtended(args, output, input, &s);
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-i");
+				string s;
+				string useForInput = "(import fuellib)\nmacros\nmodules\nfuncs\n";
+		//TODO		Fuel::MainExtended(args, output, input, &s, &useForInput);
 
-			//	Assert::IsTrue(s.Contains(".\\Library\\fuellib.fuel"));
-			//	Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
-			//}
-// TODO --> input umleiten realisieren
-			Assert::IsTrue(false);
+				Assert::IsTrue(s.Contains(".\\Library\\fuellib.fuel"));
+				Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
+			}
 		}
 
 		TEST_METHOD(Test_MultiPrintLn)
@@ -235,5 +234,45 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_StdLibObjects)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				TextWriter output;
+				TextReader input;
+				output.EnableToString(true);
+				std::vector<string> args;
+				args.push_back("TestData\\teststdlib.fuel");
+				string s;
+				Fuel::MainExtended(args, output, input, &s);
+
+				Assert::IsTrue(s.Contains("DictCount= 2"));
+				Assert::IsTrue(s.Contains("NewDictCount= 0"));
+				Assert::IsTrue(s.Contains("DirListType= List"));
+				Assert::IsTrue(s.Contains("File= .\\FuelCompiler.dll"));
+				Assert::IsTrue(s.Contains("File= .\\FuelDebugger.dll"));
+				Assert::IsTrue(s.Contains("File= .\\FuelInterpreter.dll"));
+				Assert::IsTrue(s.Contains("File= .\\fuel.exe"));
+				Assert::IsTrue(s.Contains("File= .\\teststdlib.fuel"));
+				Assert::IsTrue(s.Contains("ListCount= 4"));
+				Assert::IsTrue(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
+				Assert::IsTrue(s.Contains("newitem= 12"));
+				Assert::IsTrue(s.Contains("NewListCount= 0"));
+				Assert::IsTrue(s.Contains("ArrayCount= 5"));
+				Assert::IsTrue(s.Contains("ArrayItem1= 1"));
+				Assert::IsTrue(s.Contains("ArrayItem2= blub"));
+				Assert::IsTrue(s.Contains("ArrayItem3= #t"));
+				Assert::IsTrue(s.Contains("ArrayItem4= 42"));
+				Assert::IsTrue(s.Contains("ArrayItem5= 123"));
+			}
+		}
+
+		TEST_METHOD(Test_TestIndexOfInString)
+		{
+			CsLisp::string target("abc def blub 123");
+
+			Assert::AreEqual((size_t)4, target.IndexOf("def", "nix"));
+			Assert::AreEqual(CsLisp::string::npos, target.IndexOf("test", "nix"));
+		}
 	};
 }

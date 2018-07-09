@@ -516,7 +516,18 @@ namespace CsLisp
 	string TextReader::ReadLine()
 	{
 		string input;
-		std::getline(std::cin, input);
+		if (m_bFromString)
+		{
+			if (m_aCurrentPos != m_aAllLines.end())
+			{
+				input = *m_aCurrentPos;
+				m_aCurrentPos++;
+			}
+		}
+		else
+		{
+			std::getline(std::cin, input);
+		}
 		return input;
 	}
 }

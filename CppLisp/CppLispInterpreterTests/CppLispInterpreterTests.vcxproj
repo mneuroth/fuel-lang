@@ -187,6 +187,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Comma
     <ClCompile Include="..\CppLispInterpreter\csobject.cpp" />
     <ClCompile Include="..\CppLispInterpreter\Debugger.cpp" />
     <ClCompile Include="..\CppLispInterpreter\Environment.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\Exception.cpp" />
     <ClCompile Include="..\CppLispInterpreter\fuel.cpp" />
     <ClCompile Include="..\CppLispInterpreter\Lisp.cpp" />
     <ClCompile Include="..\CppLispInterpreter\Parser.cpp" />
