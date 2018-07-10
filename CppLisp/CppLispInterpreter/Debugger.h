@@ -144,8 +144,8 @@ namespace CsLisp
             {
                 globalScope->Tracing = tracing;                
             }
-			globalScope->Output = outp;
-			globalScope->Input = inp;
+			globalScope->Output = outp!=null ? outp : (initialTopScope !=null ? initialTopScope->Output : std::make_shared<TextWriter>());
+			globalScope->Input = inp!=null ? inp : (initialTopScope != null ? initialTopScope->Input : std::make_shared<TextReader>());
             var topScope = initialTopScope != null ? initialTopScope : globalScope;
             var currentScope = topScope;
             var bContinueWithNextStatement = false;
@@ -375,7 +375,7 @@ namespace CsLisp
 
                 try
                 {
-                    result = Lisp::Eval(script, globalScope, moduleName, /*tracing:*/ tracing);
+                    result = Lisp::Eval(script, globalScope, moduleName, /*tracing:*/ tracing, Output, Input);
                     Reset();
                 }
                 catch (LispStopDebuggerException & /*exc*/)
@@ -470,7 +470,7 @@ namespace CsLisp
             //var index = Breakpoints.FindIndex(elem => (elem.LineNo == lineNo) && (elem.ModuleName == moduleName));
             var indexIter = std::find_if(Breakpoints.begin(), Breakpoints.end(), [lineNo, moduleName](const LispBreakpointInfo & elem) -> bool { return (elem.LineNo == lineNo) && (elem.ModuleName == moduleName); });
 			size_t index = indexIter != Breakpoints.end() ? indexIter - Breakpoints.begin() : -1;
-            if (index >= 0)
+            if (index >= 0 && index!=-1)
             {
                 // replace existing item for this line
                 Breakpoints[index] = newItem; 
@@ -633,12 +633,12 @@ namespace CsLisp
                     cmdArgs = rest.Split(' ');
                 }
                 size_t indexRest = rest.IndexOf(" ", "StringComparison.Ordinal");
-                rest = indexRest >= 0 ? rest.Substring(indexRest).Trim() : string::Empty;
+                rest = indexRest != string::npos ? rest.Substring(indexRest).Trim() : string::Empty;
                 if (cmdArgs.size() > 0)
                 {
                     string lineNumberString = cmdArgs[0];
                     size_t posModuleSeparator = cmdArgs[0].LastIndexOf(":", "StringComparison.Ordinal");
-                    if (posModuleSeparator >= 0)
+                    if (posModuleSeparator >= 0 && posModuleSeparator!=-1)
                     {
                         lineNumberString = cmdArgs[0].Substring(posModuleSeparator + 1);
                         moduleName = cmdArgs[0].Substring(0, posModuleSeparator);

@@ -272,6 +272,83 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_Trace)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-t");
+				args.push_back("TestData\\simple.fuel");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("--> do"));
+				Assert::IsTrue(s.Contains("--> print"));
+			}
+		}
+
+		TEST_METHOD(Test_MainInteractive)
+		{
+			//using (var cr = new ConsoleRedirector("help\nfuncs\nbuiltins\nq\n"))
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				string useForInput = "help\nfuncs\nbuiltins\nq\n";
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
+				std::vector<string> args;
+				args.push_back("-i");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				//TestContext.WriteLine("Result=" + result);
+				Assert::IsTrue(s.Contains("DBG>"));
+				Assert::IsTrue(s.Contains("Type \"help\" for informations."));
+				Assert::IsTrue(s.Contains("help for interactive loop:")); // help
+				Assert::IsTrue(s.Contains("equal --> function (equal expr1 expr2)             : Function"));
+				Assert::IsTrue(s.Contains("define-macro --> function (define-macro name (arguments) statement) : Function  : module=<builtin>"));
+			}
+		}
+	
+		TEST_METHOD(Test_MainDebuggerExecute)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n"))
+			{
+				const string script = "(do\
+					(def a 42)\
+					(print (+ 1 2))\
+					(print (* 3 4 5)))";
+
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				string useForInput = "r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n";
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
+				std::vector<string> args;
+				args.push_back("-d");
+				args.push_back("-e");
+				args.push_back(script);
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("DBG>"));
+				Assert::IsTrue(s.Contains("Type \"help\" for informations."));
+				Assert::IsTrue(s.Contains("--> do line=1 start=1 stop=3"));
+				Assert::IsTrue(s.Contains("help for interactive loop:")); // help
+				Assert::IsTrue(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
+				Assert::IsTrue(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
+				Assert::IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
+				Assert::IsTrue(s.Contains("(def a 42)")); // code
+				Assert::IsTrue(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs                    
+			}
+		}
+
+// TODO --> move to other test module
 		TEST_METHOD(Test_TestIndexOfInString)
 		{
 			CsLisp::string target("abc def blub 123");
