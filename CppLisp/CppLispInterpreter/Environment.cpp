@@ -1273,10 +1273,9 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 	return null;
 }
 
-std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope(bool redirectOutputToString)
+std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 {
 	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>();
-	scope->Output->EnableToString(redirectOutputToString);
 
 	(*scope)[Modules] = std::make_shared<object>(LispScope(Modules, scope));
 	(*scope)[Macros] = std::make_shared<object>(LispScope(Macros, scope));

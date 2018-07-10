@@ -413,7 +413,8 @@ namespace QtLispUnitTests
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("132", result->ToString().c_str());
 
@@ -448,7 +449,8 @@ namespace QtLispUnitTests
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("144", result->ToString().c_str());
 
@@ -484,7 +486,8 @@ namespace QtLispUnitTests
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("40", result->ToString().c_str());
 
@@ -558,7 +561,8 @@ namespace QtLispUnitTests
 #ifdef ENABLE_COMPILE_TIME_MACROS
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("132", result->ToString().c_str());
 
@@ -597,7 +601,8 @@ namespace QtLispUnitTests
 #ifdef ENABLE_COMPILE_TIME_MACROS
 				//using (ConsoleRedirector cr = new ConsoleRedirector())
 				{
-					var scope = LispEnvironment::CreateDefaultScope(true);
+					var scope = LispEnvironment::CreateDefaultScope();
+					scope->Output->EnableToString(true);
 					std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 					Assert::AreEqual("144", result->ToString().c_str());
 
@@ -637,7 +642,8 @@ namespace QtLispUnitTests
 #ifdef ENABLE_COMPILE_TIME_MACROS
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
 				Assert::AreEqual("40", result->ToString().c_str());
 
@@ -654,7 +660,8 @@ namespace QtLispUnitTests
 		{
 #ifdef ENABLE_COMPILE_TIME_MACROS
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result =
 					Lisp::Eval(
 						"(do (def a 42) (define-macro-expand my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))", scope);
@@ -818,7 +825,8 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (args 0)) (println (args 1)) (println (args 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))", scope);
 				Assert::AreEqual(10, result->ToInt());
 
@@ -1300,7 +1308,8 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 4) (def b \"asdf\") (vars))", scope);
 				Assert::IsTrue(result->IsUndefined());
 
@@ -1336,7 +1345,8 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (println x))))", scope);
 				Assert::IsTrue(result->IsInt());
 				Assert::AreEqual(3, result->IntValue());
@@ -1353,7 +1363,8 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (foreach '(1 4 6) (lambda (x) (println x))))", scope);
 				Assert::IsTrue(result->IsInt());
 				Assert::AreEqual(3, result->IntValue());    // is last value of internal loop variable in foreach
@@ -1387,7 +1398,8 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
-				var scope = LispEnvironment::CreateDefaultScope(true);
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(break)", scope);
 				Assert::IsTrue(result->IsUndefined());
 

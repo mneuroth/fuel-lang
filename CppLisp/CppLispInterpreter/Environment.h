@@ -90,7 +90,7 @@ namespace CsLisp
 		static std::shared_ptr<LispVariant> quasiquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope);
 		static std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope);
 
-		static std::shared_ptr<LispScope> CreateDefaultScope(bool redirectOutputToString = false);
+		static std::shared_ptr<LispScope> CreateDefaultScope();
 
 		static bool FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> & foundValue);
 

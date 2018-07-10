@@ -69,9 +69,9 @@ namespace QtLispUnitTests
 				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("scripts\\simple.fuel");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 
+				string s = output->GetContent();
 				Assert::IsTrue(s.StartsWith("hello world !"));
 			}
 		}
@@ -85,9 +85,9 @@ namespace QtLispUnitTests
 				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("scripts\\error.fuel");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 
+				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("Error executing script"));
 				Assert::IsTrue(s.Contains("printx"));
 				Assert::IsTrue(s.Contains("not found"));
@@ -104,9 +104,9 @@ namespace QtLispUnitTests
 				std::vector<string> args;
 				args.push_back("-x");
 				args.push_back("scripts\\error.fuel");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 
+				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("Error executing script"));
 				Assert::IsTrue(s.Contains("printx"));
 				Assert::IsTrue(s.Contains("not found"));
@@ -157,9 +157,9 @@ namespace QtLispUnitTests
 				std::vector<string> args;
 				args.push_back("-e");
 				args.push_back("(print (+ 1 2))");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 				
+				string s = output->GetContent();
 				Assert::IsTrue(s == "3");
 			}
 		}
@@ -174,9 +174,9 @@ namespace QtLispUnitTests
 				std::vector<string> args;
 				args.push_back("-e");
 				args.push_back("(println \"hello world\") (println \"done.\")");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 
+				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("hello world"));
 				Assert::IsTrue(s.Contains("done"));
 			}
@@ -194,9 +194,9 @@ namespace QtLispUnitTests
 				input->EnableFromString(true);
 				std::vector<string> args;
 				args.push_back("-i");
-				string s;
-				Fuel::MainExtended(args, output, input, &s, &useForInput);
+				Fuel::MainExtended(args, output, input);
 
+				string s = output->GetContent();
 				Assert::IsTrue(s.Contains(".\\Library\\fuellib.fuel"));
 				//Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
 				Assert::IsTrue(s.Contains("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel"));
@@ -212,9 +212,9 @@ namespace QtLispUnitTests
 				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("TestData\\multiprintln.fuel");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 
+				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("hello\nworld\ndone."));
 			}
 		}
@@ -228,10 +228,10 @@ namespace QtLispUnitTests
 				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("TestData\\writereadfile.fuel");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 
 // TODO --> does not work for C++ yet
+				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("exists file =  #t"));
 				Assert::IsTrue(s.Contains("test non existing file =  #f"));
 				Assert::IsTrue(s.Contains("is equal =  #t"));
@@ -247,10 +247,10 @@ namespace QtLispUnitTests
 				output->EnableToString(true);
 				std::vector<string> args;
 				args.push_back("TestData\\teststdlib.fuel");
-				string s;
-				Fuel::MainExtended(args, output, input, &s);
+				Fuel::MainExtended(args, output, input);
 
 // TODO --> does not work for C++ yet
+				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("DictCount= 2"));
 				Assert::IsTrue(s.Contains("NewDictCount= 0"));
 				Assert::IsTrue(s.Contains("DirListType= List"));

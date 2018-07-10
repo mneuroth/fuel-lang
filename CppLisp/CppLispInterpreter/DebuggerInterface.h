@@ -47,7 +47,7 @@ namespace CsLisp
         /// <param name="currentAst">The current ast.</param>
         /// <param name="startedFromMain">if set to <c>true</c> [started from main].</param>
         /// <param name="tracing">if set to <c>true</c> tracing is enabled.</param>
-        virtual void InteractiveLoop(std::shared_ptr<LispScope> initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false, string * pRedirectToString = 0, string * pRedirectFromString = 0) = 0;
+        virtual void InteractiveLoop(std::shared_ptr<LispScope> initialTopScope /*= null*/, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> currentAst = null, bool startedFromMain = false, bool tracing = false, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null) = 0;
 
         /// <summary>
         /// Verifies if the current execution position needes a break,

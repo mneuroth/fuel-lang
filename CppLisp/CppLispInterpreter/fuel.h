@@ -52,7 +52,7 @@ namespace CsLisp
 			MainExtended(args, /*Console.Out, Console.In*/writer, reader);
 		}
 
-		/*public*/ static void MainExtended(std::vector<string> args, std::shared_ptr<TextWriter> output, std::shared_ptr<TextReader> input, string * pRedirectToString = 0, string * pRedirectFromString = 0)
+		/*public*/ static void MainExtended(std::vector<string> args, std::shared_ptr<TextWriter> output, std::shared_ptr<TextReader> input)
 		{
 			if (args.size() == 0)
 			{
@@ -136,7 +136,7 @@ namespace CsLisp
 // TODO --> Input/Output als shared_ptr, damit besser zwischen Objekten geteilt werden kann
 // TODO --> Debugger Streams != global Streams !!! --> dies ist ein Problem; Debugger sollte Streams an global Scope weiter reichen !
 					InteractiveLoopHeader(output);
-					debugger->InteractiveLoop(null, null, /*startedFromMain:*/ true, /*tracing :*/ trace, pRedirectToString, pRedirectFromString);
+					debugger->InteractiveLoop(null, null, /*startedFromMain:*/ true, /*tracing :*/ trace, output, input);
 					loadFiles = false;
 					wasDebugging = true;
 				}
@@ -181,14 +181,14 @@ namespace CsLisp
 					//}
 					//else
 					{
-						result = Lisp::SaveEval(script, /*moduleName:*/ fileName, /*verboseErrorOutput:*/ lengthyErrorOutput, /*tracing:*/ trace, /*pRedirectToString:*/ pRedirectToString, /*pRedirectFromString:*/ pRedirectFromString);
+						result = Lisp::SaveEval(script, /*moduleName:*/ fileName, /*verboseErrorOutput:*/ lengthyErrorOutput, /*tracing:*/ trace, output, input);
 					}
 				}
 			}
 			else if (!string::IsNullOrEmpty(script) && !wasDebugging)
 			{
 				// process -e option
-				result = Lisp::SaveEval(script, /*moduleName:*/ "cmdline", /*verboseErrorOutput:*/ false, /*tracing:*/ false, /*pRedirectToString:*/ pRedirectToString, /*pRedirectFromString:*/ pRedirectFromString);
+				result = Lisp::SaveEval(script, /*moduleName:*/ "cmdline", /*verboseErrorOutput:*/ false, /*tracing:*/ false, output, input);
 			}
 
 			if (trace)
