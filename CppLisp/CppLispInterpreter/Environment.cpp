@@ -128,11 +128,12 @@ static const std::vector<std::shared_ptr<object>> GetCallArgs(const std::vector<
 	return callArgs;
 }
 
-static std::shared_ptr<object> CreateFunction(FuncX func, const string & signature = /*null*/"", const string & documentation = /*null*/"", bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, const string & moduleName = "Builtin")
+static std::shared_ptr<object> CreateFunction(FuncX func, const string & signature = /*null*/"", const string & documentation = /*null*/"", bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, const string & moduleName = Builtin)
 {
 	LispFunctionWrapper wrapper;
 	wrapper.Function = func;
 	wrapper.Signature = signature;
+	wrapper.ModuleName = moduleName;
 	wrapper.Documentation = documentation;
 	wrapper.SetSpecialForm(isSpecialForm);
 	wrapper.SetEvalInExpand(isEvalInExpand);
@@ -375,7 +376,7 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 		}
 		if (!string::IsNullOrEmpty(code))
 		{
-			var importScope = std::make_shared<LispScope>("import " + fileName, scope->GlobalScope, std::make_shared<string>(fileName));
+			var importScope = std::make_shared<LispScope>("import " + fileName, scope->GlobalScope, std::make_shared<string>(fileName), scope->Output, scope->Input);
 			scope->PushNextScope(importScope);
 
 			result = Lisp::Eval(code, importScope, fileName);
@@ -961,7 +962,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 	std::function<std::shared_ptr<LispVariant>(const std::vector<std::shared_ptr<object>> &, std::shared_ptr<LispScope>)> fcn = 
 		[name, moduleName, args, scope](const std::vector<std::shared_ptr<object>> & localArgs, std::shared_ptr<LispScope> localScope) -> std::shared_ptr<LispVariant>
 	{
-		var childScope = std::make_shared<LispScope>(name, localScope->GlobalScope, std::make_shared<string>(moduleName));
+		var childScope = std::make_shared<LispScope>(name, localScope->GlobalScope, std::make_shared<string>(moduleName), scope->Output, scope->Input);
 		localScope->PushNextScope(childScope);
 
 		// add formal arguments to current scope

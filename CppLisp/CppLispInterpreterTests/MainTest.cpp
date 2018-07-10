@@ -186,17 +186,20 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
 			{
+				string useForInput = "(import fuellib)\nmacros\nmodules\nfuncs\n";
 				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
 				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
 				output->EnableToString(true);
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
 				std::vector<string> args;
 				args.push_back("-i");
 				string s;
-				string useForInput = "(import fuellib)\nmacros\nmodules\nfuncs\n";
-//TODO		Fuel::MainExtended(args, output, input, &s, &useForInput);
+				Fuel::MainExtended(args, output, input, &s, &useForInput);
 
 				Assert::IsTrue(s.Contains(".\\Library\\fuellib.fuel"));
-				Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
+				//Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
+				Assert::IsTrue(s.Contains("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel"));
 			}
 		}
 

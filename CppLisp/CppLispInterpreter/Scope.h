@@ -167,7 +167,7 @@ namespace CsLisp
         /// <param name="fcnName">Name of the FCN.</param>
         /// <param name="globalScope">The global scope.</param>
         /// <param name="moduleName">The current module name for the scope.</param>
-        /*public*/ LispScope(string fcnName = string::Empty, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null)
+        /*public*/ LispScope(string fcnName = string::Empty, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null)
         {
 			Debugger = null;
             Name = fcnName;
@@ -183,8 +183,8 @@ namespace CsLisp
             }
             CurrentToken = null;
 // TODO --> Console.In/Out umleiten realisieren !
-			Input = /*Console.In;*/std::make_shared<TextReader>();
-			Output = /*Console.Out*/std::make_shared<TextWriter>();
+			Input = /*Console.In;*/inp != null ? inp : std::make_shared<TextReader>();
+			Output = /*Console.Out*/outp != null ? outp : std::make_shared<TextWriter>();
         }
 
         /// <summary>

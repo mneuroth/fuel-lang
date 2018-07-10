@@ -168,7 +168,7 @@ namespace CsLisp
                 var cmd = debugger->Input->ReadLine();
                 cmd = /*cmd != null ?*/ cmd.Trim() /*: null*/;
 
-                if (/*cmd == null ||*/ cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
+                if (/*cmd == null ||*/string::IsNullOrEmpty(cmd) || cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
                 {
                     bContinueWithNextStatement = true;
                     bRestart = false;
@@ -310,7 +310,7 @@ namespace CsLisp
                 {
                     try
                     {
-                        std::shared_ptr<LispVariant> result = Lisp::Eval(cmd, currentScope, currentScope->ModuleName);
+                        std::shared_ptr<LispVariant> result = Lisp::Eval(cmd, currentScope, currentScope->ModuleName, pRedirectToString, pRedirectFromString);
                         debugger->Output->WriteLine("result={0}", result->ToString());
                     }
                     catch (LispException & ex)
