@@ -1275,7 +1275,7 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 
 std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 {
-	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>();
+	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>(MainScope);
 
 	(*scope)[Modules] = std::make_shared<object>(LispScope(Modules, scope));
 	(*scope)[Macros] = std::make_shared<object>(LispScope(Macros, scope));

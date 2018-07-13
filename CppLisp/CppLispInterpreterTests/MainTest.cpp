@@ -318,10 +318,10 @@ namespace QtLispUnitTests
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n"))
 			{
-				const string script = "(do\
-					(def a 42)\
-					(print (+ 1 2))\
-					(print (* 3 4 5)))";
+				const string script = "(do\n\
+	(def a 42)\n\
+	(print (+ 1 2))\n\
+	(print (* 3 4 5)))\n";
 
 				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
 				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
@@ -345,6 +345,100 @@ namespace QtLispUnitTests
 				Assert::IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
 				Assert::IsTrue(s.Contains("(def a 42)")); // code
 				Assert::IsTrue(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs                    
+			}
+		}
+
+		TEST_METHOD(Test_DebugFile)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout"))
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				string useForInput = "b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout";
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
+				std::vector<string> args;
+				args.push_back("-d");
+				args.push_back("TestData\\testdebugger.fuel");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("FUEL(isp)-DBG>                    x --> 4                                        : Int "));
+				Assert::IsTrue(s.Contains("       1 name=<main>                              lineno=11   module=TestData\\testdebugger.fuel"));
+				Assert::IsTrue(s.Contains("       2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
+				Assert::IsTrue(s.Contains("-->    3 name=f                                   lineno=4    module=TestData\\testdebugger.fuel"));
+				Assert::IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+				Assert::IsTrue(s.Contains("#1   line=4     module=TestData\\testdebugger.fuel condition="));
+				Assert::IsTrue(s.Contains("-->    2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
+				Assert::IsTrue(s.Contains("  4 B  --> 	   (+ x 1)"));
+				Assert::IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
+				Assert::IsTrue(s.Contains("  4 B      	   (+ x 1)"));
+				Assert::IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
+				Assert::IsTrue(s.Contains("FUEL(isp) v0.99.2 (for C++) from 20.6.2018, (C) by Michael Neuroth"));
+				Assert::IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
+			}
+		}
+
+		TEST_METHOD(Test_DebugSetBreakpoints)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("b \"module name\":4 (== a 4)\nlist"))
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				string useForInput = "b \"module name\":4 (== a 4)\nlist";
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
+				std::vector<string> args;
+				args.push_back("-d");
+				args.push_back("TestData\\simple.fuel");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("#1   line=4     module=module name               condition=(== a 4)"));
+			}
+		}
+
+		TEST_METHOD(Test_DebugModule)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("b .\\testmodule.fuel:4\nlist\nr\nk\nl"))
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				string useForInput = "b .\\Library\\testmodule.fuel:4\nlist\nr\nk\nl";
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
+				std::vector<string> args;
+				args.push_back("-d");
+				args.push_back("TestData\\test.fuel");
+				args.push_back("-l=.");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+				Assert::IsTrue(s.Contains("#1   line=4     module=.\\Library\\testmodule.fuel condition="));
+				Assert::IsTrue(s.Contains("       1 name=<main>                              lineno=4    module=TestData\\test.fuel"));
+				Assert::IsTrue(s.Contains("-->    2 name=blub                                lineno=4    module=.\\Library\\testmodule.fuel"));
+				Assert::IsTrue(s.Contains("x --> 8                                        : Int"));
+			}
+		}
+
+		TEST_METHOD(Test_Documentation)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("--doc");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("lambda"));
+				Assert::IsTrue(s.Contains("Syntax: (lambda (arguments) block)"));
 			}
 		}
 

@@ -104,7 +104,9 @@
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
-xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Command>
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,7 +127,9 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Comma
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
-xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Command>
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -151,7 +155,9 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Comma
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
-xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Command>
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -176,7 +182,9 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Comma
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
-xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"</Command>
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
+xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

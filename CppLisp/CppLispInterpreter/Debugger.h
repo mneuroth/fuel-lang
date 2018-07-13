@@ -73,9 +73,9 @@ namespace CsLisp
 	private:
         //#region constants
 
-        /*private*/ const static string Prompt;
+        /*private*/ static const string Prompt;
 
-        /*private*/ const static string DbgPrompt;
+        /*private*/ static const string DbgPrompt;
 
         //#endregion
 
@@ -557,7 +557,7 @@ namespace CsLisp
                 for (size_t i = 0; i < sourceCodeLines.size(); i++)
                 {
                     string breakMark = debugger->HasBreakpointAt(i + 1, moduleName) ? "B " : "  ";
-                    string mark = std::to_string(/*currentLineNo != null &&*/ currentLineNo/*.Value*/ == i + 1 /*? "-->" : string::Empty*/);
+                    string mark = /*currentLineNo != null &&*/ currentLineNo/*.Value*/ == i + 1 ? string("-->") : string::Empty;
                     debugger->Output->WriteLine("{0,3} {1,2} {2,3} {3}", std::to_string(i + 1), breakMark, mark, sourceCodeLines[i]);
                 }
             }
