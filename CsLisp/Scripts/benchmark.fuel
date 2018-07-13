@@ -1,0 +1,17 @@
+(do
+
+  (import fuellib)
+
+  (def max 1000)
+  (def i 0)
+  (def sum 0.0)
+
+  (while (< i max)
+     (do
+        (setf sum (+ sum i))
+        (setf i (+ i 1))
+     )
+  )
+  (println "result=" sum)
+
+)
