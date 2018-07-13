@@ -6,6 +6,4 @@ CONFIG -= qt
 
 include(CppLispInterpreter.pri)
 
-SOURCES += \
-        QtLisp.cpp \
-        fuel.cpp
+SOURCES += fuel.cpp
