@@ -200,7 +200,6 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     <ClCompile Include="fuel.cpp" />
     <ClCompile Include="Lisp.cpp" />
     <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="QtLisp.cpp" />
     <ClCompile Include="Scope.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -79,7 +79,7 @@ namespace CsLisp
 		}
 	}
 
-	inline bool Double_TryParse(const string & txt, const string & NumberStyles_Any, const string & CultureInfo_InvariantCulture, double & doubleValue)
+    inline bool Double_TryParse(const string & txt, const string & /*NumberStyles_Any*/, const string & /*CultureInfo_InvariantCulture*/, double & doubleValue)
 	{
 		try
 		{

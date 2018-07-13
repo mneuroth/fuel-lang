@@ -304,8 +304,7 @@ namespace CsLisp
 
 	public:
 		LispFunctionWrapper()
-			: Signature(""), 
-			  m_bIsSpecialForm(false), 
+			: m_bIsSpecialForm(false), 
 			  m_bIsEvalInExpand(false),
 			  m_bIsBuiltin(false)
 		{
@@ -376,7 +375,7 @@ namespace CsLisp
 			{
 				size_t len = signature.IndexOf(" ", "StringComparison.Ordinal");
 				// process commands like: (doc)
-				if (len < 0)
+                if (len == (size_t)-1)
 				{
 					len = signature.IndexOf(")", "StringComparison.Ordinal") - 1;
 				}

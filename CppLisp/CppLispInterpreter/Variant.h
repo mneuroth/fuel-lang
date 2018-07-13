@@ -288,7 +288,6 @@ namespace CsLisp
             }
 			else
 			{
-				int i = 0;
 				Token = null;
 				Type = ConvertObjectTypeToVariantType(val->GetType());
 				Value = val;

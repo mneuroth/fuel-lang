@@ -64,9 +64,9 @@ namespace CsLisp
 			string script = /*null*/string::Empty;
 			var loadFiles = true;
 			var trace = false;
-			var compile = false;
+			//var compile = false;
 			var wasDebugging = false;
-			var showCompileOutput = false;
+            //var showCompileOutput = false;
 			var measureTime = false;
 			var lengthyErrorOutput = false;
 			var result = std::make_shared<LispVariant>();
@@ -119,14 +119,14 @@ namespace CsLisp
 			}
 
 			// handle options for compiler
-			if (Contains(args, "-c"))
-			{
-				compile = true;
-			}
-			if (Contains(args, "-s"))
-			{
-				showCompileOutput = true;
-			}
+			//if (Contains(args, "-c"))
+			//{
+			//	compile = true;
+			//}
+			//if (Contains(args, "-s"))
+			//{
+			//	showCompileOutput = true;
+			//}
 
 			// handle options for debugger
 			if (debugger != null)

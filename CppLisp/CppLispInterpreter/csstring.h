@@ -93,7 +93,7 @@ namespace CsLisp
 			return string(substr(offs, length));
 		}
 
-		size_t IndexOf(const string & txt, const string & arg/*StringComparison.InvariantCulture*/) const
+        size_t IndexOf(const string & txt, const string & /*arg*//*StringComparison.InvariantCulture*/) const
 		{
             return find(txt);
 		}
@@ -208,7 +208,7 @@ namespace CsLisp
 			return output;
 		}
 
-		size_t LastIndexOf(const string & text, const string & compareMethod)
+        size_t LastIndexOf(const string & text, const string & /*compareMethod*/)
 		{
 			return find_last_of(text);
 		}

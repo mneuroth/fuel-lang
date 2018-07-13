@@ -115,12 +115,13 @@ static std::shared_ptr<LispVariant> CheckForFunction(const string & functionName
 
 static void CheckArgs(const string & name, size_t count, const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	if (count < 0 || args.size() != count)
+	if (count == (size_t)-1 || args.size() != count)
 	{
 		throw LispException(string::Format("Bad argument count in {0}, has {1} expected {2}", name, std::to_string(args.size()), std::to_string(count)), scope.get());
 	}
 }
 
+/* not needed yet...
 static const std::vector<std::shared_ptr<object>> GetCallArgs(const std::vector<std::shared_ptr<object>> & args)
 {
 	std::vector<std::shared_ptr<object>> callArgs(args.size() > 1 ? args.size() - 2 : 0);
@@ -134,6 +135,7 @@ static const std::vector<std::shared_ptr<object>> GetCallArgs(const std::vector<
 	}
 	return callArgs;
 }
+*/
 
 static std::shared_ptr<object> CreateFunction(FuncX func, const string & signature = /*null*/"", const string & documentation = /*null*/"", bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, const string & moduleName = Builtin)
 {
@@ -170,21 +172,21 @@ static std::shared_ptr<LispVariant> def_form_helper(const std::vector<std::share
 
 // ************************************************************************
 
-static std::shared_ptr<LispVariant> Fuel(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Fuel(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
 {
 	string text; // var text = new StringBuilder();
 	text.Append(string::Format("fuel version {0} from {1}", Lisp::Version, Lisp::Date));
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
-static std::shared_ptr<LispVariant> Copyright(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Copyright(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
 {
 	string text; // var text = new StringBuilder();
 	text.Append(string::Format("Copyright: {0} {1}", Lisp::License, Lisp::LicenseUrl));
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
-static std::shared_ptr<LispVariant> Help(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Help(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> scope)
 {
 	string helpText; // var helpText = new StringBuilder();
 	helpText.Append("available functions:\n");
@@ -222,7 +224,7 @@ static std::shared_ptr<LispVariant> DoSearchDocumentation(const std::vector<std:
 	return DumpDocumentation(scope, [scope]() -> void { scope->GlobalScope->DumpBuiltinFunctionsHelpFormated(); });
 }
 
-static std::shared_ptr<LispVariant> HtmlDocumentation(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> HtmlDocumentation(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> scope)
 {
 	return DumpDocumentation(scope, [scope]() -> void { scope->GlobalScope->DumpBuiltinFunctionsHelpHtmlFormated(); });
 }
@@ -237,7 +239,7 @@ static std::shared_ptr<LispVariant> SearchDocumentation(const std::vector<std::s
 	return DoSearchDocumentation(args, scope, [](const string & k, const string & n) -> bool { return k.Contains(n); });
 }
 
-static std::shared_ptr<LispVariant> Break(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Break(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> scope)
 {
 	scope->GlobalScope->Output->WriteLine("break -> call stack:");
 	scope->DumpStack(scope->GetCallStackSize());
@@ -253,7 +255,7 @@ static std::shared_ptr<LispVariant> Break(const std::vector<std::shared_ptr<obje
 	return std::make_shared<LispVariant>(std::make_shared<object>(LispVariant(LispType::_Undefined)));;
 }
 
-static std::shared_ptr<LispVariant> Vars(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Vars(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> scope)
 {
 	scope->GlobalScope->Output->WriteLine("variables:");
 	scope->DumpVars();
@@ -267,7 +269,7 @@ static std::shared_ptr<LispVariant> TracePrint(const std::vector<std::shared_ptr
 	return std::make_shared<LispVariant>(std::make_shared<object>(status->BoolValue()));
 }
 
-static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> scope)
 {
 	string buffer = (*scope)[Tracebuffer]->ToString(); // var buffer = (StringBuilder)(*scope)[Tracebuffer];
 	return std::make_shared<LispVariant>(std::make_shared<object>(buffer));
@@ -305,7 +307,7 @@ namespace CsLisp
 	}
 }
 
-static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
 {
 	var value = (int)GetTickCount();
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
@@ -402,12 +404,12 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 	return result;
 }
 
-static std::shared_ptr<LispVariant> Nop(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Nop(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
 {
 	return std::make_shared<LispVariant>(LispVariant());
 }
 
-static std::shared_ptr<LispVariant> Return(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Return(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	return std::make_shared<LispVariant>(LispVariant(args[0]));
 }
@@ -469,22 +471,22 @@ static std::shared_ptr<LispVariant> CompareOperation(const std::vector<std::shar
 	return result;
 }
 
-static std::shared_ptr<LispVariant> Addition(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Addition(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l + *r); });
 }
 
-static std::shared_ptr<LispVariant> Subtraction(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Subtraction(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l - *r); });
 }
 
-static std::shared_ptr<LispVariant> Multiplication(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Multiplication(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l * *r); });
 }
 
-static std::shared_ptr<LispVariant> Division(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Division(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l / *r); });
 }
@@ -527,7 +529,7 @@ static std::shared_ptr<LispVariant> NotEqualTest(const std::vector<std::shared_p
 	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(!LispVariant::EqualOp(*l, *r))); }, scope);
 }
 
-static std::shared_ptr<LispVariant> CreateList(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> CreateList(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	var list = IEnumerable<std::shared_ptr<object>>();
 	for(var arg : args)
@@ -578,7 +580,7 @@ static std::shared_ptr<LispVariant> Reduce(const std::vector<std::shared_ptr<obj
 	return result;
 }
 
-static std::shared_ptr<LispVariant> Cons(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Cons(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	var list = IEnumerable<std::shared_ptr<object>>();
 	if (args.size() > 0)
@@ -639,7 +641,7 @@ static std::shared_ptr<LispVariant> Nth(const std::vector<std::shared_ptr<object
 	return std::make_shared<LispVariant>(std::make_shared<object>(*val));
 }
 
-static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	var list = IEnumerable<std::shared_ptr<object>>();
 	for(var listElement : args)
@@ -995,7 +997,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 		// support args function for accessing all given parameters
 		(*childScope)[ArgsMeta] = std::make_shared<object>(IEnumerable<std::shared_ptr<object>>(VectorToList(localArgs)));
 		size_t formalArgsCount = formalArgs.size();
-		if ((int)localArgs.size() > formalArgsCount)
+		if (localArgs.size() > formalArgsCount)
 		{
 			//var additionalArgs = new object[localArgs.size() - formalArgsCount];
 			std::vector<std::shared_ptr<object>> additionalArgs(localArgs.size() - formalArgsCount);
@@ -1133,41 +1135,42 @@ static std::shared_ptr<LispVariant> gdefn_form(const std::vector<std::shared_ptr
 	return defn_form_helper(args, scope, Gdef);
 }
 
-static std::shared_ptr<LispVariant> CallStaticNative(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
-{
-	var className = args[0]->ToLispVariant();
-	var methodName = args.size() > 1 ? args[1]->ToString() : string::Empty;
-
-	if (className->IsString() || className->IsSymbol())
-	{
-		var callArgs = GetCallArgs(args);
-
-// TODO --> implement
-		//Type nativeClass = Type.GetType(className.ToString());
-		//if (nativeClass != null)
-		//{
-		//	MethodInfo method;
-		//	try
-		//	{
-		//		method = nativeClass.GetMethod(methodName);
-		//	}
-		//	catch (AmbiguousMatchException)
-		//	{
-		//		// process overloaded methods, try to resolve method via types of given arguments
-		//		// example: Math-Abs, File-Exits, ...
-		//		var callArgsTypes = GetTypes(callArgs);
-		//		method = nativeClass.GetMethod(methodName, callArgsTypes);
-		//	}
-		//	if (method != null)
-		//	{
-		//		ParameterInfo[] parameterInfos = method.GetParameters();
-		//		object result = method.Invoke(null, ConvertAllToNative(callArgs, parameterInfos));
-		//		return new LispVariant(result);
-		//	}
-		//}
-	}
-	//throw LispException("Bad static method " + methodName + " for class " + className, scope);
-}
+//static std::shared_ptr<LispVariant> CallStaticNative(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+//{
+//	var className = args[0]->ToLispVariant();
+//	var methodName = args.size() > 1 ? args[1]->ToString() : string::Empty;
+//
+//	if (className->IsString() || className->IsSymbol())
+//	{
+//// TODO --> implement
+//		//var callArgs = GetCallArgs(args);
+//
+//		//Type nativeClass = Type.GetType(className.ToString());
+//		//if (nativeClass != null)
+//		//{
+//		//	MethodInfo method;
+//		//	try
+//		//	{
+//		//		method = nativeClass.GetMethod(methodName);
+//		//	}
+//		//	catch (AmbiguousMatchException)
+//		//	{
+//		//		// process overloaded methods, try to resolve method via types of given arguments
+//		//		// example: Math-Abs, File-Exits, ...
+//		//		var callArgsTypes = GetTypes(callArgs);
+//		//		method = nativeClass.GetMethod(methodName, callArgsTypes);
+//		//	}
+//		//	if (method != null)
+//		//	{
+//		//		ParameterInfo[] parameterInfos = method.GetParameters();
+//		//		object result = method.Invoke(null, ConvertAllToNative(callArgs, parameterInfos));
+//		//		return new LispVariant(result);
+//		//	}
+//		//}
+//	}
+//	//throw LispException("Bad static method " + methodName + " for class " + className, scope);
+//	return null;
+//}
 
 // ************************************************************************
 
@@ -1263,6 +1266,7 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::CheckForL
 	return value->ListValue();
 }
 
+/* Not needed yet
 static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispScope * scope, const string & key)
 {
 	if (scope != null &&
@@ -1273,6 +1277,7 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 	}
 	return null;
 }
+*/
 
 /*private static*/ std::shared_ptr<object> LispEnvironment::QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key)
 {

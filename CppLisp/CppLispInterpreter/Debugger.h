@@ -428,7 +428,7 @@ namespace CsLisp
 		/*private*/ void Reset()
         {
             IsProgramStop = true;
-			IsStopStepFcn = [](std::shared_ptr<LispScope> scope) -> bool { return true; };
+            IsStopStepFcn = [](std::shared_ptr<LispScope> /*scope*/) -> bool { return true; };
         }
 
 		/*private*/ bool HitsBreakpoint(size_t lineNo, const string & moduleName, std::shared_ptr<LispScope> scope)
@@ -468,7 +468,7 @@ namespace CsLisp
             //var index = Breakpoints.FindIndex(elem => (elem.LineNo == lineNo) && (elem.ModuleName == moduleName));
             var indexIter = std::find_if(Breakpoints.begin(), Breakpoints.end(), [lineNo, moduleName](const LispBreakpointInfo & elem) -> bool { return (elem.LineNo == lineNo) && (elem.ModuleName == moduleName); });
 			size_t index = indexIter != Breakpoints.end() ? indexIter - Breakpoints.begin() : -1;
-            if (index >= 0 && index!=-1)
+            if (/*index >= 0 &&*/ index != (size_t)-1)
             {
                 // replace existing item for this line
                 Breakpoints[index] = newItem; 
@@ -482,7 +482,7 @@ namespace CsLisp
 		/*private*/ bool ClearBreakpoint(int no)
         {
             size_t index = no - 1;
-            if (index >= 0 && index < Breakpoints.size())
+            if (/*index >= 0 &&*/ index < Breakpoints.size())
             {
                 Breakpoints./*RemoveAt*/erase(Breakpoints.begin()+index);
                 return true;
@@ -496,9 +496,9 @@ namespace CsLisp
         }
 
         // ReSharper disable once UnusedParameter.Local
-		/*private*/ void DoStep(std::shared_ptr<LispScope> currentScope)
+        /*private*/ void DoStep(std::shared_ptr<LispScope> /*currentScope*/)
         {
-            IsStopStepFcn = [](std::shared_ptr<LispScope> scope) -> bool { return true; };
+            IsStopStepFcn = [](std::shared_ptr<LispScope> /*scope*/) -> bool { return true; };
             IsProgramStop = true;
         }
 
@@ -636,7 +636,7 @@ namespace CsLisp
                 {
                     string lineNumberString = cmdArgs[0];
                     size_t posModuleSeparator = cmdArgs[0].LastIndexOf(":", "StringComparison.Ordinal");
-                    if (posModuleSeparator >= 0 && posModuleSeparator!=-1)
+                    if (/*posModuleSeparator >= 0 &&*/ posModuleSeparator != (size_t)-1)
                     {
                         lineNumberString = cmdArgs[0].Substring(posModuleSeparator + 1);
                         moduleName = cmdArgs[0].Substring(0, posModuleSeparator);

@@ -183,7 +183,7 @@ namespace CsLisp
 	private:
 		//#region private methods
 
-		/*private*/ static void RegisterNativeObjects(/*Dictionary<string, object> nativeItems,*/ LispScope & currentScope)
+        /*private*/ static void RegisterNativeObjects(/*Dictionary<string, object> nativeItems,*/ LispScope & /*currentScope*/)
 		{
 // TODO --> implement native objects
 //			if (nativeItems != null)
