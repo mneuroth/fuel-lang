@@ -39,11 +39,10 @@ namespace QtLispUnitTests
 	{
 	public:
 
-		TEST_METHOD(Test_SingleParserEmptyCode)
+		TEST_METHOD(Test_Debugger)
 		{
-			LispDebugger * debugger = new LispDebugger();
-			Assert::IsNotNull(debugger);
-			delete debugger;
+			std::shared_ptr<LispDebugger> debugger = std::make_shared<LispDebugger>();
+			Assert::IsNotNull(debugger.get());
 		}
 
 		TEST_METHOD(Test_Main)
@@ -203,6 +202,47 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_MainInteractiveDoc)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("doc\ndoc if"))
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				string useForInput = "doc\ndoc if";
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
+				std::vector<string> args;
+				args.push_back("-i");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("doc --> (doc functionname ...)"));
+				Assert::IsTrue(s.Contains("Returns and shows the documentation of all builtin functions or for the given function name(s)."));
+				Assert::IsTrue(s.Contains("-------------------------------"));
+			}
+		}
+
+		TEST_METHOD(Test_MainInteractiveSearchDoc)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("searchdoc arg"))
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				string useForInput = "searchdoc arg";
+				input->SetContent(useForInput);
+				input->EnableFromString(true);
+				std::vector<string> args;
+				args.push_back("-i");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("Syntax: (argscount)"));
+				Assert::IsTrue(s.Contains("Syntax: (args number)"));
+			}
+		}
+
 		TEST_METHOD(Test_MultiPrintLn)
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -230,7 +270,6 @@ namespace QtLispUnitTests
 				args.push_back("TestData\\writereadfile.fuel");
 				Fuel::MainExtended(args, output, input);
 
-// TODO --> does not work for C++ yet
 				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("exists file =  #t"));
 				Assert::IsTrue(s.Contains("test non existing file =  #f"));
@@ -238,7 +277,7 @@ namespace QtLispUnitTests
 			}
 		}
 
-		TEST_METHOD(Test_StdLibObjects)
+		TEST_METHOD(Test_Profile)
 		{
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
 			{
@@ -246,29 +285,12 @@ namespace QtLispUnitTests
 				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
 				output->EnableToString(true);
 				std::vector<string> args;
-				args.push_back("TestData\\teststdlib.fuel");
+				args.push_back("-m");
+				args.push_back("TestData\\simple.fuel");
 				Fuel::MainExtended(args, output, input);
 
-// TODO --> does not work for C++ yet
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("DictCount= 2"));
-				Assert::IsTrue(s.Contains("NewDictCount= 0"));
-				Assert::IsTrue(s.Contains("DirListType= List"));
-				Assert::IsTrue(s.Contains("File= .\\FuelCompiler.dll"));
-				Assert::IsTrue(s.Contains("File= .\\FuelDebugger.dll"));
-				Assert::IsTrue(s.Contains("File= .\\FuelInterpreter.dll"));
-				Assert::IsTrue(s.Contains("File= .\\fuel.exe"));
-				Assert::IsTrue(s.Contains("File= .\\teststdlib.fuel"));
-				Assert::IsTrue(s.Contains("ListCount= 4"));
-				Assert::IsTrue(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
-				Assert::IsTrue(s.Contains("newitem= 12"));
-				Assert::IsTrue(s.Contains("NewListCount= 0"));
-				Assert::IsTrue(s.Contains("ArrayCount= 5"));
-				Assert::IsTrue(s.Contains("ArrayItem1= 1"));
-				Assert::IsTrue(s.Contains("ArrayItem2= blub"));
-				Assert::IsTrue(s.Contains("ArrayItem3= #t"));
-				Assert::IsTrue(s.Contains("ArrayItem4= 42"));
-				Assert::IsTrue(s.Contains("ArrayItem5= 123"));
+				Assert::IsTrue(s.Contains("Execution time ="));
 			}
 		}
 
@@ -442,13 +464,197 @@ namespace QtLispUnitTests
 			}
 		}
 
-// TODO --> move to other test module
-		TEST_METHOD(Test_TestIndexOfInString)
+		TEST_METHOD(Test_MainTestParserBracketsOutOfBalance)
 		{
-			CsLisp::string target("abc def blub 123");
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(print ( (+ 1 2))");
+				Fuel::MainExtended(args, output, input);
 
-			Assert::AreEqual((size_t)4, target.IndexOf("def", "nix"));
-			Assert::AreEqual(CsLisp::string::npos, target.IndexOf("test", "nix"));
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("Brackets out of balance --> line=2 start=17 stop=18 module="));
+			}
 		}
+
+		TEST_METHOD(Test_MainTestParserUnexpectedToken)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("dummy (print (+ 1 2))");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("List expected in do --> line=1 start=0 stop=5 module="));
+			}
+		}
+
+		TEST_METHOD(Test_MainTestFunctionNotFound)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(unknown-fcn (+ 1 2))");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("Function \"unknown-fcn\" not found --> line=1 start=1 stop=12"));
+			}
+		}
+
+		TEST_METHOD(Test_MainTestSymbolNotFound)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(setf a 5)");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("Symbol a not found --> line=1 start=1 stop=5"));
+			}
+		}
+
+		TEST_METHOD(Test_MainTestListExpectedInDo)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(do (print 3) 5)");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("List expected in do --> line=1 start=13 stop=15"));
+			}
+		}
+		
+		TEST_METHOD(Test_MainTestBadArgumentCount)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(do (print 3) (defn x))");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("Bad argument count in def, has 1 expected 3 --> line=1 start=15 stop=19"));
+			}
+		}
+
+		TEST_METHOD(Test_MainTestNoFunction)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(do (print 3) (map 3 '(1 2 3)))");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("No function in map --> line=1 start=15 stop=18"));
+			}
+		}
+
+		TEST_METHOD(Test_MainTestNoList)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(do (print 3) (map (lambda (x) (print x)) 3))");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("No list in map --> line=1 start=40 stop=40"));
+			}
+		}
+
+		TEST_METHOD(Test_MainTestSymbolExpected)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("-e");
+				args.push_back("(do (print 3) (def 4 \"test\"))");
+				Fuel::MainExtended(args, output, input);
+
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("Symbol expected --> line=1 start=15 stop=18"));
+			}
+		}
+
+/*
+		TEST_METHOD(Test_StdLibObjects)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector())
+			{
+				std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+				std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+				output->EnableToString(true);
+				std::vector<string> args;
+				args.push_back("TestData\\teststdlib.fuel");
+				Fuel::MainExtended(args, output, input);
+
+				// TODO --> does not work for C++ yet
+				string s = output->GetContent();
+				Assert::IsTrue(s.Contains("DictCount= 2"));
+				Assert::IsTrue(s.Contains("NewDictCount= 0"));
+				Assert::IsTrue(s.Contains("DirListType= List"));
+				Assert::IsTrue(s.Contains("File= .\\FuelCompiler.dll"));
+				Assert::IsTrue(s.Contains("File= .\\FuelDebugger.dll"));
+				Assert::IsTrue(s.Contains("File= .\\FuelInterpreter.dll"));
+				Assert::IsTrue(s.Contains("File= .\\fuel.exe"));
+				Assert::IsTrue(s.Contains("File= .\\teststdlib.fuel"));
+				Assert::IsTrue(s.Contains("ListCount= 4"));
+				Assert::IsTrue(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
+				Assert::IsTrue(s.Contains("newitem= 12"));
+				Assert::IsTrue(s.Contains("NewListCount= 0"));
+				Assert::IsTrue(s.Contains("ArrayCount= 5"));
+				Assert::IsTrue(s.Contains("ArrayItem1= 1"));
+				Assert::IsTrue(s.Contains("ArrayItem2= blub"));
+				Assert::IsTrue(s.Contains("ArrayItem3= #t"));
+				Assert::IsTrue(s.Contains("ArrayItem4= 42"));
+				Assert::IsTrue(s.Contains("ArrayItem5= 123"));
+			}
+		}
+*/
+		// TODO / NOT IMPLEMENTED
+		// Test_Compile
+		// Test_Compile2
+		// Test_CompileOutput
 	};
 }

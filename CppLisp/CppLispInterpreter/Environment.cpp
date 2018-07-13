@@ -56,22 +56,29 @@ const string LispEnvironment::Str = "str";
 
 // ************************************************************************
 
+namespace CsLisp
+{
+	string LispUtils_LibraryPath = string::Empty;
+}
+
 static bool File_Exists(const string & fileName)
 {
 	std::ifstream infile(fileName);
 	return infile.good();
 }
 
-namespace CsLisp
+std::string ReadFileOrEmptyString(const std::string & fileName)
 {
-	string LispUtils_LibraryPath = string::Empty;
+	std::ifstream ifs(fileName);
+	std::string content = std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+	return std::string(content);
+}
 
-	string ReadFileOrEmptyString(const string & fileName)
-	{
-		std::ifstream ifs(fileName);
-		std::string content = std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-		return string(content);
-	}
+bool WriteTextFile(const std::string & fileName, const std::string & content)
+{
+	std::ofstream ofs(fileName);
+	ofs << content;
+	return ofs.good();
 }
 
 static string GetStringRepresentation(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, string separator = " ")
@@ -272,7 +279,7 @@ static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_
 //#include <sys/sysinfo.h>
 #include <sys/time.h>
 // see https://www.c-plusplus.net/forum/topic/153559/gettickcount-für-linux
-uint64_t getTimeMs(void)
+uint64_t GetTickCount(void)
 {
 	struct timeval tv;
 
@@ -289,13 +296,18 @@ long getTickCount() // Zeit seit dem Booten in Sekunden
 }
 */
 #endif
+
+namespace CsLisp
+{
+	uint64_t Environment_GetTickCount(void)
+	{
+		return GetTickCount();
+	}
+}
+
 static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-#if defined(_WIN32) || defined(_WIN64)
 	var value = (int)GetTickCount();
-#else
-    var value = (int)getTimeMs();
-#endif
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
 }
 
@@ -927,7 +939,7 @@ static std::shared_ptr<LispVariant> while_form(const std::vector<std::shared_ptr
 
 static std::shared_ptr<LispVariant> do_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	var result = std::make_shared<LispVariant>(LispVariant(LispType::_Undefined));
+	var result = std::make_shared<LispVariant>(LispType::_Undefined);
 
 	for (var statement : args)
 	{
@@ -1273,6 +1285,31 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 	return null;
 }
 
+std::shared_ptr<LispVariant> FileExits(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("File-Exits", 1, args, scope);
+
+	var fileName = args[0]->ToLispVariant()->ToString();
+	return std::make_shared<LispVariant>(std::make_shared<object>(File_Exists(fileName)));
+}
+
+std::shared_ptr<LispVariant> FileReadAllText(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("File-ReadAllText", 1, args, scope);
+
+	var fileName = args[0]->ToLispVariant()->ToString();
+	return std::make_shared<LispVariant>(std::make_shared<object>(ReadFileOrEmptyString(fileName)));
+}
+
+std::shared_ptr<LispVariant> FileWriteAllText(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("File-WriteAllText", 2, args, scope);
+
+	var fileName = args[0]->ToLispVariant()->ToString();
+	var content = args[1]->ToLispVariant()->ToString();
+	return std::make_shared<LispVariant>(std::make_shared<object>(WriteTextFile(fileName, content)));
+}
+
 std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 {
 	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>(MainScope);
@@ -1392,6 +1429,11 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["do"] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 
 	(*scope)[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+
+	// runtime for C++ implementation
+	(*scope)["File-Exists"] = CreateFunction(FileExits, "(File-Exists name)", "Returns #t if the file exists, otherwise returns #f.");
+	(*scope)["File-ReadAllText"] = CreateFunction(FileReadAllText, "(File-ReadAllText name)", "Returns the content of the file with name.");
+	(*scope)["File-WriteAllText"] = CreateFunction(FileWriteAllText, "(File-WriteAllText name content)", "Writes the content to the file with name.");
 
 	scope->PrivateInitForCpp();
 

@@ -36,14 +36,12 @@
 #include "Lisp.h"
 #include "Environment.h"
 
-//#include <list>
 #include <vector>
 
 namespace CsLisp
 {
 	void ShowAbout(std::shared_ptr<TextWriter> output);
 	void ShowVersion(std::shared_ptr<TextWriter> output);
-	extern string ReadFileOrEmptyString(const string & fileName);
 
 	// ********************************************************************
 	/*internal*/ struct LispBreakpointInfo

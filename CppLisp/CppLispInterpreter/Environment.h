@@ -40,12 +40,12 @@
 #include <memory>
 #include <list>
 
+extern std::string ReadFileOrEmptyString(const std::string & fileName);
+
 namespace CsLisp
 {
 	class LispScope;
 	class LispBreakpointPosition;
-
-	extern string ReadFileOrEmptyString(const string & fileName);
 
 	/// <summary>
 	/// Class to hold informations about macro expansions at compile time.

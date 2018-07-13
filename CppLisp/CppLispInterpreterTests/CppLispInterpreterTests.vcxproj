@@ -206,6 +206,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <ClCompile Include="InterpreterTests.cpp" />
     <ClCompile Include="MainTest.cpp" />
     <ClCompile Include="ParserTests.cpp" />
+    <ClCompile Include="RuntimeTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

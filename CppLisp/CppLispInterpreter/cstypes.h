@@ -48,7 +48,7 @@ namespace CsLisp
 	class object;
 
 	typedef std::function<void()> Action;
-	typedef std::function<std::shared_ptr<LispVariant>(std::vector<std::shared_ptr<object>>, std::shared_ptr<LispScope>)> FuncX;
+	typedef std::function<std::shared_ptr<LispVariant>(const std::vector<std::shared_ptr<object>> &, std::shared_ptr<LispScope>)> FuncX;
 
 // TODO --> pruefen ob man IEnumerable ueberhaupt braucht oder nicht direct list verwendet --> Komplexitaet reduzieren
 	template <class T>
@@ -183,7 +183,7 @@ namespace CsLisp
 
 		bool ContainsKey(const K & key) const
 		{
-            return std::map<K,V>::count(key) == 1;
+			return std::map<K, V>::find(key) != std::map<K, V>::end();
 		}
 	};
 

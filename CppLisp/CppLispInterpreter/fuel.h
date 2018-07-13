@@ -35,6 +35,7 @@ namespace CsLisp
 {
 	extern string LispUtils_LibraryPath;
 
+	uint64_t Environment_GetTickCount(void);
 	bool Contains(const std::vector<string> & container, const string & search);
 	
 	std::vector<string> GetScriptFilesFromProgramArgs(const std::vector<string> & args);
@@ -69,7 +70,7 @@ namespace CsLisp
 			var measureTime = false;
 			var lengthyErrorOutput = false;
 			var result = std::make_shared<LispVariant>();
-			//			var startTickCount = Environment.TickCount;
+			var startTickCount = /*Environment.TickCount*/Environment_GetTickCount();
 			var debugger = TryGetDebugger();
 
 			if (Contains(args, "-m"))
@@ -195,10 +196,10 @@ namespace CsLisp
 			{
 				output->WriteLine(string("Result=") + result->ToString());
 			}
-			//if (measureTime)
-			//{
-			//	output->WriteLine("Execution time = {0} s", (Environment.TickCount - startTickCount) * 0.001);
-			//}
+			if (measureTime)
+			{
+				output->WriteLine("Execution time = {0} s", std::to_string((/*Environment.TickCount*/Environment_GetTickCount() - startTickCount) * 0.001));
+			}
 		}
 
 	private:

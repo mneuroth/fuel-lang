@@ -785,6 +785,7 @@ namespace QtLispUnitTests
 			Assert::AreEqual(14, result->ToInt());
 		}
 
+/* TODO --> not implemented yet for C++
 		TEST_METHOD(Test_Call1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def obj 0) (setf obj (call \"CsLisp.DummyNative\")) (println obj (type obj)) (call obj \"Test\"))");
@@ -795,6 +796,24 @@ namespace QtLispUnitTests
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (call-static \"System.IO.File\" Exists \"dummy\"))");
 			Assert::AreEqual(false, result->ToBool());
+		}
+*/
+
+		TEST_METHOD(Test_CallStaticError)
+		{
+			try
+			{
+				Lisp::Eval("(do (call-static \"System.IO.File\" NotExistingFunction \"dummy\"))");
+				Assert::IsTrue(false);
+			}
+			catch (const CsLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
 		}
 
 		TEST_METHOD(Test_Apply1)
@@ -1408,5 +1427,15 @@ namespace QtLispUnitTests
 			}
 		}
 
+		// TODO / NOT IMPLEMENTED:
+		// Test_CreateNative
+		// Test_RegisterNativeObjects
+		// Test_StdLibArray
+		// Test_StdLibDictionary
+		// Test_StdLibFile
+		// Test_StdLibList
+		// Test_StdLibListSort
+		// Test_StdLibMath
+		// Test_StdLibMath2
 	};
 }
