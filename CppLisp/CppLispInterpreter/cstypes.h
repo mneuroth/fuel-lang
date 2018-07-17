@@ -50,41 +50,45 @@ namespace CsLisp
 	typedef std::function<void()> Action;
 	typedef std::function<std::shared_ptr<LispVariant>(const std::vector<std::shared_ptr<object>> &, std::shared_ptr<LispScope>)> FuncX;
 
-// TODO --> pruefen ob man IEnumerable ueberhaupt braucht oder nicht direct list verwendet --> Komplexitaet reduzieren
+	// **********************************************************************
+	// Wrapp stl vector class with methods to support IEnumerable interface of C#
 	template <class T>
-	class IEnumerable : public std::list<T>
+	class IEnumerable : public std::vector<T>
 	{
 	public:
 		inline size_t Count() const
 		{
-			return std::list<T>::size();
+			return std::vector<T>::size();
 		}
 
-		inline std::vector<T> ToArray() const
+		inline const std::vector<T> & ToArray() const
 		{
-			return std::vector<T>(std::list<T>::begin(), std::list<T>::end());
-		}
-
-		inline std::list<T> ToList() const
-		{
-			return std::list<T>(std::list<T>::begin(), std::list<T>::end());
+			return *this;
 		}
 
 		inline const T & First() const
 		{
-			return std::list<T>::front();
+			return std::vector<T>::front();
 		}
 
 		inline const T & Last() const
 		{
-			return std::list<T>::back();
+			return std::vector<T>::back();
 		}
 
-// TODO --> optimize --> hier wird kopiert !
-		const T ElementAt(int index) const
+		inline const T ElementAt(int index) const
 		{
-            std::vector<T> aCopy(std::list<T>::begin(), std::list<T>::end());
-			return aCopy[index];
+			return (*this)[index];
+		}
+
+		inline void Add(const T & elem)
+		{
+			std::vector<T>::push_back(elem);
+		}
+
+		inline void AddRange(const IEnumerable<T> & other)
+		{
+            std::vector<T>::insert(this->end(), other.begin(), other.end());
 		}
 
 		IEnumerable<T> Skip(int skipNoOfElements)
@@ -92,30 +96,30 @@ namespace CsLisp
 			IEnumerable<T> temp(*this);
 			for (int i = 0; i < skipNoOfElements; i++)
 			{
-				temp.pop_front();
+				temp.erase(temp.begin());
 			}
 			return temp;
 		}
 
 		void RemoveAt(int index)
 		{
-            typename IEnumerable<T>::iterator iter = std::list<T>::begin();
+			typename IEnumerable<T>::iterator iter = std::vector<T>::begin();
 			for (int i = 0; i < index; i++)
 			{
 				iter++;
 			}
-            if (iter != std::list<T>::end())
+			if (iter != std::vector<T>::end())
 			{
-                std::list<T>::erase(iter);
+				std::vector<T>::erase(iter);
 			}
 		}
 
 		bool SequenceEqual(const IEnumerable & other) const
 		{
-            if (this->size() == other.size())
+			if (this->size() == other.size())
 			{
 				var iter2 = other.begin();
-                for (var iter = this->begin(); iter != this->end(); ++iter)
+				for (var iter = this->begin(); iter != this->end(); ++iter)
 				{
 					const T & val1 = *iter;
 					const T & val2 = *iter2;
@@ -133,29 +137,11 @@ namespace CsLisp
 			return true;
 		}
 
-		void Add(const T & elem)
-		{
-			std::list<T>::push_back(elem);
-		}
-
-		void AddRange(const IEnumerable<T> & other)
-		{
-            std::list<T>::insert(this->end(), other.begin(), other.end());
-		}
-
 		// for debugging...
-		string DumpList()
-		{
-			string ret = "(";
-			for (var elem : *this)
-			{
-				ret += elem->ToString();
-				ret += ",";
-			}
-			return ret + ")";
-		}
+		string DumpList() const;
 	};
 
+	// **********************************************************************
 	template <class K, class V>
 	class Dictionary : public std::map<K,V>
 	{
@@ -176,6 +162,7 @@ namespace CsLisp
 		}
 	};
 
+	// **********************************************************************
 	template <class T1, class T2>
 	class Tuple : std::pair<T1, T2>
 	{
@@ -194,6 +181,7 @@ namespace CsLisp
 		}
 	};
 
+	// **********************************************************************
 	template <class T1, class T2, class T3>
 	class Tuple3 : public std::tuple<T1, T2, T3>
 	{
@@ -216,6 +204,7 @@ namespace CsLisp
 		}
 	};
 
+	// **********************************************************************
 	class TextWriter
 	{
 	private:
@@ -244,6 +233,7 @@ namespace CsLisp
 		void WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3, const string & txt4);
 	};
 
+	// **********************************************************************
 	class TextReader
 	{
 	private:
@@ -271,6 +261,7 @@ namespace CsLisp
 		string ReadLine();
 	};
 
+	// **********************************************************************
 	template <class K, class V>
 	class KeyValuePair
 	{
@@ -284,6 +275,7 @@ namespace CsLisp
 		V Value;
 	};
 
+	// **********************************************************************
 	struct LispFunctionWrapper
 	{
 	private:

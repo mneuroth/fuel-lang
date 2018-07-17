@@ -486,10 +486,10 @@ namespace CsLisp
 
 		/*private*/ void Dump(std::function<bool(const LispVariant &)>/*Func<LispVariant, bool>*/ select, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ show = null, bool showHelp = false, bool sort = false, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ format = null)
         {
-			IEnumerable<LispScope::key_type> keys = GetKeys();
+			var keys = GetKeys();
             if (sort)
             {
-                keys.sort();                
+                std::sort(keys.begin(), keys.end());                
             }
             for (var key : keys)
             {

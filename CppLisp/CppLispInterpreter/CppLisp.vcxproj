@@ -195,6 +195,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
   <ItemGroup>
     <ClCompile Include="csobject.cpp" />
     <ClCompile Include="csstring.cpp" />
+    <ClCompile Include="cstypes.cpp" />
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="Environment.cpp" />
     <ClCompile Include="Exception.cpp" />
