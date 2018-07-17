@@ -55,31 +55,32 @@ namespace CsLisp
 	class IEnumerable : public std::list<T>
 	{
 	public:
-		size_t Count() const
+		inline size_t Count() const
 		{
 			return std::list<T>::size();
 		}
 
-		std::vector<T> ToArray() const
+		inline std::vector<T> ToArray() const
 		{
 			return std::vector<T>(std::list<T>::begin(), std::list<T>::end());
 		}
 
-		std::list<T> ToList() const
+		inline std::list<T> ToList() const
 		{
 			return std::list<T>(std::list<T>::begin(), std::list<T>::end());
 		}
 
-		const T & First() const
+		inline const T & First() const
 		{
 			return std::list<T>::front();
 		}
 
-		const T & Last() const
+		inline const T & Last() const
 		{
 			return std::list<T>::back();
 		}
 
+// TODO --> optimize --> hier wird kopiert !
 		const T ElementAt(int index) const
 		{
             std::vector<T> aCopy(std::list<T>::begin(), std::list<T>::end());
@@ -155,23 +156,11 @@ namespace CsLisp
 		}
 	};
 
-	//template <class T>
-	//class IList : public IEnumerable<T>
-	//{
-	//public:
-	//};
-
-	//template <class T>
-	//class List : public IEnumerable<T>
-	//{
-	//public:
-	//};
-
 	template <class K, class V>
 	class Dictionary : public std::map<K,V>
 	{
 	public:
-		IEnumerable<K> GetKeys() const
+		inline IEnumerable<K> GetKeys() const
 		{
 			IEnumerable<K> keys;
 			for (auto & kvp : *this)
@@ -181,7 +170,7 @@ namespace CsLisp
 			return keys;
 		}
 
-		bool ContainsKey(const K & key) const
+		inline bool ContainsKey(const K & key) const
 		{
 			return std::map<K, V>::find(key) != std::map<K, V>::end();
 		}
@@ -191,15 +180,15 @@ namespace CsLisp
 	class Tuple : std::pair<T1, T2>
 	{
 	public:
-		Tuple(const T1 & val1, const T2 & val2)
+		inline Tuple(const T1 & val1, const T2 & val2)
 			: std::pair<T1, T2>(val1, val2)
 		{
 		}
-		T1 Item1() const
+		inline T1 Item1() const
 		{
 			return std::pair<T1, T2>::first;
 		}
-		T2 Item2() const
+		inline T2 Item2() const
 		{
 			return std::pair<T1, T2>::second;
 		}
@@ -209,19 +198,19 @@ namespace CsLisp
 	class Tuple3 : public std::tuple<T1, T2, T3>
 	{
 	public:
-		Tuple3(const T1 & val1, const T2 & val2, const T3 & val3)
+		inline Tuple3(const T1 & val1, const T2 & val2, const T3 & val3)
 			: std::tuple<T1, T2, T3>(val1, val2, val3)
 		{
 		}
-		T1 Item1() const
+		inline T1 Item1() const
 		{
 			return std::get<0>(*this);
 		}
-		T2 Item2() const
+		inline T2 Item2() const
 		{
 			return std::get<1>(*this);
 		}
-		T3 Item3() const
+		inline T3 Item3() const
 		{
 			return std::get<2>(*this);
 		}
@@ -234,15 +223,15 @@ namespace CsLisp
 		string	m_sText;
 
 	public:
-		TextWriter(bool bToString = false)
+		inline TextWriter(bool bToString = false)
 			: m_bToString(bToString)
 		{
 		}
-		void EnableToString(bool value = true)
+		inline void EnableToString(bool value = true)
 		{
 			m_bToString = value;
 		}
-		string GetContent() const
+		inline string GetContent() const
 		{
 			return m_sText;
 		}
@@ -264,16 +253,16 @@ namespace CsLisp
 		std::vector<string>::const_iterator m_aCurrentPos;
 
 	public:
-		TextReader(const string & txt = string::Empty)
+		inline TextReader(const string & txt = string::Empty)
 		{
 			m_bFromString = !string::IsNullOrEmpty(txt);
 			SetContent(txt);
 		}
-		void EnableFromString(bool value = true)
+		inline void EnableFromString(bool value = true)
 		{
 			m_bFromString = value;
 		}
-		void SetContent(const string & txt)
+		inline void SetContent(const string & txt)
 		{
 			m_sText = txt;
 			m_aAllLines = txt.Split("\n");
@@ -286,7 +275,7 @@ namespace CsLisp
 	class KeyValuePair
 	{
 	public:
-		KeyValuePair(K key, V value)
+		inline KeyValuePair(K key, V value)
 			: Key(key), Value(value)
 		{
 		}
@@ -303,7 +292,7 @@ namespace CsLisp
 		bool m_bIsBuiltin;
 
 	public:
-		LispFunctionWrapper()
+		inline LispFunctionWrapper()
 			: m_bIsSpecialForm(false), 
 			  m_bIsEvalInExpand(false),
 			  m_bIsBuiltin(false)
@@ -316,11 +305,11 @@ namespace CsLisp
 
 		/*public*/ string Documentation; // { get; private set; }
 
-		bool IsBuiltin() const
+		inline bool IsBuiltin() const
 		{
 			return m_bIsBuiltin;
 		}
-		void SetBuiltin(bool val)
+		inline void SetBuiltin(bool val)
 		{
 			m_bIsBuiltin = val;
 		}
@@ -341,19 +330,19 @@ namespace CsLisp
 			return GetFormatedHelpString(separator, splitter, [](const string & s) -> string { return "<b>" + s + "</b>"; }, [](const string & s) -> string { return "<code>" + s + "</code>"; });
 		}
 
-		bool IsSpecialForm() const
+		inline bool IsSpecialForm() const
 		{
 			return m_bIsSpecialForm;
 		}
-		void SetSpecialForm(bool value)
+		inline void SetSpecialForm(bool value)
 		{
 			m_bIsSpecialForm = value;
 		}
-		bool IsEvalInExpand() const
+		inline bool IsEvalInExpand() const
 		{
 			return m_bIsEvalInExpand;
 		}
-		void SetEvalInExpand(bool value)
+		inline void SetEvalInExpand(bool value)
 		{
 			m_bIsEvalInExpand = value;
 		}
@@ -390,12 +379,8 @@ namespace CsLisp
 		}
 	};
 
-	//class Exception
-	//{
-	//};
-
 	template <class T>
-	int CompareToType(T d1, T d2)
+	inline int CompareToType(T d1, T d2)
 	{
 		if (d1 < d2)
 		{
