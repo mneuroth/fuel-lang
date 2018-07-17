@@ -193,6 +193,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CppLispInterpreter\csobject.cpp" />
+    <ClCompile Include="..\CppLispInterpreter\csstring.cpp" />
     <ClCompile Include="..\CppLispInterpreter\Debugger.cpp" />
     <ClCompile Include="..\CppLispInterpreter\Environment.cpp" />
     <ClCompile Include="..\CppLispInterpreter\Exception.cpp" />

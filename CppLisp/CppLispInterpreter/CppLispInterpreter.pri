@@ -1,6 +1,7 @@
 
 SOURCES += \
         $$PWD/csobject.cpp \
+        $$PWD/csstring.cpp \
         $$PWD/Token.cpp \
         $$PWD/Parser.cpp \
         $$PWD/Environment.cpp \
