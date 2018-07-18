@@ -41,6 +41,7 @@ const string Args = "args";
 
 /*private*/ const string MainScope = "<main>";
 
+const string LispEnvironment::EvalStrTag = "<evalstr>:";
 const string LispEnvironment::MetaTag = /*MetaTag*/"###";
 const string LispEnvironment::Macros = LispEnvironment::MetaTag + "macros" + LispEnvironment::MetaTag;
 const string LispEnvironment::Modules = LispEnvironment::MetaTag + "modules" + LispEnvironment::MetaTag;
@@ -746,7 +747,11 @@ static std::shared_ptr<LispVariant> EvalStrFcn(const std::vector<std::shared_ptr
 	CheckArgs("evalstr", 1, args, scope);
 
 	var variant = args[0]->ToLispVariant();
-	var result = Lisp::Eval(variant->Value->ToString(), scope, scope->ModuleName);
+	var tempModuleName = scope->ModuleName;
+	scope->IsInEval = true;
+	var result = Lisp::Eval(variant->Value->ToString(), scope, LispEnvironment::EvalStrTag + variant->Value->ToString());
+	scope->IsInEval = false;
+	scope->ModuleName = tempModuleName;
 	return result;
 }
 

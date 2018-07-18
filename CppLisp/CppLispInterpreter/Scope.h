@@ -99,6 +99,12 @@ namespace CsLisp
         /// </value>       
 		/*public*/ string ModuleName; // { get; set; }
 
+		/// <summary>
+		/// Gets or sets the flat which indicates that an eval function is executed.
+		/// This is needed for debugging.
+		/// </summary>
+		/*public*/ bool IsInEval; // { get; set; }
+
         /// <summary>
         /// Gets or sets the current token.
         /// </summary>

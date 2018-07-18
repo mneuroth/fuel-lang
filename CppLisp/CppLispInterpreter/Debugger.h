@@ -230,7 +230,8 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
-                    var script = /*LispUtils::*/ReadFileOrEmptyString(currentScope->ModuleName);
+					var moduleName = currentScope->ModuleName;
+					var script = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size()) : /*LispUtils::*/ReadFileOrEmptyString(moduleName);
                     // use the script given on command line if no valid module name was set
                     if (string::IsNullOrEmpty(script))
                     {
@@ -333,7 +334,8 @@ namespace CsLisp
                 var startPos = initialTopScope != null ? initialTopScope->CurrentToken->StartPos : 0;
                 var stopPos = initialTopScope != null ? initialTopScope->CurrentToken->StopPos : 0;
                 var moduleName = initialTopScope != null ? initialTopScope->ModuleName : "?";
-                Output->WriteLine("--> " + (*((*currentAst).begin()))->ToString()/*[0]*/ + " line=" + std::to_string((int)lineNumber) + " start=" + std::to_string((int)startPos) + " stop=" + std::to_string((int)stopPos) + " module=" + moduleName);
+				var tokenTxt = initialTopScope != null ? initialTopScope->CurrentToken->ToString() : "?";
+                Output->WriteLine("--> " + (*((*currentAst).begin()))->ToString()/*[0]*/ + " line=" + std::to_string((int)lineNumber) + " start=" + std::to_string((int)startPos) + " stop=" + std::to_string((int)stopPos) + " module=" + moduleName + " token=" + tokenTxt);
             }
             InteractiveLoop(this, initialTopScope, startedFromMain, tracing, outp, inp);
         }

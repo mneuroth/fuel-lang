@@ -97,6 +97,7 @@ namespace CsLisp
 		static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
 
 		const static string MetaTag;
+		const static string EvalStrTag;
 
 		const static string Macros;
 		const static string Modules;
