@@ -397,7 +397,7 @@ namespace QtLispUnitTests
 				Assert::IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
 				Assert::IsTrue(s.Contains("  4 B      	   (+ x 1)"));
 				Assert::IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
-				Assert::IsTrue(s.Contains("FUEL(isp) v0.99.2 (for C++) from 20.6.2018, (C) by Michael Neuroth"));
+				Assert::IsTrue(s.Contains("FUEL(isp) v0.99.3 (for C++) from 18.7.2018, (C) by Michael Neuroth"));
 				Assert::IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
 			}
 		}

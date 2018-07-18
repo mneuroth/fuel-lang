@@ -340,7 +340,7 @@ namespace CsLisp
 
         public void DumpFunctions()
         {
-            Dump(v => v.IsFunction, v => " : module=" + v.FunctionValue.ModuleName);
+            Dump(v => v.IsFunction, v => " : module=" + ExtractModuleName(v.FunctionValue.ModuleName));
 
             ProcessMetaScope(LispEnvironment.Modules, module =>
             {
@@ -417,6 +417,12 @@ namespace CsLisp
         #endregion
 
         #region private methods
+
+        private static string ExtractModuleName(string moduleName)
+        {
+            var temp = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.Substring(LispEnvironment.EvalStrTag.Length, moduleName.IndexOf(":", LispEnvironment.EvalStrTag.Length) - LispEnvironment.EvalStrTag.Length) : moduleName;
+            return temp;
+        }
 
         private void ProcessMetaScope(string metaScope, Action<KeyValuePair<string, object>> action)
         {

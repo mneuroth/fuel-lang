@@ -231,8 +231,8 @@ namespace CsLisp
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
 					var moduleName = currentScope->ModuleName;
-					var script = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size()) : /*LispUtils::*/ReadFileOrEmptyString(moduleName);
-                    // use the script given on command line if no valid module name was set
+					var script = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size() + moduleName.IndexOf(":", LispEnvironment::EvalStrTag.size())) : /*LispUtils*/ReadFileOrEmptyString(moduleName);
+					// use the script given on command line if no valid module name was set
                     if (string::IsNullOrEmpty(script))
                     {
                         script = debugger->CommandLineScript;

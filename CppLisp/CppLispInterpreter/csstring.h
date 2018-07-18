@@ -75,6 +75,11 @@ namespace CsLisp
             return find(txt);
 		}
 
+		inline size_t IndexOf(const string & txt, size_t offset) const
+		{
+			return find(txt, offset);
+		}
+
 		inline void Append(const string & txt)
 		{
 			append(txt);

@@ -899,7 +899,7 @@ namespace CsLisp
             var variant = (LispVariant)args[0];
             var tempModuleName = scope.ModuleName;
             scope.IsInEval = true;
-            var result = Lisp.Eval(variant.Value.ToString(), scope, EvalStrTag + variant.Value.ToString());
+            var result = Lisp.Eval(variant.Value.ToString(), scope, EvalStrTag + scope.ModuleName + ":" + variant.Value.ToString());
             scope.IsInEval = false;
             scope.ModuleName = tempModuleName;
             return result;

@@ -392,9 +392,15 @@ namespace CsLisp
 			Dump([](const LispVariant & v) -> bool { return !v.IsFunction() || (v.IsFunction() && !v.FunctionValue().IsBuiltin()); });
         }
 
+		/*private*/ static string ExtractModuleName(string moduleName)
+		{
+			var temp = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size(), moduleName.IndexOf(":", LispEnvironment::EvalStrTag.size()) - LispEnvironment::EvalStrTag.size()) : moduleName;
+			return temp;
+		}
+
         /*public*/ void DumpFunctions()
         {
-			Dump([](const LispVariant & v)-> bool { return v.IsFunction(); }, [](const LispVariant & v) -> string { return " : module=" + v.FunctionValue().ModuleName; });
+			Dump([](const LispVariant & v)-> bool { return v.IsFunction(); }, [](const LispVariant & v) -> string { return " : module=" + ExtractModuleName(v.FunctionValue().ModuleName); });
 
             ProcessMetaScope(LispEnvironment::Modules, [](KeyValuePair<string, std::shared_ptr<object>> modu) -> void
             {

@@ -749,7 +749,7 @@ static std::shared_ptr<LispVariant> EvalStrFcn(const std::vector<std::shared_ptr
 	var variant = args[0]->ToLispVariant();
 	var tempModuleName = scope->ModuleName;
 	scope->IsInEval = true;
-	var result = Lisp::Eval(variant->Value->ToString(), scope, LispEnvironment::EvalStrTag + variant->Value->ToString());
+	var result = Lisp::Eval(variant->Value->ToString(), scope, LispEnvironment::EvalStrTag + scope->ModuleName + ":" + variant->Value->ToString());
 	scope->IsInEval = false;
 	scope->ModuleName = tempModuleName;
 	return result;
