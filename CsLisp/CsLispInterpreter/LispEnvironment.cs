@@ -191,6 +191,7 @@ namespace CsLisp
 
         public const string MetaTag = "###";
         public const string Builtin = "<builtin>";
+        public const string EvalStrTag = "<evalstr>:";
 
         private const string MainScope = "<main>";
 
@@ -896,7 +897,11 @@ namespace CsLisp
             CheckArgs("evalstr", 1, args, scope);
 
             var variant = (LispVariant)args[0];
-            var result = Lisp.Eval(variant.Value.ToString(), scope, scope.ModuleName);
+            var tempModuleName = scope.ModuleName;
+            scope.IsInEval = true;
+            var result = Lisp.Eval(variant.Value.ToString(), scope, EvalStrTag + variant.Value.ToString());
+            scope.IsInEval = false;
+            scope.ModuleName = tempModuleName;
             return result;
         }
 
