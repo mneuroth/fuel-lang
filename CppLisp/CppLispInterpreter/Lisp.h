@@ -1,6 +1,3 @@
-#ifndef _LISP_H
-#define _LISP_H
-
 /*
 * FUEL(isp) is a fast usable embeddable lisp interpreter.
 *
@@ -52,6 +49,9 @@
 *        --------------------           ---------------             --------
 *
 */
+
+#ifndef _LISP_H
+#define _LISP_H
 
 //using System;
 //using System.Collections.Generic;

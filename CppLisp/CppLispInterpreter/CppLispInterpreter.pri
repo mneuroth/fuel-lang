@@ -4,6 +4,7 @@ SOURCES += \
         $$PWD/csstring.cpp \
         $$PWD/cstypes.cpp \
         $$PWD/Token.cpp \
+        $$PWD/Tokenizer.cpp \
         $$PWD/Parser.cpp \
         $$PWD/Environment.cpp \
         $$PWD/Interpreter.cpp \

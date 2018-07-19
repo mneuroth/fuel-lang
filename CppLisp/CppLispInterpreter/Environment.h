@@ -1,7 +1,4 @@
-﻿#ifndef _ENVIRONMENT_H
-#define _ENVIRONMENT_H
-
-/*
+﻿/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -26,7 +23,10 @@
  * 
  * */
 
-//using System;
+#ifndef _ENVIRONMENT_H
+#define _ENVIRONMENT_H
+
+ //using System;
 //using System.Collections.Generic;
 //using System.IO;
 //using System.Linq;

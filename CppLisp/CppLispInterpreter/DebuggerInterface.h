@@ -1,7 +1,4 @@
-﻿#ifndef _DEBUGGER_INTERFACE_H
-#define _DEBUGGER_INTERFACE_H
-
-/*
+﻿/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -26,7 +23,10 @@
  * 
  * */
 
-//using System.Collections.Generic;
+#ifndef _DEBUGGER_INTERFACE_H
+#define _DEBUGGER_INTERFACE_H
+
+ //using System.Collections.Generic;
 //using System.IO;
 
 namespace CsLisp

@@ -1,7 +1,4 @@
-﻿#ifndef _EXCEPTION_H
-#define _EXCEPTION_H
-
-/*
+﻿/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -26,7 +23,10 @@
  * 
  * */
 
-//using System;
+#ifndef _EXCEPTION_H
+#define _EXCEPTION_H
+
+ //using System;
 
 #include "cstypes.h"
 #include "csstring.h"

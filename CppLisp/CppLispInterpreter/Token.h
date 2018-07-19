@@ -26,12 +26,6 @@
 #ifndef _TOKEN_H
 #define _TOKEN_H
 
-#include <cctype>
-#include <functional>
-#include <algorithm>
-#include <stdexcept>
-#include <memory>
-
 #include "csobject.h"
 #include "cstypes.h"
 #include "csstring.h"
@@ -61,85 +55,20 @@ namespace CsLisp
 		Nil = 13,
 	};
 
-	inline bool Int32_TryParse(const string & txt, size_t & outValue)
-	{
-		try
-		{
-			size_t errPos;
-			outValue = std::stoi(txt, &errPos);
-			if (errPos < txt.length())
-			{
-				return false;
-			}
-			return true;
-		}
-		catch (const std::invalid_argument &)
-		{
-			return false;
-		}
-	}
+	bool Int32_TryParse(const string & txt, size_t & outValue);
 
-    inline bool Double_TryParse(const string & txt, const string & /*NumberStyles_Any*/, const string & /*CultureInfo_InvariantCulture*/, double & doubleValue)
-	{
-		try
-		{
-			size_t errPos;
-			doubleValue = std::stod(txt, &errPos);
-			if (errPos < txt.length())
-			{
-				return false;
-			}
-			return true;
-		}
-		catch (const std::invalid_argument &)
-		{
-			return false;
-		}
-	}
+	bool Double_TryParse(const string & txt, const string & /*NumberStyles_Any*/, const string & /*CultureInfo_InvariantCulture*/, double & doubleValue);
 
 	inline bool Char_IsWhiteSpace(char ch)
 	{
 		return isspace(ch) != 0;
 	}
 
-	/// <summary>
-	/// Interface for a lisp token.
-	/// </summary>
-	/// <remark>
-	/// This interface is intended to remove the dependency to the LispToken class in the future.
-	/// </remark>
-	/*public interface*/class ILispTokenInterface
-	{
-	public:
-		///// <summary>
-		///// Gets the type of the token.
-		///// </summary>
-		///// <value>
-		///// The type.
-		///// </value>
-		//LispTokenType Type; //{ get; }
-
-		///// <summary>
-		///// Gets the value.
-		///// </summary>
-		///// <value>
-		///// The value.
-		///// </value>
-		//object Value; // { get; }
-
-		///// <summary>
-		///// Gets the start position of the token.
-		///// </summary>
-		///// <value>
-		///// The start position.
-		///// </value>
-		//int StartPos; // { get; }
-	};
-
+	// **********************************************************************
 	/// <summary>
 	/// Lisp token.
 	/// </summary>
-	/*public*/ class LispToken : public ILispTokenInterface
+	/*public*/ class LispToken
 	{
 	public:
 		//#region constants
@@ -206,93 +135,11 @@ namespace CsLisp
 		/// <param name="start">The start position.</param>
 		/// <param name="stop">The stop position.</param>
 		/// <param name="lineNo">The line no.</param>
-		/*public*/ LispToken(string text, size_t start, size_t stop, size_t lineNo)
-		{
-			size_t intValue;
-			double doubleValue;
-
-			StartPos = start;
-			StopPos = stop;
-			LineNo = lineNo;
-			Value = std::make_shared<object>(text);
-
-			if (text.StartsWith(StringStart))
-			{
-				Type = /*LispTokenType::*/String;
-				Value = std::make_shared<object>(text.Substring(1, text.Length() - 2));
-			}
-			else if (text == QuoteConst)
-			{
-				Type = /*LispTokenType::*/Quote;
-			}
-			else if (text == Quasiquote)
-			{
-				Type = /*LispTokenType::*/QuasiQuote;
-			}
-			else if (text == Unquote)
-			{
-				Type = /*LispTokenType::*/UnQuote;
-			}
-			else if (text == Unquotesplicing)
-			{
-				Type = /*LispTokenType::*/UnQuoteSplicing;
-			}
-			else if (text == "(")
-			{
-				Type = /*LispTokenType::*/ListStart;
-			}
-			else if (text == ")")
-			{
-				Type = /*LispTokenType::*/ListEnd;
-			}
-			else if (Int32_TryParse(text, /*out*/ intValue))
-			{
-				Type = /*LispTokenType::*/Int;
-				Value = std::make_shared<object>((int)intValue);
-			}
-			else if (Double_TryParse(text, "NumberStyles.Any", "CultureInfo.InvariantCulture", /*out*/ doubleValue))
-			{
-				Type = /*LispTokenType::*/Double;
-				Value = std::make_shared<object>(doubleValue);
-			}
-			else if (text.Equals("true") || text.Equals("#t"))
-			{
-				Type = /*LispTokenType::*/True;
-				Value = std::make_shared<object>(true);
-			}
-			else if (text.Equals("false") || text.Equals("#f"))
-			{
-				Type = /*LispTokenType::*/False;
-				Value = std::make_shared<object>(false);
-			}
-			else if (text.ToUpper().Equals(NilConst))
-			{
-				Type = /*LispTokenType::*/Nil;
-				Value = std::make_shared<object>(null);
-			}
-			else if (text.StartsWith(";"))
-			{
-				Type = /*LispTokenType::*/Comment;
-				Value = std::make_shared<object>(text);
-			}
-			else
-			{
-				Type = /*LispTokenType::*/Symbol;
-				Value = std::make_shared<object>(text);
-			}
-		}
+		/*public*/ LispToken(string text, size_t start, size_t stop, size_t lineNo);
 
 		//#endregion
 
-		bool operator ==(const LispToken & other) const
-		{
-			bool isEqual = Type == other.Type &&
-						   ToString() == other.ToString() &&
-						   StartPos == other.StartPos &&
-						   StopPos == other.StopPos &&
-						   LineNo == other.LineNo;
-			return isEqual;
-		}
+		bool operator ==(const LispToken & other) const;
 
 		//#region public methods
 
@@ -302,14 +149,7 @@ namespace CsLisp
 		/// <returns>
 		/// A <see cref="System.String" /> that represents this instance.
 		/// </returns>
-		/*public override*/ string ToString() const
-		{
-			if (Type == /*LispTokenType::*/Nil)
-			{
-				return NilConst;
-			}
-			return Value->ToString();
-		}
+		/*public override*/ string ToString() const;
 
 		//#endregion
 	};
