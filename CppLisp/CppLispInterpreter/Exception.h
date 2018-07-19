@@ -39,7 +39,8 @@ namespace CsLisp
 	class LispToken;
 	class object;
 
-    /// <summary>
+	// **********************************************************************
+	/// <summary>
     /// Exception for the FUEL lisp interpreter
     /// </summary>
     /*public*/ class LispException //: Exception
@@ -76,6 +77,7 @@ namespace CsLisp
 		}
 	};
 
+	// **********************************************************************
 	/*public*/ class LispStopDebuggerException : LispException
 	{
 	public:

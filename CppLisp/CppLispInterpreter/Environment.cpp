@@ -1,3 +1,27 @@
+/*
+* FUEL(isp) is a fast usable embeddable lisp interpreter.
+*
+* Copyright (c) 2016 Michael Neuroth
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+* OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*
+* */
 
 #include "Scope.h"
 #include "Interpreter.h"
@@ -380,14 +404,15 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 		else
 		{
 			// use std lib of fuel from builtin resources
-			if (orgModuleFileName == "fuellib")
-			{
-		// TODO		code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
-			}
-			else
-			{
+		// resources not supported in C++ for all paltforms...
+		//	if (orgModuleFileName == "fuellib")
+		//	{
+		// 		code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
+		//	}
+		//	else
+		//	{
 				scope->GlobalScope->Output->WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
-			}
+		//	}
 		}
 		if (!string::IsNullOrEmpty(code))
 		{
@@ -889,12 +914,12 @@ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToEnumerable(std::s
 	}
 }
 
-std::shared_ptr<LispVariant> LispEnvironment::quasiquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+std::shared_ptr<LispVariant> quasiquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs(LispEnvironment::Quasiquote, 1, args, scope);
 
 	// unquote elements of list if needed
-	var lst = GetExpression(args[0]);
+	var lst = LispEnvironment::GetExpression(args[0]);
 	IEnumerable<std::shared_ptr<object>> ret;
 	for(var elem : *lst)
 	{
@@ -970,7 +995,7 @@ static IEnumerable<std::shared_ptr<object>> VectorToList(const std::vector<std::
 	return ret;
 }
 
-std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	var name = /*(string)*/scope->UserData.get()!=null ? scope->UserData->ToString() : "";
 	var moduleName = scope->ModuleName;
@@ -986,7 +1011,7 @@ std::shared_ptr<LispVariant> LispEnvironment::fn_form(const std::vector<std::sha
 
 		// add formal arguments to current scope
 		var i = 0;
-		var formalArgs = (args[0]->IsLispVariant() /*is LispVariant*/ ? args[0]->ToLispVariant()->ListValue() : GetExpression(args[0]))->ToArray();
+		var formalArgs = (args[0]->IsLispVariant() /*is LispVariant*/ ? args[0]->ToLispVariant()->ListValue() : LispEnvironment::GetExpression(args[0]))->ToArray();
 		
 		if (formalArgs.size() > localArgs.size())
 		{

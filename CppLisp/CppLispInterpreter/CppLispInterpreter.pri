@@ -6,6 +6,7 @@ SOURCES += \
         $$PWD/Token.cpp \
         $$PWD/Parser.cpp \
         $$PWD/Environment.cpp \
+        $$PWD/Interpreter.cpp \
         $$PWD/Scope.cpp \
         $$PWD/Variant.cpp \
         $$PWD/Debugger.cpp \

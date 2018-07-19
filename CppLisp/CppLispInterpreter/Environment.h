@@ -37,9 +37,6 @@
 #include "csstring.h"
 #include "csobject.h"
 
-#include <memory>
-#include <list>
-
 extern std::string ReadFileOrEmptyString(const std::string & fileName);
 
 namespace CsLisp
@@ -47,6 +44,9 @@ namespace CsLisp
 	class LispScope;
 	class LispBreakpointPosition;
 
+	extern string LispUtils_LibraryPath;
+
+	// **********************************************************************
 	/// <summary>
 	/// Class to hold informations about macro expansions at compile time.
 	/// </summary>
@@ -64,6 +64,7 @@ namespace CsLisp
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Expression;
 	};
 
+	// **********************************************************************
 	/// <summary>
 	/// Class to hold informations about macro expansions at run time.
 	/// </summary>
@@ -76,26 +77,14 @@ namespace CsLisp
 		}
 	};
 
+	// **********************************************************************
+	/// <summary>
+	/// The runtime environment for the FUEL lisp interpreter.
+	/// </summary>
 	class LispEnvironment
 	{
 	public:
-		static bool IsInModules(const string & funcName, std::shared_ptr<LispScope> scope);
-		static std::shared_ptr<object> GetFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope);
-		static bool IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
-		static std::shared_ptr<object> GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
-		static bool IsExpression(std::shared_ptr<object> item);
-		static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> GetExpression(std::shared_ptr<object> item);
-		static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> CheckForList(const string & functionName, std::shared_ptr<object> listObj, std::shared_ptr<LispScope> scope);
-
-		static std::shared_ptr<LispVariant> quasiquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope);
-		static std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope);
-
-		static std::shared_ptr<LispScope> CreateDefaultScope();
-
-		static bool FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> & foundValue);
-
-		static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
-
+		// constants
 		const static string MetaTag;
 		const static string EvalStrTag;
 
@@ -110,6 +99,20 @@ namespace CsLisp
 
 		const static string Sym;
 		const static string Str;
+
+		// methods
+		static bool IsInModules(const string & funcName, std::shared_ptr<LispScope> scope);
+		static bool IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
+		static bool IsExpression(std::shared_ptr<object> item);
+		static bool FindFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope, std::shared_ptr<object> & foundValue);
+
+		static std::shared_ptr<LispScope> CreateDefaultScope();
+
+		static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
+		static std::shared_ptr<object> GetFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope);
+		static std::shared_ptr<object> GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
+		static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> GetExpression(std::shared_ptr<object> item);
+		static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> CheckForList(const string & functionName, std::shared_ptr<object> listObj, std::shared_ptr<LispScope> scope);
 	};
 }
 
