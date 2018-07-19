@@ -1437,5 +1437,8 @@ namespace QtLispUnitTests
 		// Test_StdLibListSort
 		// Test_StdLibMath
 		// Test_StdLibMath2
+
+		// TODO --> open points:
+		// compare functions in lisp available ? --> (== f g) where f and g are functions: (defn f (x) (+ x x))
 	};
 }

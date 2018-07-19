@@ -43,7 +43,6 @@ namespace CsLisp
 			ModuleName = globalScope->ModuleName;
 		}
 		CurrentToken = null;
-		// TODO --> Console.In/Out umleiten realisieren !
 		Input = /*Console.In;*/inp != null ? inp : std::make_shared<TextReader>();
 		Output = /*Console.Out*/outp != null ? outp : std::make_shared<TextWriter>();
 	}

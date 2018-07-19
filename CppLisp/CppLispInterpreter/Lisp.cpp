@@ -84,7 +84,7 @@ namespace CsLisp
 			{
 				outp->WriteLine(errMsg);
 			}
-			// TODO --> implement stack trace for exception
+// TODO --> implement stack trace for exception
 			var stackInfo = exc.Data["StackInfo"];
 			//Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : "<not available>");                if (verboseErrorOutput)
 			errMsg = string::Format("\nCallstack:\n{0}", stackInfo != null ? stackInfo->ToString() : "<not available>");

@@ -136,8 +136,6 @@ namespace CsLisp
 			debugger->SetInputOutputStreams(output, input);
 			if (Contains(args, "-i"))
 			{
-				// TODO --> Input/Output als shared_ptr, damit besser zwischen Objekten geteilt werden kann
-				// TODO --> Debugger Streams != global Streams !!! --> dies ist ein Problem; Debugger sollte Streams an global Scope weiter reichen !
 				InteractiveLoopHeader(output);
 				debugger->InteractiveLoop(null, null, /*startedFromMain:*/ true, /*tracing :*/ trace, output, input);
 				loadFiles = false;

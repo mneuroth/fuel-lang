@@ -262,7 +262,7 @@ namespace CsLisp
 				return std::to_string(m_Data.d);
 			case __String:
 				return *(m_Data.pString);
-// TODO --> ToString fuer weitere Datentypen realisieren
+// TODO --> implement ToString() for more data types
 			case __List:
 				{
 					string result;
@@ -349,19 +349,18 @@ namespace CsLisp
 		if (IsLispMacroRuntimeEvaluate())
 		{
 // TODO: ist das wirklich korrekt eine Kopie zu liefern ?
-			// return a copy 
+			// return a copy (not fast but it works)
 			return std::make_shared<LispMacroRuntimeEvaluate>(*(m_Data.pMacro));
 		}
 		return null;
 	}
-
 
 	std::shared_ptr<LispMacroCompileTimeExpand> object::ToLispMacroCompileTimeExpand() const
 	{
 		if (IsLispMacroCompileTimeExpand())
 		{
 // TODO: ist das wirklich korrekt eine Kopie zu liefern ?
-			// return a copy 
+			// return a copy (not fast but it works)
 			return std::make_shared<LispMacroCompileTimeExpand>(*(m_Data.pCompileMacro));
 		}
 		return null;
@@ -405,7 +404,7 @@ namespace CsLisp
 			case __List:
 				return ToList() == other.ToList();
 			case __Function:
-// TODO --> not implemented yet !
+// TODO --> not implemented yet ! also not in C#
 				return false;		// ???
 			case __Symbol:
 				return ToString() == other.ToString();
@@ -416,7 +415,7 @@ namespace CsLisp
 			case __LispVariant:
 				return ToLispVariant() == other.ToLispVariant();
 			case __LispFunctionWrapper:
-// TODO --> check
+// TODO --> std::function comparison is not supported in C++ 
                 return false; //&(ToLispFunctionWrapper().Function) == &(other.ToLispFunctionWrapper().Function);
 			case __LispToken:
 				return ToString() == other.ToString();

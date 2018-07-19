@@ -90,6 +90,7 @@ namespace CsLisp
 			bool   b;
 			int    i;
 			double d;
+// TODO --> maybe use shared_ptr, so we can return the correct reference and no copy (i. e. for pCompileMacro) --> search for return copy
 			std::string * pString;
 			LispVariant * pVariant;
 			LispScope * pScope;

@@ -1165,6 +1165,7 @@ static std::shared_ptr<LispVariant> gdefn_form(const std::vector<std::shared_ptr
 	return defn_form_helper(args, scope, Gdef);
 }
 
+// TODO --> implement call static native
 //static std::shared_ptr<LispVariant> CallStaticNative(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 //{
 //	var className = args[0]->ToLispVariant();
@@ -1172,7 +1173,6 @@ static std::shared_ptr<LispVariant> gdefn_form(const std::vector<std::shared_ptr
 //
 //	if (className->IsString() || className->IsSymbol())
 //	{
-//// TODO --> implement
 //		//var callArgs = GetCallArgs(args);
 //
 //		//Type nativeClass = Type.GetType(className.ToString());
@@ -1279,7 +1279,6 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::GetExpres
 
 std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::CheckForList(const string & functionName, std::shared_ptr<object> listObj, std::shared_ptr<LispScope> scope)
 {
-	// TODO --> pruefen...
 	if (listObj->IsList() /*is object[]*/)
 	{
 		return GetExpression(listObj);

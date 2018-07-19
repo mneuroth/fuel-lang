@@ -103,7 +103,7 @@ namespace CsLisp
     /// <summary>
     /// Generic data container for lisp data types.
     /// </summary>
-    /*public*/ class LispVariant //: public object // TODO: IComparable
+    /*public*/ class LispVariant
     {
         //#region constants
 
