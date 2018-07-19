@@ -392,12 +392,6 @@ namespace CsLisp
 			Dump([](const LispVariant & v) -> bool { return !v.IsFunction() || (v.IsFunction() && !v.FunctionValue().IsBuiltin()); });
         }
 
-		/*private*/ static string ExtractModuleName(string moduleName)
-		{
-			var temp = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size(), moduleName.IndexOf(":", LispEnvironment::EvalStrTag.size()) - LispEnvironment::EvalStrTag.size()) : moduleName;
-			return temp;
-		}
-
         /*public*/ void DumpFunctions()
         {
 			Dump([](const LispVariant & v)-> bool { return v.IsFunction(); }, [](const LispVariant & v) -> string { return " : module=" + ExtractModuleName(v.FunctionValue().ModuleName); });
@@ -477,8 +471,15 @@ namespace CsLisp
         }
 
         //#endregion
-
+	
+	private:
         //#region private methods
+
+		/*private*/ static string ExtractModuleName(string moduleName)
+		{
+			var temp = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size(), moduleName.IndexOf(":", LispEnvironment::EvalStrTag.size()) - LispEnvironment::EvalStrTag.size()) : moduleName;
+			return temp;
+		}
 
 		/*private*/ void ProcessMetaScope(string metaScope, /*Action<KeyValuePair<string, std::shared_ptr<object>>>*/std::function<void(KeyValuePair<string, std::shared_ptr<object>>)> action)
         {

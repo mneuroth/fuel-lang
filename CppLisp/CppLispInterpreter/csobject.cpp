@@ -334,17 +334,6 @@ namespace CsLisp
 		return null;
 	}
 
-//	std::shared_ptr<LispScope> object::ToLispScope() const
-//	{
-//		if (IsLispScope())
-//		{
-//// TODO: ist das wirklich korrekt eine Kopie zu liefern ?
-//			// return a copy 
-//			return std::make_shared<LispScope>(*(m_Data.pScope));
-//		}
-//		return null;
-//	}
-
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> object::ToList() const
 	{
 		if (IsList())
@@ -378,7 +367,7 @@ namespace CsLisp
 		return null;
 	}
 
-	LispFunctionWrapper object::ToLispFunctionWrapper() const
+	LispFunctionWrapper & object::ToLispFunctionWrapper() const
 	{
 		if (IsLispFunctionWrapper())
 		{

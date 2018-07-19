@@ -26,10 +26,11 @@
 #ifndef _CSTYPES_H
 #define _CSTYPES_H
 
-#include <list>
 #include <vector>
 #include <map>
 #include <tuple>
+#include <functional>
+#include <memory>
 
 #include "csstring.h"
 #include "Exception.h"
@@ -142,6 +143,7 @@ namespace CsLisp
 	};
 
 	// **********************************************************************
+	// Wrapp stl map class with methods to support Dictionary class of C#
 	template <class K, class V>
 	class Dictionary : public std::map<K,V>
 	{
@@ -160,6 +162,20 @@ namespace CsLisp
 		{
 			return std::map<K, V>::find(key) != std::map<K, V>::end();
 		}
+	};
+
+	// **********************************************************************
+	template <class K, class V>
+	class KeyValuePair
+	{
+	public:
+		inline KeyValuePair(K key, V value)
+			: Key(key), Value(value)
+		{
+		}
+
+		K Key;
+		V Value;
 	};
 
 	// **********************************************************************
@@ -205,6 +221,7 @@ namespace CsLisp
 	};
 
 	// **********************************************************************
+	// Implement C++ version of TextWriter class of C#
 	class TextWriter
 	{
 	private:
@@ -212,10 +229,8 @@ namespace CsLisp
 		string	m_sText;
 
 	public:
-		inline TextWriter(bool bToString = false)
-			: m_bToString(bToString)
-		{
-		}
+		TextWriter(bool bToString = false);
+		
 		inline void EnableToString(bool value = true)
 		{
 			m_bToString = value;
@@ -224,6 +239,7 @@ namespace CsLisp
 		{
 			return m_sText;
 		}
+		
 		void Write(const string & txt);
 		void WriteLine();
 		void WriteLine(const string & txt);
@@ -234,6 +250,7 @@ namespace CsLisp
 	};
 
 	// **********************************************************************
+	// Implement C++ version of TextWriter class of C#
 	class TextReader
 	{
 	private:
@@ -243,36 +260,15 @@ namespace CsLisp
 		std::vector<string>::const_iterator m_aCurrentPos;
 
 	public:
-		inline TextReader(const string & txt = string::Empty)
-		{
-			m_bFromString = !string::IsNullOrEmpty(txt);
-			SetContent(txt);
-		}
+		TextReader(const string & txt = string::Empty);
+
 		inline void EnableFromString(bool value = true)
 		{
 			m_bFromString = value;
 		}
-		inline void SetContent(const string & txt)
-		{
-			m_sText = txt;
-			m_aAllLines = txt.Split("\n");
-			m_aCurrentPos = m_aAllLines.begin();
-		}
+
+		void SetContent(const string & txt);
 		string ReadLine();
-	};
-
-	// **********************************************************************
-	template <class K, class V>
-	class KeyValuePair
-	{
-	public:
-		inline KeyValuePair(K key, V value)
-			: Key(key), Value(value)
-		{
-		}
-
-		K Key;
-		V Value;
 	};
 
 	// **********************************************************************
@@ -308,19 +304,8 @@ namespace CsLisp
 
 		string ModuleName;
 
-		/*public*/ string GetFormatedDoc() const
-		{
-			const string separator = "\n\n";
-			const string splitter = "-------------------------------------------------" + separator;
-			return GetFormatedHelpString(separator, splitter);
-		}
-
-		/*public*/ string GetHtmlFormatedDoc() const
-		{
-			const string separator = "<br><br>";
-			const string splitter = string("<hr>") + string("<br>");
-			return GetFormatedHelpString(separator, splitter, [](const string & s) -> string { return "<b>" + s + "</b>"; }, [](const string & s) -> string { return "<code>" + s + "</code>"; });
-		}
+		/*public*/ string GetFormatedDoc() const;
+		/*public*/ string GetHtmlFormatedDoc() const;
 
 		inline bool IsSpecialForm() const
 		{
@@ -340,37 +325,10 @@ namespace CsLisp
 		}
 
 	private:
-		string GetFormatedHelpString(const string & separator, const string & splitter, std::function<string(const string &)> nameDecorator = null, std::function<string(const string &)> syntaxDecorator = null) const 
-		{
-			if (nameDecorator == null)
-			{
-				nameDecorator = [](const string & s) -> string { return s; };
-			}
-			if (syntaxDecorator == null)
-			{
-				syntaxDecorator = [](const string & s) -> string { return s; };
-			}
-			string name = "???";
-			string signature = (!string::IsNullOrEmpty(Signature) ? Signature : string::Empty);
-			if (signature.size() > 0 && signature.StartsWith("("))
-			{
-				size_t len = signature.IndexOf(" ", "StringComparison.Ordinal");
-				// process commands like: (doc)
-                if (len == (size_t)-1)
-				{
-					len = signature.IndexOf(")", "StringComparison.Ordinal") - 1;
-				}
-				name = nameDecorator(signature.Substring(1, len));
-			}
-			name += IsSpecialForm() ? " [special form]" : string::Empty;
-			name += separator;
-			string syntax = syntaxDecorator("Syntax: " + signature) + separator;
-			string doc = (!string::IsNullOrEmpty(Documentation) ? Documentation : "<not available>");
-			doc += separator;
-			return splitter + name + syntax + doc + "\n";
-		}
+		string GetFormatedHelpString(const string & separator, const string & splitter, std::function<string(const string &)> nameDecorator = null, std::function<string(const string &)> syntaxDecorator = null) const;
 	};
 
+	// **********************************************************************
 	template <class T>
 	inline int CompareToType(T d1, T d2)
 	{

@@ -29,6 +29,7 @@
 //using System;
 
 #include "cstypes.h"
+#include "csstring.h"
 
 #include <map>
 

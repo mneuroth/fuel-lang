@@ -26,10 +26,6 @@
 #ifndef _CSOBJECT_H
 #define _CSOBJECT_H
 
-#include <string>
-#include <list>
-#include <memory>
-
 #include "cstypes.h"
 
 namespace CsLisp
@@ -115,18 +111,7 @@ namespace CsLisp
 		{
 		}
 
-		//explicit object(ObjectType objType)
-		//	: m_Type(objType)
-		//{
-		//}
-
 		explicit object(const object & other);
-
-//		explicit object(void * ptr)
-//			: m_Type(ObjectType::__VoidPtr)
-//		{
-//// TODO --> void * pointer behandeln ...
-//		}
 
 		explicit object(const std::string & text)
 			: m_Type(ObjectType::__String)
@@ -194,109 +179,102 @@ namespace CsLisp
 			return *this;
 		}
 */
-		operator bool() const
+		inline operator bool() const
 		{
 			return m_Data.b;
 		}
 
-		operator int() const
+		inline operator int() const
 		{
 			return m_Data.i;
 		}
 
-		operator double() const
+		inline operator double() const
 		{
 			return m_Data.d;
 		}
 
-		bool IsBool() const
+		inline bool IsBool() const
 		{
 			return m_Type == ObjectType::__Bool;
 		}
 
-		bool IsInt() const
+		inline bool IsInt() const
 		{
 			return m_Type == ObjectType::__Int;
 		}
 
-		bool IsDouble() const
+		inline bool IsDouble() const
 		{
 			return m_Type == ObjectType::__Double;
 		}
 
-		bool IsString() const
+		inline bool IsString() const
 		{
 			return m_Type == ObjectType::__String;
 		}
 
-		bool IsLispVariant() const
+		inline bool IsLispVariant() const
 		{
 			return m_Type == ObjectType::__LispVariant;
 		}
 
-		bool IsList() const
+		inline bool IsList() const
 		{
 			return m_Type == ObjectType::__List;
 		}
 
-		bool IsLispScope() const
+		inline bool IsLispScope() const
 		{
 			return m_Type == ObjectType::__LispScope;
 		}
 
-		bool IsLispToken() const
+		inline bool IsLispToken() const
 		{
 			return m_Type == ObjectType::__LispToken;
 		}
 
-		bool IsLispFunctionWrapper() const
+		inline bool IsLispFunctionWrapper() const
 		{
 			return m_Type == ObjectType::__LispFunctionWrapper;
 		}
 
-		bool IsIEnumerableOfObject() const
+		inline bool IsIEnumerableOfObject() const
 		{
 			return m_Type == ObjectType::__IEnumerableOfObject;
 		}
 
-		bool IsLispMacroRuntimeEvaluate() const
+		inline bool IsLispMacroRuntimeEvaluate() const
 		{
 			return m_Type == ObjectType::__LispMacroRuntimeEvaluate;
 		}
 
-		bool IsLispMacroCompileTimeExpand() const
+		inline bool IsLispMacroCompileTimeExpand() const
 		{
 			return m_Type == ObjectType::__LispMacroCompileTimeExpand;
 		}
 
-		std::shared_ptr<LispVariant> ToLispVariant() const;
+		inline ObjectType GetType() const
+		{
+			return m_Type;
+		}
 
-		//std::shared_ptr<LispScope> ToLispScope() const;
-
-        LispScope * GetLispScopeRef() const;
-
-		LispFunctionWrapper ToLispFunctionWrapper() const;
-
-		std::shared_ptr<LispToken> ToLispToken() const;
-
-		IEnumerable<std::shared_ptr<object>> ToEnumerableOfObject() const;
-
-		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList() const;
-
-		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const;
-
-		std::shared_ptr<LispMacroCompileTimeExpand> ToLispMacroCompileTimeExpand() const;
-
-		string ToString() const;
-        
 		std::string GetTypeName() const;
-        
-        ObjectType GetType() const
-        {
-            return m_Type;
-        }
 
 		bool Equals(const object & other) const;
+
+		// get references to data
+        LispScope * GetLispScopeRef() const;
+		LispFunctionWrapper & ToLispFunctionWrapper() const;
+
+		// get a copy of the data
+		IEnumerable<std::shared_ptr<object>> ToEnumerableOfObject() const;
+		std::shared_ptr<LispVariant> ToLispVariant() const;
+		std::shared_ptr<LispToken> ToLispToken() const;
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList() const;
+		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const;
+		std::shared_ptr<LispMacroCompileTimeExpand> ToLispMacroCompileTimeExpand() const;
+		string ToString() const;
 	};
 }
 

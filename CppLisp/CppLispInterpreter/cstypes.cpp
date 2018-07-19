@@ -84,6 +84,24 @@ namespace CsLisp
 		std::cout << temp << std::endl;
 	}
 
+	TextWriter::TextWriter(bool bToString)
+		: m_bToString(bToString)
+	{
+	}
+
+	TextReader::TextReader(const string & txt)
+	{
+		m_bFromString = !string::IsNullOrEmpty(txt);
+		SetContent(txt);
+	}
+
+	void TextReader::SetContent(const string & txt)
+	{
+		m_sText = txt;
+		m_aAllLines = txt.Split("\n");
+		m_aCurrentPos = m_aAllLines.begin();
+	}
+
 	string TextReader::ReadLine()
 	{
 		string input;
@@ -101,4 +119,49 @@ namespace CsLisp
 		}
 		return input;
 	}
+
+	string LispFunctionWrapper::GetFormatedDoc() const
+	{
+		const string separator = "\n\n";
+		const string splitter = "-------------------------------------------------" + separator;
+		return GetFormatedHelpString(separator, splitter);
+	}
+
+	string LispFunctionWrapper::GetHtmlFormatedDoc() const
+	{
+		const string separator = "<br><br>";
+		const string splitter = string("<hr>") + string("<br>");
+		return GetFormatedHelpString(separator, splitter, [](const string & s) -> string { return "<b>" + s + "</b>"; }, [](const string & s) -> string { return "<code>" + s + "</code>"; });
+	}
+
+	string LispFunctionWrapper::GetFormatedHelpString(const string & separator, const string & splitter, std::function<string(const string &)> nameDecorator, std::function<string(const string &)> syntaxDecorator) const
+	{
+		if (nameDecorator == null)
+		{
+			nameDecorator = [](const string & s) -> string { return s; };
+		}
+		if (syntaxDecorator == null)
+		{
+			syntaxDecorator = [](const string & s) -> string { return s; };
+		}
+		string name = "???";
+		string signature = (!string::IsNullOrEmpty(Signature) ? Signature : string::Empty);
+		if (signature.size() > 0 && signature.StartsWith("("))
+		{
+			size_t len = signature.IndexOf(" ", "StringComparison.Ordinal");
+			// process commands like: (doc)
+			if (len == (size_t)-1)
+			{
+				len = signature.IndexOf(")", "StringComparison.Ordinal") - 1;
+			}
+			name = nameDecorator(signature.Substring(1, len));
+		}
+		name += IsSpecialForm() ? " [special form]" : string::Empty;
+		name += separator;
+		string syntax = syntaxDecorator("Syntax: " + signature) + separator;
+		string doc = (!string::IsNullOrEmpty(Documentation) ? Documentation : "<not available>");
+		doc += separator;
+		return splitter + name + syntax + doc + "\n";
+	}
+
 }

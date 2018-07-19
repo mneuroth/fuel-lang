@@ -1,6 +1,10 @@
 
 #include "csstring.h"
 
+#include <cctype>
+#include <algorithm>
+#include <functional>
+
 namespace CsLisp
 {
 	string::string()

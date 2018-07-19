@@ -28,10 +28,6 @@
 
 #include <string.h>
 #include <string>
-#include <cctype>
-#include <functional>
-#include <memory>
-#include <algorithm>
 #include <vector>
 
 #include <stdlib.h>
