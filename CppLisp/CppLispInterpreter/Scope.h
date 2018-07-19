@@ -61,7 +61,6 @@ namespace CsLisp
         /// <summary>
         /// Gets and sets the debuging modus.
         /// </summary>
-//		/*public*/ std::shared_ptr<ILispDebugger> Debugger; // { get; set; }
 		/*public*/ ILispDebugger * Debugger; // { get; set; }
 
         /// <summary>

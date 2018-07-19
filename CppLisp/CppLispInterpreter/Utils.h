@@ -30,8 +30,8 @@
 
 namespace CsLisp
 {
-	void ShowAbout(TextWriter & output);
-	void ShowAbout(TextWriter & output);
+	void ShowVersion(std::shared_ptr<TextWriter> output);
+	void ShowAbout(std::shared_ptr<TextWriter> output);
 }
 
 #endif

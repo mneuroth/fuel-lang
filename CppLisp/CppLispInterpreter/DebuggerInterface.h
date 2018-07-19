@@ -26,8 +26,10 @@
 #ifndef _DEBUGGER_INTERFACE_H
 #define _DEBUGGER_INTERFACE_H
 
- //using System.Collections.Generic;
+//using System.Collections.Generic;
 //using System.IO;
+
+#include "cstypes.h"
 
 namespace CsLisp
 {

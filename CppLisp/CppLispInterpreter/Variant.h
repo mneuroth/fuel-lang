@@ -293,34 +293,6 @@ namespace CsLisp
 
 		/*public override*/ string ToString() const;
         
-        //template <T1, T2, T3>
-        //typedef (*Func<T1,T2,T3>)();
-
-// TODO Func Operatoren realisieren ?
-//        // used for compiler module
-//        /*public*/ static explicit operator Func<object[], LispScope, LispVariant>(LispVariant variant)
-//        {
-//            return variant.FunctionValue.Function;
-//        }
-//
-//        // used for compiler module
-//        /*public*/ static explicit operator Func<LispVariant, LispScope, LispVariant>(LispVariant variant)
-//        {
-//            return (arg1, scope) => variant.FunctionValue.Function(new object[] { arg1 }, scope);
-//        }
-//
-//        // used for compiler module
-//        /*public*/ static explicit operator Func<LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-//        {
-//            return (arg1, arg2, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2 }, scope);
-//        }
-//
-//        // used for compiler module
-//        /*public*/ static explicit operator Func<LispVariant, LispVariant, LispVariant, LispScope, LispVariant>(LispVariant variant)
-//        {
-//            return (arg1, arg2, arg3, scope) => variant.FunctionValue.Function(new object[] { arg1, arg2, arg3 }, scope);
-//        }
-
 		/*private*/ static string ExpandContainerToString(std::shared_ptr<object> maybeContainer);
 
 		/*private*/ static string ExpandItemForContainer(std::shared_ptr<object> item);
@@ -339,18 +311,6 @@ namespace CsLisp
         /// </returns>
         /// <param name="other">The object to compare with the current object. </param><filterpriority>2</filterpriority>
 		/*public override*/ bool Equals(std::shared_ptr<object>  other);
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        ///*public override*/ int GetHashCode()
-        //{
-        //    // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
-        //    return base.GetHashCode();
-        //}
 
         //#endregion
 
