@@ -420,8 +420,12 @@ namespace CsLisp
 
         private static string ExtractModuleName(string moduleName)
         {
-            var temp = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.Substring(LispEnvironment.EvalStrTag.Length, moduleName.IndexOf(":", LispEnvironment.EvalStrTag.Length) - LispEnvironment.EvalStrTag.Length) : moduleName;
-            return temp;
+            if (moduleName != null)
+            {
+                var temp = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.Substring(LispEnvironment.EvalStrTag.Length, moduleName.IndexOf(":", LispEnvironment.EvalStrTag.Length) - LispEnvironment.EvalStrTag.Length) : moduleName;
+                return temp;
+            }
+            return moduleName;
         }
 
         private void ProcessMetaScope(string metaScope, Action<KeyValuePair<string, object>> action)
