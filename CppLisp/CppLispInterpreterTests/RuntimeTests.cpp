@@ -31,7 +31,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 namespace QtLispUnitTests
 {
@@ -40,10 +40,10 @@ namespace QtLispUnitTests
 	public:
 		TEST_METHOD(Test_TestIndexOfInString)
 		{
-			CsLisp::string target("abc def blub 123");
+			CppLisp::string target("abc def blub 123");
 
 			Assert::AreEqual((size_t)4, target.IndexOf("def", "nix"));
-			Assert::AreEqual(CsLisp::string::npos, target.IndexOf("test", "nix"));
+			Assert::AreEqual(CppLisp::string::npos, target.IndexOf("test", "nix"));
 		}
 	};
 }

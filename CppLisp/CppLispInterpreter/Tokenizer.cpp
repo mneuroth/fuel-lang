@@ -25,7 +25,7 @@
 
 #include "Tokenizer.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	IEnumerable<std::shared_ptr<LispToken>> LispTokenizer::Tokenize(string code, size_t offset)
 	{

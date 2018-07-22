@@ -29,7 +29,7 @@
 #include "Token.h"
 #include "Scope.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	/// <summary>
 	/// The FUEL lisp parser.

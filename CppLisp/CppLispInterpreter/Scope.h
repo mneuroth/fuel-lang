@@ -43,7 +43,7 @@
 #include <memory>
 #include <list>
 
-namespace CsLisp
+namespace CppLisp
 {
     /// <summary>
     /// The lisp runtime scope. That is something like a stack item.

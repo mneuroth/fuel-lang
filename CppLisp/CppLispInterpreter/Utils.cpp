@@ -26,7 +26,7 @@
 #include "Utils.h"
 #include "Lisp.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 
 	/*static*/ void ShowVersion(std::shared_ptr<TextWriter> output)

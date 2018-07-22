@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-namespace CsLisp
+namespace CppLisp
 {
 	template <class T>
 	string IEnumerable<T>::DumpList() const 

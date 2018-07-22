@@ -34,7 +34,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 namespace QtLispUnitTests
 {

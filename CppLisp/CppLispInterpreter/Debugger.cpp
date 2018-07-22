@@ -28,13 +28,13 @@
 
 #include "cstypes.h"
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 const string LispDebugger::Prompt = /*Lisp::Name*/string("FUEL(isp)") + "> ";
 
 const string LispDebugger::DbgPrompt = /*Lisp::Name*/string("FUEL(isp)") + "-DBG> ";
 
-namespace CsLisp
+namespace CppLisp
 {
 	LispDebugger::LispDebugger()
 	{

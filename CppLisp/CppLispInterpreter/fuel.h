@@ -31,7 +31,7 @@
 #include "Lisp.h"
 #include "Debugger.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	/// <summary>
 	/// Fast Usable Embeddable Lisp Interpreter and Compiler (FUEL).

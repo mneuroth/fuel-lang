@@ -27,13 +27,13 @@
 
 #include <stack>
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 const string LispParser::BracketsOutOfBalance = "Brackets out of balance";
 const string LispParser::BracketsOutOfBalanceOrUnexpectedScriptCode = BracketsOutOfBalance + " or unexpected script code";
 const string LispParser::UnexpectedToken = "Unexpected token";
 
-namespace CsLisp
+namespace CppLisp
 {
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispParser::Parse(string code, size_t offset, std::shared_ptr<LispScope> scope)
 	{

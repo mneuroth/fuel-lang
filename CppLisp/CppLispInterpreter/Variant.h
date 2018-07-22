@@ -42,7 +42,7 @@
 #include <math.h>
 #include <cstdlib>
 
-namespace CsLisp
+namespace CppLisp
 {
     /// <summary>
     /// Enumeration for unqoute modus

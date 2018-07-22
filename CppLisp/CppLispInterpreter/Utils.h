@@ -28,7 +28,7 @@
 
 #include "cstypes.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	void ShowVersion(std::shared_ptr<TextWriter> output);
 	void ShowAbout(std::shared_ptr<TextWriter> output);

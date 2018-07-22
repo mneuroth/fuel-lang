@@ -30,7 +30,7 @@
 
 #include "fuel.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	extern string LispUtils_LibraryPath;
 
@@ -257,11 +257,11 @@ namespace CsLisp
 
 int main(int argc, char *argv[])
 {
-	std::vector<CsLisp::string> args;
+	std::vector<CppLisp::string> args;
 	for (int i = 1; i < argc; i++)
 	{
 		args.push_back(argv[i]);
 	}
-	CsLisp::Fuel::Main(args);
+	CppLisp::Fuel::Main(args);
 	return 0;
 }

@@ -62,7 +62,7 @@
 #include "Parser.h"
 #include "Interpreter.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	/// <summary>
 	/// The FUEL lisp interpreter.

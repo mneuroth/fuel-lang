@@ -34,7 +34,7 @@
 #include "cstypes.h"
 #include "Scope.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	// **********************************************************************
 	class LispBreakpointPosition : public Tuple3<size_t, size_t, size_t>

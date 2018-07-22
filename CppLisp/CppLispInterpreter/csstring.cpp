@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <functional>
 
-namespace CsLisp
+namespace CppLisp
 {
 	string::string()
 		: std::string()

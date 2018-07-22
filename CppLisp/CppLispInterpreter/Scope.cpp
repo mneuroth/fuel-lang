@@ -26,7 +26,7 @@
 #include "Scope.h"
 #include "Interpreter.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	LispScope::LispScope(string fcnName, std::shared_ptr<LispScope> globalScope, std::shared_ptr<string> moduleName, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp)
 	{

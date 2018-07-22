@@ -28,7 +28,7 @@
 
 #include "cstypes.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	class LispVariant;
 	class LispScope;

@@ -41,7 +41,7 @@
 
 #define null 0
 
-namespace CsLisp
+namespace CppLisp
 {
 	class LispToken;
 	class LispScope;

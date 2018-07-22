@@ -28,7 +28,7 @@
 #include "Scope.h"
 #include "Token.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	object::object(const LispVariant & value)
 		: m_Type(ObjectType::__LispVariant)

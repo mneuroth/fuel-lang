@@ -32,7 +32,7 @@
 
 #include <stdlib.h>
 
-namespace CsLisp
+namespace CppLisp
 {
 	//
 	// Class to wrap the stl string class with functions of the C# string class

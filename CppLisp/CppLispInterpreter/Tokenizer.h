@@ -29,7 +29,7 @@
 #include "Token.h"
 #include "cstypes.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	/// <summary>
 	/// The FUEL lisp tokenizer

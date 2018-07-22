@@ -31,7 +31,7 @@
 
 #include "cstypes.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	class LispScope;
 	class LispBreakpointPosition;

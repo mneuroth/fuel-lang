@@ -30,7 +30,7 @@
 #include <map>
 #include <fstream>
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 const string If = "if";
 const string While = "while";
@@ -81,7 +81,7 @@ const string LispEnvironment::Str = "str";
 
 // ************************************************************************
 
-namespace CsLisp
+namespace CppLisp
 {
 	string LispUtils_LibraryPath = string::Empty;
 }
@@ -324,7 +324,7 @@ long getTickCount() // Zeit seit dem Booten in Sekunden
 */
 #endif
 
-namespace CsLisp
+namespace CppLisp
 {
 	uint64_t Environment_GetTickCount(void)
 	{
@@ -349,7 +349,7 @@ static string AddFileExtensionIfNeeded(string fileName)
 	return fileName;
 }
 
-namespace CsLisp
+namespace CppLisp
 {
 	extern string LispUtils_LibraryPath;
 }

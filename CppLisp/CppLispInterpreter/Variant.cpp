@@ -26,7 +26,7 @@
 #include "Variant.h"
 #include "cstypes.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	double LispVariant::Tolerance = 1e-8;
 

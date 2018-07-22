@@ -26,7 +26,7 @@
 #include "Exception.h"
 #include "Scope.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	LispException::LispException(const string & text, LispScope * scope)
 		//: base(text)

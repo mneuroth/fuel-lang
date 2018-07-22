@@ -39,7 +39,7 @@
 
 extern std::string ReadFileOrEmptyString(const std::string & fileName);
 
-namespace CsLisp
+namespace CppLisp
 {
 	class LispScope;
 	class LispBreakpointPosition;

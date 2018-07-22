@@ -25,7 +25,7 @@
 
 #include "Interpreter.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ResolveArgsInScopes(std::shared_ptr<LispScope> scope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, bool compile)
 	{

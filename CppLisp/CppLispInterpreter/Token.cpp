@@ -24,24 +24,25 @@
 * */
 
 #include "Token.h"
+#include <string>
 
-const CsLisp::string CsLisp::LispToken::StringStart = "\"";
-const CsLisp::string CsLisp::LispToken::QuoteConst = "'";
-const CsLisp::string CsLisp::LispToken::Quasiquote = "`";
-const CsLisp::string CsLisp::LispToken::Unquote = ",";
-const CsLisp::string CsLisp::LispToken::Unquotesplicing = ",@";
-const CsLisp::string CsLisp::LispToken::NilConst = "NIL";
+const CppLisp::string CppLisp::LispToken::StringStart = "\"";
+const CppLisp::string CppLisp::LispToken::QuoteConst = "'";
+const CppLisp::string CppLisp::LispToken::Quasiquote = "`";
+const CppLisp::string CppLisp::LispToken::Unquote = ",";
+const CppLisp::string CppLisp::LispToken::Unquotesplicing = ",@";
+const CppLisp::string CppLisp::LispToken::NilConst = "NIL";
 
-const CsLisp::string CsLisp::string::Empty = "";
+const CppLisp::string CppLisp::string::Empty = "";
 
-namespace CsLisp
+namespace CppLisp
 {
 	bool Int32_TryParse(const string & txt, size_t & outValue)
 	{
 		try
 		{
 			size_t errPos;
-			outValue = std::stoi(txt, &errPos);
+			outValue = std::stoi(std::string(txt), &errPos, 10);
 			if (errPos < txt.length())
 			{
 				return false;

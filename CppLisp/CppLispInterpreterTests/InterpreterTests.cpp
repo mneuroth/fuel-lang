@@ -31,7 +31,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 #include <math.h>
 
@@ -763,7 +763,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (defn g (x) (do (+ x 2 i))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -806,7 +806,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (call-static \"System.IO.File\" NotExistingFunction \"dummy\"))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -866,7 +866,7 @@ namespace QtLispUnitTests
 				Assert::AreEqual(10, result->ToInt());
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -927,7 +927,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(map 4 '(1 2 3))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -944,7 +944,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(map (lambda (x) (+ x 1)) 4)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -961,7 +961,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(reduce \"blub\" '(1 2 3) 0)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -978,7 +978,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(reduce (lambda (x y) (+ x y))  \"test\" 0)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -995,7 +995,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(setf a 2.0)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1012,7 +1012,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(println \"hello\"))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1029,7 +1029,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("((println \"hello\")");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1046,7 +1046,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(blub 1 2 3)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1063,7 +1063,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(not a 2.0)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1080,7 +1080,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(> 2.0)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1097,7 +1097,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(> 2.0 5 234)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1114,7 +1114,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(setf a 2.0) asdf");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1131,7 +1131,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(def 1 2)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1148,7 +1148,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (def a 2) blub (setf a 5))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1165,7 +1165,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(if #t 1 2 3)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1182,7 +1182,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(unknown-fcn 1 2 3)");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1199,7 +1199,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (println 2)))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1216,7 +1216,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do ( (println 2))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1233,7 +1233,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("blub (do (println 2))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1250,7 +1250,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (println 2)) asfd");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}
@@ -1403,7 +1403,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (import fuellib) (foreach))");
 				Assert::IsTrue(false);
 			}
-			catch (const CsLisp::LispException &)
+			catch (const CppLisp::LispException &)
 			{
 				Assert::IsTrue(true);
 			}

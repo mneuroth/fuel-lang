@@ -30,7 +30,7 @@
 #include "cstypes.h"
 #include "csstring.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	class LispToken;
 

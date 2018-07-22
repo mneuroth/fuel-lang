@@ -25,7 +25,7 @@
 
 #include "Lisp.h"
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 const string Lisp::ProgramName = "fuel";
 const string Lisp::Name = "FUEL(isp)";
@@ -38,7 +38,7 @@ const string Lisp::Info = Lisp::Name + " is a fast usable embeddable lisp interp
 const string Lisp::License = "MIT-License";
 const string Lisp::LicenseUrl = "http://opensource.org/licenses/MIT";
 
-namespace CsLisp
+namespace CppLisp
 {
 	/*public*/ static string DecorateWithBlock(string code, size_t & offset)
 	{

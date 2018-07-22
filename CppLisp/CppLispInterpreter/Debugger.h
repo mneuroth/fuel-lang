@@ -36,7 +36,7 @@
 #include "Environment.h"
 #include "Utils.h"
 
-namespace CsLisp
+namespace CppLisp
 {
 	// ********************************************************************
 	/*internal*/ struct LispBreakpointInfo

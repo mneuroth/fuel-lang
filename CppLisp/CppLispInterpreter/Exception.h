@@ -33,7 +33,7 @@
 
 #include <map>
 
-namespace CsLisp
+namespace CppLisp
 {
 	class LispScope;
 	class LispToken;
