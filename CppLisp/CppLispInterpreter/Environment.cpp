@@ -356,7 +356,7 @@ namespace CsLisp
 
 static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(_WIN64)
 	const std::string DirectorySeparatorChar("\\");
 #else
 	const std::string DirectorySeparatorChar("/");

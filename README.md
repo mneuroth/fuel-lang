@@ -1,7 +1,8 @@
 <img src="fuel.png" alt="fuel logo" height="128" >
 
 # fuel-lang == FUEL(isp)
-FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform and native C++). FUEL is written in C# and C++.
+FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform and native C++). 
+FUEL is written in C# and C++.
 
 FUEL
 ----
@@ -146,7 +147,7 @@ look at the TestAppUsingFuel project.
   
 Deployment  
 ----------
-The binary distribution of FUEL consists of the following components:
+The binary distribution of FUEL for the .NET platform consists of the following components:
 
     LICENSE                   (license)
     README.md                 (this file)
@@ -164,7 +165,7 @@ FUEL is developed with C# for the Microsoft .NET version 3.5 under Windows.
 FUEL can be used with mono environment under Linux and Mac OS X.
 
 FUEL is also available for native C++ for all platforms supporting a C++11 compiler.
-FUEL was successfully compiled on Windows, Android, Linux and Mac OS X. 
+FUEL was successfully compiled on Windows, Android, Linux (including the Raspberry Pi) and Mac OS X. 
   
 
 License
