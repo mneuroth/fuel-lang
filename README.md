@@ -1,7 +1,7 @@
 <img src="fuel.png" alt="fuel logo" height="128" >
 
 # fuel-lang == FUEL(isp)
-FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform)
+FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform and native C++). FUEL is written in C# and C++.
 
 FUEL
 ----
@@ -63,6 +63,30 @@ Even complete classes can be registered at the FUEL interpreter.
     (FUEL_name-DoIt obj 123)        ; use native object
     
 
+The FUEL interpreter can also easily be embedded into native C++ applications.
+Just add the source code files contained in the CppLispInterpreter.pri file to your C++ project
+and use the static Lisp::Eval() function.
+
+    #include "Lisp.h"
+    
+    using namespace CppLisp;
+    
+    ...
+  
+    // script = "(* 6 7)"
+    static double InvokeFuelScript(const string & script)
+    {
+        // evaluate the given script
+        std::shared_ptr<LispVariant> result = Lisp::Eval(script);
+        
+        // convert result to expected type
+        double d = result->DoubleValue();
+        
+        // returns 42
+        return d;
+    }
+
+    
 Interactive loop
 ----------------
 FUEL comes with an interactive loop.
@@ -99,7 +123,7 @@ See: http://mneuroth.de/projects/Visiscript.html.
 
 Compiler
 --------
-FUEL comes with a compiler (experimental).
+FUEL comes with a compiler (experimental). The compiler is not yet implemented for the native C++ environment.
 
     >fuel -c test.fuel
   
@@ -136,8 +160,11 @@ The binary distribution of FUEL consists of the following components:
   
 Platforms  
 ---------
-FUEL is developed with the Microsoft .NET version 3.5 under Windows.
+FUEL is developed with C# for the Microsoft .NET version 3.5 under Windows.
 FUEL can be used with mono environment under Linux and Mac OS X.
+
+FUEL is also available for native C++ for all platforms supporting a C++11 compiler.
+FUEL was successfully compiled on Windows, Android, Linux and Mac OS X. 
   
 
 License
@@ -146,7 +173,7 @@ FUEL is released under the MIT license:
 
 >  FUEL(isp) is a fast usable embeddable lisp interpreter.
 >  
->  Copyright (c) 2016 Michael Neuroth
+>  Copyright (c) 2016-2018 Michael Neuroth
 >
 >  Permission is hereby granted, free of charge, to any person obtaining
 >  a copy of this software and associated documentation files (the "Software"),
