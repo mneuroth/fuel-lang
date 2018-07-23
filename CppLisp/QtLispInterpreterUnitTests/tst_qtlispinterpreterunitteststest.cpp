@@ -123,7 +123,7 @@ void QtLispInterpreterUnitTestsTest::testStringIndexOf()
 
     QVERIFY((size_t)4 == target.IndexOf("def", ""));
     size_t st = target.IndexOf("test", "");
-    QVERIFY(CppLisp::string::npos == target.IndexOf("test", "nix"));
+    QVERIFY(std::string::npos == target.IndexOf("test", "nix"));
 }
 
 QTEST_APPLESS_MAIN(QtLispInterpreterUnitTestsTest)
