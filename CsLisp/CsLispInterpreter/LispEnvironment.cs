@@ -321,7 +321,13 @@ namespace CsLisp
             scope["return"] = CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function.");
             scope["print"] = CreateFunction(Print, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
             scope["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
+            scope["flush"] = CreateFunction(Flush, "(flush)", "Flushes the output to the console.");
+            scope["readline"] = CreateFunction(ReadLine, "(readline)", "Reads a line from the console input.");
 
+            scope["parse-integer"] = CreateFunction(ParseInteger, "(parse-integer expr)", "Convert the expr into a integer value");
+            scope["parse-float"] = CreateFunction(ParseFloat, "(parse-float expr)", "Convert the expr into a float value");
+
+            scope["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
             scope["string"] = CreateFunction(Addition, "(string expr1 expr2 ...)", "see: add");
             scope["add"] = CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ...");
             scope["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
@@ -633,6 +639,56 @@ namespace CsLisp
             var text = GetStringRepresentation(args, scope);
             scope.GlobalScope.Output.WriteLine(text);
             return new LispVariant(text);
+        }
+
+        public static LispVariant Flush(object[] args, LispScope scope)
+        {
+            CheckArgs("flush", 0, args, scope);
+
+            scope.GlobalScope.Output.Flush();
+            return new LispVariant();
+        }
+
+        public static LispVariant ReadLine(object[] args, LispScope scope)
+        {
+            CheckArgs("readline", 0, args, scope);
+
+            var text = scope.GlobalScope.Input.ReadLine();
+            return new LispVariant(text);
+        }
+
+        public static LispVariant ParseInteger(object[] args, LispScope scope)
+        {
+            CheckArgs("parse-integer", 1, args, scope);
+
+            var value = Convert.ToInt32(((LispVariant)args[0]).ToString());
+            return new LispVariant(value);
+        }
+
+        public static LispVariant ParseFloat(object[] args, LispScope scope)
+        {
+            CheckArgs("parse-float", 1, args, scope);
+
+            var value = Convert.ToDouble(((LispVariant)args[0]).ToString());
+            return new LispVariant(value);
+        }
+
+        public static LispVariant Slice(object[] args, LispScope scope)
+        {
+            CheckArgs("slice", 3, args, scope);
+
+            var value = ((LispVariant)args[0]).ToString();
+            var startPos = ((LispVariant)args[1]).ToInt();
+            var len = ((LispVariant)args[2]).ToInt();
+            if(len>=0)
+            {
+                value = value.Substring(startPos, len);
+            }
+            else
+            {
+                value = value.Substring(startPos);
+            }
+            return new LispVariant(value);
         }
 
         public static LispVariant Addition(object[] args, LispScope scope)

@@ -1439,5 +1439,95 @@ namespace LispUnitTests
         }
 
         #endregion
+
+        [TestMethod]
+        public void Test_ReadLine()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("some input\nmore input\n"))
+            {
+                LispVariant result = Lisp.Eval("(do (def a (readline)) (println a) (def b (readline)) (println b))");
+                Assert.IsTrue(result.IsString);
+                Assert.AreEqual("more input", result.ToString());
+
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.Contains("some input"));
+                Assert.IsTrue(s.Contains("more input"));
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_ReadLineWithArgs()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector("some input\nmore input\n"))
+            {
+                LispVariant result = Lisp.Eval("(do (def a (readline 1)) (println a)");
+                Assert.IsTrue(false);
+            }
+        }
+
+        [TestMethod]
+        public void Test_ParseInteger()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"42\") (def i (parse-integer s)))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(42, result.IntValue);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(System.FormatException))]
+        public void Test_ParseIntegerError()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"nonumber\") (def i (parse-integer s)))");
+            Assert.IsTrue(false);
+        }
+
+        [TestMethod]
+        public void Test_ParseFloat()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"42,789\") (def f (parse-float s)))");
+            Assert.IsTrue(result.IsDouble);
+            Assert.AreEqual(42.789, result.DoubleValue);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(System.FormatException))]
+        public void Test_ParseFloatError()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"nonumber\") (def f (parse-float s)))");
+            Assert.IsTrue(false);
+        }
+
+        [TestMethod]
+        public void Test_Slice1()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (slice s 0 4))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("this", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_Slice2()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (slice s 8 -1))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("a string", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_Slice3()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (slice s 5 4))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("is a", result.StringValue);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_SliceError()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (slice s))");
+            Assert.IsTrue(false);
+        }
     }
 }
