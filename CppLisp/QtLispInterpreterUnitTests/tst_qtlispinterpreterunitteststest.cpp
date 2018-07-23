@@ -1,9 +1,9 @@
 #include <QString>
 #include <QtTest>
 
-#include "../CsLispInterpreter/Variant.h"
+#include "../CppLispInterpreter/Variant.h"
 
-using namespace CsLisp;
+using namespace CppLisp;
 
 class QtLispInterpreterUnitTestsTest : public QObject
 {
@@ -19,6 +19,7 @@ private Q_SLOTS:
     void testVariantOperations();
     void testVariantEqualOp();
     void testVariantCastError();
+    void testStringIndexOf();
 };
 
 QtLispInterpreterUnitTestsTest::QtLispInterpreterUnitTestsTest()
@@ -116,6 +117,14 @@ void QtLispInterpreterUnitTestsTest::testVariantCastError()
     }
 }
 
+void QtLispInterpreterUnitTestsTest::testStringIndexOf()
+{
+    CppLisp::string target("abc def blub 123");
+
+    QVERIFY((size_t)4 == target.IndexOf("def", ""));
+    size_t st = target.IndexOf("test", "");
+    QVERIFY(CppLisp::string::npos == target.IndexOf("test", "nix"));
+}
 
 QTEST_APPLESS_MAIN(QtLispInterpreterUnitTestsTest)
 
