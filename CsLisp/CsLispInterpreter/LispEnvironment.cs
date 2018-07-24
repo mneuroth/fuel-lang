@@ -357,6 +357,7 @@ namespace CsLisp
             scope["cons"] = CreateFunction(Cons, "(cons item list)", "Returns a new list containing the item and the elements of the list.");
             scope["len"] = CreateFunction(Length, "(len list)", "Returns the length of the list.");
             scope["first"] = CreateFunction(First, "(first list)", "see: car");
+            scope["last"] = CreateFunction(Last, "(last list)", "Returns the last element of the list.");
             scope["car"] = CreateFunction(First, "(car list)", "Returns the first element of the list.");
             scope["rest"] = CreateFunction(Rest, "(rest list)", "see: cdr");
             scope["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");
@@ -841,6 +842,19 @@ namespace CsLisp
             }
             var elements = val.ListValue;
             return new LispVariant(elements.First());
+        }
+
+        public static LispVariant Last(object[] args, LispScope scope)
+        {
+            CheckArgs("last", 1, args, scope);
+
+            LispVariant val = (LispVariant)args[0];
+            if (val.IsString)
+            {
+                return new LispVariant(val.StringValue.Substring(val.StringValue.Length-1));
+            }
+            var elements = val.ListValue;
+            return new LispVariant(elements.Last());
         }
 
         public static LispVariant Rest(object[] args, LispScope scope)

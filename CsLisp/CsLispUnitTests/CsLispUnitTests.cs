@@ -249,6 +249,13 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_ListLast()
+        {
+            LispVariant result = Lisp.Eval("(last '(1 2 3))");
+            Assert.AreEqual(3, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_ListCar()
         {
             LispVariant result = Lisp.Eval("(car '(\"abc\" 2 3))");
@@ -1536,6 +1543,14 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (first s))");
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("t", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_LastForString()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (last s))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("g", result.StringValue);
         }
 
         [TestMethod]
