@@ -404,7 +404,7 @@ namespace CsLisp
             {
                 return Math.Abs(DoubleValue) > Tolerance;
             }
-            throw CreateInvalidCastException("bool", CanNotConvertTo);
+            throw CreateInvalidCastException("bool", string.Format(CanNotConvertTo, TypeString, "bool"));
         }
 
         public int ToInt()
@@ -425,7 +425,7 @@ namespace CsLisp
             {
                 return Convert.ToInt32(StringValue);
             }
-            throw CreateInvalidCastException("int", CanNotConvertTo);
+            throw CreateInvalidCastException("int", string.Format(CanNotConvertTo, TypeString, "int"));
         }
 
         public double ToDouble()
@@ -446,7 +446,7 @@ namespace CsLisp
             {
                 return Convert.ToDouble(StringValue, CultureInfo.InvariantCulture);
             }
-            throw CreateInvalidCastException("double", CanNotConvertTo);
+            throw CreateInvalidCastException("double", string.Format(CanNotConvertTo, TypeString, "double"));
         }
 
         public string StringValue

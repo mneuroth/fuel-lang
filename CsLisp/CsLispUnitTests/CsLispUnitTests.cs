@@ -1529,5 +1529,37 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (slice s))");
             Assert.IsTrue(false);
         }
+
+        [TestMethod]
+        public void Test_FirstForString()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (first s))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("t", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_RestForString()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (rest s))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("his is a string", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_NthForString()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (nth 5 s))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("i", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_LenForString()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (len s))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(16, result.IntValue);
+        }
     }
 }

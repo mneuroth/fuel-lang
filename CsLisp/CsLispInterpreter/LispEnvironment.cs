@@ -821,7 +821,12 @@ namespace CsLisp
         {
             CheckArgs("len", 1, args, scope);
 
-            var elements = ((LispVariant)args[0]).ListValue;
+            LispVariant val = (LispVariant)args[0];
+            if (val.IsString)
+            {
+                return new LispVariant(val.StringValue.Length);
+            }
+            var elements = val.ListValue;
             return new LispVariant(elements.Count());
         }
 
@@ -829,7 +834,12 @@ namespace CsLisp
         {
             CheckArgs("first", 1, args, scope);
 
-            var elements = ((LispVariant)args[0]).ListValue;
+            LispVariant val = (LispVariant)args[0];
+            if (val.IsString)
+            {
+                return new LispVariant(val.StringValue.Substring(0, 1));
+            }
+            var elements = val.ListValue;
             return new LispVariant(elements.First());
         }
 
@@ -837,7 +847,12 @@ namespace CsLisp
         {
             CheckArgs("rest", 1, args, scope);
 
-            var elements = ((LispVariant)args[0]).ListValue;
+            LispVariant val = (LispVariant)args[0];
+            if(val.IsString)
+            {
+                return new LispVariant(val.StringValue.Substring(1));
+            }
+            var elements = val.ListValue;
             return new LispVariant(elements.Skip(1));
         }
 
@@ -846,7 +861,12 @@ namespace CsLisp
             CheckArgs("nth", 2, args, scope);
 
             var index = ((LispVariant)args[0]).IntValue;
-            var elements = ((LispVariant)args[1]).ListValue;
+            LispVariant val = (LispVariant)args[1];
+            if (val.IsString)
+            {
+                return new LispVariant(val.StringValue.Substring(index, 1));
+            }
+            var elements = val.ListValue;
             return new LispVariant(elements.ElementAt(index));
         }
 
