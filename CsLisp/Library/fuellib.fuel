@@ -27,7 +27,35 @@
 
 (do
     
-  ;; foreach looop  
+  ;; return the secod element of a list or a string
+  (defn second (l)
+      (first (cdr l))
+  )
+
+  ;; return the length of a list or a string 
+  (defn length (l)
+      (len l)
+  )
+
+  ;; returns the length of a string  
+  (defn strlen (s)
+      (len s)
+  )
+
+  ;; implement dotimes function: example: (dotimes (c 10) (println c))
+  (define-macro-eval dotimes (counterinfo statements)
+      (do
+        (def (first 'counterinfo) 0)
+        (while (eval (list < (first 'counterinfo) (nth 1 'counterinfo)))
+          (do
+             (eval statements)
+             (setf (first 'counterinfo) (eval (list + (first 'counterinfo) 1)))
+          )
+        )
+      )
+  )
+
+  ;; foreach loop  
   (defn foreach (container fcn) 
      (do 
 	   (def __i 0)
