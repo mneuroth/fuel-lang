@@ -875,6 +875,14 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Return2()
+        {
+            // return statement was not implmented correctly until 25.7.2018...
+            LispVariant result = Lisp.Eval("(do (defn f (x) (do (return (+ x x)) (return 9))) (println (f 7)))");
+            Assert.AreEqual(14, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_Call1()
         {
             LispVariant result = Lisp.Eval("(do (def obj 0) (setf obj (call \"CsLisp.DummyNative\")) (println obj (type obj)) (call obj \"Test\"))");
@@ -1575,6 +1583,30 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (def s \"this is a string\") (len s))");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(16, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Trim()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \" \t   this is a string  \") (trim s))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("this is a string", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_LowerCase()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"THIS is A stRing\") (lower-case s))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("this is a string", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_UpperCase()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"THIS is A stRing 8 ,.!?\") (upper-case s))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("THIS IS A STRING 8 ,.!?", result.StringValue);
         }
     }
 }

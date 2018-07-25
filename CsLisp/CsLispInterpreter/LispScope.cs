@@ -79,10 +79,15 @@ namespace CsLisp
         public string ModuleName { get; set; }
 
         /// <summary>
-        /// Gets or sets the flat which indicates that an eval function is executed.
+        /// Gets or sets the flag which indicates that an eval function is executed.
         /// This is needed for debugging.
         /// </summary>
         public bool IsInEval { get; set; }
+
+        /// <summary>
+        /// Gets or sets the flag which indicates that an return function is executed.
+        /// </summary>
+        public bool IsInReturn { get; set; }
 
         /// <summary>
         /// Gets or sets the current token.

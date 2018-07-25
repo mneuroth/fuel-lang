@@ -328,6 +328,9 @@ namespace CsLisp
             scope["parse-float"] = CreateFunction(ParseFloat, "(parse-float expr)", "Convert the expr into a float value");
 
             scope["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
+            scope["trim"] = CreateFunction(Trim, "(trim expr1)", "Returns a string with no starting and trailing whitespaces.");
+            scope["lower-case"] = CreateFunction(LowerCase, "(lower-case expr1)", "Returns a string with only lower case characters.");
+            scope["upper-case"] = CreateFunction(UpperCase, "(upper-case expr1)", "Returns a string with only upper case characters.");
             scope["string"] = CreateFunction(Addition, "(string expr1 expr2 ...)", "see: add");
             scope["add"] = CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ...");
             scope["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
@@ -455,6 +458,11 @@ namespace CsLisp
                 foreach (var item in args)
                 {
                     help += scope.GetFunctionsHelpFormated(item.ToString(), select);
+                    // search for functions in all loaded modules
+                    foreach (KeyValuePair<string, object> module in (LispScope)(scope.GlobalScope[Modules]))
+                    {
+                        help += ((LispScope)module.Value).GetFunctionsHelpFormated(item.ToString(), select);
+                    }
                 }
                 return DumpDocumentation(scope, () => scope.GlobalScope.Output.WriteLine("{0}", help));
             }
@@ -609,6 +617,7 @@ namespace CsLisp
 
         public static LispVariant Return(object[] args, LispScope scope)
         {
+            scope.IsInReturn = true;
             return new LispVariant(args[0]);
         }
 
@@ -690,6 +699,30 @@ namespace CsLisp
                 value = value.Substring(startPos);
             }
             return new LispVariant(value);
+        }
+
+        public static LispVariant Trim(object[] args, LispScope scope)
+        {
+            CheckArgs("trim", 1, args, scope);
+
+            var value = ((LispVariant)args[0]).ToString();
+            return new LispVariant(value.Trim());
+        }
+
+        public static LispVariant LowerCase(object[] args, LispScope scope)
+        {
+            CheckArgs("lower-case", 1, args, scope);
+
+            var value = ((LispVariant)args[0]).ToString();
+            return new LispVariant(value.ToLower());
+        }
+
+        public static LispVariant UpperCase(object[] args, LispScope scope)
+        {
+            CheckArgs("upper-case", 1, args, scope);
+
+            var value = ((LispVariant)args[0]).ToString();
+            return new LispVariant(value.ToUpper());
         }
 
         public static LispVariant Addition(object[] args, LispScope scope)
@@ -1135,6 +1168,10 @@ namespace CsLisp
             while (condition.ToBool())
             {
                 result = LispInterpreter.EvalAst(args[1], scope);
+                if (scope.IsInReturn)
+                {
+                    break;
+                }
                 condition = LispInterpreter.EvalAst(args[0], scope);
             }
             return result;
@@ -1151,6 +1188,10 @@ namespace CsLisp
                     throw new LispException("List expected in do", ((LispVariant)statement).Token, scope.ModuleName, scope.DumpStackToString());
                 }
                 result = LispInterpreter.EvalAst(statement, scope);
+                if (scope.IsInReturn)
+                {
+                    break;
+                }
             }
 
             return result;

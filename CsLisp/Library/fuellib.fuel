@@ -42,6 +42,22 @@
       (len s)
   )
 
+  ;; returns index or position of key if the key is found in the list or string
+  (defn find (key _list)
+    (do
+        (def i 0)
+        (while (< i (len _list))
+           (do
+               (if (== key (nth i _list))
+                  (return i)
+               )
+               (setf i (+ i 1))
+           )
+        )
+        (return -1)
+    )
+  )
+
   ;; implement dotimes function: example: (dotimes (c 10) (println c))
   (define-macro-eval dotimes (counterinfo statements)
       (do
