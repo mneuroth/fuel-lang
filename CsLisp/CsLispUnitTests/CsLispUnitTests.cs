@@ -1608,5 +1608,23 @@ namespace LispUnitTests
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("THIS IS A STRING 8 ,.!?", result.StringValue);
         }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_Find1()
+        {
+            LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 5 l))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(1, result.IntValue);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_Find2()
+        {
+            LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 9 l))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(-1, result.IntValue);
+        }
     }
 }
