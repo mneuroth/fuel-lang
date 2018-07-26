@@ -338,6 +338,16 @@ static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shar
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
 }
 
+static std::shared_ptr<LispVariant> Platform(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
+{
+	var list = IEnumerable<std::shared_ptr<object>>();
+// TODO --> real implementation
+	list.Add(std::make_shared<object>("WIN"));
+	list.Add(std::make_shared<object>("C++"));
+	var result = std::make_shared<LispVariant>(LispType::_List, std::make_shared<object>(list));
+	return result;
+}
+
 static string AddFileExtensionIfNeeded(string fileName)
 {
 	const string extension = ".fuel";
@@ -1365,6 +1375,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
     (*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
 	(*scope)["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");
+	(*scope)["platform"] = CreateFunction(Platform, "(platform)", "Returns a list with informations about the current platform: (operating_system runtime_environment).");
 
 	// access to .NET
 //	(*scope)["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static, net-method-name)", "Returns a list of all available method names of the given native class.");

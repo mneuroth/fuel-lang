@@ -1242,7 +1242,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_Import()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1259,7 +1259,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_Import2()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1284,7 +1284,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_CreateNative()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1345,7 +1345,7 @@ namespace LispUnitTests
         #region test fuel standard lib
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_StdLibList()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1362,7 +1362,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_StdLibListSort()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1378,7 +1378,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_StdLibFile()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1392,7 +1392,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_StdLibMath()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1409,7 +1409,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_StdLibMath2()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1424,7 +1424,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_StdLibArray()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1439,7 +1439,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_StdLibDictionary()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -1610,7 +1610,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_Find1()
         {
             LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 5 l))");
@@ -1619,7 +1619,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_Find2()
         {
             LispVariant result = Lisp.Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 9 l))");
@@ -1628,7 +1628,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_DoTimes1()
         {
             LispVariant result = Lisp.Eval("(do (import fuellib) (def l '()) (dotimes (ix 7) (setf l (cons ix l))) (println l))");
@@ -1637,7 +1637,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
         public void Test_DoTimes2()
         {
             LispVariant result = Lisp.Eval("(do (import fuellib) (def l '()) (dotimes (i 7) (setf l (cons i l))) (dotimes (i 9) (setf l (cons i l))) (println l))");

@@ -103,7 +103,7 @@
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(TargetDir)library
-copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
+copy $(ProjectDir)..\..\library\fuellib.fuel $(TargetDir)\library</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,7 +122,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(TargetDir)library
-copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
+copy $(ProjectDir)..\..\library\fuellib.fuel $(TargetDir)\library</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,7 +146,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(TargetDir)library
-copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
+copy $(ProjectDir)..\..\library\fuellib.fuel $(TargetDir)\library</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -169,7 +169,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(TargetDir)library
-copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
+copy $(ProjectDir)..\..\library\fuellib.fuel $(TargetDir)\library</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -216,17 +216,7 @@ copy $(ProjectDir)..\library\fuellib.fuel $(TargetDir)\library</Command>
     <ClCompile Include="Variant.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\Library\fuellib.fuel">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
-    </Text>
+    <None Include="..\..\Library\fuellib.fuel" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
