@@ -1,0 +1,11 @@
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\bin\Release\library\fuellib.fuel
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\bin\Release\fuel.exe.config
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\bin\Release\fuel.exe
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\bin\Release\fuel.pdb
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\bin\Release\FuelInterpreter.dll
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\bin\Release\FuelInterpreter.pdb
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\obj\Release\CsLisp.csprojAssemblyReference.cache
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\obj\Release\CsLisp.csproj.CoreCompileInputs.cache
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\obj\Release\CsLisp.csproj.CopyComplete
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\obj\Release\fuel.exe
+C:\Users\micha\Documents\git_projects\fuel-lang\CsLisp\obj\Release\fuel.pdb

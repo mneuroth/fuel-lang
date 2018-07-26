@@ -590,17 +590,23 @@ namespace CsLisp
                         fileName = AddFileExtensionIfNeeded(fileName);
                         if (!File.Exists(fileName))
                         {
-                            // try default path <fuel.exe-path>\Library\modulename.fuel
-                            fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+                            // try default path for visiscript .\lib\fuel\modulename.fuel
+                            fileName = "." + Path.DirectorySeparatorChar + "lib" + Path.DirectorySeparatorChar + "fuel" + orgModuleFileName;
                             fileName = AddFileExtensionIfNeeded(fileName);
                             if (!File.Exists(fileName))
                             {
-                                // try environment variable FUELPATH
-                                string envPath = Environment.GetEnvironmentVariable("FUELPATH");
-                                if (envPath != null) 
+                                // try default path <fuel.exe-path>\Library\modulename.fuel
+                                fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+                                fileName = AddFileExtensionIfNeeded(fileName);
+                                if (!File.Exists(fileName))
                                 {
-                                    fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
-                                    fileName = AddFileExtensionIfNeeded(fileName);
+                                    // try environment variable FUELPATH
+                                    string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+                                    if (envPath != null)
+                                    {
+                                        fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
+                                        fileName = AddFileExtensionIfNeeded(fileName);
+                                    }
                                 }
                             }
                         }
