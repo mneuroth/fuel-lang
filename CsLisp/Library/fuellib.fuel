@@ -64,7 +64,7 @@
         (def (first 'counterinfo) 0)
         (while (eval (list < (first 'counterinfo) (nth 1 'counterinfo)))
           (do
-             (eval statements)
+             (eval 'statements)
              (setf (first 'counterinfo) (eval (list + (first 'counterinfo) 1)))
           )
         )

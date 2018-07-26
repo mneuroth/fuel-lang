@@ -1626,5 +1626,23 @@ namespace LispUnitTests
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(-1, result.IntValue);
         }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_DoTimes1()
+        {
+            LispVariant result = Lisp.Eval("(do (import fuellib) (def l '()) (dotimes (ix 7) (setf l (cons ix l))) (println l))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("(6 5 4 3 2 1 0)", result.StringValue);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+        public void Test_DoTimes2()
+        {
+            LispVariant result = Lisp.Eval("(do (import fuellib) (def l '()) (dotimes (i 7) (setf l (cons i l))) (dotimes (i 9) (setf l (cons i l))) (println l))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("(8 7 6 5 4 3 2 1 0 6 5 4 3 2 1 0)", result.StringValue);
+        }
     }
 }
