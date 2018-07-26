@@ -390,18 +390,25 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 				fileName = AddFileExtensionIfNeeded(fileName);		
 				if (!File_Exists(fileName))
 				{
-		//			// try default path <fuel.exe-path>\Library\modulename.fuel
-		//// TODO			fileName = AppDomain.CurrentDomain.BaseDirectory + /*Path.*/DirectorySeparatorChar + "Library" + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
-		//			fileName = AddFileExtensionIfNeeded(fileName);
-		//			if (!File_Exists(fileName))
+					// try default path for visiscript .\lib\fuel\modulename.fuel
+					fileName = "." + /*Path.*/DirectorySeparatorChar + "lib" + /*Path.*/DirectorySeparatorChar + "fuel" + DirectorySeparatorChar + orgModuleFileName;
+					fileName = AddFileExtensionIfNeeded(fileName);
+					if (!File_Exists(fileName))
 					{
-						// try environment variable FUELPATH
-						//string envPath = Environment.GetEnvironmentVariable("FUELPATH");
-						char * envPath = getenv("FUELPATH");
-						if (envPath != null)
+
+						//			// try default path <fuel.exe-path>\Library\modulename.fuel
+						//// TODO			fileName = AppDomain.CurrentDomain.BaseDirectory + /*Path.*/DirectorySeparatorChar + "Library" + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
+						//			fileName = AddFileExtensionIfNeeded(fileName);
+						//			if (!File_Exists(fileName))
 						{
-							fileName = envPath + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
-							fileName = AddFileExtensionIfNeeded(fileName);
+							// try environment variable FUELPATH
+							//string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+							char * envPath = getenv("FUELPATH");
+							if (envPath != null)
+							{
+								fileName = envPath + /*Path.*/DirectorySeparatorChar + orgModuleFileName;
+								fileName = AddFileExtensionIfNeeded(fileName);
+							}
 						}
 					}
 				}

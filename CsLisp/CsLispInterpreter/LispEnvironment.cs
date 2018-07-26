@@ -591,7 +591,7 @@ namespace CsLisp
                         if (!File.Exists(fileName))
                         {
                             // try default path for visiscript .\lib\fuel\modulename.fuel
-                            fileName = "." + Path.DirectorySeparatorChar + "lib" + Path.DirectorySeparatorChar + "fuel" + orgModuleFileName;
+                            fileName = "." + Path.DirectorySeparatorChar + "lib" + Path.DirectorySeparatorChar + "fuel" + Path.DirectorySeparatorChar + orgModuleFileName;
                             fileName = AddFileExtensionIfNeeded(fileName);
                             if (!File.Exists(fileName))
                             {
