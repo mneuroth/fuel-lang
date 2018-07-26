@@ -26,7 +26,17 @@
 ;;====================================
 
 (do
-    
+   
+  ;; return #t if script runs on a .NET platform
+  (defn isNET ()
+    (== (nth 1 (platform)) ".NET")
+  )
+
+  ;; return #t if script runs on a native C++ platform
+  (defn isCpp ()
+    (== (nth 1 (platform)) "C++")
+  )
+
   ;; return the secod element of a list or a string
   (defn second (l)
       (first (cdr l))
@@ -202,15 +212,18 @@
         )     
   )
   
-  ;; create the standard library for fuel
-  
-  (evalstr (create-native "Math" "System.Math"))
-  (evalstr (create-native "File" "System.IO.File"))
-  (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
-  (evalstr (create-native "Directory" "System.IO.Directory"))
-  (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
-  (evalstr (create-native "Array" "System.Object[]"))
-  (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
+  ;; create the standard library for fuel on .NET platforms
+  (if (isNET)
+	(do
+	  (evalstr (create-native "Math" "System.Math"))
+	  (evalstr (create-native "File" "System.IO.File"))
+	  (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
+	  (evalstr (create-native "Directory" "System.IO.Directory"))
+	  (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
+	  (evalstr (create-native "Array" "System.Object[]"))
+	  (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
+	)
+  )
   
 ;  (evalstr "(defn yyy (x) (+ x x x))")
 ;  (eval '(defn xxx (x) (+ x x x)))

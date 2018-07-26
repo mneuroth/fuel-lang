@@ -302,7 +302,8 @@ namespace CsLisp
             scope["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
             scope["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
             scope["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
-            scope["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");            
+            scope["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");
+            scope["platform"] = CreateFunction(Platform, "(platform)", "Returns a list with informations about the current platform: (operating_system runtime_environment).");
 
             // access to .NET
             scope["native-methods"] = CreateFunction(GetNativeMethods, "(native-methods native-obj|class-name) -> (method-name, argument-count, is-static, net-method-name)", "Returns a list of all available method names of the given native class.");
@@ -327,6 +328,7 @@ namespace CsLisp
             scope["parse-integer"] = CreateFunction(ParseInteger, "(parse-integer expr)", "Convert the expr into a integer value");
             scope["parse-float"] = CreateFunction(ParseFloat, "(parse-float expr)", "Convert the expr into a float value");
 
+            scope["search"] = CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos.");
             scope["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
             scope["trim"] = CreateFunction(Trim, "(trim expr1)", "Returns a string with no starting and trailing whitespaces.");
             scope["lower-case"] = CreateFunction(LowerCase, "(lower-case expr1)", "Returns a string with only lower case characters.");
@@ -366,6 +368,7 @@ namespace CsLisp
             scope["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");
             scope["nth"] = CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list.");
             scope["append"] = CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements.");
+            scope["reverse"] = CreateFunction(Reverse, "(reverse expr)", "Returns a list or string with a reverted order.");
             scope[Sym] = CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol.");
             scope[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
 
@@ -526,6 +529,35 @@ namespace CsLisp
             return new LispVariant(value);
         }
 
+        private static LispVariant Platform(object[] args, LispScope scope)
+        {
+            string osString;
+            OperatingSystem os = Environment.OSVersion;
+            PlatformID pid = os.Platform;
+            switch(pid)
+            {
+                case PlatformID.MacOSX:
+                    osString = "MACOSX";
+                    break;
+                case PlatformID.Unix:
+                    osString = "UNIX";
+                    break;
+                case PlatformID.Win32NT:
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                    osString = "WIN";
+                    break;
+                case PlatformID.Xbox:
+                    osString = "XBOX";
+                    break;
+                default:
+                    osString = "UNKNOWN";
+                    break;
+            }
+            var value = new List<string>() { osString, ".NET", /*Environment.Is64BitProcess,*/ /*Environment.OSVersion.ToString(), Environment.Version.ToString()*/ };
+            return new LispVariant(value);
+        }
+
         private static string AddFileExtensionIfNeeded(string fileName)
         {
             const string extension = ".fuel";
@@ -683,6 +715,33 @@ namespace CsLisp
             return new LispVariant(value);
         }
 
+        public static LispVariant Search(object[] args, LispScope scope)
+        {
+            CheckOptionalArgs("search", 2, 4, args, scope);
+
+            var searchText = ((LispVariant)args[0]).ToString();
+            var source = ((LispVariant)args[1]).ToString();
+            var pos = args.Length > 2 ? ((LispVariant)args[2]).ToInt() : -1;
+            var len = args.Length > 3 ? ((LispVariant)args[3]).ToInt() : -1;
+            int foundPos = -1;
+            if (pos >= 0)
+            {
+                if (len >= 0)
+                {
+                    foundPos = source.IndexOf(searchText, pos, len);
+                }
+                else
+                {
+                    foundPos = source.IndexOf(searchText, pos);
+                }
+            }
+            else
+            {
+                foundPos = source.IndexOf(searchText);
+            }
+            return new LispVariant(foundPos);
+        }
+
         public static LispVariant Slice(object[] args, LispScope scope)
         {
             CheckArgs("slice", 3, args, scope);
@@ -690,7 +749,7 @@ namespace CsLisp
             var value = ((LispVariant)args[0]).ToString();
             var startPos = ((LispVariant)args[1]).ToInt();
             var len = ((LispVariant)args[2]).ToInt();
-            if(len>=0)
+            if (len >= 0)
             {
                 value = value.Substring(startPos, len);
             }
@@ -929,6 +988,20 @@ namespace CsLisp
                 }
             }
             return result;
+        }
+
+        public static LispVariant Reverse(object[] args, LispScope scope)
+        {
+            CheckArgs("reverse", 1, args, scope);
+
+            LispVariant val = (LispVariant)args[0];
+            if (val.IsString)
+            {
+                var temp = new String(val.StringValue.Reverse().ToArray());
+                return new LispVariant(temp.ToString());
+            }
+            var elements = val.ListValue;
+            return new LispVariant(elements.Reverse());
         }
 
         public static LispVariant Symbol(object[] args, LispScope scope)
@@ -1595,6 +1668,14 @@ namespace CsLisp
             if (count < 0 || args.Length != count)
             {
                 throw new LispException(string.Format("Bad argument count in {0}, has {1} expected {2}", name, args.Length, count), scope);
+            }
+        }
+
+        private static void CheckOptionalArgs(string name, int minCount, int maxCount, object[] args, LispScope scope)
+        {
+            if ((args.Length < minCount) || (args.Length > maxCount))
+            {
+                throw new LispException(string.Format("Bad argument count in {0}, has {1} expected between {2} and {3}", name, args.Length, minCount, maxCount), scope);
             }
         }
 
