@@ -29,6 +29,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 
 namespace CsLisp
 {
@@ -303,6 +304,8 @@ namespace CsLisp
             scope["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
             scope["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
             scope["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");
+            scope["sleep"] = CreateFunction(Sleep, "(sleep time-in-ms)", "Sleeps the given number of milliseconds.");
+            scope["date-time"] = CreateFunction(Datetime, "(date-time)", "Returns a list with informations about the current date and time: (year month day hours minutes seconds).");
             scope["platform"] = CreateFunction(Platform, "(platform)", "Returns a list with informations about the current platform: (operating_system runtime_environment).");
 
             // access to .NET
@@ -342,6 +345,8 @@ namespace CsLisp
             scope["*"] = CreateFunction(Multiplication, "(* expr1 expr2 ...)", "see: mul");
             scope["div"] = CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ...");
             scope["/"] = CreateFunction(Division, "(/ expr1 expr2 ...)", "see: div");
+            scope["mod"] = CreateFunction(Modulo, "(mod expr1 expr2)", "Returns value of modulo operation between expr1 and expr2");
+            scope["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: div");
 
             scope["<"] = CreateFunction(LessTest, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese.");
             scope[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
@@ -372,8 +377,8 @@ namespace CsLisp
             scope[Sym] = CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol.");
             scope[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
 
-            scope[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of command line arguments for this script.");
-            scope[Args] = CreateFunction(ArgsFcn, "(args number)", "Returns the [number] command line argument for this script.");
+            scope[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of arguments for the current function.");
+            scope[Args] = CreateFunction(ArgsFcn, "(args number)", "Returns the value of the [number] argument for the current function.");
             scope[Apply] = CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments.");
             scope[Eval] = CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast).");
             scope[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");
@@ -526,6 +531,25 @@ namespace CsLisp
         private static LispVariant CurrentTickCount(object[] args, LispScope scope)
         {
             var value = Environment.TickCount;
+            return new LispVariant(value);
+        }
+
+        private static LispVariant Sleep(object[] args, LispScope scope)
+        {
+            var timeInMs = ((LispVariant)args[0]).ToInt();
+            Thread.Sleep(timeInMs);
+            return new LispVariant();
+        }
+
+        private static LispVariant Datetime(object[] args, LispScope scope)
+        {
+            var year = DateTime.Now.Year;
+            var month = DateTime.Now.Month;
+            var day = DateTime.Now.Day;
+            var hour = DateTime.Now.Hour;
+            var minute = DateTime.Now.Minute;
+            var second = DateTime.Now.Second;
+            var value = new List<LispVariant>() { new LispVariant(year), new LispVariant(month), new LispVariant(day), new LispVariant(hour), new LispVariant(minute), new LispVariant(second) };
             return new LispVariant(value);
         }
 
@@ -797,6 +821,20 @@ namespace CsLisp
 
         public static LispVariant Subtraction(object[] args, LispScope scope)
         {
+            // process unary - operator
+            if (args.Length == 1)
+            {
+                var value = (LispVariant)args[0];
+                if (value.IsInt)
+                {
+                    return new LispVariant(-value.IntValue);
+                }
+                if (value.IsDouble)
+                {
+                    return new LispVariant(-value.DoubleValue);
+                }
+                throw new LispException(string.Format("Unary operator - not available for {0}", value.TypeString));
+            }
             return ArithmetricOperation(args, (l, r) => l - r);
         }
 
@@ -809,6 +847,11 @@ namespace CsLisp
         {
             return ArithmetricOperation(args, (l, r) => l / r);
         }
+
+        public static LispVariant Modulo(object[] args, LispScope scope)
+        {
+            return ArithmetricOperation(args, (l, r) => l % r);
+        }        
 
         public static LispVariant Not(object[] args, LispScope scope)
         {
@@ -1296,7 +1339,23 @@ namespace CsLisp
 
                     if (formalArgs.Length > localArgs.Length)
                     {
-                        throw new LispException("Invalid number of arguments");
+                        //throw new LispException("Invalid number of arguments");
+
+                        // fill all not given arguments with nil
+                        var newLocalArgs = new object[formalArgs.Length];
+                        for (int n = 0; n < formalArgs.Length; n++)
+                        {
+                            if (n < localArgs.Length)
+                            {
+                                newLocalArgs[n] = localArgs[n];
+                            }
+                            else
+                            {
+                                newLocalArgs[n] = new LispVariant(LispType.Nil);
+                            }
+                        }
+
+                        localArgs = newLocalArgs;
                     }
 
                     foreach (var arg in formalArgs)

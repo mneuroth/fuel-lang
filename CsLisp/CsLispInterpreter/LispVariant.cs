@@ -720,6 +720,19 @@ namespace CsLisp
             throw CreateInvalidOperationException("/", l, r);
         }
 
+        public static LispVariant operator %(LispVariant l, LispVariant r)
+        {
+            if (l.IsDouble || r.IsDouble)
+            {
+                return new LispVariant(l.ToDouble() % r.ToDouble());
+            }
+            if (l.IsInt || r.IsInt)
+            {
+                return new LispVariant(l.ToInt() % r.ToInt());
+            }
+            throw CreateInvalidOperationException("%", l, r);
+        }
+
         public static LispVariant operator <(LispVariant l, LispVariant r)
         {
             if (l.IsDouble || r.IsDouble)

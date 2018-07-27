@@ -1277,10 +1277,10 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LispException))]
         public void Test_BadForeach()
         {
-            Lisp.Eval("(do (import fuellib) (foreach))");
+            LispVariant result = Lisp.Eval("(do (import fuellib) (foreach))");
+            Assert.IsTrue(result.IsUndefined);
         }
 
         [TestMethod]
@@ -1675,6 +1675,53 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (def s \"this is text\") (search \"tes\" s))");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(-1, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_UnaryMinusInt()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 8) (- a))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(-8, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_UnaryMinusDouble()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 1.234) (- a))");
+            Assert.IsTrue(result.IsDouble);
+            Assert.AreEqual(-1.234, result.DoubleValue);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_UnaryMinusString()
+        {
+            LispVariant result = Lisp.Eval("(do (def a \"nix\") (- a))");
+        }
+
+        [TestMethod]
+        public void Test_ModuloInt()
+        {
+            LispVariant result = Lisp.Eval("(do (% 7 3))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(1, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_ModuloDouble()
+        {
+            LispVariant result = Lisp.Eval("(do (% 7.4 2.8))");
+            Assert.IsTrue(result.IsDouble);
+            Assert.AreEqual("1,8", result.DoubleValue.ToString());
+        }
+
+        [TestMethod]
+        public void Test_NotEnoughFunctionArguments()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f (x y z) (add (str x) (str y) (str z))) (f 3))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("3NILNIL", result.StringValue);
         }
     }
 }
