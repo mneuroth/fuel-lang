@@ -1490,27 +1490,25 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.FormatException))]
         public void Test_ParseIntegerError()
         {
             LispVariant result = Lisp.Eval("(do (def s \"nonumber\") (def i (parse-integer s)))");
-            Assert.IsTrue(false);
+            Assert.IsTrue(result.IsUndefined);
         }
 
         [TestMethod]
         public void Test_ParseFloat()
         {
-            LispVariant result = Lisp.Eval("(do (def s \"42,789\") (def f (parse-float s)))");
+            LispVariant result = Lisp.Eval("(do (def s \"42.789\") (def f (parse-float s)))");
             Assert.IsTrue(result.IsDouble);
             Assert.AreEqual(42.789, result.DoubleValue);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.FormatException))]
         public void Test_ParseFloatError()
         {
             LispVariant result = Lisp.Eval("(do (def s \"nonumber\") (def f (parse-float s)))");
-            Assert.IsTrue(false);
+            Assert.IsTrue(result.IsUndefined);
         }
 
         [TestMethod]
@@ -1722,6 +1720,83 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (defn f (x y z) (add (str x) (str y) (str z))) (f 3))");
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("3NILNIL", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_IntConversion1()
+        {
+            LispVariant result = Lisp.Eval("(do (int 7.4))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(7, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_IntConversion2()
+        {
+            LispVariant result = Lisp.Eval("(do (int \"61.234\"))");
+            Assert.IsTrue(result.IsUndefined);
+        }
+
+        [TestMethod]
+        public void Test_IntConversion3()
+        {
+            LispVariant result = Lisp.Eval("(do (int #t))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(1, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_IntConversion4()
+        {
+            LispVariant result = Lisp.Eval("(do (int #f))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(0, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_IntConversion5()
+        {
+            LispVariant result = Lisp.Eval("(do (int \"a text\"))");
+            Assert.IsTrue(result.IsUndefined);
+        }
+
+        [TestMethod]
+        public void Test_FloatConversion1()
+        {
+            LispVariant result = Lisp.Eval("(do (float 7))");
+            Assert.IsTrue(result.IsDouble);
+            Assert.AreEqual(7, result.DoubleValue);
+        }
+
+        [TestMethod]
+        public void Test_FloatConversion2()
+        {
+            LispVariant result = Lisp.Eval("(do (float \"61.234\"))");
+            Assert.IsTrue(result.IsDouble);
+            Assert.AreEqual(61.234, result.DoubleValue);
+        }
+
+        [TestMethod]
+        public void Test_FloatConversion3()
+        {
+            LispVariant result = Lisp.Eval("(do (float #t))");
+            Assert.IsTrue(result.IsDouble);
+            Assert.AreEqual(1, result.DoubleValue);
+        }
+
+        [TestMethod]
+        public void Test_FloatConversion4()
+        {
+            LispVariant result = Lisp.Eval("(do (float #f))");
+            Assert.IsTrue(result.IsDouble);
+            Assert.AreEqual(0, result.DoubleValue);
+        }
+
+        [TestMethod]
+        public void Test_FloatConversion5()
+        {
+            LispVariant result = Lisp.Eval("(do (float \"a text\"))");
+            Assert.IsTrue(result.IsUndefined);
         }
     }
 }

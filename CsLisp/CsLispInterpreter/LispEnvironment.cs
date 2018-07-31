@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -328,8 +329,10 @@ namespace CsLisp
             scope["flush"] = CreateFunction(Flush, "(flush)", "Flushes the output to the console.");
             scope["readline"] = CreateFunction(ReadLine, "(readline)", "Reads a line from the console input.");
 
-            scope["parse-integer"] = CreateFunction(ParseInteger, "(parse-integer expr)", "Convert the expr into a integer value");
-            scope["parse-float"] = CreateFunction(ParseFloat, "(parse-float expr)", "Convert the expr into a float value");
+            scope["parse-integer"] = CreateFunction(ParseInteger, "(parse-integer expr)", "Convert the string expr into an integer value");
+            scope["parse-float"] = CreateFunction(ParseFloat, "(parse-float expr)", "Convert the string expr into a float value");
+            scope["int"] = CreateFunction(ToInt, "(int expr)", "Convert the expr into an integer value");
+            scope["float"] = CreateFunction(ToFloat, "(float expr)", "Convert the expr into a float value");
 
             scope["search"] = CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos.");
             scope["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
@@ -733,7 +736,15 @@ namespace CsLisp
         {
             CheckArgs("parse-integer", 1, args, scope);
 
-            var value = Convert.ToInt32(((LispVariant)args[0]).ToString());
+            int value;
+            try
+            {
+                value = Convert.ToInt32(((LispVariant)args[0]).ToString(), CultureInfo.InvariantCulture);
+            }
+            catch (Exception)
+            {
+                return new LispVariant(LispType.Undefined);
+            }
             return new LispVariant(value);
         }
 
@@ -741,8 +752,64 @@ namespace CsLisp
         {
             CheckArgs("parse-float", 1, args, scope);
 
-            var value = Convert.ToDouble(((LispVariant)args[0]).ToString());
+            double value;
+            try
+            {
+                value = Convert.ToDouble(((LispVariant)args[0]).ToString(), CultureInfo.InvariantCulture);
+            }
+            catch (Exception)
+            {
+                return new LispVariant(LispType.Undefined);
+            }
             return new LispVariant(value);
+        }
+
+        public static LispVariant ToInt(object[] args, LispScope scope)
+        {
+            CheckArgs("int", 1, args, scope);
+
+            var value = (LispVariant)args[0];
+            if (value.IsInt)
+            {
+                return new LispVariant(value.IntValue);
+            }
+            if (value.IsDouble)
+            {
+                return new LispVariant((int)value.DoubleValue);
+            }
+            if (value.IsString)
+            {
+                return ParseInteger(args, scope);
+            }
+            if (value.IsBool)
+            {
+                return new LispVariant(value.BoolValue ? 1 : 0);
+            }
+            return new LispVariant(LispType.Undefined);
+        }
+
+        public static LispVariant ToFloat(object[] args, LispScope scope)
+        {
+            CheckArgs("float", 1, args, scope);
+
+            var value = (LispVariant) args[0];
+            if (value.IsInt)
+            {
+                return new LispVariant((double)value.IntValue);
+            }
+            if (value.IsDouble)
+            {
+                return new LispVariant(value.DoubleValue);
+            }
+            if (value.IsString)
+            {
+                return ParseFloat(args, scope);
+            }
+            if (value.IsBool)
+            {
+                return new LispVariant(value.BoolValue ? 1.0 : 0.0);
+            }
+            return new LispVariant(LispType.Undefined);
         }
 
         public static LispVariant Search(object[] args, LispScope scope)

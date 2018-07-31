@@ -423,7 +423,7 @@ namespace CsLisp
             }
             if (IsString)
             {
-                return Convert.ToInt32(StringValue);
+                return Convert.ToInt32(StringValue, CultureInfo.InvariantCulture);
             }
             throw CreateInvalidCastException("int", string.Format(CanNotConvertTo, TypeString, "int"));
         }

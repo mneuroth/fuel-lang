@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -663,7 +664,7 @@ namespace CsLisp
             var ok = true;
             try
             {
-                result = Convert.ToInt32(value);
+                result = Convert.ToInt32(value, CultureInfo.InvariantCulture);
             }
             catch (FormatException)
             {
