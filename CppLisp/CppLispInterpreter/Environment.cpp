@@ -487,6 +487,149 @@ static std::shared_ptr<LispVariant> PrintLn(const std::vector<std::shared_ptr<ob
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
+static std::shared_ptr<LispVariant> Flush(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("flush", 0, args, scope);
+
+	scope->GlobalScope->Output->Flush();
+	return std::make_shared<LispVariant>(LispVariant(LispType::_Undefined));
+}
+
+static std::shared_ptr<LispVariant> ReadLine(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("readline", 0, args, scope);
+
+	var text = scope->GlobalScope->Input->ReadLine();
+	return std::make_shared<LispVariant>(std::make_shared<object>(text));
+}
+
+static std::shared_ptr<LispVariant> ParseInteger(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("parse-integer", 1, args, scope);
+
+	int value;
+	try
+	{
+		value = std::stoi(((LispVariant)args[0]).ToString());
+	}
+	catch (...)
+	{
+		return std::make_shared<LispVariant>(LispVariant(LispType::_Undefined));
+	}
+	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+}
+
+static std::shared_ptr<LispVariant> ParseFloat(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("parse-float", 1, args, scope);
+
+	double value;
+	try
+	{
+		value = std::stod(((LispVariant)args[0]).ToString());
+	}
+	catch (...)
+	{
+		return std::make_shared<LispVariant>(LispVariant(LispType::_Undefined));
+	}
+	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+}
+
+#ifdef xxx
+static std::shared_ptr<LispVariant> ToInt(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("int", 1, args, scope);
+
+	var value = (LispVariant)args[0];
+	if (value.IsInt)
+	{
+		return new LispVariant(value.IntValue);
+	}
+	if (value.IsDouble)
+	{
+		return new LispVariant((int)value.DoubleValue);
+	}
+	if (value.IsString)
+	{
+		return ParseInteger(args, scope);
+	}
+	if (value.IsBool)
+	{
+		return new LispVariant(value.BoolValue ? 1 : 0);
+	}
+	return new LispVariant(LispType.Undefined);
+}
+
+static std::shared_ptr<LispVariant> ToFloat(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("float", 1, args, scope);
+
+	var value = (LispVariant)args[0];
+	if (value.IsInt)
+	{
+		return new LispVariant((double)value.IntValue);
+	}
+	if (value.IsDouble)
+	{
+		return new LispVariant(value.DoubleValue);
+	}
+	if (value.IsString)
+	{
+		return ParseFloat(args, scope);
+	}
+	if (value.IsBool)
+	{
+		return new LispVariant(value.BoolValue ? 1.0 : 0.0);
+	}
+	return new LispVariant(LispType.Undefined);
+}
+
+static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckOptionalArgs("search", 2, 4, args, scope);
+
+	var searchText = ((LispVariant)args[0]).ToString();
+	var source = ((LispVariant)args[1]).ToString();
+	var pos = args.Length > 2 ? ((LispVariant)args[2]).ToInt() : -1;
+	var len = args.Length > 3 ? ((LispVariant)args[3]).ToInt() : -1;
+	int foundPos = -1;
+	if (pos >= 0)
+	{
+		if (len >= 0)
+		{
+			foundPos = source.IndexOf(searchText, pos, len);
+		}
+		else
+		{
+			foundPos = source.IndexOf(searchText, pos);
+		}
+	}
+	else
+	{
+		foundPos = source.IndexOf(searchText);
+	}
+	return new LispVariant(foundPos);
+}
+#endif
+
+static std::shared_ptr<LispVariant> Slice(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("slice", 3, args, scope);
+
+	var value = ((LispVariant)args[0]).ToString();
+	var startPos = ((LispVariant)args[1]).ToInt();
+	var len = ((LispVariant)args[2]).ToInt();
+	if (len >= 0)
+	{
+		value = value.Substring(startPos, len);
+	}
+	else
+	{
+		value = value.Substring(startPos);
+	}
+	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+}
+
 static std::shared_ptr<LispVariant> ArithmetricOperation(const std::vector<std::shared_ptr<object>> & args, std::function<std::shared_ptr<LispVariant>(std::shared_ptr<LispVariant>, std::shared_ptr<LispVariant>)> op)
 {
 	std::shared_ptr<LispVariant> result(null);
@@ -1400,7 +1543,16 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["return"] = CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function.");
 	(*scope)["print"] = CreateFunction(Print, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
 	(*scope)["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
+	(*scope)["flush"] = CreateFunction(Flush, "(flush)", "Flushes the output to the console.");
+	(*scope)["readline"] = CreateFunction(ReadLine, "(readline)", "Reads a line from the console input.");
 
+	(*scope)["parse-integer"] = CreateFunction(ParseInteger, "(parse-integer expr)", "Convert the string expr into an integer value");
+	(*scope)["parse-float"] = CreateFunction(ParseFloat, "(parse-float expr)", "Convert the string expr into a float value");
+//	(*scope)["int"] = CreateFunction(ToInt, "(int expr)", "Convert the expr into an integer value");
+//	(*scope)["float"] = CreateFunction(ToFloat, "(float expr)", "Convert the expr into a float value");
+
+//	(*scope)["search"] = CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos.");
+	(*scope)["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
 	(*scope)["string"] = CreateFunction(Addition, "(string expr1 expr2 ...)", "see: add");
 	(*scope)["add"] = CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ...");
 	(*scope)["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");

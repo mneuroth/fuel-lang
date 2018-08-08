@@ -108,6 +108,11 @@ namespace CppLisp
 		std::cout << temp << std::endl;
 	}
 
+	void TextWriter::Flush() 
+	{
+		std::cout.flush();
+	}
+
 	TextWriter::TextWriter(bool bToString)
 		: m_bToString(bToString)
 	{

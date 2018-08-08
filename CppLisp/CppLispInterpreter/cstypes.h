@@ -247,6 +247,7 @@ namespace CppLisp
 		void WriteLine(const string & txt, const string & txt1, const string & txt2);
 		void WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3);
 		void WriteLine(const string & txt, const string & txt1, const string & txt2, const string & txt3, const string & txt4);
+		void Flush();
 	};
 
 	// **********************************************************************

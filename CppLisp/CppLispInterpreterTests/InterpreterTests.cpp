@@ -1427,6 +1427,110 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_ReadLine)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("some input\nmore input\n"))
+			{
+				var scope = LispEnvironment::CreateDefaultScope();
+				scope->Output->EnableToString(true);
+				scope->Input->EnableFromString(true);
+				scope->Input->SetContent("some input\nmore input\n");
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a (readline)) (println a) (def b (readline)) (println b))", scope);
+				Assert::IsTrue(result->IsString());
+				Assert::AreEqual("more input", result->ToString().c_str());
+
+				string s = scope->Output->GetContent().Trim();
+				Assert::IsTrue(s.Contains("some input"));
+				Assert::IsTrue(s.Contains("more input"));
+			}
+		}
+
+		TEST_METHOD(Test_ReadLineWithArgs)
+		{
+			//using (ConsoleRedirector cr = new ConsoleRedirector("some input\nmore input\n"))
+			{
+				try
+				{
+					var scope = LispEnvironment::CreateDefaultScope();
+					scope->Output->EnableToString(true);
+					std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a (readline 1)) (println a)", scope);
+					Assert::IsTrue(false);
+				}
+				catch (const CppLisp::LispException &)
+				{
+					Assert::IsTrue(true);
+				}
+				catch (...)
+				{
+					Assert::IsTrue(false);
+				}
+			}
+		}
+
+		TEST_METHOD(Test_ParseInteger)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"42\") (def i (parse-integer s)))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(42, result->IntValue());
+		}
+
+		TEST_METHOD(Test_ParseIntegerError)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"nonumber\") (def i (parse-integer s)))");
+			Assert::IsTrue(result->IsUndefined());
+		}
+
+		TEST_METHOD(Test_ParseFloat)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"42.789\") (def f (parse-float s)))");
+			Assert::IsTrue(result->IsDouble());
+			Assert::AreEqual(42.789, result->DoubleValue());
+		}
+
+		TEST_METHOD(Test_ParseFloatError)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"nonumber\") (def f (parse-float s)))");
+			Assert::IsTrue(result->IsUndefined());
+		}
+
+		TEST_METHOD(Test_Slice1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s 0 4))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("this", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_Slice2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s 8 -1))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("a string", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_Slice3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s 5 4))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("is a", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_SliceError)
+		{
+			try
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s))");
+				Assert::IsTrue(false);
+			}
+			catch (const CppLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects
