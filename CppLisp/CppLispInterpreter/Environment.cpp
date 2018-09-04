@@ -797,24 +797,52 @@ static std::shared_ptr<LispVariant> Length(const std::vector<std::shared_ptr<obj
 {
 	CheckArgs("len", 1, args, scope);
 
-	var elements = *(args[0]->ToLispVariant()->ListValue());
-	return std::make_shared<LispVariant>(std::make_shared<object>((int)elements.Count()));
+	var val = args[0]->ToLispVariant();
+	if (val->IsString())
+	{
+		return std::make_shared<LispVariant>(std::make_shared<object>((int)val->StringValue().size()));
+	}
+	var elements = val->ListValue();
+	return std::make_shared<LispVariant>(std::make_shared<object>((int)elements->Count()));
 }
 
 static std::shared_ptr<LispVariant> First(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("first", 1, args, scope);
 
-	var elements = *(args[0]->ToLispVariant()->ListValue());
-	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements.First())));
+	var val = args[0]->ToLispVariant();
+	if (val->IsString())
+	{
+		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(0, 1)));
+	}
+	var elements = val->ListValue();
+	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements->First())));
+}
+
+static std::shared_ptr<LispVariant> Last(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("last", 1, args, scope);
+
+	var val = args[0]->ToLispVariant();
+	if (val->IsString())
+	{
+		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(val->StringValue().size() - 1)));
+	}
+	var elements = val->ListValue();
+	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements->Last())));
 }
 
 static std::shared_ptr<LispVariant> Rest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("rest", 1, args, scope);
 
-	var elements = *(args[0]->ToLispVariant()->ListValue());
-	return std::make_shared<LispVariant>(std::make_shared<object>(elements.Skip(1)));
+	var val = args[0]->ToLispVariant();
+	if (val->IsString())
+	{
+		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(1)));
+	}
+	var elements = val->ListValue();
+	return std::make_shared<LispVariant>(std::make_shared<object>(elements->Skip(1)));
 }
 
 static std::shared_ptr<LispVariant> Nth(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -822,9 +850,13 @@ static std::shared_ptr<LispVariant> Nth(const std::vector<std::shared_ptr<object
 	CheckArgs("nth", 2, args, scope);
 
 	var index = args[0]->ToLispVariant()->IntValue();
-	var elements = args[1]->ToLispVariant()->ListValue();
-	var val = elements->ElementAt(index);
-	return std::make_shared<LispVariant>(std::make_shared<object>(*val));
+	var val = args[1]->ToLispVariant();
+	if (val->IsString())
+	{
+		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(index, 1)));
+	}
+	var elements = val->ListValue();
+	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements->ElementAt(index))));
 }
 
 static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
@@ -1583,6 +1615,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["cons"] = CreateFunction(Cons, "(cons item list)", "Returns a new list containing the item and the elements of the list.");
 	(*scope)["len"] = CreateFunction(Length, "(len list)", "Returns the length of the list.");
 	(*scope)["first"] = CreateFunction(First, "(first list)", "see: car");
+	(*scope)["last"] = CreateFunction(Last, "(last list)", "Returns the last element of the list.");
 	(*scope)["car"] = CreateFunction(First, "(car list)", "Returns the first element of the list.");
 	(*scope)["rest"] = CreateFunction(Rest, "(rest list)", "see: cdr");
 	(*scope)["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");

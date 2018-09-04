@@ -145,7 +145,7 @@ namespace CppLisp
 		{
 			return /*Math.A*/fabs(DoubleValue()) > Tolerance;
 		}
-		throw CreateInvalidCastException("bool", CanNotConvertTo);
+		throw CreateInvalidCastException("bool", CppLisp::string::Format(CanNotConvertTo, TypeString(), "bool"));
 	}
 
 	int LispVariant::ToInt() const
@@ -166,7 +166,7 @@ namespace CppLisp
 		{
 			return /*Convert.ToInt32*/atoi(StringValue().c_str());
 		}
-		throw CreateInvalidCastException("int", CanNotConvertTo);
+		throw CreateInvalidCastException("int", CppLisp::string::Format(CanNotConvertTo, TypeString(), "int"));
 	}
 
 	double LispVariant::ToDouble() const
@@ -187,7 +187,7 @@ namespace CppLisp
 		{
 			return atof(StringValue().c_str()); //Convert.ToDouble(StringValue(), CultureInfo.InvariantCulture);
 		}
-		throw CreateInvalidCastException("double", CanNotConvertTo);
+		throw CreateInvalidCastException("double", CppLisp::string::Format(CanNotConvertTo, TypeString(), "double"));
 	}
 
 	string LispVariant::StringValue() const

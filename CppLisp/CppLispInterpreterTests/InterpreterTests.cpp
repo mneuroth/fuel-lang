@@ -1531,6 +1531,41 @@ namespace QtLispUnitTests
 			}
 		}
 
+		TEST_METHOD(Test_FirstForString)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (first s))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("t", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_LastForString)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (last s))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("g", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_RestForString)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (rest s))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("his is a string", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_NthForString)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (nth 5 s))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("i", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_LenForString)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (len s))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(16, result->IntValue());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects
