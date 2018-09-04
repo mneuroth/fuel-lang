@@ -230,6 +230,12 @@ namespace QtLispUnitTests
 			Assert::AreEqual(1, result->ToInt());
 		}
 
+		TEST_METHOD(Test_ListLast)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(last '(1 2 3))");
+			Assert::AreEqual(3, result->ToInt());
+		}
+
 		TEST_METHOD(Test_ListCar)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(car '(\"abc\" 2 3))");
