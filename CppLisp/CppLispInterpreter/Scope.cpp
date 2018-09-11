@@ -31,6 +31,8 @@ namespace CppLisp
 	LispScope::LispScope(string fcnName, std::shared_ptr<LispScope> globalScope, std::shared_ptr<string> moduleName, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp)
 	{
 		Debugger = null;
+		IsInEval = false;
+		IsInReturn = false;
 		Name = fcnName;
 		ModuleName = moduleName ? *moduleName : string::Empty;
 		//GlobalScope = globalScope != null ? globalScope : shared_from_this();

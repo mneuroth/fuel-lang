@@ -101,6 +101,8 @@ namespace CppLisp
 		const static string Str;
 
 		// methods
+		string GetFunctionsHelpFormated(string functionName, std::function<bool(const string &, const string &)> select = null);
+			
 		static bool IsInModules(const string & funcName, std::shared_ptr<LispScope> scope);
 		static bool IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
 		static bool IsExpression(std::shared_ptr<object> item);

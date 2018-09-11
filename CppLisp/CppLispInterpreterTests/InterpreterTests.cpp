@@ -791,7 +791,14 @@ namespace QtLispUnitTests
 			Assert::AreEqual(14, result->ToInt());
 		}
 
-/* TODO --> not implemented yet for C++
+		TEST_METHOD(Test_Return2)
+		{
+			// return statement was not implmented correctly until 25.7.2018...
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (return (+ x x)) (return 9))) (println (f 7)))");
+			Assert::AreEqual(14, result->ToInt());
+		}
+
+		/* TODO --> not implemented yet for C++
 		TEST_METHOD(Test_Call1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def obj 0) (setf obj (call \"CsLisp.DummyNative\")) (println obj (type obj)) (call obj \"Test\"))");
@@ -1570,6 +1577,27 @@ namespace QtLispUnitTests
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (len s))");
 			Assert::IsTrue(result->IsInt());
 			Assert::AreEqual(16, result->IntValue());
+		}
+
+		TEST_METHOD(Test_Trim)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \" \t   this is a string  \") (trim s))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("this is a string", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_LowerCase)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"THIS is A stRing\") (lower-case s))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("this is a string", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_UpperCase)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"THIS is A stRing 8 ,.!?\") (upper-case s))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("THIS IS A STRING 8 ,.!?", result->StringValue().c_str());
 		}
 
 		// TODO / NOT IMPLEMENTED:

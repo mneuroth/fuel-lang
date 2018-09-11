@@ -243,6 +243,12 @@ static std::shared_ptr<LispVariant> DoSearchDocumentation(const std::vector<std:
 		for(var item : args)
 		{
 			help += scope->GetFunctionsHelpFormated(item->ToString(), select);
+			// search for functions in all loaded modules
+			auto tempScope = ((*(scope->GlobalScope))[LispEnvironment::Macros])->GetLispScopeRef();
+			for(/*KeyValuePair*/std::pair<string, std::shared_ptr<object>> module : *tempScope)
+			{
+				help += module.second->GetLispScopeRef()->GetFunctionsHelpFormated(item->ToString(), select);
+			}
 		}
 		return DumpDocumentation(scope, [help, scope]() -> void { scope->GlobalScope->Output->WriteLine("{0}", help); });
 	}
@@ -452,8 +458,9 @@ static std::shared_ptr<LispVariant> Nop(const std::vector<std::shared_ptr<object
 	return std::make_shared<LispVariant>(LispVariant());
 }
 
-static std::shared_ptr<LispVariant> Return(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
+static std::shared_ptr<LispVariant> Return(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
+	scope->IsInReturn = true;
 	return std::make_shared<LispVariant>(LispVariant(args[0]));
 }
 
@@ -628,6 +635,30 @@ static std::shared_ptr<LispVariant> Slice(const std::vector<std::shared_ptr<obje
 		value = value.Substring(startPos);
 	}
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+}
+
+static std::shared_ptr<LispVariant> Trim(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("trim", 1, args, scope);
+
+	var value = ((LispVariant)args[0]).ToString();
+	return std::make_shared<LispVariant>(std::make_shared<object>(value.Trim()));
+}
+
+static std::shared_ptr<LispVariant> LowerCase(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("lower-case", 1, args, scope);
+
+	var value = ((LispVariant)args[0]).ToString();
+	return std::make_shared<LispVariant>(std::make_shared<object>(value.ToLower()));
+}
+
+static std::shared_ptr<LispVariant> UpperCase(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("upper-case", 1, args, scope);
+
+	var value = ((LispVariant)args[0]).ToString();
+	return std::make_shared<LispVariant>(std::make_shared<object>(value.ToUpper()));
 }
 
 static std::shared_ptr<LispVariant> ArithmetricOperation(const std::vector<std::shared_ptr<object>> & args, std::function<std::shared_ptr<LispVariant>(std::shared_ptr<LispVariant>, std::shared_ptr<LispVariant>)> op)
@@ -1156,6 +1187,10 @@ static std::shared_ptr<LispVariant> while_form(const std::vector<std::shared_ptr
 	while (condition->ToBool())
 	{
 		result = LispInterpreter::EvalAst(args[1], scope);
+		if (scope->IsInReturn)
+		{
+			break;
+		}
 		condition = LispInterpreter::EvalAst(args[0], scope);
 	}
 	return result;
@@ -1172,6 +1207,10 @@ static std::shared_ptr<LispVariant> do_form(const std::vector<std::shared_ptr<ob
 			throw LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariant()->Token, scope->ModuleName, scope->DumpStackToString());
 		}
 		result = LispInterpreter::EvalAst(statement, scope);
+		if (scope->IsInReturn)
+		{
+			break;
+		}
 	}
 
 	return result;
@@ -1585,6 +1624,9 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 
 //	(*scope)["search"] = CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos.");
 	(*scope)["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
+	(*scope)["trim"] = CreateFunction(Trim, "(trim expr1)", "Returns a string with no starting and trailing whitespaces.");
+	(*scope)["lower-case"] = CreateFunction(LowerCase, "(lower-case expr1)", "Returns a string with only lower case characters.");
+	(*scope)["upper-case"] = CreateFunction(UpperCase, "(upper-case expr1)", "Returns a string with only upper case characters.");
 	(*scope)["string"] = CreateFunction(Addition, "(string expr1 expr2 ...)", "see: add");
 	(*scope)["add"] = CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ...");
 	(*scope)["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
