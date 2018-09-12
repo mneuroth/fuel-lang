@@ -1600,6 +1600,20 @@ namespace QtLispUnitTests
 			Assert::AreEqual("THIS IS A STRING 8 ,.!?", result->StringValue().c_str());
 		}
 
+		TEST_METHOD(Test_Find1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 5 l))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(1, result->IntValue());
+		}
+
+		TEST_METHOD(Test_Find2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 9 l))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(-1, result->IntValue());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects
