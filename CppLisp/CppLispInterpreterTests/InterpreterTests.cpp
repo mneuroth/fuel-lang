@@ -1614,6 +1614,20 @@ namespace QtLispUnitTests
 			Assert::AreEqual(-1, result->IntValue());
 		}
 
+		TEST_METHOD(Test_DoTimes1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (def l '()) (dotimes (ix 7) (setf l (cons ix l))) (println l))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("(6 5 4 3 2 1 0)", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_DoTimes2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (def l '()) (dotimes (i 7) (setf l (cons i l))) (dotimes (i 9) (setf l (cons i l))) (println l))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("(8 7 6 5 4 3 2 1 0 6 5 4 3 2 1 0)", result->StringValue().c_str());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects
