@@ -94,6 +94,8 @@ namespace CsLisp
         /// <exception cref="CsLisp.LispStopDebuggerException"></exception>
         public static bool InteractiveLoop(LispDebugger debugger = null, LispScope initialTopScope = null, bool startedFromMain = false, bool tracing = false)
         {
+            string interactiveScript = string.Empty;
+
             startedFromMain = startedFromMain || debugger == null;
             if (debugger == null)
             {
@@ -191,8 +193,16 @@ namespace CsLisp
                 }
                 else if (cmd.Equals("code") || cmd.StartsWith("c"))
                 {
+                    var script = string.Empty;
                     var moduleName = currentScope.ModuleName;
-                    var script = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.Substring(LispEnvironment.EvalStrTag.Length + moduleName.IndexOf(":", LispEnvironment.EvalStrTag.Length)) : LispUtils.ReadFileOrEmptyString(moduleName);
+                    if (moduleName == null)
+                    {
+                        script = interactiveScript;
+                    }
+                    else
+                    {
+                        script = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.Substring(LispEnvironment.EvalStrTag.Length + moduleName.IndexOf(":", LispEnvironment.EvalStrTag.Length)) : LispUtils.ReadFileOrEmptyString(moduleName);
+                    }
                     // use the script given on command line if no valid module name was set
                     if (string.IsNullOrEmpty(script))
                     {
@@ -265,6 +275,7 @@ namespace CsLisp
                     {
                         LispVariant result = Lisp.Eval(cmd, currentScope, currentScope.ModuleName);
                         debugger.Output.WriteLine("result={0}", result);
+                        interactiveScript += cmd + '\n';
                     }
                     catch (Exception ex)
                     {

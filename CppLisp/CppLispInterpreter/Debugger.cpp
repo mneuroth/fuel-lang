@@ -51,6 +51,8 @@ namespace CppLisp
 
 	bool LispDebugger::InteractiveLoop(LispDebugger * debugger, std::shared_ptr<LispScope> initialTopScope, bool startedFromMain, bool tracing, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp)
 	{
+		string interactiveScript;
+
 		startedFromMain = startedFromMain || debugger == null;
 		if (debugger == null)
 		{
@@ -150,8 +152,16 @@ namespace CppLisp
 			}
 			else if (cmd.Equals("code") || cmd.StartsWith("c"))
 			{
+				var script = string::Empty;
 				var moduleName = currentScope->ModuleName;
-				var script = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size() + moduleName.IndexOf(":", LispEnvironment::EvalStrTag.size())) : /*LispUtils*/ReadFileOrEmptyString(moduleName);
+				if (string::IsNullOrEmpty(moduleName))
+				{
+					script = interactiveScript;
+				}
+				else
+				{
+					script = moduleName.StartsWith(LispEnvironment::EvalStrTag) ? moduleName.Substring(LispEnvironment::EvalStrTag.size() + moduleName.IndexOf(":", LispEnvironment::EvalStrTag.size())) : /*LispUtils*/ReadFileOrEmptyString(moduleName);
+				}
 				// use the script given on command line if no valid module name was set
 				if (string::IsNullOrEmpty(script))
 				{
@@ -224,6 +234,7 @@ namespace CppLisp
 				{
 					std::shared_ptr<LispVariant> result = Lisp::Eval(cmd, currentScope, currentScope->ModuleName, /*tracing:*/false, outp, inp);
 					debugger->Output->WriteLine("result={0}", result->ToString());
+					interactiveScript += cmd + "\n";
 				}
 				catch (LispException & ex)
 				{
