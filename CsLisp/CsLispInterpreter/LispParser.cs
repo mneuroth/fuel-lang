@@ -134,11 +134,19 @@ namespace CsLisp
                 }
                 else if (token.Type == LispTokenType.UnQuote || token.Type == LispTokenType.UnQuoteSplicing)
                 {
-                    i++;
-                    var nextToken = tokens[i];
-                    if (current != null)
+                    LispUnQuoteModus unquotedModus = token.Type == LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing;
+
+                    var nextToken = tokens[i + 1];
+                    if (nextToken.Type == LispTokenType.ListStart)
                     {
-                        current.Add(new LispVariant(nextToken, unQuoted: token.Type == LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing));                        
+                        List<object> unquotedList = null;
+                        i = ParseTokens(moduleName, tokens, i + 1, ref unquotedList, isToplevel: false);
+                        current.Add(new LispVariant(LispType.List, unquotedList, unquotedModus));
+                    }
+                    else
+                    {
+                        current.Add(new LispVariant(nextToken, unQuoted: unquotedModus));
+                        i++;
                     }
                 }
                 else if (token.Type == LispTokenType.Comment)

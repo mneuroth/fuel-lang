@@ -1750,14 +1750,17 @@ namespace CsLisp
             isSplicing = false;
             if (value != null)
             {
-                if (value.IsUnQuoted == LispUnQuoteModus.UnQuote)
+                if (value.IsUnQuoted == LispUnQuoteModus.UnQuote || value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing)
                 {
-                    return scope[value.StringValue];
-                }
-                if (value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing)
-                {
-                    isSplicing = true;
-                    return scope[value.StringValue];
+                    isSplicing = value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing;
+                    if (value.IsList)
+                    {
+                        return LispInterpreter.EvalAst(value.ListValue, scope);
+                    }
+                    else
+                    {
+                        return scope[value.StringValue];
+                    }
                 }
             }
             return item;

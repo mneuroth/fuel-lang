@@ -770,6 +770,20 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Quasiquote5()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 42) (println (quasiquote (1 2 3 ,(+ 3 a)))))");
+            Assert.AreEqual("(1 2 3 45)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote6()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 42) (println (quasiquote (1 2 3 ,@(list 9 8 7 a)))))");
+            Assert.AreEqual("(1 2 3 9 8 7 42)", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_Quote1()
         {
             LispVariant result = Lisp.Eval("(do (def x 42) (println 'x))");
