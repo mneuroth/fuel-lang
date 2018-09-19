@@ -1640,6 +1640,34 @@ namespace QtLispUnitTests
 			Assert::AreEqual("(8 7 6 5 4 3 2 1 0 6 5 4 3 2 1 0)", result->StringValue().c_str());
 		}
 
+		TEST_METHOD(Test_Reverse)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l (list 1 2 b \"nix\" 4.5)) (print (reverse l)))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("(4.500000 \"nix\" b 2 1)", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_ReverseString)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text\") (print (reverse s)))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("txet si siht", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_Search1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text\") (print (search \"tex\" s)))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("8", result->StringValue().c_str());
+		}
+
+		TEST_METHOD(Test_Search2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text\") (search \"tes\" s))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(-1, result->IntValue());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects

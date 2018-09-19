@@ -71,9 +71,14 @@ namespace CppLisp
             return find(txt);
 		}
 
-		inline size_t IndexOf(const string & txt, size_t offset) const
+		inline size_t IndexOf(const string & txt, size_t offset = 0) const
 		{
 			return find(txt, offset);
+		}
+
+		inline size_t IndexOf(const string & txt, size_t offset, size_t count) const
+		{
+			return find(txt.c_str(), offset, count);
 		}
 
 		inline void Append(const string & txt)

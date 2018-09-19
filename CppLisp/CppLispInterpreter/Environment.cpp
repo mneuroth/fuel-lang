@@ -146,6 +146,14 @@ static void CheckArgs(const string & name, size_t count, const std::vector<std::
 	}
 }
 
+static void CheckOptionalArgs(const string & name, size_t minCount, size_t maxCount, const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	if ((args.size() < minCount) || (args.size() > maxCount))
+	{
+		throw LispException(string::Format("Bad argument count in {0}, has {1} expected between {2} and {3}", name, std::to_string(args.size()), std::to_string(minCount), std::to_string(maxCount)), scope.get());
+	}
+}
+
 /* not needed yet...
 static const std::vector<std::shared_ptr<object>> GetCallArgs(const std::vector<std::shared_ptr<object>> & args)
 {
@@ -344,11 +352,26 @@ static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shar
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
 }
 
+#ifdef _WIN32
+#define _OS_STRING	"WIN"
+#endif
+
+#ifdef __OS2__
+#define _OS_STRING	"OS2"
+#endif
+
+#if defined( __linux__ )
+#define _OS_STRING	"UNIX"
+#endif
+
+#if defined( __APPLE__ )
+#define _OS_STRING	"MACOSX"
+#endif
+
 static std::shared_ptr<LispVariant> Platform(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
 {
 	var list = IEnumerable<std::shared_ptr<object>>();
-// TODO --> real implementation
-	list.Add(std::make_shared<object>("WIN"));
+	list.Add(std::make_shared<object>(_OS_STRING));
 	list.Add(std::make_shared<object>("C++"));
 	var result = std::make_shared<LispVariant>(LispType::_List, std::make_shared<object>(list));
 	return result;
@@ -590,6 +613,7 @@ static std::shared_ptr<LispVariant> ToFloat(const std::vector<std::shared_ptr<ob
 	}
 	return new LispVariant(LispType.Undefined);
 }
+#endif
 
 static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
@@ -597,12 +621,12 @@ static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<obj
 
 	var searchText = ((LispVariant)args[0]).ToString();
 	var source = ((LispVariant)args[1]).ToString();
-	var pos = args.Length > 2 ? ((LispVariant)args[2]).ToInt() : -1;
-	var len = args.Length > 3 ? ((LispVariant)args[3]).ToInt() : -1;
-	int foundPos = -1;
-	if (pos >= 0)
+	size_t pos = args.size() > 2 ? ((LispVariant)args[2]).ToInt() : std::string::npos;
+	size_t len = args.size() > 3 ? ((LispVariant)args[3]).ToInt() : std::string::npos;
+	size_t foundPos = std::string::npos;
+	if (pos != std::string::npos)
 	{
-		if (len >= 0)
+		if (len != std::string::npos)
 		{
 			foundPos = source.IndexOf(searchText, pos, len);
 		}
@@ -615,9 +639,8 @@ static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<obj
 	{
 		foundPos = source.IndexOf(searchText);
 	}
-	return new LispVariant(foundPos);
+	return std::make_shared<LispVariant>(std::make_shared<object>((int)foundPos));
 }
-#endif
 
 static std::shared_ptr<LispVariant> Slice(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
@@ -903,6 +926,22 @@ static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<obj
 	}
 	var result = std::make_shared<LispVariant>(LispType::_List, std::make_shared<object>(list));
 	return result;
+}
+
+static std::shared_ptr<LispVariant> Reverse(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("reverse", 1, args, scope);
+
+	LispVariant val = (LispVariant)args[0];
+	if (val.IsString())
+	{
+		var temp = val.StringValue();
+		std::reverse(temp.begin(), temp.end());
+		return std::make_shared<LispVariant>(LispType::_String, std::make_shared<object>(temp));
+	}
+	var elements = *(val.ListValue());
+	std::reverse(elements.begin(), elements.end());
+	return std::make_shared<LispVariant>(LispType::_List, std::make_shared<object>(elements));
 }
 
 static std::shared_ptr<LispVariant> SymbolFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -1626,7 +1665,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 //	(*scope)["int"] = CreateFunction(ToInt, "(int expr)", "Convert the expr into an integer value");
 //	(*scope)["float"] = CreateFunction(ToFloat, "(float expr)", "Convert the expr into a float value");
 
-//	(*scope)["search"] = CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos.");
+	(*scope)["search"] = CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos.");
 	(*scope)["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
 	(*scope)["trim"] = CreateFunction(Trim, "(trim expr1)", "Returns a string with no starting and trailing whitespaces.");
 	(*scope)["lower-case"] = CreateFunction(LowerCase, "(lower-case expr1)", "Returns a string with only lower case characters.");
@@ -1667,7 +1706,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");
 	(*scope)["nth"] = CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list.");
 	(*scope)["append"] = CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements.");
-    (*scope)[Sym] = CreateFunction(SymbolFcn, "(sym expr)", "Returns the evaluated expression as symbol.");
+	(*scope)["reverse"] = CreateFunction(Reverse, "(reverse expr)", "Returns a list or string with a reverted order.");
+	(*scope)[Sym] = CreateFunction(SymbolFcn, "(sym expr)", "Returns the evaluated expression as symbol.");
 	(*scope)[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
 
 	(*scope)[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of command line arguments for this script.");
