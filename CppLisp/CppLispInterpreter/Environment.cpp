@@ -1099,14 +1099,18 @@ std::shared_ptr<object> UnQuoteIfNeeded(std::shared_ptr<object> item, bool & isS
 	isSplicing = false;
 	if (value != null)
 	{
-		if (value->IsUnQuoted == LispUnQuoteModus::_UnQuote)
+		if (value->IsUnQuoted == LispUnQuoteModus::_UnQuote || value->IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing)
 		{
-			return (*scope)[value->StringValue()];
-		}
-		if (value->IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing)
-		{
-			isSplicing = true;
-			return (*scope)[value->StringValue()];
+			isSplicing = value->IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing;
+			if (value->IsList())
+			{
+				std::shared_ptr<object> pObj = std::make_shared<object>(*(value->ListValue()));
+				return LispInterpreter::EvalAst(pObj, scope)->Value;
+			}
+			else
+			{
+				return (*scope)[value->StringValue()];
+			}
 		}
 	}
 	return item;

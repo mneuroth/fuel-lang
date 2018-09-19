@@ -714,6 +714,18 @@ namespace QtLispUnitTests
 			Assert::AreEqual("(1 2 3 42 (6 8 12))", result->ToString().c_str());
 		}
 
+		TEST_METHOD(Test_Quasiquote5)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (println (quasiquote (1 2 3 ,(+ 3 a)))))");
+			Assert::AreEqual("(1 2 3 45)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote6)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (println (quasiquote (1 2 3 ,@(list 9 8 7 a)))))");
+			Assert::AreEqual("(1 2 3 9 8 7 42)", result->ToString().c_str());
+		}
+
 		TEST_METHOD(Test_Quote1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def x 42) (println 'x))");

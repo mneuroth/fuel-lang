@@ -114,11 +114,19 @@ namespace CppLisp
 			}
 			else if (token->Type == LispTokenType::UnQuote || token->Type == LispTokenType::UnQuoteSplicing)
 			{
-				i++;
-				var nextToken = tokens[i];
-				if (current != null)
+				LispUnQuoteModus unquotedModus = token->Type == LispTokenType::UnQuote ? LispUnQuoteModus::_UnQuote : LispUnQuoteModus::_UnQuoteSplicing;
+
+				var nextToken = tokens[i + 1];
+				if (nextToken->Type == LispTokenType::ListStart)
 				{
-					current->push_back/*Add*/(std::make_shared<object>(object(LispVariant(nextToken, /*unQuoted:*/ token->Type == LispTokenType::UnQuote ? LispUnQuoteModus::_UnQuote : LispUnQuoteModus::_UnQuoteSplicing))));
+					std::shared_ptr<IEnumerable<std::shared_ptr<object>>> unquotedList = null;
+					i = ParseTokens(moduleName, tokens, i + 1, /*ref*/ unquotedList, /*isToplevel:*/ false);
+					current->push_back/*Add*/(std::make_shared<object>(object(LispVariant(LispType::_List, std::make_shared<object>(*unquotedList), unquotedModus))));
+				}
+				else
+				{
+					current->push_back/*Add*/(std::make_shared<object>(object(LispVariant(nextToken, /*unQuoted:*/ unquotedModus))));
+					i++;
 				}
 			}
 			else if (token->Type == LispTokenType::Comment)
