@@ -325,6 +325,7 @@ namespace CppLisp
 		/*public static*/ LispVariant operator -(const LispVariant & r);
 		/*public static*/ LispVariant operator *(const LispVariant & r);
 		/*public static*/ LispVariant operator /(const LispVariant & r);
+		/*public static*/ LispVariant operator %(const LispVariant & r);
 		/*public static*/ LispVariant operator <(const LispVariant & r) const;
 		/*public static*/ inline LispVariant operator >(const LispVariant & r) const
         {

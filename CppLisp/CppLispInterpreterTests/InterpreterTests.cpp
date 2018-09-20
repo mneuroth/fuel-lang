@@ -509,7 +509,7 @@ namespace QtLispUnitTests
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (define-macro-expand blub (x y) (println x y)) (println (quote (1 2 3))) (blub 3 4))");
 			Assert::AreEqual("3 4", result->ToString().c_str());
 #else
-			Assert.IsTrue(true);
+			Assert::IsTrue(true);
 #endif
 		}
 
@@ -1423,19 +1423,8 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_BadForeach)
 		{
-			try
-			{
-				Lisp::Eval("(do (import fuellib) (foreach))");
-				Assert::IsTrue(false);
-			}
-			catch (const CppLisp::LispException &)
-			{
-				Assert::IsTrue(true);
-			}
-			catch (...)
-			{
-				Assert::IsTrue(false);
-			}
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (foreach))");
+			Assert::IsTrue(result->IsUndefined());
 		}
 
 		TEST_METHOD(Test_Break)
@@ -1666,6 +1655,58 @@ namespace QtLispUnitTests
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text\") (search \"tes\" s))");
 			Assert::IsTrue(result->IsInt());
 			Assert::AreEqual(-1, result->IntValue());
+		}
+
+		TEST_METHOD(Test_UnaryMinusInt)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 8) (- a))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(-8, result->IntValue());
+		}
+
+		TEST_METHOD(Test_UnaryMinusDouble)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1.234) (- a))");
+			Assert::IsTrue(result->IsDouble());
+			Assert::AreEqual(-1.234, result->DoubleValue());
+		}
+
+		TEST_METHOD(Test_UnaryMinusString)
+		{
+			try
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a \"nix\") (- a))");
+				Assert::IsTrue(false);
+			}
+			catch (const CppLisp::LispException &)
+			{
+				Assert::IsTrue(true);
+			}
+			catch (...)
+			{
+				Assert::IsTrue(false);
+			}
+		}
+
+		TEST_METHOD(Test_ModuloInt)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (% 7 3))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(1, result->IntValue());
+		}
+
+		TEST_METHOD(Test_ModuloDouble)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (% 7.4 2.8))");
+			Assert::IsTrue(result->IsDouble());
+			Assert::AreEqual("1.800000", std::to_string(result->DoubleValue()).c_str());
+		}
+
+		TEST_METHOD(Test_NotEnoughFunctionArguments)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x y z) (add (str x) (str y) (str z))) (f 3))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("3NILNIL", result->StringValue().c_str());
 		}
 
 		// TODO / NOT IMPLEMENTED:

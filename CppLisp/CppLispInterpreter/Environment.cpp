@@ -30,6 +30,11 @@
 #include <map>
 #include <fstream>
 
+#include <chrono>
+#include <thread>
+
+#include <ctime>
+
 using namespace CppLisp;
 
 const string If = "if";
@@ -350,6 +355,35 @@ static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shar
 {
 	var value = (int)GetTickCount();
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+}
+
+static std::shared_ptr<LispVariant> _Sleep(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
+{
+	var timeInMs = ((LispVariant)args[0]).ToInt();
+	std::this_thread::sleep_for(std::chrono::milliseconds(timeInMs));
+	return std::make_shared<LispVariant>(LispVariant());
+}
+
+static std::shared_ptr<LispVariant> Datetime(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
+{
+	std::time_t t = std::time(0);   // get time now
+	std::tm* now = std::localtime(&t);
+
+	var year = now->tm_year;
+	var month = now->tm_mon;
+	var day = now->tm_mday;
+	var hour = now->tm_hour;
+	var minute = now->tm_min;
+	var second = now->tm_sec;
+	var value = IEnumerable<std::shared_ptr<object>>();
+	value.Add(std::make_shared<object>(year));
+	value.Add(std::make_shared<object>(month));
+	value.Add(std::make_shared<object>(day));
+	value.Add(std::make_shared<object>(hour));
+	value.Add(std::make_shared<object>(minute));
+	value.Add(std::make_shared<object>(second));
+	var result = std::make_shared<LispVariant>(LispType::_List, std::make_shared<object>(value));
+	return result;
 }
 
 #ifdef _WIN32
@@ -718,6 +752,21 @@ static std::shared_ptr<LispVariant> Addition(const std::vector<std::shared_ptr<o
 
 static std::shared_ptr<LispVariant> Subtraction(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
+	// process unary - operator
+	if (args.size() == 1)
+	{
+		var value = (LispVariant)args[0];
+		if (value.IsInt())
+		{
+			return std::make_shared<LispVariant>(std::make_shared<object>(-value.IntValue()));
+		}
+		if (value.IsDouble())
+		{
+			return std::make_shared<LispVariant>(std::make_shared<object>(-value.DoubleValue()));
+		}
+		throw LispException(string::Format("Unary operator - not available for {0}", value.TypeString()));
+	}
+
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l - *r); });
 }
 
@@ -729,6 +778,11 @@ static std::shared_ptr<LispVariant> Multiplication(const std::vector<std::shared
 static std::shared_ptr<LispVariant> Division(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
 {
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l / *r); });
+}
+
+static std::shared_ptr<LispVariant> Modulo(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
+{
+	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l % *r); });
 }
 
 static std::shared_ptr<LispVariant> Not(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -1287,27 +1341,46 @@ std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> 
 		var i = 0;
 		var formalArgs = (args[0]->IsLispVariant() /*is LispVariant*/ ? args[0]->ToLispVariant()->ListValue() : LispEnvironment::GetExpression(args[0]))->ToArray();
 		
+		std::vector<std::shared_ptr<object>> tempLocalArgs = localArgs;
+
 		if (formalArgs.size() > localArgs.size())
 		{
-			throw LispException("Invalid number of arguments");
+			//throw LispException("Invalid number of arguments");
+
+			// fill all not given arguments with nil
+			//var newLocalArgs = new object[formalArgs.size()];
+			std::vector<std::shared_ptr<object>> newLocalArgs(formalArgs.size());
+			for (int n = 0; n < formalArgs.size(); n++)
+			{
+				if (n < localArgs.size())
+				{
+					newLocalArgs[n] = localArgs[n];
+				}
+				else
+				{
+					newLocalArgs[n] = std::make_shared<object>(LispVariant(LispType::_Nil));
+				}
+			}
+
+			tempLocalArgs = newLocalArgs;
 		}
 
 		for(var arg : formalArgs)
 		{
-			(*childScope)[arg->ToString()] = localArgs[i];
+			(*childScope)[arg->ToString()] = tempLocalArgs[i];
 			i++;
 		}
 
 		// support args function for accessing all given parameters
-		(*childScope)[ArgsMeta] = std::make_shared<object>(IEnumerable<std::shared_ptr<object>>(VectorToList(localArgs)));
+		(*childScope)[ArgsMeta] = std::make_shared<object>(IEnumerable<std::shared_ptr<object>>(VectorToList(tempLocalArgs)));
 		size_t formalArgsCount = formalArgs.size();
-		if (localArgs.size() > formalArgsCount)
+		if (tempLocalArgs.size() > formalArgsCount)
 		{
-			//var additionalArgs = new object[localArgs.size() - formalArgsCount];
-			std::vector<std::shared_ptr<object>> additionalArgs(localArgs.size() - formalArgsCount);
-			for (size_t n = 0; n < localArgs.size() - formalArgsCount; n++)
+			//var additionalArgs = new object[tempLocalArgs.size() - formalArgsCount];
+			std::vector<std::shared_ptr<object>> additionalArgs(tempLocalArgs.size() - formalArgsCount);
+			for (size_t n = 0; n < tempLocalArgs.size() - formalArgsCount; n++)
 			{
-				additionalArgs[n] = localArgs[n + formalArgsCount];
+				additionalArgs[n] = tempLocalArgs[n + formalArgsCount];
 			}
 			(*childScope)[AdditionalArgs] = std::make_shared<object>(LispVariant(std::make_shared<object>(VectorToList(additionalArgs))));
 		}
@@ -1639,6 +1712,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
     (*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
 	(*scope)["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");
+	(*scope)["sleep"] = CreateFunction(_Sleep, "(sleep time-in-ms)", "Sleeps the given number of milliseconds.");
+	(*scope)["date-time"] = CreateFunction(Datetime, "(date-time)", "Returns a list with informations about the current date and time: (year month day hours minutes seconds).");
 	(*scope)["platform"] = CreateFunction(Platform, "(platform)", "Returns a list with informations about the current platform: (operating_system runtime_environment).");
 
 	// access to .NET
@@ -1679,6 +1754,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["*"] = CreateFunction(Multiplication, "(* expr1 expr2 ...)", "see: mul");
 	(*scope)["div"] = CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ...");
 	(*scope)["/"] = CreateFunction(Division, "(/ expr1 expr2 ...)", "see: div");
+	(*scope)["mod"] = CreateFunction(Modulo, "(mod expr1 expr2)", "Returns value of modulo operation between expr1 and expr2");
+	(*scope)["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: div");
 
 	(*scope)["<"] = CreateFunction(LessTest, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese.");
 	(*scope)[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
@@ -1710,8 +1787,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[Sym] = CreateFunction(SymbolFcn, "(sym expr)", "Returns the evaluated expression as symbol.");
 	(*scope)[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
 
-	(*scope)[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of command line arguments for this script.");
-	(*scope)[Args] = CreateFunction(ArgsFcn, "(args number)", "Returns the [number] command line argument for this script.");
+	(*scope)[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of arguments for the current function.");
+	(*scope)[Args] = CreateFunction(ArgsFcn, "(args number)", "Returns the value of the [number] argument for the current function.");
 	(*scope)[Apply] = CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments.");
 	(*scope)[Eval] = CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast).");
 	(*scope)[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");

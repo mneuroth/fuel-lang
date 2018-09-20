@@ -415,6 +415,19 @@ namespace CppLisp
 		throw CreateInvalidOperationException("/", *this, r);
 	}
 
+	LispVariant LispVariant::operator %(const LispVariant & r)
+	{
+		if (IsDouble() || r.IsDouble())
+		{
+			return /*new*/ LispVariant(std::make_shared<object>(std::fmod(ToDouble(),r.ToDouble())));
+		}
+		if (IsInt() || r.IsInt())
+		{
+			return /*new*/ LispVariant(std::make_shared<object>(ToInt() % r.ToInt()));
+		}
+		throw CreateInvalidOperationException("%", *this, r);
+	}
+
 	LispVariant LispVariant::operator <(const LispVariant & r) const
 	{
 		if (IsDouble() || r.IsDouble())
