@@ -1709,6 +1709,73 @@ namespace QtLispUnitTests
 			Assert::AreEqual("3NILNIL", result->StringValue().c_str());
 		}
 
+		TEST_METHOD(Test_IntConversion1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int 7.4))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(7, result->IntValue());
+		}
+
+		TEST_METHOD(Test_IntConversion2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int \"61.234\"))");
+			Assert::IsTrue(result->IsUndefined());
+		}
+
+		TEST_METHOD(Test_IntConversion3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int #t))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(1, result->IntValue());
+		}
+
+		TEST_METHOD(Test_IntConversion4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int #f))");
+			Assert::IsTrue(result->IsInt());
+			Assert::AreEqual(0, result->IntValue());
+		}
+
+		TEST_METHOD(Test_IntConversion5)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int \"a text\"))");
+			Assert::IsTrue(result->IsUndefined());
+		}
+
+		TEST_METHOD(Test_FloatConversion1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float 7))");
+			Assert::IsTrue(result->IsDouble());
+			Assert::AreEqual(7.0, result->DoubleValue());
+		}
+
+		TEST_METHOD(Test_FloatConversion2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float \"61.234\"))");
+			Assert::IsTrue(result->IsDouble());
+			Assert::AreEqual(61.234, result->DoubleValue());
+		}
+
+		TEST_METHOD(Test_FloatConversion3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float #t))");
+			Assert::IsTrue(result->IsDouble());
+			Assert::AreEqual(1.0, result->DoubleValue());
+		}
+
+		TEST_METHOD(Test_FloatConversion4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float #f))");
+			Assert::IsTrue(result->IsDouble());
+			Assert::AreEqual(0.0, result->DoubleValue());
+		}
+
+		TEST_METHOD(Test_FloatConversion5)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float \"a text\"))");
+			Assert::IsTrue(result->IsUndefined());
+		}
+	
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects
