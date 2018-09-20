@@ -26,6 +26,8 @@
 #include "Variant.h"
 #include "cstypes.h"
 
+#include <math.h>
+
 namespace CppLisp
 {
 	double LispVariant::Tolerance = 1e-8;
@@ -419,7 +421,7 @@ namespace CppLisp
 	{
 		if (IsDouble() || r.IsDouble())
 		{
-			return /*new*/ LispVariant(std::make_shared<object>(std::fmod(ToDouble(),r.ToDouble())));
+            return /*new*/ LispVariant(std::make_shared<object>(fmod(ToDouble(),r.ToDouble())));
 		}
 		if (IsInt() || r.IsInt())
 		{
