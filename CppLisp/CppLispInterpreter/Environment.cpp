@@ -407,6 +407,8 @@ static std::shared_ptr<LispVariant> Platform(const std::vector<std::shared_ptr<o
 	var list = IEnumerable<std::shared_ptr<object>>();
 	list.Add(std::make_shared<object>(_OS_STRING));
 	list.Add(std::make_shared<object>("C++"));
+	bool is64Bit = sizeof(void *) == 8;
+	list.Add(std::make_shared<object>(is64Bit ? "64bit" : "32bit"));
 	var result = std::make_shared<LispVariant>(LispType::_List, std::make_shared<object>(list));
 	return result;
 }

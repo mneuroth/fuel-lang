@@ -581,7 +581,8 @@ namespace CsLisp
                     osString = "UNKNOWN";
                     break;
             }
-            var value = new List<string>() { osString, ".NET", /*Environment.Is64BitProcess,*/ /*Environment.OSVersion.ToString(), Environment.Version.ToString()*/ };
+            bool is64Bit = IntPtr.Size == 8;
+            var value = new List<string>() { osString, ".NET", is64Bit ? "64bit" : "32bit"/*, Environment.Is64BitProcess*/ /*, Environment.OSVersion.ToString(), Environment.Version.ToString()*/ };
             return new LispVariant(value);
         }
 
