@@ -35,9 +35,9 @@ const string LispParser::UnexpectedToken = "Unexpected token";
 
 namespace CppLisp
 {
-	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispParser::Parse(string code, size_t offset, std::shared_ptr<LispScope> scope)
+	std::shared_ptr<object> LispParser::Parse(string code, size_t offset, std::shared_ptr<LispScope> scope)
 	{
-		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> parseResult/* = null*/;
+		std::shared_ptr<object> parseResult/* = null*/;
 		string moduleName = ""; // string.Empty;
 
 		// set tokens at LispScope to improve debugging and 
@@ -54,7 +54,7 @@ namespace CppLisp
 		return parseResult;
 	}
 
-	size_t LispParser::ParseTokens(string moduleName, std::vector<std::shared_ptr<LispToken>> tokens, size_t startIndex, /*ref*/ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> & parseResult, bool isToplevel)
+	size_t LispParser::ParseTokens(string moduleName, std::vector<std::shared_ptr<LispToken>> tokens, size_t startIndex, /*ref*/ std::shared_ptr<object> & parseResult, bool isToplevel)
 	{
 		size_t i;
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> current = null;
@@ -66,10 +66,6 @@ namespace CppLisp
 			if (token->Type == LispTokenType::ListStart)
 			{
 				current = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
-				if (parseResult == null)
-				{
-					parseResult = current;
-				}
 				listStack.push(current);
 			}
 			else if (token->Type == LispTokenType::ListEnd)
@@ -87,6 +83,7 @@ namespace CppLisp
 					{
 						throw LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
 					}
+					parseResult = std::make_shared<object>(*current);
 					return i;
 				}
 			}
@@ -95,18 +92,10 @@ namespace CppLisp
 				std::shared_ptr<IEnumerable<std::shared_ptr<object>>> quote = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
 				quote->push_back/*Add*/(std::make_shared<object>(object(LispVariant(LispType::_Symbol, std::make_shared<object>(token->Type == LispTokenType::Quote ? LispEnvironment::Quote : LispEnvironment::Quasiquote)))));
 
-				var nextToken = tokens[i + 1];
-				if (nextToken->Type == LispTokenType::ListStart)
-				{
-					std::shared_ptr<IEnumerable<std::shared_ptr<object>>> quotedList = null;
-					i = ParseTokens(moduleName, tokens, i + 1, /*ref*/ quotedList, /*isToplevel:*/ false);
-					quote->push_back/*Add*/(std::make_shared<object>(object(*quotedList)));
-				}
-				else
-				{
-					quote->push_back/*Add*/(std::make_shared<object>(object(LispVariant(nextToken))));
-					i++;
-				}
+				std::shared_ptr<object> quotedList = null;
+				i = ParseTokens(moduleName, tokens, i + 1, /*ref*/ quotedList, /*isToplevel:*/ false);
+				quote->push_back/*Add*/(std::make_shared<object>(object(*quotedList)));
+
 				if (current != null)
 				{
 					current->push_back/*Add*/(std::make_shared<object>(object(*quote)));
@@ -114,19 +103,22 @@ namespace CppLisp
 			}
 			else if (token->Type == LispTokenType::UnQuote || token->Type == LispTokenType::UnQuoteSplicing)
 			{
+				var unquote = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
 				LispUnQuoteModus unquotedModus = token->Type == LispTokenType::UnQuote ? LispUnQuoteModus::_UnQuote : LispUnQuoteModus::_UnQuoteSplicing;
+				unquote->push_back/*Add*/(std::make_shared<object>(LispVariant(LispType::_Symbol, std::make_shared<object>(object(token->Type == LispTokenType::UnQuote ? LispEnvironment::UnQuote : LispEnvironment::UnQuoteSplicing)))));
 
-				var nextToken = tokens[i + 1];
-				if (nextToken->Type == LispTokenType::ListStart)
+				std::shared_ptr<object> quotedList = null;
+				i = ParseTokens(moduleName, tokens, i + 1, /*ref*/ quotedList, /*isToplevel:*/ false);
+				unquote->push_back/*Add*/(quotedList);
+
+				if (current != null)
 				{
-					std::shared_ptr<IEnumerable<std::shared_ptr<object>>> unquotedList = null;
-					i = ParseTokens(moduleName, tokens, i + 1, /*ref*/ unquotedList, /*isToplevel:*/ false);
-					current->push_back/*Add*/(std::make_shared<object>(object(LispVariant(LispType::_List, std::make_shared<object>(*unquotedList), unquotedModus))));
+					current->push_back/*Add*/(std::make_shared<object>(*unquote));
 				}
 				else
 				{
-					current->push_back/*Add*/(std::make_shared<object>(object(LispVariant(nextToken, /*unQuoted:*/ unquotedModus))));
-					i++;
+					parseResult = std::make_shared<object>(*unquote);
+					return i;
 				}
 			}
 			else if (token->Type == LispTokenType::Comment)
@@ -135,11 +127,16 @@ namespace CppLisp
 			}
 			else
 			{
+				if (!isToplevel && current == null)
+				{
+					parseResult = std::make_shared<object>(LispVariant(token));
+					return i;
+				}
 				if (current == null)
 				{
 					throw LispException(UnexpectedToken, token, moduleName);
 				}
-				current->push_back/*Add*/(std::make_shared<object>(object(LispVariant(std::make_shared<LispToken>(*token)))));
+				current->push_back/*Add*/(std::make_shared<object>(LispVariant(std::make_shared<LispToken>(*token))));
 			}
 		}
 
@@ -149,6 +146,7 @@ namespace CppLisp
 			throw LispException(BracketsOutOfBalance, token, moduleName);
 		}
 
+		parseResult = std::make_shared<object>(*current);
 		return i;
 	}
 

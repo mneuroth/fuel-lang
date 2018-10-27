@@ -36,17 +36,19 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_SingleParserEmptyCode()
         {
-            IEnumerable<object> result = LispParser.Parse("()");
+            object result = LispParser.Parse("()");
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count());
+            Assert.IsTrue(result as IEnumerable<object> != null);
+            Assert.AreEqual(0, ((IEnumerable<object>)result).Count());
         }
 
         [TestMethod]
         public void Test_SingleParser1()
         {
-            IEnumerable<object> result = LispParser.Parse("(print 1 2.54 \"string\")");
+            object result = LispParser.Parse("(print 1 2.54 \"string\")");
             Assert.IsNotNull(result);
-            var resultAsArray = result.ToArray();
+            Assert.IsTrue(result as IEnumerable<object> != null);
+            var resultAsArray = ((IEnumerable<object>)result).ToArray();
             Assert.AreEqual(4, resultAsArray.Length);
 
             var value = (LispVariant) resultAsArray[0];
@@ -66,9 +68,10 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_SingleParser2()
         {
-            IEnumerable<object> result = LispParser.Parse("(do (print #t 2.54 \"string\"))");
+            object result = LispParser.Parse("(do (print #t 2.54 \"string\"))");
             Assert.IsNotNull(result);
-            var resultAsArrayDo = result.ToArray();
+            Assert.IsTrue(result as IEnumerable<object> != null);
+            var resultAsArrayDo = ((IEnumerable<object>)result).ToArray();
             Assert.AreEqual(2, resultAsArrayDo.Length);
 
             var value = (LispVariant)resultAsArrayDo[0];

@@ -1,0 +1,238 @@
+;;
+;; FUEL(isp) is a fast usable embeddable lisp interpreter.
+;;
+;; Copyright (c) 2016 Michael Neuroth
+;;
+;; Permission is hereby granted, free of charge, to any person obtaining 
+;; a copy of this software and associated documentation files (the "Software"), 
+;; to deal in the Software without restriction, including without limitation 
+;; the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+;; and/or sell copies of the Software, and to permit persons to whom the 
+;; Software is furnished to do so, subject to the following conditions:
+;; 
+;; The above copyright notice and this permission notice shall be included 
+;; in all copies or substantial portions of the Software.
+;; 
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+;; OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+;; THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
+;; OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+;; ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+;; OTHER DEALINGS IN THE SOFTWARE.
+;; 
+;;====================================
+;; standard library for fuel language
+;;====================================
+
+(do
+   
+  ;; return #t if script runs on a .NET platform
+  (defn isNET ()
+    (== (nth 1 (platform)) ".NET")
+  )
+
+  ;; return #t if script runs on a native C++ platform
+  (defn isCpp ()
+    (== (nth 1 (platform)) "C++")
+  )
+
+  ;; return the secod element of a list or a string
+  (defn second (l)
+      (first (cdr l))
+  )
+
+  ;; return the length of a list or a string 
+  (defn length (l)
+      (len l)
+  )
+
+  ;; returns the length of a string  
+  (defn strlen (s)
+      (len s)
+  )
+
+  ;; returns index or position of key if the key is found in the list or string
+  (defn find (key _list)
+    (do
+        (def i 0)
+        (while (< i (len _list))
+           (do
+               (if (== key (nth i _list))
+                  (return i)
+               )
+               (setf i (+ i 1))
+           )
+        )
+        (return -1)
+    )
+  )
+
+  ;; implement dotimes function: example: (dotimes (c 10) (println c))
+  (define-macro-eval dotimes (counterinfo statements)
+      (do
+        (def (first 'counterinfo) 0)
+        (while (eval (list < (first 'counterinfo) (nth 1 'counterinfo)))
+          (do
+             (eval 'statements)
+             (setf (first 'counterinfo) (eval (list + (first 'counterinfo) 1)))
+          )
+        )
+      )
+  )
+
+  (define-macro-eval setq (symbol value)
+	  (setf symbol value)
+  )
+
+  ;; foreach loop  
+  (defn foreach (container fcn) 
+     (do 
+	   (def __i 0)
+	   (def max (len container))
+	   (while (< __i max)
+	     (do 
+		   (apply fcn (list (nth __i container)))
+		   (setf __i (+ __i 1))
+		 )
+	   )
+	 )
+  )
+
+  ;; create list of symbols count=4 --> (p1 p2 p3 p4)
+  (defn arg-list-expression (argcount)
+     (do
+         (def result (list))
+         (def i 0)
+         (while (< i argcount)
+           (do 
+             (setf result (append result (list (sym (+ "p" (string i))))))
+  			 (setf i (+ i 1))
+           )
+         )
+         (return result)
+     )
+  )
+
+  ;; create list of symbols count=4 --> (obj p1 p2 p3 p4)
+  (defn arg-list-with-obj-expression (obj argcount)
+     (do
+         (def result (list))
+         (setf result (append result (list obj)))
+         (setf result (append result (arg-list-expression argcount)))
+         (return result)
+     )
+  )
+  
+  ;; create list of symbols: (call obj methodname p1 p2 p3 p4)
+  (defn create-call-expression (callfcn methodname obj argcount)
+      (do
+         (def _result (list))
+         (setf _result (append _result (list callfcn)))
+         (if (!= obj ())
+            (setf _result (append _result (list obj)))
+            (nop)
+         )
+         (setf _result (append _result (list (sym methodname))))
+         (def i 0)
+         (while (< i argcount)
+           (do 
+             (setf _result (append _result (list (sym (+ "p" (string i))))))
+  			 (setf i (+ i 1))
+           )
+         )
+         '(println _result)
+         (return _result)
+      )
+  )
+
+  ;; create something like (gdef name (obj p1 p2 ...) (<code>))
+  (defn create-native-method-expression (lisp-prefix full-class-name name netName isStatic argcount) 
+      (do 
+          (def code (list))
+          (setf code (append code (list 'defn)))
+          (setf code (append code (list (string lisp-prefix name))))
+          (if isStatic
+             (do 
+               (setf code (append code (list (arg-list-expression argcount))))
+               (setf code (append code (list (create-call-expression 'call-static netName full-class-name argcount))))
+             )
+             (do 
+               (setf code (append code (list (arg-list-with-obj-expression 'obj argcount))))             
+               (setf code (append code (list (create-call-expression 'call netName obj argcount))))
+             )
+          )
+          ;(println "---->" code)
+          (return code)
+      )
+  )
+  
+  ;; create lisp functions for a native class  
+  (defn create-native (lisp-name full-class-name) 
+        (do
+            (def result "(do ")
+            ; inspect class and generate for all public properties and methods method stubs
+            (setf result (+ result "(defn "))
+            (setf result (+ result (str (sym (string "create-" lisp-name)))))
+            (setf result (+ result " () "))
+            (setf result (+ result "(call "))
+            (setf result (+ result "\"" (str full-class-name) "\""))
+            (setf result (+ result "))"))
+            ;(setf result (+ result (str '(gdefn (sym (string "create-" lisp-name)) () (call full-class-name)))))
+            ;(setf result (str '(gdefn (sym (string "create-" lisp-name)) () (call full-class-name))))
+			
+			(def methodInfos (native-methods full-class-name))
+			(foreach methodInfos 
+               (lambda (methodNameAndArgCount) 
+    			   (do 
+    			     (def methodName (first methodNameAndArgCount))
+    			     (def methodArgsCount (nth 1 methodNameAndArgCount))
+                     (def isStatic (nth 2 methodNameAndArgCount))
+    			     (def netMethodName (nth 3 methodNameAndArgCount))
+                     (def method-expr (create-native-method-expression (+ (str lisp-name) "-") full-class-name methodName netMethodName isStatic methodArgsCount))
+                     ;(eval method-expr)
+                     (setf result (+ result (str method-expr)))
+                     ;(println method-expr)
+                     ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
+                     ;(evalstr method)
+    			   )
+			   )
+			)
+
+			(def fieldInfos (native-fields full-class-name))
+			(foreach fieldInfos 
+               (lambda (fieldName) 
+    			   (do 
+                     ;	(gdef Math-PI (field System.Math PI))
+					 (def field-expr (list 'def (sym (string lisp-name "-" fieldName)) (list 'field full-class-name fieldName) ))
+					 ;(eval field-expr)
+                     (setf result (+ result (str field-expr)))
+    			   )
+			   )
+			)
+            (setf result (+ result ")"))
+			;(println result)
+            (return result)
+        )     
+  )
+  
+  ;; create the standard library for fuel on .NET platforms
+  (if (isNET)
+	(do
+	  (evalstr (create-native "Math" "System.Math"))
+	  (evalstr (create-native "File" "System.IO.File"))
+	  (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
+	  (evalstr (create-native "Directory" "System.IO.Directory"))
+	  (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
+	  (evalstr (create-native "Array" "System.Object[]"))
+	  (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
+	)
+  )
+  
+;  (evalstr "(defn yyy (x) (+ x x x))")
+;  (eval '(defn xxx (x) (+ x x x)))
+;  (eval '(do (defn x1 (x) (+ x x x)) (defn x2 (x) (* x x x))))
+
+  (nop)
+)
+  

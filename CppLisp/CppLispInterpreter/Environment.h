@@ -96,6 +96,8 @@ namespace CppLisp
 		const static string EvalStr;
 		const static string Quote;
 		const static string Quasiquote;
+		const static string UnQuote;
+		const static string UnQuoteSplicing;
 
 		const static string Sym;
 		const static string Str;

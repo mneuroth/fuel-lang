@@ -784,10 +784,59 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Quasiquote7()
+        {
+            LispVariant result = Lisp.Eval("(do (def args '(1 2 3)) `,(first args))");
+            Assert.AreEqual("1", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote8()
+        {
+            LispVariant result = Lisp.Eval("(do (def args '(1 2 3)) `(,(first args)))");
+            Assert.AreEqual("(1)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote9()
+        {
+            LispVariant result = Lisp.Eval("(do `(b))");
+            Assert.AreEqual("(b)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote10()
+        {
+            LispVariant result = Lisp.Eval("(do `a)");
+            Assert.AreEqual("a", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_Quote1()
         {
             LispVariant result = Lisp.Eval("(do (def x 42) (println 'x))");
             Assert.AreEqual("x", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quote2()
+        {
+            LispVariant result = Lisp.Eval("(do 'x)");
+            Assert.AreEqual("x", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quote3()
+        {
+            LispVariant result = Lisp.Eval("(do '(a b 6 x))");
+            Assert.AreEqual("(a b 6 x)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_EvalQuasiQuote1()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 4) (def lst '(a 2 3)) (eval `,(first lst)))");
+            Assert.AreEqual("4", result.ToString());
         }
 
         [TestMethod]

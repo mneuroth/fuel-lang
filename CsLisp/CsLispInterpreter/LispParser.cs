@@ -51,9 +51,9 @@ namespace CsLisp
         /// <param name="offset">The position offset.</param>
         /// <param name="scope">The scope.</param>
         /// <returns>Abstract syntax tree as container</returns>
-        public static IEnumerable<object> Parse(string code, int offset = 0, LispScope scope = null)
+        public static object Parse(string code, int offset = 0, LispScope scope = null)
         {
-            List<object> parseResult = null;
+            object parseResult = null;
             string moduleName = string.Empty;
 
             // set tokens at LispScope to improve debugging and 
@@ -74,7 +74,7 @@ namespace CsLisp
 
         #region private methods
 
-        private static int ParseTokens(string moduleName, IList<LispToken> tokens, int startIndex, ref List<object> parseResult, bool isToplevel)
+        private static int ParseTokens(string moduleName, IList<LispToken> tokens, int startIndex, ref object parseResult, bool isToplevel)
         {
             int i;
             List<object> current = null;
@@ -86,10 +86,6 @@ namespace CsLisp
                 if (token.Type == LispTokenType.ListStart)
                 {
                     current = new List<object>();
-                    if (parseResult == null)
-                    {
-                        parseResult = current;
-                    }
                     listStack.Push(current);
                 }
                 else if (token.Type == LispTokenType.ListEnd)
@@ -107,6 +103,7 @@ namespace CsLisp
                         {
                             throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
                         }
+                        parseResult = current;
                         return i;
                     }
                 }
@@ -115,18 +112,10 @@ namespace CsLisp
                     var quote = new List<object>();
                     quote.Add(new LispVariant(LispType.Symbol, token.Type == LispTokenType.Quote ? LispEnvironment.Quote : LispEnvironment.Quasiquote));
 
-                    var nextToken = tokens[i + 1];
-                    if (nextToken.Type == LispTokenType.ListStart)
-                    {
-                        List<object> quotedList = null;
-                        i = ParseTokens(moduleName, tokens, i + 1, ref quotedList, isToplevel: false);
-                        quote.Add(quotedList);
-                    }
-                    else
-                    {
-                        quote.Add(new LispVariant(nextToken));
-                        i++;
-                    }
+                    object quotedList = null;
+                    i = ParseTokens(moduleName, tokens, i + 1, ref quotedList, isToplevel: false);
+                    quote.Add(quotedList);
+
                     if (current != null)
                     {
                         current.Add(quote);                        
@@ -134,19 +123,22 @@ namespace CsLisp
                 }
                 else if (token.Type == LispTokenType.UnQuote || token.Type == LispTokenType.UnQuoteSplicing)
                 {
+                    var unquote = new List<object>();
                     LispUnQuoteModus unquotedModus = token.Type == LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing;
+                    unquote.Add(new LispVariant(LispType.Symbol, token.Type == LispTokenType.UnQuote ? LispEnvironment.UnQuote : LispEnvironment.UnQuoteSplicing));
 
-                    var nextToken = tokens[i + 1];
-                    if (nextToken.Type == LispTokenType.ListStart)
+                    object quotedList = null;
+                    i = ParseTokens(moduleName, tokens, i + 1, ref quotedList, isToplevel: false);
+                    unquote.Add(quotedList);
+
+                    if (current != null)
                     {
-                        List<object> unquotedList = null;
-                        i = ParseTokens(moduleName, tokens, i + 1, ref unquotedList, isToplevel: false);
-                        current.Add(new LispVariant(LispType.List, unquotedList, unquotedModus));
+                        current.Add(unquote);
                     }
                     else
                     {
-                        current.Add(new LispVariant(nextToken, unQuoted: unquotedModus));
-                        i++;
+                        parseResult = unquote;
+                        return i;
                     }
                 }
                 else if (token.Type == LispTokenType.Comment)
@@ -155,6 +147,11 @@ namespace CsLisp
                 }
                 else
                 {
+                    if(!isToplevel && current == null)
+                    {
+                        parseResult = new LispVariant(token);
+                        return i;
+                    }
                     if (current == null)
                     {
                         throw new LispException(UnexpectedToken, token, moduleName);
@@ -169,6 +166,7 @@ namespace CsLisp
                 throw new LispException(BracketsOutOfBalance, token, moduleName);
             }
 
+            parseResult = current;
             return i;
         }
 

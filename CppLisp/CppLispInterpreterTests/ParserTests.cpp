@@ -41,16 +41,18 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_SingleParserEmptyCode)
         {
-			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> result = LispParser::Parse("()");
+			std::shared_ptr<object> result = LispParser::Parse("()");
             Assert::IsNotNull(result.get());
-            Assert::AreEqual<size_t>(0, result->size());
+			Assert::IsTrue(result->IsList());
+			Assert::AreEqual<size_t>(0, result->ToList()->size());
         }
 
 		TEST_METHOD(Test_SingleParser1)
         {
-			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> result = LispParser::Parse("(print 1 2.54 \"string\")");
+			std::shared_ptr<object> result = LispParser::Parse("(print 1 2.54 \"string\")");
             Assert::IsNotNull(result.get());
-            var resultAsArray = result->ToArray();
+			Assert::IsTrue(result->IsList());
+			var resultAsArray = result->ToEnumerableOfObject();
             Assert::AreEqual<size_t>(4, resultAsArray.size());
 
             var value = resultAsArray[0]->ToLispVariant();
@@ -69,10 +71,11 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_SingleParser2)
 		{
-			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> result = LispParser::Parse("(do (print #t 2.54 \"string\"))");
+			std::shared_ptr<object> result = LispParser::Parse("(do (print #t 2.54 \"string\"))");
             Assert::IsNotNull(result.get());
-            var resultAsArrayDo = result->ToArray();
-            Assert::AreEqual<size_t>(2, resultAsArrayDo.size());
+			Assert::IsTrue(result->IsList());
+			var resultAsArrayDo = result->ToEnumerableOfObject();
+			Assert::AreEqual<size_t>(2, resultAsArrayDo.size());
 
             var value = resultAsArrayDo[0]->ToLispVariant();
             Assert::IsTrue(value->IsSymbol());

@@ -81,6 +81,10 @@
       )
   )
 
+  (define-macro-eval setq (symbol value)
+	  (setf symbol value)
+  )
+
   ;; foreach loop  
   (defn foreach (container fcn) 
      (do 

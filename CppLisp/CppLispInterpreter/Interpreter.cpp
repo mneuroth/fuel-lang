@@ -83,8 +83,9 @@ namespace CppLisp
 			if (item->IsSymbol())
 			{
 				item = std::make_shared<LispVariant>(scope->ResolveInScopes(std::make_shared<object>(*item)));
+				return item;
 			}
-			if (item->IsList() && !item->IsNil())
+			else if (item->IsList() && !item->IsNil())
 			{
 				*astAsList = *(item->ListValue()/*->ToList()*/);
 			}

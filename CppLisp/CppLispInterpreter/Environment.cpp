@@ -79,7 +79,9 @@ const string LispEnvironment::Apply = "apply";
 const string LispEnvironment::Eval = "eval";
 const string LispEnvironment::EvalStr = "evalstr";
 const string LispEnvironment::Quote = "quote";
-const string LispEnvironment::Quasiquote = "quasiquote";
+const string LispEnvironment::Quasiquote = "quasiquote";   
+const string LispEnvironment::UnQuote = "_unquote";
+const string LispEnvironment::UnQuoteSplicing = "_unquotesplicing";
 
 const string LispEnvironment::Sym = "sym";
 const string LispEnvironment::Str = "str";
@@ -1083,8 +1085,7 @@ static std::shared_ptr<LispVariant> EvalFcn(const std::vector<std::shared_ptr<ob
 	}
 	else
 	{
-		// if a single value is given for evaluation --> just return value !
-		result = variant;
+		result = LispInterpreter::EvalAst(std::make_shared<object>(*variant), scope);
 	}
 	return result;
 }
@@ -1240,32 +1241,86 @@ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToEnumerable(std::s
 	}
 }
 
+std::shared_ptr<LispVariant> unquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs(UnQuote, 1, args, scope);
+
+	return std::make_shared<LispVariant>(args[0]);
+}
+
+std::shared_ptr<LispVariant> unquotesplicing_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs(UnQuoteSplicing, 1, args, scope);
+
+	return std::make_shared<LispVariant>(args[0]);
+}
+
+static std::shared_ptr<object> ProcessQuotedSExpression(const IEnumerable<std::shared_ptr<object>> & expr, std::shared_ptr<LispScope> scope, /*out*/ bool & splicing)
+{
+	IEnumerable<std::shared_ptr<object>> result;
+
+	splicing = false;
+
+	if (expr.Count() == 2)
+	{
+		var item1 = expr.First();
+		var item2 = expr.ElementAt(1);
+		if (item1->IsLispVariant())
+		{
+			std::shared_ptr<LispVariant> variant = item1->ToLispVariant();
+			if (variant->IsSymbol() && (variant->ToString() == LispEnvironment::UnQuote || variant->ToString() == LispEnvironment::UnQuoteSplicing))
+			{
+				var evalResult = LispInterpreter::EvalAst(item2, scope);
+				splicing = variant->ToString() == LispEnvironment::UnQuoteSplicing;
+				return std::make_shared<object>(*evalResult);
+			}
+		}
+		result.Add(item1);
+		result.Add(item2);
+	}
+	else
+	{
+		for (var itm : expr)
+		{
+			if (itm->IsIEnumerableOfObject() || itm->IsList())
+			{
+				bool tempSplicing = false;
+				var res = ProcessQuotedSExpression(itm->IsIEnumerableOfObject() ? itm->ToEnumerableOfObject() : *(itm->ToList()), scope, /*out*/ tempSplicing);
+				if (tempSplicing)
+				{
+					std::shared_ptr<LispVariant> variant = res->ToLispVariant();
+					result.AddRange(*(variant->ListValue()));
+				}
+				else
+				{
+					result.Add(res);
+				}
+			}
+			else
+			{
+				result.Add(itm);
+			}
+		}
+	}
+	return std::make_shared<object>(result);
+}
+
 std::shared_ptr<LispVariant> quasiquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs(LispEnvironment::Quasiquote, 1, args, scope);
 
-	// unquote elements of list if needed
-	var lst = LispEnvironment::GetExpression(args[0]);
-	IEnumerable<std::shared_ptr<object>> ret;
-	for(var elem : *lst)
+	// iterate through arguments and evaluate unquote/splicing expressions
+	var expression = args[0];
+	if (expression->IsLispVariant())
 	{
-		bool isSplicing;
-		std::shared_ptr<object> item = UnQuoteIfNeeded(elem, /*out*/ isSplicing, scope);
-		// process unquotesplicing
-		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> sublst = ToEnumerable(item);
-		if (isSplicing && sublst != null)
-		{
-			for(var subitem : *sublst)
-			{
-				ret.Add(subitem);
-			}
-		}
-		else
-		{
-			ret.Add(item);
-		}
+		return expression->ToLispVariant();
 	}
-	return std::make_shared<LispVariant>(std::make_shared<object>(ret));
+	else if (expression->IsIEnumerableOfObject() || expression->IsList())
+	{
+		bool splicing = false;
+		return std::make_shared<LispVariant>(ProcessQuotedSExpression(expression->IsIEnumerableOfObject() ? expression->ToEnumerableOfObject() : *(expression->ToList()), scope, /*out*/ splicing));
+	}
+	return std::make_shared<LispVariant>(expression);
 }
 
 static std::shared_ptr<LispVariant> if_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -1305,7 +1360,7 @@ static std::shared_ptr<LispVariant> do_form(const std::vector<std::shared_ptr<ob
 
 	for (var statement : args)
 	{
-		if (!(statement->IsIEnumerableOfObject() || statement->IsList() /*is IEnumerable<object>*/))
+		if (!(statement->IsIEnumerableOfObject() || statement->IsList() /*is IEnumerable<object>*/) || ((statement->IsLispVariant()) && (statement->ToLispVariant()->IsList())))
 		{
 			throw LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariant()->Token, scope->ModuleName, scope->DumpStackToString());
 		}
@@ -1627,7 +1682,9 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::GetExpres
 	{
 		return item->ToList(); // (IEnumerable<object>)item;
 	}
-	return std::make_shared<IEnumerable<std::shared_ptr<object>>>(); // new List<object>();
+	var result = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
+	result->Add(item);
+	return result;
 }
 
 std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::CheckForList(const string & functionName, std::shared_ptr<object> listObj, std::shared_ptr<LispScope> scope)
@@ -1821,6 +1878,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 
 	(*scope)[Quote] = CreateFunction(quote_form, "(quote expr)", "Returns expression without evaluating it.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)[UnQuote] = CreateFunction(unquote_form, "(unquote expr)", "Special form for unquoting expressions in quasiquote functions.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)[UnQuoteSplicing] = CreateFunction(unquotesplicing_form, "(unquotesplicing expr)", "Special form for unquotingsplicing expressions in quasiquote functions.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[While] = CreateFunction(while_form, "(while cond block)", "The while loop.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);

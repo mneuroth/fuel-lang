@@ -232,6 +232,8 @@ namespace CsLisp
         public const string EvalStr = "evalstr";
         public const string Quote = "quote";
         public const string Quasiquote = "quasiquote";
+        public const string UnQuote = "_unquote";
+        public const string UnQuoteSplicing = "_unquotesplicing";
 
         public const string Sym = "sym";
         public const string Str = "str";
@@ -279,7 +281,7 @@ namespace CsLisp
             {
                 return (IEnumerable<object>)item;
             }
-            return new List<object>();
+            return new List<object>() { item };
         }
 
         public static LispScope CreateDefaultScope()
@@ -408,6 +410,8 @@ namespace CsLisp
 
             scope[Quote] = CreateFunction(quote_form, "(quote expr)", "Returns expression without evaluating it.", isSpecialForm: true);
             scope[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", isSpecialForm: true);
+            scope[UnQuote] = CreateFunction(unquote_form, "(unquote expr)", "Special form for unquoting expressions in quasiquote functions.", isSpecialForm: true);
+            scope[UnQuoteSplicing] = CreateFunction(unquotesplicing_form, "(unquotesplicing expr)", "Special form for unquotingsplicing expressions in quasiquote functions.", isSpecialForm: true);
             scope[If] = CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", isSpecialForm: true);
             scope[While] = CreateFunction(while_form, "(while cond block)", "The while loop.", isSpecialForm: true);
             scope[Do] = CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", isSpecialForm: true);
@@ -1199,8 +1203,7 @@ namespace CsLisp
             }
             else
             {
-                // if a single value is given for evaluation --> just return value !
-                result = variant;
+                result = LispInterpreter.EvalAst(variant, scope);
             }
             return result;
         }
@@ -1261,7 +1264,7 @@ namespace CsLisp
         {
             CheckArgs(Setf, 2, args, scope);
 
-            var symbol = EvalArgIfNeeded(args[0], scope);
+            var symbol = EvalArgIfNeeded(args[0], scope);       // TODO: get l-value...
             var symbolName = symbol != null ? symbol.ToString() : null;
             var value = LispInterpreter.EvalAst(args[1], scope);
             scope.SetInScopes(symbolName, value);
@@ -1308,32 +1311,86 @@ namespace CsLisp
             return new LispVariant(args[0]);
         }
 
+        private static object ProcessQuotedSExpression(IEnumerable<object> expr, LispScope scope, out bool splicing)
+        {
+            List<object> result = new List<object>();
+
+            splicing = false;
+
+            if (expr.Count() == 2)
+            {
+                var item1 = expr.First();
+                var item2 = expr.ElementAt(1);
+                if (item1 is LispVariant)
+                {
+                    LispVariant variant = item1 as LispVariant;
+                    if (variant.IsSymbol && (variant.ToString() == UnQuote || variant.ToString() == UnQuoteSplicing))
+                    {
+                        var evalResult = LispInterpreter.EvalAst(item2, scope);
+                        splicing = variant.ToString() == UnQuoteSplicing;
+                        return evalResult;
+                    }
+                }
+                result.Add(item1);
+                result.Add(item2);
+            }
+            else
+            {
+                foreach (var itm in expr)
+                {
+                    if (itm is IEnumerable<object>)
+                    {
+                        bool tempSplicing = false; ;
+                        var res = ProcessQuotedSExpression(itm as IEnumerable<object>, scope, out tempSplicing);
+                        if (tempSplicing)
+                        {
+                            LispVariant variant = (LispVariant)res;
+                            result.AddRange(variant.ListValue);
+                        }
+                        else
+                        {
+                            result.Add(res);
+                        }
+                    }
+                    else
+                    {
+                        result.Add(itm);
+                    }
+                }
+            }
+            return result;
+        }
+
         public static LispVariant quasiquote_form(object[] args, LispScope scope)
         {
             CheckArgs(Quasiquote, 1, args, scope);
 
-            // unquote elements of list if needed
-            var lst = GetExpression(args[0]);
-            var ret = new List<object>();
-            foreach (var elem in lst)
+            // iterate through arguments and evaluate unquote/splicing expressions
+            var expression = args[0];
+            if (expression is LispVariant)
             {
-                bool isSplicing;
-                object item = UnQuoteIfNeeded(elem, out isSplicing, scope);
-                // process unquotesplicing
-                IEnumerable<object> sublst = ToEnumerable(item);
-                if (isSplicing && sublst != null)
-                {
-                    foreach (var subitem in sublst)
-                    {
-                        ret.Add(subitem);
-                    }
-                }
-                else
-                {
-                    ret.Add(item);
-                }
+                return (LispVariant)expression;
             }
-            return new LispVariant(ret);
+            else if(expression is IEnumerable<object>)
+            {
+                bool splicing = false;
+                return new LispVariant(ProcessQuotedSExpression(expression as IEnumerable<object>, scope, out splicing));
+            }
+            return new LispVariant(expression);
+        }
+
+        public static LispVariant unquote_form(object[] args, LispScope scope)
+        {
+            CheckArgs(UnQuote, 1, args, scope);
+
+            return new LispVariant(args[0]);
+        }
+
+        public static LispVariant unquotesplicing_form(object[] args, LispScope scope)
+        {
+            CheckArgs(UnQuoteSplicing, 1, args, scope);
+
+            return new LispVariant(args[0]);
         }
 
         public static LispVariant if_form(object[] args, LispScope scope)
@@ -1373,7 +1430,7 @@ namespace CsLisp
 
             foreach (var statement in args)
             {
-                if (!(statement is IEnumerable<object>))
+                if (!((statement is IEnumerable<object>) || ((statement is LispVariant) && ((LispVariant)statement).IsList)))
                 {
                     throw new LispException("List expected in do", ((LispVariant)statement).Token, scope.ModuleName, scope.DumpStackToString());
                 }

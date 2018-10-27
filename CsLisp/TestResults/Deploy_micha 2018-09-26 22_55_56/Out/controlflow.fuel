@@ -1,0 +1,32 @@
+(do
+    (defn f (x) (+ x x))
+
+    (defn fcn (x y)
+       (do
+           (println "fcn call" x y)
+           (+ x y 1)
+       )
+    )
+    
+    (def g (fn (x) (* x 2)))
+    
+    (println "hello world !")
+    (def a 1)
+    (if (> a 2)
+       (println "then")
+       (println "else")
+    )
+    (setf a 4)
+    (println '(1 a 3) a)
+    (println `(1 ,a 3) a)
+    (println (f 4))
+    (println (g 42))
+    (println "fcn=" (fcn 6 7))
+    
+    (while (< a 10)
+        (do
+            (println a)
+            (setf a (+ a 1))
+        )
+    )
+)

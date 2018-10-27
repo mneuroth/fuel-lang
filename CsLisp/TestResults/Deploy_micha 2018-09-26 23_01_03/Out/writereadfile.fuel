@@ -1,0 +1,17 @@
+;; test script to write and read a file
+
+(import fuellib)
+
+(def content "blub blub\nhello world.")
+(def fileName "test.txt")
+
+(File-WriteAllText fileName content)
+
+(println "exists file = " (File-Exists fileName))
+
+(println "test non existing file = " (File-Exists "blub"))
+
+(def checkContent (File-ReadAllText fileName))
+
+(println checkContent)
+(println "is equal = " (== content checkContent))

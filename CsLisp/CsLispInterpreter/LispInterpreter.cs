@@ -106,8 +106,9 @@ namespace CsLisp
                 if (item.IsSymbol)
                 {
                     item = new LispVariant(scope.ResolveInScopes(item));
+                    return item;
                 }
-                if (item.IsList && !item.IsNil)
+                else if (item.IsList && !item.IsNil)
                 {
                     astAsList = item.ListValue.ToList();
                 }

@@ -726,10 +726,52 @@ namespace QtLispUnitTests
 			Assert::AreEqual("(1 2 3 9 8 7 42)", result->ToString().c_str());
 		}
 
+		TEST_METHOD(Test_Quasiquote7)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def args '(1 2 3)) `,(first args))");
+			Assert::AreEqual("1", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote8)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def args '(1 2 3)) `(,(first args)))");
+			Assert::AreEqual("(1)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote9)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do `(b))");
+			Assert::AreEqual("(b)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote10)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do `a)");
+			Assert::AreEqual("a", result->ToString().c_str());
+		}
+
 		TEST_METHOD(Test_Quote1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def x 42) (println 'x))");
 			Assert::AreEqual("x", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quote2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do 'x)");
+			Assert::AreEqual("x", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quote3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do '(a b 6 x))");
+			Assert::AreEqual("(a b 6 x)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_EvalQuasiQuote1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 4) (def lst '(a 2 3)) (eval `,(first lst)))");
+			Assert::AreEqual("4", result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_String1)

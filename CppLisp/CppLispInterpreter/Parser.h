@@ -55,14 +55,14 @@ namespace CppLisp
 		/// <param name="offset">The position offset.</param>
 		/// <param name="scope">The scope.</param>
 		/// <returns>Abstract syntax tree as container</returns>
-		/*public*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> Parse(string code, size_t offset = 0, std::shared_ptr<LispScope> scope = null);
+		/*public*/ static std::shared_ptr<object> Parse(string code, size_t offset = 0, std::shared_ptr<LispScope> scope = null);
 
 		//#endregion
 
 	private:
 		//#region private methods
 
-		/*private*/ static size_t ParseTokens(string moduleName, std::vector<std::shared_ptr<LispToken>> tokens, size_t startIndex, /*ref*/ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> & parseResult, bool isToplevel);
+		/*private*/ static size_t ParseTokens(string moduleName, std::vector<std::shared_ptr<LispToken>> tokens, size_t startIndex, /*ref*/ std::shared_ptr<object> & parseResult, bool isToplevel);
 
 		/*private*/ static bool OnlyCommentTokensFrom(const std::vector<std::shared_ptr<LispToken>> & tokens, size_t i);
 
