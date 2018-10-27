@@ -1,3 +1,0 @@
-(do
-    (printx "hello world !")
-)
