@@ -114,39 +114,41 @@ namespace CppLisp
 		return txt.size() == 0;
 	}
 
-	string string::ReplaceIn(string temp, const string & findText, const string & arg)
+	string string::ReplaceIn(const string & temp, const string & findText, const string & arg)
 	{
 		auto pos = temp.find(findText);
+		string ret = temp;
 		if (pos != std::string::npos)
 		{
-			temp = temp.replace(pos, findText.size(), arg);
+			ret = ret.replace(pos, findText.size(), arg);
 		}
-		return temp;
+		return ret;
 	}
 
-	string string::ReplaceInWithFill(string temp, const string & findText, const string & arg)
+	string string::ReplaceInWithFill(const string & temp, const string & findText, const string & arg)
 	{
-		auto pos = temp.find(findText);
+		string ret = temp;
+		auto pos = ret.find(findText);
 		if (pos != std::string::npos)
 		{
-			auto pos2 = temp.find("}", pos + 1);
+			auto pos2 = ret.find("}", pos + 1);
 			if (pos2 != std::string::npos)
 			{
-				string len = temp.substr(pos + 3, pos2 - pos - findText.size());
+				string len = ret.substr(pos + 3, pos2 - pos - findText.size());
 				int l = std::stoi(len);
 				if (l > 0)
 				{
 					int count = l - (int)arg.size();
-					temp = temp.replace(pos, pos2 - pos + 1, std::string(count > 0 ? count : 0, ' ') + arg);
+					ret = ret.replace(pos, pos2 - pos + 1, std::string(count > 0 ? count : 0, ' ') + arg);
 				}
 				else
 				{
 					int count = abs(l) - (int)arg.size();
-					temp = temp.replace(pos, pos2 - pos + 1, arg + std::string(count > 0 ? count : 0, ' '));
+					ret = ret.replace(pos, pos2 - pos + 1, arg + std::string(count > 0 ? count : 0, ' '));
 				}
 			}
 		}
-		return temp;
+		return ret;
 	}
 
 	string string::Format(const string & txt, const string & arg1, const string & arg2, const string & arg3, const string & arg4, const string & arg5)

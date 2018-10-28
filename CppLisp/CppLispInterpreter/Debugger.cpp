@@ -363,12 +363,12 @@ namespace CppLisp
 		return false;
 	}
 
-	bool LispDebugger::HasBreakpointAt(size_t lineNo, string moduleName)
+	bool LispDebugger::HasBreakpointAt(size_t lineNo, const string & moduleName)
 	{
 		return HitsBreakpoint(lineNo, moduleName, null);
 	}
 
-	void LispDebugger::AddBreakpoint(size_t lineNo, string moduleName, string condition)
+	void LispDebugger::AddBreakpoint(size_t lineNo, const string & moduleName, const string & condition)
 	{
 		var newItem = /*new*/ LispBreakpointInfo(lineNo, moduleName, condition);
 		//var index = Breakpoints.FindIndex(elem => (elem.LineNo == lineNo) && (elem.ModuleName == moduleName));

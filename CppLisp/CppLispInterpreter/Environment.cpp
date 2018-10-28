@@ -113,7 +113,7 @@ bool WriteTextFile(const std::string & fileName, const std::string & content)
 	return ofs.good();
 }
 
-static string GetStringRepresentation(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, string separator = " ")
+static string GetStringRepresentation(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & separator = " ")
 {
 	var text = string::Empty;
 	for (var item : args)
@@ -310,9 +310,9 @@ static std::shared_ptr<LispVariant> Vars(const std::vector<std::shared_ptr<objec
 
 static std::shared_ptr<LispVariant> TracePrint(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	var status = args[0]->ToLispVariant();
-	(*scope)[Traceon] = std::make_shared<object>(status->BoolValue());
-	return std::make_shared<LispVariant>(std::make_shared<object>(status->BoolValue()));
+	var status = args[0]->ToLispVariantRef();
+	(*scope)[Traceon] = std::make_shared<object>(status.BoolValue());
+	return std::make_shared<LispVariant>(std::make_shared<object>(status.BoolValue()));
 }
 
 static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> scope)
@@ -443,7 +443,7 @@ static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<obj
 	for(var modu : args)
 	{
 		string code = string::Empty;
-		string orgModuleFileName = modu->ToLispVariant()->StringValue();
+		string orgModuleFileName = modu->ToLispVariantRef().StringValue();
 		string fileName = orgModuleFileName;
 		if (!File_Exists(fileName))
 		{
@@ -743,12 +743,12 @@ static std::shared_ptr<LispVariant> ArithmetricOperation(const std::vector<std::
 	return result;
 }
 
-static std::shared_ptr<LispVariant> CompareOperation(const std::vector<std::shared_ptr<object>> & args, std::function<std::shared_ptr<LispVariant>(std::shared_ptr<LispVariant>, std::shared_ptr<LispVariant>)> op, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> CompareOperation(const std::vector<std::shared_ptr<object>> & args, std::function<std::shared_ptr<LispVariant>(const LispVariant &, const LispVariant &)> op, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("compare-op", 2, args, scope);
 
-	var arg1 = args[0]->ToLispVariant();
-	var arg2 = args[1]->ToLispVariant();
+	const LispVariant & arg1 = args[0]->ToLispVariantRef();
+	const LispVariant & arg2 = args[1]->ToLispVariantRef();
 	std::shared_ptr<LispVariant> result = op(arg1, arg2);
 	return result;
 }
@@ -803,32 +803,32 @@ static std::shared_ptr<LispVariant> Not(const std::vector<std::shared_ptr<object
 
 static std::shared_ptr<LispVariant> LessTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l < *r); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(l < r); }, scope);
 }
 
 static std::shared_ptr<LispVariant> GreaterTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l > *r); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(l > r); }, scope);
 }
 
 static std::shared_ptr<LispVariant> LessEqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l <= *r); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(l <= r); }, scope);
 }
 
 static std::shared_ptr<LispVariant> GreaterEqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l >= *r); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(l >= r); }, scope);
 }
 
 static std::shared_ptr<LispVariant> EqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(LispVariant::EqualOp(*l, *r))); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(LispVariant::EqualOp(l, r))); }, scope);
 }
 
 static std::shared_ptr<LispVariant> NotEqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(!LispVariant::EqualOp(*l, *r))); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(!LispVariant::EqualOp(l, r))); }, scope);
 }
 
 static std::shared_ptr<LispVariant> CreateList(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
@@ -868,8 +868,8 @@ static std::shared_ptr<LispVariant> Reduce(const std::vector<std::shared_ptr<obj
 	var function = CheckForFunction(ReduceFcn, args[0], scope)->FunctionValue();
 	var elements = LispEnvironment::CheckForList(ReduceFcn, args[1], scope);
 
-	var start = args[2]->ToLispVariant();
-	var result = std::make_shared<LispVariant>(*start);
+	const LispVariant & start = args[2]->ToLispVariantRef();
+	var result = std::make_shared<LispVariant>(start);
 	for(var elem : *elements)
 	{
 		// call for every element the given function (args[0])
@@ -891,11 +891,11 @@ static std::shared_ptr<LispVariant> Cons(const std::vector<std::shared_ptr<objec
 	}
 	if (args.size() > 1)
 	{
-		var item2 = args[1]->ToLispVariant();
-		if (item2->IsList())
+		var item2 = args[1]->ToLispVariantRef();
+		if (item2.IsList())
 		{
-			std::shared_ptr<IEnumerable<std::shared_ptr<object>>> l = item2->ListValue();
-			for(var item : *l)
+			const IEnumerable<std::shared_ptr<object>> & l = item2.ListValueRef();
+			for(var item : l)
 			{
 				list.Add(item);
 			}
@@ -913,66 +913,66 @@ static std::shared_ptr<LispVariant> Length(const std::vector<std::shared_ptr<obj
 {
 	CheckArgs("len", 1, args, scope);
 
-	var val = args[0]->ToLispVariant();
-	if (val->IsString())
+	const LispVariant & val = args[0]->ToLispVariantRef();
+	if (val.IsString())
 	{
-		return std::make_shared<LispVariant>(std::make_shared<object>((int)val->StringValue().size()));
+		return std::make_shared<LispVariant>(std::make_shared<object>((int)val.StringValue().size()));
 	}
-	var elements = val->ListValue();
-	return std::make_shared<LispVariant>(std::make_shared<object>((int)elements->Count()));
+	const IEnumerable<std::shared_ptr<object>> & elements = val.ListValueRef();
+	return std::make_shared<LispVariant>(std::make_shared<object>((int)elements.Count()));
 }
 
 static std::shared_ptr<LispVariant> First(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("first", 1, args, scope);
 
-	var val = args[0]->ToLispVariant();
-	if (val->IsString())
+	const LispVariant & val = args[0]->ToLispVariantRef();
+	if (val.IsString())
 	{
-		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(0, 1)));
+		return std::make_shared<LispVariant>(std::make_shared<object>(val.StringValue().Substring(0, 1)));
 	}
-	var elements = val->ListValue();
-	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements->First())));
+	const IEnumerable<std::shared_ptr<object>> & elements = val.ListValueRef();
+	return std::make_shared<LispVariant>(elements.First());
 }
 
 static std::shared_ptr<LispVariant> Last(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("last", 1, args, scope);
 
-	var val = args[0]->ToLispVariant();
-	if (val->IsString())
+	const LispVariant & val = args[0]->ToLispVariantRef();
+	if (val.IsString())
 	{
-		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(val->StringValue().size() - 1)));
+		return std::make_shared<LispVariant>(std::make_shared<object>(val.StringValue().Substring(val.StringValue().size() - 1)));
 	}
-	var elements = val->ListValue();
-	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements->Last())));
+	const IEnumerable<std::shared_ptr<object>> & elements = val.ListValueRef();
+	return std::make_shared<LispVariant>(elements.Last());
 }
 
 static std::shared_ptr<LispVariant> Rest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("rest", 1, args, scope);
 
-	var val = args[0]->ToLispVariant();
-	if (val->IsString())
+	const LispVariant & val = args[0]->ToLispVariantRef();
+	if (val.IsString())
 	{
-		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(1)));
+		return std::make_shared<LispVariant>(std::make_shared<object>(val.StringValue().Substring(1)));
 	}
-	var elements = val->ListValue();
-	return std::make_shared<LispVariant>(std::make_shared<object>(elements->Skip(1)));
+	IEnumerable<std::shared_ptr<object>> elements = val.ListValueRef();
+	return std::make_shared<LispVariant>(std::make_shared<object>(elements.Skip(1)));
 }
 
 static std::shared_ptr<LispVariant> Nth(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("nth", 2, args, scope);
 
-	var index = args[0]->ToLispVariant()->IntValue();
-	var val = args[1]->ToLispVariant();
-	if (val->IsString())
+	var index = args[0]->ToLispVariantRef().IntValue();
+	const LispVariant & val = args[1]->ToLispVariantRef();
+	if (val.IsString())
 	{
-		return std::make_shared<LispVariant>(std::make_shared<object>(val->StringValue().Substring(index, 1)));
+		return std::make_shared<LispVariant>(std::make_shared<object>(val.StringValue().Substring(index, 1)));
 	}
-	var elements = val->ListValue();
-	return std::make_shared<LispVariant>(std::make_shared<object>(*(elements->ElementAt(index))));
+	const IEnumerable<std::shared_ptr<object>> & elements = val.ListValueRef();
+	return std::make_shared<LispVariant>(elements.ElementAt(index));
 }
 
 static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
@@ -980,8 +980,8 @@ static std::shared_ptr<LispVariant> Append(const std::vector<std::shared_ptr<obj
 	var list = IEnumerable<std::shared_ptr<object>>();
 	for(var listElement : args)
 	{
-		var lst = listElement->ToLispVariant()->ListValue();
-		for(var item : *lst)
+		const IEnumerable<std::shared_ptr<object>> & lst = listElement->ToLispVariantRef().ListValueRef();
+		for(var item : lst)
 		{
 			list.Add(item);
 		}
@@ -994,14 +994,14 @@ static std::shared_ptr<LispVariant> Reverse(const std::vector<std::shared_ptr<ob
 {
 	CheckArgs("reverse", 1, args, scope);
 
-	LispVariant val = (LispVariant)args[0];
+	const LispVariant & val = args[0]->ToLispVariantRef();
 	if (val.IsString())
 	{
 		var temp = val.StringValue();
 		std::reverse(temp.begin(), temp.end());
 		return std::make_shared<LispVariant>(LispType::_String, std::make_shared<object>(temp));
 	}
-	var elements = *(val.ListValue());
+	IEnumerable<std::shared_ptr<object>> elements = val.ListValueRef();
 	std::reverse(elements.begin(), elements.end());
 	return std::make_shared<LispVariant>(LispType::_List, std::make_shared<object>(elements));
 }
@@ -1010,7 +1010,7 @@ static std::shared_ptr<LispVariant> SymbolFcn(const std::vector<std::shared_ptr<
 {
 	CheckArgs(LispEnvironment::Sym, 1, args, scope);
 
-	var symbol = args[0]->ToString();
+	const string & symbol = args[0]->ToString();
 	return std::make_shared<LispVariant>(LispType::_Symbol, std::make_shared<object>(symbol));
 }
 
@@ -1023,10 +1023,10 @@ static std::shared_ptr<LispVariant> ConvertToString(const std::vector<std::share
 	// used for: (println (str nativeLst))
 	if (args[0]->IsLispVariant())
 	{
-		var variant = args[0]->ToLispVariant();
-		if (variant->IsNativeObject())
+		const LispVariant & variant = args[0]->ToLispVariantRef();
+		if (variant.IsNativeObject())
 		{
-			value = variant->NativeObjectStringRepresentation();
+			value = variant.NativeObjectStringRepresentation();
 		}
 	}
 	return std::make_shared<LispVariant>(LispType::_String, std::make_shared<object>(value));
@@ -1036,7 +1036,7 @@ static std::shared_ptr<LispVariant> ArgsCountFcn(const std::vector<std::shared_p
 {
 	CheckArgs(LispEnvironment::Apply, 0, args, scope);
 
-	size_t cnt = (*scope)[ArgsMeta]->ToList()->Count();
+	size_t cnt = (*scope)[ArgsMeta]->ToListRef().Count();
 	return std::make_shared<LispVariant>(std::make_shared<object>((int)cnt));
 }
 
@@ -1044,8 +1044,8 @@ static std::shared_ptr<LispVariant> ArgsFcn(const std::vector<std::shared_ptr<ob
 {
 	CheckArgs(LispEnvironment::Apply, 1, args, scope);
 
-	var index = args[0]->ToLispVariant()->IntValue();
-	var array = (*scope)[ArgsMeta]->ToList()->ToArray();
+	var index = args[0]->ToLispVariantRef().IntValue();
+	const IEnumerable<std::shared_ptr<object>> & array = (*scope)[ArgsMeta]->ToListRef();
 	if (index >= 0 && index < (int)array.size())
 	{
 		return std::make_shared<LispVariant>(array[index]);
@@ -1059,11 +1059,11 @@ static std::shared_ptr<LispVariant> ApplyFcn(const std::vector<std::shared_ptr<o
 
 	var fcn = LispInterpreter::EvalAst(args[0], scope);
 
-	var arguments = args[1]->ToLispVariant();
+	const LispVariant & arguments = args[1]->ToLispVariantRef();
 
-	if (arguments->IsList())
+	if (arguments.IsList())
 	{
-		var argumentsArray = arguments->ListValue()->ToArray();
+		const IEnumerable<std::shared_ptr<object>> & argumentsArray = arguments.ListValueRef();
 		var result = fcn->FunctionValue().Function(argumentsArray, scope);
 		return result;
 	}
@@ -1077,15 +1077,15 @@ static std::shared_ptr<LispVariant> EvalFcn(const std::vector<std::shared_ptr<ob
 
 	std::shared_ptr<LispVariant> result;
 	// convert LispVariant.List --> object[] needed for evaluation
-	var variant = args[0]->ToLispVariant();
-	if (variant->IsList())
+	const LispVariant & variant = args[0]->ToLispVariantRef();
+	if (variant.IsList())
 	{
-		std::shared_ptr<object> code = std::make_shared<object>(*(variant->ListValue()));
+		std::shared_ptr<object> code = std::make_shared<object>(variant.ListValueRef());
 		result = LispInterpreter::EvalAst(code, scope);
 	}
 	else
 	{
-		result = LispInterpreter::EvalAst(std::make_shared<object>(*variant), scope);
+		result = LispInterpreter::EvalAst(std::make_shared<object>(variant), scope);
 	}
 	return result;
 }
@@ -1094,10 +1094,10 @@ static std::shared_ptr<LispVariant> EvalStrFcn(const std::vector<std::shared_ptr
 {
 	CheckArgs("evalstr", 1, args, scope);
 
-	var variant = args[0]->ToLispVariant();
+	const LispVariant & variant = args[0]->ToLispVariantRef();
 	var tempModuleName = scope->ModuleName;
 	scope->IsInEval = true;
-	var result = Lisp::Eval(variant->Value->ToString(), scope, LispEnvironment::EvalStrTag + scope->ModuleName + ":" + variant->Value->ToString());
+	var result = Lisp::Eval(variant.Value->ToString(), scope, LispEnvironment::EvalStrTag + scope->ModuleName + ":" + variant.Value->ToString());
 	scope->IsInEval = false;
 	scope->ModuleName = tempModuleName;
 	return result;
@@ -1159,7 +1159,7 @@ static std::shared_ptr<LispVariant> definemacroevaluate_form(const std::vector<s
 		var macros = dict[LispEnvironment::Macros]->GetLispScopeRef() /*as LispScope*/;
 		if (macros != null)
 		{
-			(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroRuntimeEvaluate(std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObject()), std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[2]->ToEnumerableOfObject())));
+			(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroRuntimeEvaluate(std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObjectRef()), std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[2]->ToEnumerableOfObjectRef())));
 		}
 	}
 
@@ -1178,7 +1178,7 @@ static std::shared_ptr<LispVariant> definemacroexpand_form(const std::vector<std
 	{
 		// allow macros in macros --> recursive call for ExpandMacros()
 		std::shared_ptr<object> result = LispInterpreter::ExpandMacros(std::make_shared<object>(*LispEnvironment::GetExpression(args[2])), scope);
-		(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroCompileTimeExpand(LispEnvironment::GetExpression(args[1]), std::make_shared<IEnumerable<std::shared_ptr<object>>>(result->ToEnumerableOfObject())));
+		(*macros)[args[0]->ToString()] = std::make_shared<object>(LispMacroCompileTimeExpand(LispEnvironment::GetExpression(args[1]), std::make_shared<IEnumerable<std::shared_ptr<object>>>(result->ToEnumerableOfObjectRef())));
 	}
 
 	return null;
@@ -1195,21 +1195,21 @@ static std::shared_ptr<LispVariant> quote_form(const std::vector<std::shared_ptr
 
 std::shared_ptr<object> UnQuoteIfNeeded(std::shared_ptr<object> item, bool & isSplicing, std::shared_ptr<LispScope> scope)
 {
-	var value = item->ToLispVariant(); // as LispVariant
 	isSplicing = false;
-	if (value != null)
+	if (item->IsLispVariant())
 	{
-		if (value->IsUnQuoted == LispUnQuoteModus::_UnQuote || value->IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing)
+		const LispVariant & value = item->ToLispVariantRef(); 
+		if (value.IsUnQuoted == LispUnQuoteModus::_UnQuote || value.IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing)
 		{
-			isSplicing = value->IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing;
-			if (value->IsList())
+			isSplicing = value.IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing;
+			if (value.IsList())
 			{
-				std::shared_ptr<object> pObj = std::make_shared<object>(*(value->ListValue()));
+				std::shared_ptr<object> pObj = std::make_shared<object>(value.ListValueRef());
 				return LispInterpreter::EvalAst(pObj, scope)->Value;
 			}
 			else
 			{
-				return (*scope)[value->StringValue()];
+				return (*scope)[value.StringValue()];
 			}
 		}
 	}
@@ -1220,15 +1220,15 @@ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToEnumerable(std::s
 {
 	if (obj->IsIEnumerableOfObject() /*enumerable != null*/ || obj->IsList())
 	{
-		var enumerable = obj->ToEnumerableOfObject() /*as IEnumerable<object>*/;
+		var enumerable = obj->ToEnumerableOfObjectRef() /*as IEnumerable<object>*/;
 		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(enumerable);
 	}
 	if (obj->IsLispVariant())
 	{
-		var variant = obj->ToLispVariant() /*as LispVariant*/;
-		if (variant->IsList())
+		const LispVariant & variant = obj->ToLispVariantRef() /*as LispVariant*/;
+		if (variant.IsList())
 		{
-			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(*(variant->ListValue()));
+			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(variant.ListValueRef());
 		}
 		else
 		{
@@ -1267,11 +1267,11 @@ static std::shared_ptr<object> ProcessQuotedSExpression(const IEnumerable<std::s
 		var item2 = expr.ElementAt(1);
 		if (item1->IsLispVariant())
 		{
-			std::shared_ptr<LispVariant> variant = item1->ToLispVariant();
-			if (variant->IsSymbol() && (variant->ToString() == LispEnvironment::UnQuote || variant->ToString() == LispEnvironment::UnQuoteSplicing))
+			const LispVariant & variant = item1->ToLispVariantRef();
+			if (variant.IsSymbol() && (variant.ToString() == LispEnvironment::UnQuote || variant.ToString() == LispEnvironment::UnQuoteSplicing))
 			{
 				var evalResult = LispInterpreter::EvalAst(item2, scope);
-				splicing = variant->ToString() == LispEnvironment::UnQuoteSplicing;
+				splicing = variant.ToString() == LispEnvironment::UnQuoteSplicing;
 				return std::make_shared<object>(*evalResult);
 			}
 		}
@@ -1285,11 +1285,11 @@ static std::shared_ptr<object> ProcessQuotedSExpression(const IEnumerable<std::s
 			if (itm->IsIEnumerableOfObject() || itm->IsList())
 			{
 				bool tempSplicing = false;
-				var res = ProcessQuotedSExpression(itm->IsIEnumerableOfObject() ? itm->ToEnumerableOfObject() : *(itm->ToList()), scope, /*out*/ tempSplicing);
+				var res = ProcessQuotedSExpression(itm->IsIEnumerableOfObject() ? itm->ToEnumerableOfObjectRef() : itm->ToListRef(), scope, /*out*/ tempSplicing);
 				if (tempSplicing)
 				{
-					std::shared_ptr<LispVariant> variant = res->ToLispVariant();
-					result.AddRange(*(variant->ListValue()));
+					const LispVariant & variant = res->ToLispVariantRef();
+					result.AddRange(variant.ListValueRef());
 				}
 				else
 				{
@@ -1318,7 +1318,7 @@ std::shared_ptr<LispVariant> quasiquote_form(const std::vector<std::shared_ptr<o
 	else if (expression->IsIEnumerableOfObject() || expression->IsList())
 	{
 		bool splicing = false;
-		return std::make_shared<LispVariant>(ProcessQuotedSExpression(expression->IsIEnumerableOfObject() ? expression->ToEnumerableOfObject() : *(expression->ToList()), scope, /*out*/ splicing));
+		return std::make_shared<LispVariant>(ProcessQuotedSExpression(expression->IsIEnumerableOfObject() ? expression->ToEnumerableOfObjectRef() : expression->ToListRef(), scope, /*out*/ splicing));
 	}
 	return std::make_shared<LispVariant>(expression);
 }
@@ -1360,9 +1360,9 @@ static std::shared_ptr<LispVariant> do_form(const std::vector<std::shared_ptr<ob
 
 	for (var statement : args)
 	{
-		if (!(statement->IsIEnumerableOfObject() || statement->IsList() /*is IEnumerable<object>*/) || ((statement->IsLispVariant()) && (statement->ToLispVariant()->IsList())))
+		if (!(statement->IsIEnumerableOfObject() || statement->IsList() /*is IEnumerable<object>*/) || ((statement->IsLispVariant()) && (statement->ToLispVariantRef().IsList())))
 		{
-			throw LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariant()->Token, scope->ModuleName, scope->DumpStackToString());
+			throw LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariantRef().Token, scope->ModuleName, scope->DumpStackToString());
 		}
 		result = LispInterpreter::EvalAst(statement, scope);
 		if (scope->IsInReturn)
@@ -1400,7 +1400,7 @@ std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> 
 
 		// add formal arguments to current scope
 		var i = 0;
-		var formalArgs = (args[0]->IsLispVariant() /*is LispVariant*/ ? args[0]->ToLispVariant()->ListValue() : LispEnvironment::GetExpression(args[0]))->ToArray();
+		std::vector<std::shared_ptr<object>> formalArgs = args[0]->IsLispVariant() /*is LispVariant*/ ? args[0]->ToLispVariantRef().ListValueRef().ToArray() : LispEnvironment::GetExpression(args[0])->ToArray();
 		
 		std::vector<std::shared_ptr<object>> tempLocalArgs = localArgs;
 
@@ -1433,7 +1433,7 @@ std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> 
 		}
 
 		// support args function for accessing all given parameters
-		(*childScope)[ArgsMeta] = std::make_shared<object>(IEnumerable<std::shared_ptr<object>>(VectorToList(tempLocalArgs)));
+		(*childScope)[ArgsMeta] = std::make_shared<object>(VectorToList(tempLocalArgs));
 		size_t formalArgsCount = formalArgs.size();
 		if (tempLocalArgs.size() > formalArgsCount)
 		{
@@ -1471,7 +1471,7 @@ std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> 
 			{
 				scope->GlobalScope->Output->WriteLine(ex.ToString());
 
-				debugger->InteractiveLoop(/*initialTopScope: */childScope, /*currentAst :*/ /*(IEnumerable<object>)*/std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObject()) /*new List<object> { info.Item2 }*/);
+				debugger->InteractiveLoop(/*initialTopScope: */childScope, /*currentAst :*/ /*(IEnumerable<object>)*/std::make_shared<IEnumerable<std::shared_ptr<object>>>(args[1]->ToEnumerableOfObjectRef()) /*new List<object> { info.Item2 }*/);
 			}
 
 			throw ex;
@@ -1492,8 +1492,8 @@ static std::shared_ptr<LispToken> GetTokenBeforeDefn(std::shared_ptr<object> ite
 {
 	if (item->IsLispVariant() /*is LispVariant*/)
 	{
-		std::shared_ptr<LispVariant> tokenName = item->ToLispVariant();
-		std::shared_ptr<LispToken> token1 = scope->GetPreviousToken(tokenName->Token);
+		const LispVariant & tokenName = item->ToLispVariantRef();
+		std::shared_ptr<LispToken> token1 = scope->GetPreviousToken(tokenName.Token);
 		std::shared_ptr<LispToken> token2 = scope->GetPreviousToken(token1);
 		std::shared_ptr<LispToken> token3 = scope->GetPreviousToken(token2);
 		return token3;
@@ -1504,7 +1504,7 @@ static std::shared_ptr<LispToken> GetTokenBeforeDefn(std::shared_ptr<object> ite
 static string GetFormalArgsAsString(std::shared_ptr<object> args)
 {
 	string result = string::Empty;
-	IEnumerable<std::shared_ptr<object>> theArgs = args->ToEnumerableOfObject();
+	const IEnumerable<std::shared_ptr<object>> & theArgs = args->ToEnumerableOfObjectRef();
 	for(var s : theArgs)
 	{
 		if (result.size() > 0)
@@ -1547,7 +1547,7 @@ static std::shared_ptr<LispVariant> defn_form_helper(const std::vector<std::shar
 
 	UpdateDocumentationInformationAtScope(args, scope);
 
-	var fn = ((*(scope->GlobalScope))[Fn])->ToLispVariant()->FunctionValue();
+	var fn = ((*(scope->GlobalScope))[Fn])->ToLispVariantRef().FunctionValue();
 	scope->UserData = std::make_shared<object>(EvalArgIfNeeded(args[0], scope)->ToString());
 
 	std::vector<std::shared_ptr<object>> tempArgs;
@@ -1556,7 +1556,7 @@ static std::shared_ptr<LispVariant> defn_form_helper(const std::vector<std::shar
 	var resultingFcn = fn.Function(tempArgs, scope);
 	scope->UserData = null;
 
-	var defFcn = ((*(scope->GlobalScope))[name])->ToLispVariant()->FunctionValue();
+	var defFcn = ((*(scope->GlobalScope))[name])->ToLispVariantRef().FunctionValue();
 	std::vector<std::shared_ptr<object>> tempArgs2;
 	tempArgs2.push_back(args[0]);
 	tempArgs2.push_back(std::make_shared<object>(*resultingFcn));
@@ -1623,9 +1623,10 @@ bool LispEnvironment::FindFunctionInModules(const string & funcName, std::shared
 		for (/*KeyValuePair*/std::pair<string, std::shared_ptr<object>> kv : *tempScope)
 		{
 			var module = /*(LispScope)*/kv.second->GetLispScopeRef();
-			if (module->ContainsKey(funcName))
+			auto item = module->find(funcName);
+			if (item != module->end())
 			{
-				foundValue = (*module)[funcName];
+				foundValue = item->second;
 				return true;
 			}
 		}
@@ -1648,10 +1649,13 @@ std::shared_ptr<object> LispEnvironment::GetFunctionInModules(const string & fun
 
 static bool ExistsItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, const string & key)
 {
-    if (scope.get() != null &&
-        scope->ContainsKey(key))
+    if (scope.get() != null)
     {
-        return (*scope)[key]->GetLispScopeRef()->ContainsKey(funcName->ToString());
+		auto item = scope->find(key);
+		if (item != scope->end())
+		{
+			return (*item).second->GetLispScopeRef()->ContainsKey(funcName->ToString());
+		}
     }
     return false;
 }
@@ -1676,7 +1680,7 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::GetExpres
 {
 	if (item->IsLispVariant() /*is LispVariant*/ && item->IsList()/*((LispVariant)item).IsList*/)
 	{
-		return item->ToLispVariant()->ListValue(); // ((LispVariant)item).ListValue;
+		return item->ToLispVariantRef().ListValue(); // ((LispVariant)item).ListValue;
 	}
 	if (item->IsIEnumerableOfObject() /*is IEnumerable<object>*/ || item->IsList())
 	{
@@ -1693,16 +1697,16 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::CheckForL
 	{
 		return GetExpression(listObj);
 	}
-	var value = listObj->ToLispVariant();
-	if (value->IsNativeObject() && (value->Value->IsList() /*is IEnumerable<object>*/))
+	const LispVariant & value = listObj->ToLispVariantRef();
+	if (value.IsNativeObject() && (value.Value->IsList() /*is IEnumerable<object>*/))
 	{
-		return /*(IEnumerable<object>)*/value->Value->ToList();
+		return /*(IEnumerable<object>)*/value.Value->ToList();
 	}
-	if (!value->IsList())
+	if (!value.IsList())
 	{
 		throw LispException("No list in " + functionName, scope->GetPreviousToken(((LispVariant)listObj).Token), scope->ModuleName, scope->DumpStackToString());
 	}
-	return value->ListValue();
+	return value.ListValue();
 }
 
 /* Not needed yet
@@ -1718,7 +1722,7 @@ static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, LispS
 }
 */
 
-/*private static*/ std::shared_ptr<object> LispEnvironment::QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key)
+/*private static*/ std::shared_ptr<object> LispEnvironment::QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, const string & key)
 {
 	if (scope != null &&
 		scope->ContainsKey(key) &&
@@ -1733,7 +1737,7 @@ std::shared_ptr<LispVariant> FileExits(const std::vector<std::shared_ptr<object>
 {
 	CheckArgs("File-Exits", 1, args, scope);
 
-	var fileName = args[0]->ToLispVariant()->ToString();
+	var fileName = args[0]->ToLispVariantRef().ToString();
 	return std::make_shared<LispVariant>(std::make_shared<object>(File_Exists(fileName)));
 }
 
@@ -1741,7 +1745,7 @@ std::shared_ptr<LispVariant> FileReadAllText(const std::vector<std::shared_ptr<o
 {
 	CheckArgs("File-ReadAllText", 1, args, scope);
 
-	var fileName = args[0]->ToLispVariant()->ToString();
+	var fileName = args[0]->ToLispVariantRef().ToString();
 	return std::make_shared<LispVariant>(std::make_shared<object>(ReadFileOrEmptyString(fileName)));
 }
 
@@ -1749,8 +1753,8 @@ std::shared_ptr<LispVariant> FileWriteAllText(const std::vector<std::shared_ptr<
 {
 	CheckArgs("File-WriteAllText", 2, args, scope);
 
-	var fileName = args[0]->ToLispVariant()->ToString();
-	var content = args[1]->ToLispVariant()->ToString();
+	var fileName = args[0]->ToLispVariantRef().ToString();
+	var content = args[1]->ToLispVariantRef().ToString();
 	return std::make_shared<LispVariant>(std::make_shared<object>(WriteTextFile(fileName, content)));
 }
 

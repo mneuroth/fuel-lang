@@ -153,8 +153,8 @@ namespace CppLisp
 		/*private*/ void Reset();
 
 		/*private*/ bool HitsBreakpoint(size_t lineNo, const string & moduleName, std::shared_ptr<LispScope> scope);
-		/*private*/ bool HasBreakpointAt(size_t lineNo, string moduleName);
-		/*private*/ void AddBreakpoint(size_t lineNo, string moduleName, string condition);
+		/*private*/ bool HasBreakpointAt(size_t lineNo, const string & moduleName);
+		/*private*/ void AddBreakpoint(size_t lineNo, const string & moduleName, const string & condition);
 		/*private*/ bool ClearBreakpoint(int no);
 		/*private*/ void ClearAllBreakpoints();
 

@@ -52,7 +52,7 @@ namespace QtLispUnitTests
 			std::shared_ptr<object> result = LispParser::Parse("(print 1 2.54 \"string\")");
             Assert::IsNotNull(result.get());
 			Assert::IsTrue(result->IsList());
-			var resultAsArray = result->ToEnumerableOfObject();
+			var resultAsArray = result->ToEnumerableOfObjectRef();
             Assert::AreEqual<size_t>(4, resultAsArray.size());
 
             var value = resultAsArray[0]->ToLispVariant();
@@ -74,7 +74,7 @@ namespace QtLispUnitTests
 			std::shared_ptr<object> result = LispParser::Parse("(do (print #t 2.54 \"string\"))");
             Assert::IsNotNull(result.get());
 			Assert::IsTrue(result->IsList());
-			var resultAsArrayDo = result->ToEnumerableOfObject();
+			var resultAsArrayDo = result->ToEnumerableOfObjectRef();
 			Assert::AreEqual<size_t>(2, resultAsArrayDo.size());
 
             var value = resultAsArrayDo[0]->ToLispVariant();

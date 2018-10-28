@@ -55,11 +55,11 @@ namespace CppLisp
 		//if (value /*!= null*/)
 		if (val->IsLispVariant())
 		{
-			std::shared_ptr<LispVariant> value = val->ToLispVariant();
-			Token = value->Token;
-			Type = value->Type;
-			Value = value->Value;
-			IsUnQuoted = value->IsUnQuoted;
+			const LispVariant & value = val->ToLispVariantRef();
+			Token = value.Token;
+			Type = value.Type;
+			Value = value.Value;
+			IsUnQuoted = value.IsUnQuoted;
 		}
 		else
 		{
@@ -262,7 +262,7 @@ namespace CppLisp
 		}
 		if (IsList())
 		{
-			return ExpandContainerToString(std::make_shared<object>(*(ListValue())));
+			return ExpandContainerToString(std::make_shared<object>(ListValueRef()));
 		}
 		if (IsFunction())
 		{
@@ -291,10 +291,10 @@ namespace CppLisp
 	{
 		if (item->IsLispVariant())
 		{
-			std::shared_ptr<LispVariant> variant = item->ToLispVariant();
-			if (variant->IsString())
+			const LispVariant & variant = item->ToLispVariantRef();
+			if (variant.IsString())
 			{
-				return variant->ToStringDebugger();
+				return variant.ToStringDebugger();
 			}
 		}
 		return item->ToString();
@@ -304,18 +304,18 @@ namespace CppLisp
 	{
 		if (other->IsLispVariant())
 		{
-			std::shared_ptr<LispVariant> otherVariant = other->ToLispVariant();
-			return EqualOp(*this, *otherVariant);
+			const LispVariant & otherVariant = other->ToLispVariantRef();
+			return EqualOp(*this, otherVariant);
 		}
 		return false;
 	}
 
-	bool LispVariant::SymbolCompare(std::shared_ptr<object> other)
+	bool LispVariant::SymbolCompare(std::shared_ptr<object> other) const
 	{
 		if (other->IsLispVariant())
 		{
-			std::shared_ptr<LispVariant> otherVariant = other->ToLispVariant();
-			return Value->Equals(*(otherVariant->Value));
+			const LispVariant & otherVariant = other->ToLispVariantRef();
+			return Value->Equals(*(otherVariant.Value));
 		}
 		return false;
 	}
@@ -324,17 +324,17 @@ namespace CppLisp
 	{
 		if (other->IsLispVariant())
 		{
-			var otherVariant = other->ToLispVariant();
-			if (IsNumber() && otherVariant->IsNumber())
+			const LispVariant & otherVariant = other->ToLispVariantRef();
+			if (IsNumber() && otherVariant.IsNumber())
 			{
-				if (IsDouble() || otherVariant->IsDouble())
+				if (IsDouble() || otherVariant.IsDouble())
 				{
-					return CompareToType<double>(ToDouble(), otherVariant->ToDouble());
+					return CompareToType<double>(ToDouble(), otherVariant.ToDouble());
 				}
-				return CompareToType<int>(ToInt(), otherVariant->ToInt());
+				return CompareToType<int>(ToInt(), otherVariant.ToInt());
 			}
 			// all other types will be compared like a string
-			return string::CompareOrdinal(StringValue(), otherVariant->StringValue()/*, StringComparison.Ordinal*/);
+			return string::CompareOrdinal(StringValue(), otherVariant.StringValue()/*, StringComparison.Ordinal*/);
 		}
 		return CompareTo(std::make_shared<object>(LispVariant(other)));
 	}
@@ -344,7 +344,7 @@ namespace CppLisp
 		return CompareTo(other->NativeObjectValue());
 	}
 
-	void LispVariant::Add(std::shared_ptr<object>  value)
+	void LispVariant::Add(std::shared_ptr<object> value)
 	{
 		if (Type != LispType::_List)
 		{
@@ -371,8 +371,8 @@ namespace CppLisp
 		if (IsList() && r.IsList())
 		{
 			IEnumerable<std::shared_ptr<object>> newList;
-			newList.AddRange(*(ListValue()));
-			newList.AddRange(*(r.ListValue()));
+			newList.AddRange(ListValueRef());
+			newList.AddRange(r.ListValueRef());
 			return /*new*/ LispVariant(std::make_shared<object>(newList));
 		}
 		throw CreateInvalidOperationException("+", *this, r);
@@ -484,7 +484,7 @@ namespace CppLisp
 		}
 		if (l.IsList() && r.IsList())
 		{
-			return l.ListValue()->SequenceEqual(*(r.ListValue()));
+			return l.ListValueRef().SequenceEqual(r.ListValueRef());
 		}
 		if (l.IsUndefined() || r.IsUndefined())
 		{
@@ -539,7 +539,7 @@ namespace CppLisp
 		}
 		if (obj->IsLispVariant())
 		{
-			return obj->ToLispVariant()->Type;
+			return obj->ToLispVariantRef().Type;
 		}
 		if (obj->IsLispToken())
 		{
@@ -563,7 +563,7 @@ namespace CppLisp
 		return exception;
 	}
 
-	LispFunctionWrapper LispVariant::FunctionValue() const
+	const LispFunctionWrapper & LispVariant::FunctionValue() const
 	{
 		//get
 		//{
@@ -586,13 +586,36 @@ namespace CppLisp
 		}
 		if (IsNativeObject() && NativeObjectValue()->IsIEnumerableOfObject())
 		{
-			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(NativeObjectValue()->ToEnumerableOfObject());
+			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(NativeObjectValue()->ToEnumerableOfObjectRef());
 		}
 		if (Type != LispType::_List)
 		{
 			throw CreateInvalidCastException("list");
 		}
-		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(Value->ToEnumerableOfObject()); // ((IEnumerable)Value).Cast<object>();
+		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(Value->ToEnumerableOfObjectRef()); // ((IEnumerable)Value).Cast<object>();
+		//}
+	}
+
+	IEnumerable<std::shared_ptr<object>> g_Empty;
+
+	const IEnumerable<std::shared_ptr<object>> & LispVariant::ListValueRef() const
+	{
+		//get
+		//{
+			// Nil is an empty list () !
+		if (Type == LispType::_Nil)
+		{
+			return g_Empty;
+		}
+		if (IsNativeObject() && NativeObjectValue()->IsIEnumerableOfObject())
+		{
+			return NativeObjectValue()->ToEnumerableOfObjectRef();
+		}
+		if (Type != LispType::_List)
+		{
+			throw CreateInvalidCastException("list");
+		}
+		return Value->ToEnumerableOfObjectRef(); // ((IEnumerable)Value).Cast<object>();
 		//}
 	}
 
@@ -653,7 +676,7 @@ namespace CppLisp
 		std::shared_ptr<object> native = NativeObjectValue();
 		if (native->IsIEnumerableOfObject())
 		{
-			IEnumerable<std::shared_ptr<object>> container = native->ToEnumerableOfObject();
+			const IEnumerable<std::shared_ptr<object>> & container = native->ToEnumerableOfObjectRef();
 			for (var element = container.begin(); element != container.end(); element++)	//foreach(var element in container)
 			{
 				if (result.Length() > 0)
@@ -679,7 +702,7 @@ namespace CppLisp
 
 		if (maybeContainer->IsIEnumerableOfObject() || maybeContainer->IsList())
 		{
-			var container = maybeContainer->ToEnumerableOfObject();
+			var container = maybeContainer->ToEnumerableOfObjectRef();
 			for (var item = container.begin(); item != container.end(); item++) // foreach(var item in container)
 			{
 				if (ret.Length() > 0)

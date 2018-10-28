@@ -135,7 +135,7 @@ namespace CppLisp
 		/// <param name="start">The start position.</param>
 		/// <param name="stop">The stop position.</param>
 		/// <param name="lineNo">The line no.</param>
-		/*public*/ LispToken(string text, size_t start, size_t stop, size_t lineNo);
+		/*public*/ LispToken(const string & text, size_t start, size_t stop, size_t lineNo);
 
 		//#endregion
 

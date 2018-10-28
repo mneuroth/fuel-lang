@@ -132,7 +132,7 @@ namespace CppLisp
 				case __String:
 					return ToString() == other.ToString();
 				case __List:
-					return ToList() == other.ToList();
+					return ToListRef() == other.ToListRef();
 				case __Function:
 					return false;
 				case __Symbol:
@@ -141,13 +141,13 @@ namespace CppLisp
 					return false;
 					//__Array = 10,
 				case __LispVariant:
-					return *(ToLispVariant()) == *(other.ToLispVariant());
+					return ToLispVariantRef() == other.ToLispVariantRef();
 				case __LispFunctionWrapper:
 					return false;
 				case __LispToken:
 					return ToString() == other.ToString();
 				case __IEnumerableOfObject:
-					return *(ToList()) == *(other.ToList());
+					return ToListRef() == other.ToListRef();
 				case __VoidPtr:
 					return true;
 				case __LispScope:
@@ -325,6 +325,18 @@ namespace CppLisp
 		return std::make_shared<LispVariant>(LispVariant(LispType::_Nil));
 	}
 
+	LispVariant g_Nil(LispType::_Nil);
+
+	const LispVariant & object::ToLispVariantRef() const
+	{
+		if (IsLispVariant())
+		{
+			// return a reference
+			return *(m_Data.pVariant);
+		}
+		return g_Nil;
+	}
+
 	LispScope * object::GetLispScopeRef() const
 	{
 		if (IsLispScope())
@@ -332,6 +344,18 @@ namespace CppLisp
 			return m_Data.pScope;
 		}
 		return null;
+	}
+
+	IEnumerable<std::shared_ptr<object>> g_EmptyList;
+
+	const IEnumerable<std::shared_ptr<object>> & object::ToListRef() const
+	{
+		if (IsList())
+		{
+			// return a reference
+			return *(m_Data.pList);
+		}
+		return g_EmptyList;
 	}
 
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> object::ToList() const
@@ -366,7 +390,7 @@ namespace CppLisp
 		return null;
 	}
 
-	LispFunctionWrapper & object::ToLispFunctionWrapper() const
+	const LispFunctionWrapper & object::ToLispFunctionWrapper() const
 	{
 		if (IsLispFunctionWrapper())
 		{
@@ -375,9 +399,9 @@ namespace CppLisp
 		throw LispException("Invalid cast to lisp function wrapper.");
 	}
 
-	IEnumerable<std::shared_ptr<object>> object::ToEnumerableOfObject() const
+	const IEnumerable<std::shared_ptr<object>> & object::ToEnumerableOfObjectRef() const
 	{
-		return IEnumerable<std::shared_ptr<object>>(*(m_Data.pList));
+		return *(m_Data.pList); // IEnumerable<std::shared_ptr<object>>(*(m_Data.pList));
 	}
 
 	bool object::Equals(const object & other) const
@@ -402,7 +426,7 @@ namespace CppLisp
 			case __String:
 				return ToString() == other.ToString();
 			case __List:
-				return ToList() == other.ToList();
+				return ToListRef() == other.ToListRef();
 			case __Function:
 // TODO --> not implemented yet ! also not in C#
 				return false;		// ???
@@ -420,7 +444,7 @@ namespace CppLisp
 			case __LispToken:
 				return ToString() == other.ToString();
 			case __IEnumerableOfObject:
-				return ToEnumerableOfObject() == other.ToEnumerableOfObject();
+				return ToEnumerableOfObjectRef() == other.ToEnumerableOfObjectRef();
 			case __VoidPtr:
 				return true;
 			case __LispScope:

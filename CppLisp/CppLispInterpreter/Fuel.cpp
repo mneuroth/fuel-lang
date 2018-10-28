@@ -195,7 +195,7 @@ namespace CppLisp
 		if (trace)
 		{
 			output->WriteLine(string("Result=") + result->ToString());
-		}
+		} 
 		if (measureTime)
 		{
 			output->WriteLine("Execution time = {0} s", std::to_string((/*Environment.TickCount*/Environment_GetTickCount() - startTickCount) * 0.001));

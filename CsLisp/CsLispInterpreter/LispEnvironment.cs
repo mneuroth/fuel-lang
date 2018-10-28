@@ -1264,7 +1264,7 @@ namespace CsLisp
         {
             CheckArgs(Setf, 2, args, scope);
 
-            var symbol = EvalArgIfNeeded(args[0], scope);       // TODO: get l-value...
+            var symbol = EvalArgIfNeeded(args[0], scope);       // TODO: get l-value... working gulp
             var symbolName = symbol != null ? symbol.ToString() : null;
             var value = LispInterpreter.EvalAst(args[1], scope);
             scope.SetInScopes(symbolName, value);
@@ -1804,10 +1804,10 @@ namespace CsLisp
 
         private static object UnQuoteIfNeeded(object item, out bool isSplicing, LispScope scope)
         {
-            var value = item as LispVariant;
             isSplicing = false;
-            if (value != null)
+            if (item is LispVariant)
             {
+                var value = item as LispVariant;
                 if (value.IsUnQuoted == LispUnQuoteModus.UnQuote || value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing)
                 {
                     isSplicing = value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing;

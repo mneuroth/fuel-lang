@@ -45,7 +45,7 @@ namespace CppLisp
 		/// <param name="code">The code.</param>
 		/// <param name="offset">The position offset (decorated code).</param>
 		/// <returns>Container with tokens</returns>
-		/*public*/ static IEnumerable<std::shared_ptr<LispToken>> Tokenize(string code, size_t offset = 0);
+		/*public*/ static IEnumerable<std::shared_ptr<LispToken>> Tokenize(const string & code, size_t offset = 0);
 
 		//#endregion
 
@@ -54,9 +54,9 @@ namespace CppLisp
 	
 		/*private*/ static char ProcessCharAfterBackslash(char ch);
 
-		/*private*/ static size_t ProcessComment(string code, size_t i, size_t lineCount, char ch, /*Action<string, size_t, size_t>*/std::function<void(const string &, size_t, size_t)> addToken);
+		/*private*/ static size_t ProcessComment(const string & code, size_t i, size_t lineCount, char ch, /*Action<string, size_t, size_t>*/std::function<void(const string &, size_t, size_t)> addToken);
 
-		/*private*/ static string GetRestOfLine(string code, size_t i, /*out*/ size_t & newIndex);
+		/*private*/ static string GetRestOfLine(const string & code, size_t i, /*out*/ size_t & newIndex);
 
 		//#endregion
 	};

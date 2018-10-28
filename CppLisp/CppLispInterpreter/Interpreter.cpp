@@ -29,12 +29,13 @@ namespace CppLisp
 {
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ResolveArgsInScopes(std::shared_ptr<LispScope> scope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, bool compile)
 	{
-		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astWithResolvedValues = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
-		std::shared_ptr<bool> isSpecialFormX = null;
+		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astWithResolvedValues = std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList->Count());
+		std::shared_ptr<bool> isSpecialForm = null;
+		int i = 0;
 		for (var elem : *astAsList)
 		{
 			std::shared_ptr<object> resolvedElem;
-			if ((isSpecialFormX != null && (bool)*isSpecialFormX) || !IsSymbol(elem))
+			if ((isSpecialForm != null && (bool)*isSpecialForm) || !IsSymbol(elem))
 			{
 				resolvedElem = elem;
 			}
@@ -42,16 +43,17 @@ namespace CppLisp
 			{
 				resolvedElem = scope->ResolveInScopes(elem);
 			}
-			astWithResolvedValues->Add(resolvedElem);
+			(*astWithResolvedValues)[i++] = resolvedElem;
 
-			if (isSpecialFormX == null)
+			if (isSpecialForm == null)
 			{
-				LispFunctionWrapper firstElem;
+				bool valIsSpecialForm = false;
 				std::shared_ptr<object> first = null;
 				try
 				{
 					first = astWithResolvedValues->First();
-					firstElem = first->ToLispVariant()->FunctionValue();
+					const LispFunctionWrapper & firstElem = first->ToLispVariantRef().FunctionValue();
+					valIsSpecialForm = firstElem.IsSpecialForm();
 				}
 				catch (LispException exc)
 				{
@@ -60,7 +62,7 @@ namespace CppLisp
 						throw LispException("Function \"" + first->ToString() + "\" not found", scope.get());
 					}
 				}
-				isSpecialFormX = std::make_shared<bool>(firstElem.IsSpecialForm());
+				isSpecialForm = std::make_shared<bool>(valIsSpecialForm);
 			}
 
 		}
@@ -78,20 +80,19 @@ namespace CppLisp
 
 		if (ast->IsLispVariant())
 		{
-			var item = ast->ToLispVariant();
+			var item = ast->ToLispVariantRef();
 			// evaluate the value for the symbol
-			if (item->IsSymbol())
+			if (item.IsSymbol())
 			{
-				item = std::make_shared<LispVariant>(scope->ResolveInScopes(std::make_shared<object>(*item)));
-				return item;
+				return std::make_shared<LispVariant>(scope->ResolveInScopes(std::make_shared<object>(item)));
 			}
-			else if (item->IsList() && !item->IsNil())
+			else if (item.IsList() && !item.IsNil())
 			{
-				*astAsList = *(item->ListValue()/*->ToList()*/);
+				*astAsList = item.ListValueRef()/*->ToList()*/;
 			}
 			else
 			{
-				return item;
+				return ast->ToLispVariant();
 			}
 		}
 		else
@@ -155,7 +156,7 @@ namespace CppLisp
 		var function = astWithResolvedValues->First();
 
 		// normal evaluation...
-		LispFunctionWrapper functionWrapper = function->ToLispVariant()->FunctionValue();
+		const LispFunctionWrapper & functionWrapper = function->ToLispVariantRef().FunctionValue();
 
 		// trace current function (if tracing is enabled)
 		if (scope->GlobalScope->Tracing)
@@ -165,11 +166,11 @@ namespace CppLisp
 
 		// evaluate arguments, but allow recursive lists
 		std::vector<std::shared_ptr<object>> arguments(astWithResolvedValues->Count() - 1); // = new object[astWithResolvedValues->Count() - 1];
+		const std::vector<std::shared_ptr<object>> & arrAstWithResolvedValues = astWithResolvedValues->ToArray();
 		for (size_t i = 1; i < astWithResolvedValues->Count(); i++)
 		{
-			var needEvaluation = (astWithResolvedValues->ToArray()[i]->IsList() /*is IEnumerable<object>*/) &&
-				!functionWrapper.IsSpecialForm();
-			arguments[i - 1] = needEvaluation ? std::make_shared<object>(*EvalAst(astWithResolvedValues->ToArray()[i], scope)) : astWithResolvedValues->ToArray()[i];
+			var needEvaluation = (arrAstWithResolvedValues[i]->IsList() /*is IEnumerable<object>*/) && !functionWrapper.IsSpecialForm();
+			arguments[i - 1] = needEvaluation ? std::make_shared<object>(*EvalAst(arrAstWithResolvedValues[i], scope)) : arrAstWithResolvedValues[i];
 		}
 
 		// debugger processing
@@ -204,7 +205,7 @@ namespace CppLisp
 			return ast;
 		}
 
-		var astAsList = ast->ToEnumerableOfObject();
+		const IEnumerable<std::shared_ptr<object>> & astAsList = ast->ToEnumerableOfObjectRef();
 		if (astAsList.size() == 0)
 		{
 			return ast;
@@ -215,7 +216,7 @@ namespace CppLisp
 		var functionName = function->ToString();
 		if (globalScope != null && globalScope->ContainsKey(functionName))
 		{
-			var fcn = (*globalScope)[functionName]->ToLispVariant()->FunctionValue();
+			var fcn = (*globalScope)[functionName]->ToLispVariantRef().FunctionValue();
 			if (fcn.IsEvalInExpand())
 			{
 				var args = std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList);
@@ -276,13 +277,13 @@ namespace CppLisp
 		return /*new*/ LispBreakpointPosition(-1, -1, -1);
 	}
 
-	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::RepaceSymbolWithValueInExpression(std::shared_ptr<LispVariant> symbol, std::shared_ptr<object> symbolValue, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, /*ref*/ bool & replacedAnything)
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::RepaceSymbolWithValueInExpression(const LispVariant & symbol, std::shared_ptr<object> symbolValue, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, /*ref*/ bool & replacedAnything)
 	{
 		var ret = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
 		for (var elem : *expression)
 		{
 			// is the current element the symbol which should be replaced? --> Yes
-			if (symbol->SymbolCompare(elem))
+			if (symbol.SymbolCompare(elem))
 			{
 				(*ret).Add(symbolValue);
 				replacedAnything = true;
@@ -317,7 +318,7 @@ namespace CppLisp
 			{
 				value = std::make_shared<object>(LispVariant(astAsList->ToArray()[i]));
 			}
-			expression = RepaceSymbolWithValueInExpression(/*(LispVariant)*/formalArgument->ToLispVariant(), value, expression, /*ref*/ anyMacroReplaced);
+			expression = RepaceSymbolWithValueInExpression(/*(LispVariant)*/formalArgument->ToLispVariantRef(), value, expression, /*ref*/ anyMacroReplaced);
 			i++;
 		}
 		return expression;
@@ -328,8 +329,7 @@ namespace CppLisp
 		bool isSymbol = false;
 		if (elem->IsLispVariant())
 		{
-			var variant = elem->ToLispVariant();
-			isSymbol = variant->IsSymbol();
+			isSymbol = elem->ToLispVariantRef().IsSymbol();
 		}
 		return isSymbol;
 	}

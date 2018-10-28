@@ -178,7 +178,7 @@ namespace CppLisp
         /// <param name="fcnName">Name of the FCN.</param>
         /// <param name="globalScope">The global scope.</param>
         /// <param name="moduleName">The current module name for the scope.</param>
-		/*public*/ LispScope(string fcnName = string::Empty, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null);
+		/*public*/ LispScope(const string & fcnName = string::Empty, std::shared_ptr<LispScope> globalScope = null, std::shared_ptr<string> moduleName = null, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null);
 
 		inline void PrivateInitForCpp(std::shared_ptr<LispScope> globalScope = null)
 		{
@@ -207,7 +207,7 @@ namespace CppLisp
         /// <param name="name">The name.</param>
         /// <param name="closureScopeFound">The closure scope found.</param>
         /// <returns>True if name was found.</returns>
-		/*public*/ bool IsInClosureChain(string name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound);
+		/*public*/ bool IsInClosureChain(const string & name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound);
 
         /// <summary>
         /// Resolves the given element in this scope.
@@ -269,14 +269,14 @@ namespace CppLisp
 			ProcessMetaScope(LispEnvironment::Modules, [this](KeyValuePair<string, std::shared_ptr<object>> mod) -> void { return Output->WriteLine(mod.Key); });
         }
 
-		/*public*/ string GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(string, string)> select = null);
+		/*public*/ string GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(const string &, const string &)> select = null);
 
         //#endregion
 	
 	private:
         //#region private methods
 
-		/*private*/ void ProcessMetaScope(string metaScope, /*Action<KeyValuePair<string, std::shared_ptr<object>>>*/std::function<void(KeyValuePair<string, std::shared_ptr<object>>)> action);
+		/*private*/ void ProcessMetaScope(const string & metaScope, /*Action<KeyValuePair<string, std::shared_ptr<object>>>*/std::function<void(KeyValuePair<string, std::shared_ptr<object>>)> action);
 
 		/*private*/ void Dump(std::function<bool(const LispVariant &)>/*Func<LispVariant, bool>*/ select, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ show = null, bool showHelp = false, bool sort = false, std::function<string(const LispVariant &)>/*Func<LispVariant, string>*/ format = null);
 

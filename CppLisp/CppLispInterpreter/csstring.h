@@ -51,7 +51,7 @@ namespace CppLisp
 			return size();
 		}
 
-		inline bool Equals(const string & txt)
+		inline bool Equals(const string & txt) const
 		{
 			return *this == txt;
 		}
@@ -103,8 +103,8 @@ namespace CppLisp
 		std::vector<string> Split(const string & seperator) const;
 
 		static bool IsNullOrEmpty(const string & txt);
-		static string ReplaceIn(string temp, const string & findText, const string & arg);
-		static string ReplaceInWithFill(string temp, const string & findText, const string & arg);
+		static string ReplaceIn(const string & temp, const string & findText, const string & arg);
+		static string ReplaceInWithFill(const string & temp, const string & findText, const string & arg);
 		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "", const string & arg4 = "", const string & arg5 = "");
 		static int CompareOrdinal(const string & a, const string & b);
 

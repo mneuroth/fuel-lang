@@ -28,7 +28,7 @@
 
 namespace CppLisp
 {
-	LispScope::LispScope(string fcnName, std::shared_ptr<LispScope> globalScope, std::shared_ptr<string> moduleName, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp)
+	LispScope::LispScope(const string & fcnName, std::shared_ptr<LispScope> globalScope, std::shared_ptr<string> moduleName, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp)
 	{
 		Debugger = null;
 		IsInEval = false;
@@ -49,7 +49,7 @@ namespace CppLisp
 		Output = /*Console.Out*/outp != null ? outp : std::make_shared<TextWriter>();
 	}
 
-	bool LispScope::IsInClosureChain(string name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound)
+	bool LispScope::IsInClosureChain(const string & name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound)
 	{
 		closureScopeFound = null;
 		if (ClosureChain != null)
@@ -71,9 +71,10 @@ namespace CppLisp
 		var name = elem->ToString();
 		std::shared_ptr<LispScope> foundClosureScope;
 		// first try to resolve in this scope
-		if (ContainsKey(name))
+		auto item = find(name);
+		if (item != end())
 		{
-			result = (*this)[name];
+			result = item->second;
 		}
 		// then try to resolve in closure chain scope(s)
 		else if (IsInClosureChain(name, foundClosureScope))
@@ -81,8 +82,7 @@ namespace CppLisp
 			result = (*foundClosureScope)[name];
 		}
 		// then try to resolve in global scope
-		else if (GlobalScope != null &&
-			GlobalScope->ContainsKey(name))
+		else if (GlobalScope != null && GlobalScope->ContainsKey(name))
 		{
 			result = (*GlobalScope)[name];
 		}
@@ -208,7 +208,7 @@ namespace CppLisp
 		Output->WriteLine("</html>");
 	}
 
-	string LispScope::GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(string, string)> select)
+	string LispScope::GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(const string &, const string &)> select)
 	{
 		string result = string::Empty;
 		//foreach (var key in Keys)
@@ -218,20 +218,20 @@ namespace CppLisp
 			{
 				if (select(key, functionName))
 				{
-					var value = /*(LispVariant)*/(*this)[key]->ToLispVariant();
-					result += value->FunctionValue().GetFormatedDoc();
+					const LispVariant & value = /*(LispVariant)*/(*this)[key]->ToLispVariantRef();
+					result += value.FunctionValue().GetFormatedDoc();
 				}
 			}
 			else if (key.StartsWith(functionName))
 			{
-				var value = /*(LispVariant)*/(*this)[key]->ToLispVariant();
-				result += value->FunctionValue().GetFormatedDoc();
+				const LispVariant & value = /*(LispVariant)*/(*this)[key]->ToLispVariantRef();
+				result += value.FunctionValue().GetFormatedDoc();
 			}
 		}
 		return result;
 	}
 
-	void LispScope::ProcessMetaScope(string metaScope, /*Action<KeyValuePair<string, std::shared_ptr<object>>>*/std::function<void(KeyValuePair<string, std::shared_ptr<object>>)> action)
+	void LispScope::ProcessMetaScope(const string & metaScope, /*Action<KeyValuePair<string, std::shared_ptr<object>>>*/std::function<void(KeyValuePair<string, std::shared_ptr<object>>)> action)
 	{
 		if (ContainsKey(metaScope))
 		{
@@ -258,19 +258,19 @@ namespace CppLisp
 		{
 			if (!key.StartsWith(LispEnvironment::MetaTag))
 			{
-				var value = /*(LispVariant)*/(*this)[key]->ToLispVariant();
-				if (select(*value))
+				const LispVariant & value = /*(LispVariant)*/(*this)[key]->ToLispVariantRef();
+				if (select(value))
 				{
 					if (format != null)
 					{
-						Output->WriteLine("{0}", format(*value));
+						Output->WriteLine("{0}", format(value));
 					}
 					else
 					{
-						string info = show != null ? show(*value) : string::Empty;
+						string info = show != null ? show(value) : string::Empty;
 						if (showHelp)
 						{
-							Output->WriteLine("{0,20} --> {1}", key, value->FunctionValue().Signature);
+							Output->WriteLine("{0,20} --> {1}", key, value.FunctionValue().Signature);
 							if (!string::IsNullOrEmpty(info))
 							{
 								Output->WriteLine("{0,20}     {1}", "", info);
@@ -278,7 +278,7 @@ namespace CppLisp
 						}
 						else
 						{
-							Output->WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value->ToStringDebugger(), value->TypeString(), info);
+							Output->WriteLine("{0,20} --> {1,-40} : {2} {3}", key, value.ToStringDebugger(), value.TypeString(), info);
 						}
 					}
 				}

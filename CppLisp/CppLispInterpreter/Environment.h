@@ -103,7 +103,7 @@ namespace CppLisp
 		const static string Str;
 
 		// methods
-		string GetFunctionsHelpFormated(string functionName, std::function<bool(const string &, const string &)> select = null);
+		string GetFunctionsHelpFormated(const string & functionName, std::function<bool(const string &, const string &)> select = null);
 			
 		static bool IsInModules(const string & funcName, std::shared_ptr<LispScope> scope);
 		static bool IsMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
@@ -112,7 +112,7 @@ namespace CppLisp
 
 		static std::shared_ptr<LispScope> CreateDefaultScope();
 
-		static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, string key);
+		static std::shared_ptr<object> QueryItem(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope, const string & key);
 		static std::shared_ptr<object> GetFunctionInModules(const string & funcName, std::shared_ptr<LispScope> scope);
 		static std::shared_ptr<object> GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
 		static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> GetExpression(std::shared_ptr<object> item);

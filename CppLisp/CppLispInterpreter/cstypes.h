@@ -57,6 +57,16 @@ namespace CppLisp
 	class IEnumerable : public std::vector<T>
 	{
 	public:
+		IEnumerable()
+			: std::vector<T>()
+		{
+		}
+
+		IEnumerable(size_t capacity)
+			: std::vector<T>(capacity)
+		{
+		}
+
 		inline size_t Count() const
 		{
 			return std::vector<T>::size();

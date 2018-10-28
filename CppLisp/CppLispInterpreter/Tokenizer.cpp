@@ -27,7 +27,7 @@
 
 namespace CppLisp
 {
-	IEnumerable<std::shared_ptr<LispToken>> LispTokenizer::Tokenize(string code, size_t offset)
+	IEnumerable<std::shared_ptr<LispToken>> LispTokenizer::Tokenize(const string & code, size_t offset)
 	{
 		IEnumerable<std::shared_ptr<LispToken>> tokens; // = new List<LispToken>();
 		string currentToken = string::Empty;
@@ -194,7 +194,7 @@ namespace CppLisp
 		throw LispException(string::Format(string("Invalid character after backslash {0}"), string(ch)));
 	}
 
-	size_t LispTokenizer::ProcessComment(string code, size_t i, size_t lineCount, char ch, /*Action<string, size_t, size_t>*/std::function<void(const string &, size_t, size_t)> addToken)
+	size_t LispTokenizer::ProcessComment(const string & code, size_t i, size_t lineCount, char ch, /*Action<string, size_t, size_t>*/std::function<void(const string &, size_t, size_t)> addToken)
 	{
 		size_t newIndex;
 		string comment = string::Empty + string(ch) + GetRestOfLine(code, i + 1, /*out*/ newIndex);
@@ -203,7 +203,7 @@ namespace CppLisp
 		return i;
 	}
 
-	string LispTokenizer::GetRestOfLine(string code, size_t i, /*out*/ size_t & newIndex)
+	string LispTokenizer::GetRestOfLine(const string & code, size_t i, /*out*/ size_t & newIndex)
 	{
 		string rest = code.Substring(i);
 		size_t pos = rest.IndexOf("\n", "StringComparison.InvariantCulture");

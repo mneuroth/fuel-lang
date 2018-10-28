@@ -73,7 +73,7 @@ namespace CppLisp
 		}
 	}
 
-	LispToken::LispToken(string text, size_t start, size_t stop, size_t lineNo)
+	LispToken::LispToken(const string & text, size_t start, size_t stop, size_t lineNo)
 	{
 		size_t intValue;
 		double doubleValue;

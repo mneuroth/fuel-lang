@@ -35,7 +35,7 @@ const string LispParser::UnexpectedToken = "Unexpected token";
 
 namespace CppLisp
 {
-	std::shared_ptr<object> LispParser::Parse(string code, size_t offset, std::shared_ptr<LispScope> scope)
+	std::shared_ptr<object> LispParser::Parse(const string & code, size_t offset, std::shared_ptr<LispScope> scope)
 	{
 		std::shared_ptr<object> parseResult/* = null*/;
 		string moduleName = ""; // string.Empty;
@@ -54,7 +54,7 @@ namespace CppLisp
 		return parseResult;
 	}
 
-	size_t LispParser::ParseTokens(string moduleName, std::vector<std::shared_ptr<LispToken>> tokens, size_t startIndex, /*ref*/ std::shared_ptr<object> & parseResult, bool isToplevel)
+	size_t LispParser::ParseTokens(const string & moduleName, std::vector<std::shared_ptr<LispToken>> tokens, size_t startIndex, /*ref*/ std::shared_ptr<object> & parseResult, bool isToplevel)
 	{
 		size_t i;
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> current = null;

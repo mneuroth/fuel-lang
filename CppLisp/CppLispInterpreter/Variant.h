@@ -257,10 +257,12 @@ namespace CppLisp
 
         //#region Casts
 
-        /*public*/ LispFunctionWrapper FunctionValue() const;
+        /*public*/ const LispFunctionWrapper & FunctionValue() const;
 
         /*public*/ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ListValue() const;
- 
+
+		/*public*/ const IEnumerable<std::shared_ptr<object>> & ListValueRef() const;
+
         /*public*/ double DoubleValue() const;
 
         /*public*/ int IntValue() const;
@@ -299,7 +301,7 @@ namespace CppLisp
 
         //#endregion
 
-		/*public*/ bool SymbolCompare(std::shared_ptr<object> other);
+		/*public*/ bool SymbolCompare(std::shared_ptr<object> other) const;
 
         //#region overloaded methods
 

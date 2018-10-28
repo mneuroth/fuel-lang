@@ -266,13 +266,15 @@ namespace CppLisp
 
 		// get references to data
         LispScope * GetLispScopeRef() const;
-		LispFunctionWrapper & ToLispFunctionWrapper() const;
+		const LispFunctionWrapper & ToLispFunctionWrapper() const;
 
 		// get a copy of the data
-		IEnumerable<std::shared_ptr<object>> ToEnumerableOfObject() const;
+		const IEnumerable<std::shared_ptr<object>> & ToEnumerableOfObjectRef() const;
+		const LispVariant & ToLispVariantRef() const;
 		std::shared_ptr<LispVariant> ToLispVariant() const;
-		std::shared_ptr<LispToken> ToLispToken() const;
+		const IEnumerable<std::shared_ptr<object>> & ToListRef() const;
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList() const;
+		std::shared_ptr<LispToken> ToLispToken() const;
 		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const;
 		std::shared_ptr<LispMacroCompileTimeExpand> ToLispMacroCompileTimeExpand() const;
 		string ToString() const;
