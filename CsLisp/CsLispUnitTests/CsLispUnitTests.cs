@@ -110,6 +110,34 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_SetfWithNth()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c d)) (setf (nth 2 l) 9) (print l))");
+            Assert.AreEqual("(a b 9 d)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_SetfWithFirst()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c d)) (setf (first l) 21) (print l))");
+            Assert.AreEqual("(21 b c d)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_SetfWithLast()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c d)) (setf (last l) \"xyz\") (print l))");
+            Assert.AreEqual("(a b c \"xyz\")", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_QuoteList()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 1) (def l '(a b c)))");
+            Assert.AreEqual("(a b c)", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_Def1()
         {
             LispVariant result = Lisp.Eval("(do (def a 1) (def b 1) (def (nth 2 (list 'a 'b 'c)) 9) (+ c 2))");
@@ -249,10 +277,24 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_ListFirstSymbol()
+        {
+            LispVariant result = Lisp.Eval("(first '(a b c))");
+            Assert.AreEqual("a", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_ListLast()
         {
             LispVariant result = Lisp.Eval("(last '(1 2 3))");
             Assert.AreEqual(3, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_ListLastSymbol()
+        {
+            LispVariant result = Lisp.Eval("(last '(abc def xyz))");
+            Assert.AreEqual("xyz", result.ToString());
         }
 
         [TestMethod]
@@ -288,6 +330,71 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(append (list 4 54 3) (list 7 9))");
             Assert.AreEqual("(4 54 3 7 9)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_ListPush1()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push z l))");
+            Assert.AreEqual("(z a b c)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_ListPush2()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push z l 2))");
+            Assert.AreEqual("(a b z c)", result.ToString());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_ListPushError()
+        {
+            LispVariant result = Lisp.Eval("(do (def l 42) (push z l 2))");
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public void Test_ListPop1()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (def a (pop l)) (print a l))");
+            Assert.AreEqual("a (b c)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_ListPop2()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '()) (def a (pop l)) (print a l))");
+            Assert.AreEqual("NIL ()", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_ListPop3()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '()) (def a (pop l)) (print a l))");
+            Assert.AreEqual("NIL ()", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_ListPop4()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (def a (pop l 5)) (print a l))");
+            Assert.AreEqual("NIL (a b c)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_ListPop5()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (def a (pop l 1)) (print a l))");
+            Assert.AreEqual("b (a c)", result.ToString());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_ListPopError()
+        {
+            LispVariant result = Lisp.Eval("(do (def l 5) (def a (pop l)) (print a l))");
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -578,6 +685,39 @@ namespace LispUnitTests
             {
                 LispVariant result = Lisp.Eval(macroExpandScript);
                 Assert.AreEqual("96", result.ToString());
+            }
+            else
+            {
+                Assert.IsTrue(true);
+            }
+        }
+
+        [TestMethod]
+        public void Test_MacrosExpandDefineStruct()
+        {
+            const string macroExpandScript = @"(do
+  (define-macro-expand defstruct (name field1)
+        (do            
+; (quoted-macro-args) --> '(<formal-args>)
+; (macro-args-len) --> arg count --> REPLACE --> (len '(<formal-args>))
+; (macro-args 0) --> arg[0] --> REPLACE --> (nth 0 '(<formal-args>))
+
+	      (defn (sym (+ (str make-) (str name))) ((sym field1) (nth 2 (quoted-macro-args)))
+            ;;(list (eval (nth 1 (quoted-macro-args))) (eval (nth 2 (quoted-macro-args))))
+            (list (arg 0) (arg 1))
+	      )
+
+    	   (println 'a (nth 1 (quoted-macro-args)) (nth 2 (quoted-macro-args)))
+        )
+  )
+  
+  (defstruct point x y)
+  (def p (make-point 2 3))
+)";
+            if (LispUtils.IsCompileTimeMacroEnabled)
+            {
+                LispVariant result = Lisp.Eval(macroExpandScript);
+                Assert.AreEqual("(2 3)", result.ToString());
             }
             else
             {
@@ -924,6 +1064,14 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Closure4()
+        {
+// TODO working...
+            LispVariant result = Lisp.Eval("(do (defn g (x) (do (+ x 2))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+            Assert.AreEqual(13, result.ToInt());
+        }
+
+        [TestMethod]
         public void Test_RecursiveCall1()
         {
             LispVariant result = Lisp.Eval("(do (defn addConst (x a) (+ x a)) (def add2 (lambda (x) (addConst x 2))) (println (addConst 8 2)) (println (add2 4)))");
@@ -988,18 +1136,18 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        public void Test_Args1()
+        public void Test_Arg1()
         {
             LispVariant result = Lisp.Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (+ x x))) (f 5 6 7))");
             Assert.AreEqual(10, result.ToInt());
         }
 
         [TestMethod]
-        public void Test_Args2()
+        public void Test_Arg2()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (args 0)) (println (args 1)) (println (args 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))");
+                LispVariant result = Lisp.Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (arg 0)) (println (arg 1)) (println (arg 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))");
                 Assert.AreEqual(10, result.ToInt());
 
                 string s = cr.ToString().Trim();
@@ -1013,10 +1161,24 @@ namespace LispUnitTests
 
         [TestMethod]
         [ExpectedException(typeof(LispException))]
-        public void Test_Args3()
+        public void Test_Arg3()
         {
-            LispVariant result = Lisp.Eval("(do (defn f (x) (do (args 7) (+ x x))) (f 5 6 7))");
+            LispVariant result = Lisp.Eval("(do (defn f (x) (do (arg 7) (+ x x))) (f 5 6 7))");
             Assert.AreEqual(10, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Arg4()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f () (do (def z (arg 2)) (+ z z))) (f 5 6 7))");
+            Assert.AreEqual(14, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Args1()
+        {
+            LispVariant result = Lisp.Eval("(do (defn f () (do (def z (args)))) (f 5 6 7))");
+            Assert.AreEqual("(5 6 7)", result.ToString());
         }
 
         [TestMethod]
@@ -1736,6 +1898,71 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (def s \"this is text\") (search \"tes\" s))");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(-1, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Search3()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search b l))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(1, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Search4()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search 4 l))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(2, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Search5()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search \"blub\" l))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(5, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Search6()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search nix l))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(-1, result.IntValue);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_Search7()
+        {
+            LispVariant result = Lisp.Eval("(do (def l 5.234) (search nix l))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(-1, result.IntValue);
+        }
+
+        [TestMethod]
+        public void Test_Replace1()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a long text\") (replace s \"long\" \"short\"))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("this is a short text", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_Replace2()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a long long text\") (replace s \"long\" \"short\"))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("this is a short short text", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_Replace3()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a long text\") (replace s \"verylong\" \"short\"))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("this is a long text", result.StringValue);
         }
 
         [TestMethod]

@@ -72,10 +72,10 @@
   (define-macro-eval dotimes (counterinfo statements)
       (do
         (def (first 'counterinfo) 0)
-        (while (eval (list < (first 'counterinfo) (nth 1 'counterinfo)))
+        (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))
           (do
              (eval 'statements)
-             (setf (first 'counterinfo) (eval (list + (first 'counterinfo) 1)))
+             (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))
           )
         )
       )
@@ -83,6 +83,36 @@
 
   (define-macro-eval setq (symbol value)
 	  (setf symbol value)
+  )
+
+  (define-macro-eval defstruct (name)
+    (do
+;; TODO Frage: wie kommt man innerhalb des macros an die formalten argumente (symbole)? --> (macro-argcount), (macro-arg pos) ??? oder statement einschmuggeln mit formalen argumenten ?
+	  ;;(println (arg 0))
+	  ;;(println a)
+	  ;;(println "blub defstruct")
+	  ;;(println (argscount))
+	  (println (quoted-macro-args))
+
+	  ;; support: (type ), (setf ), (debugger support)
+
+;;	  (defn (sym (+ "make-" (str name))) ((nth 0 (quoted-macro-args)) (nth 1 (quoted-macro-args)))
+;;		(list name (arg 0) (arg 1))
+;;	  )
+	  (defn (sym (+ "make-" (str name))) (rest (quoted-macro-args))
+		(+ (list name) (args))
+	  )
+
+	  (defn (sym (+ "is-" (str name) "-p")) (data)
+		(and (== (type data) 6) (== (first data) name))
+	  )
+
+	  (dotimes (i (len (quoted-macro-args)))
+  	    (defn (sym (+ "get-" (str name) "-" (str (nth (+ i 1) (quoted-macro-args))))) (data)
+		  (nth (+ i 1) data)
+	    )
+      )
+	)
   )
 
   ;; foreach loop  

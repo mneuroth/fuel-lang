@@ -32,6 +32,47 @@
 
 #include <stdlib.h>
 
+#if defined( __ANDROID__ )
+
+#include <string>
+#include <sstream>
+
+namespace std
+{
+    template <typename T>
+    inline std::string to_string(T value)
+    {
+        std::ostringstream os ;
+        os << value ;
+        return os.str() ;
+    }
+
+    inline int stoi(const string & s, size_t * errPos = 0, int base = 10)
+    {
+        char * p;
+        const char * val = s.c_str();
+        long ret = strtol(val, &p, base);
+        if( errPos != 0 )
+        {
+            *errPos = (size_t)(p - val);
+        }
+        return (int)ret;
+    }
+
+    inline double stod(const string & s, size_t * errPos = 0)
+    {
+        char * p;
+        const char * val = s.c_str();
+        double ret = strtod(val, &p);
+        if( errPos != 0 )
+        {
+            *errPos = (size_t)(p - val);
+        }
+        return ret;
+    }
+}
+#endif
+
 namespace CppLisp
 {
 	//

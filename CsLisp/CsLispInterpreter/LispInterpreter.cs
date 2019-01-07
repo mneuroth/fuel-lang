@@ -309,7 +309,7 @@ namespace CsLisp
             return new LispBreakpointPosition(-1, -1, -1);
         }
 
-        private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, ref bool replacedAnything)
+        private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, bool macroArgsReplace, ref bool replacedAnything)
         {
             var ret = new List<object>();
             foreach(var elem in expression)
@@ -317,13 +317,21 @@ namespace CsLisp
                 // is the current element the symbol which should be replaced? --> Yes
                 if (symbol.SymbolCompare(elem))
                 {
-                    ret.Add(symbolValue);
+                    IEnumerable<object> l = symbolValue as IEnumerable<object>;
+                    if (l != null && macroArgsReplace)
+                    {
+                        ret.AddRange(l);
+                    }
+                    else
+                    {
+                        ret.Add(symbolValue);
+                    }
                     replacedAnything = true;
                 }
                 // is it an expression? --> recursive call
                 else if (LispEnvironment.IsExpression(elem))
                 {
-                    IEnumerable<object> temp = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(elem)/*.ToArray()*/, ref replacedAnything);
+                    IEnumerable<object> temp = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(elem)/*.ToArray()*/, macroArgsReplace, ref replacedAnything);
                     ret.Add(temp);
                 }
                 // current element is not the symbol which should by replaced !
@@ -337,7 +345,15 @@ namespace CsLisp
 
         private static IEnumerable<object> ReplaceFormalArgumentsInExpression(IEnumerable<object> formalArguments, IList<object> astAsList, IEnumerable<object> expression, ref bool anyMacroReplaced)
         {
+// TODO gulp working
             int i = 1;
+
+            // replace (quoted-macro-args) --> '(<real_args>)
+            bool replaced = false;
+            IEnumerable<object> realArguments = astAsList.Skip(1).ToList();
+            List<object> quotedRealArguments = new List<object>() { new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments };
+            expression = RepaceSymbolWithValueInExpression(new LispVariant(LispType.Symbol, "quoted-macro-args"), quotedRealArguments, expression, true, ref replaced);
+
             foreach (var formalArgument in formalArguments)
             {
                 object value;
@@ -349,7 +365,7 @@ namespace CsLisp
                 {
                     value = new LispVariant(astAsList[i]);
                 }
-                expression = RepaceSymbolWithValueInExpression((LispVariant)formalArgument, value, expression, ref anyMacroReplaced);
+                expression = RepaceSymbolWithValueInExpression((LispVariant)formalArgument, value, expression, false, ref anyMacroReplaced);
                 i++;
             }
             return expression;
