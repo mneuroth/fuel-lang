@@ -1411,7 +1411,7 @@ std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> 
 			// fill all not given arguments with nil
 			//var newLocalArgs = new object[formalArgs.size()];
 			std::vector<std::shared_ptr<object>> newLocalArgs(formalArgs.size());
-			for (int n = 0; n < formalArgs.size(); n++)
+			for (size_t n = 0; n < formalArgs.size(); n++)
 			{
 				if (n < localArgs.size())
 				{

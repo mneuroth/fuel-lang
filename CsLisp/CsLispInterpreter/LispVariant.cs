@@ -47,6 +47,7 @@ namespace CsLisp
         Symbol = 8,
         NativeObject = 9,
         //Array = 10,
+        LValue = 11,
         Error = 999
     }
 
@@ -154,6 +155,11 @@ namespace CsLisp
         public bool IsNativeObject
         {
             get { return Type == LispType.NativeObject; }
+        }
+
+        public bool IsLValue
+        {
+            get { return Type == LispType.LValue; }
         }
 
         #endregion
@@ -309,7 +315,28 @@ namespace CsLisp
                 {
                     throw CreateInvalidCastException("list");
                 }
-                return ((IEnumerable)Value).Cast<object>();
+                return  ((IEnumerable)Value).Cast<object>();
+            }
+        }
+
+        public List<object> ListRef
+        {
+            get
+            {
+                // Nil is an empty list () !
+                if (Type == LispType.Nil)
+                {
+                    return new List<object>();
+                }
+                if (Type == LispType.NativeObject && NativeObjectValue is IEnumerable<object>)
+                {
+                    return (List<object>)NativeObjectValue;
+                }
+                if (Type != LispType.List)
+                {
+                    throw CreateInvalidCastException("list");
+                }
+                return (List<object>)Value;
             }
         }
 
@@ -803,6 +830,10 @@ namespace CsLisp
             {
                 return l.IsUndefined && r.IsUndefined;
             }
+            if (l.IsString || r.IsString)
+            {
+                return l.ToString() == r.ToString();
+            }
             if (l.IsDouble || r.IsDouble)
             {
                 return Math.Abs(l.ToDouble() - r.ToDouble()) < Tolerance;
@@ -810,10 +841,6 @@ namespace CsLisp
             if (l.IsInt || r.IsInt)
             {
                 return l.ToInt() == r.ToInt();
-            }
-            if (l.IsString || r.IsString)
-            {
-                return l.ToString() == r.ToString();
             }
             throw CreateInvalidOperationException("==", l, r);
         }

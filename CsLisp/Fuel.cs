@@ -51,6 +51,7 @@ namespace CsLisp
             string script = null;
             var loadFiles = true;
             var trace = false;
+            var macroExpand = false;
             var compile = false;
             var wasDebugging = false;
             var showCompileOutput = false;
@@ -84,6 +85,10 @@ namespace CsLisp
                 script = "(println (htmldoc))";
                 loadFiles = false;
             }
+            if (args.Contains("--macro-expand"))
+            {
+                macroExpand = true;
+            }            
             if (args.Contains("-x"))
             {
                 lengthyErrorOutput = true;
@@ -164,16 +169,20 @@ namespace CsLisp
                     }
                     else
                     {
-                        result = Lisp.SaveEval(script, moduleName: fileName, verboseErrorOutput: lengthyErrorOutput, tracing: trace);
+                        result = Lisp.SaveEval(script, moduleName: fileName, verboseErrorOutput: lengthyErrorOutput, tracing: trace, onlyMacroExpand: macroExpand);
                     }
                 }
             }
             else if (script != null && !wasDebugging)
             {
                 // process -e option
-                result = Lisp.SaveEval(script);
+                result = Lisp.SaveEval(script, onlyMacroExpand: macroExpand);
             }
 
+            if (macroExpand)
+            {
+                output.WriteLine("Macro expand: " + result);
+            }
             if (trace)
             {
                 output.WriteLine("Result=" + result);
@@ -193,19 +202,20 @@ namespace CsLisp
             output.WriteLine(">" + Lisp.ProgramName + " [options] [script_file_name]");
             output.WriteLine();
             output.WriteLine("options:");
-            output.WriteLine("  -v          : show version");
-            output.WriteLine("  -h          : show help");
-            output.WriteLine("  -e \"script\" : execute given script");
-            output.WriteLine("  -l=\"path\"   : path to library");
-            output.WriteLine("  --doc       : show language documentation");
-            output.WriteLine("  --html      : show language documentation in html");
-            output.WriteLine("  -m          : measure execution time");
-            output.WriteLine("  -t          : enable tracing");
-            output.WriteLine("  -x          : exhaustive error output");
+            output.WriteLine("  -v             : show version");
+            output.WriteLine("  -h             : show help");
+            output.WriteLine("  -e \"script\"    : execute given script");
+            output.WriteLine("  -l=\"path\"      : path to library");
+            output.WriteLine("  --doc          : show language documentation");
+            output.WriteLine("  --html         : show language documentation in html");
+            output.WriteLine("  --macro-expand : expand all macros and show resulting code");
+            output.WriteLine("  -m             : measure execution time");
+            output.WriteLine("  -t             : enable tracing");
+            output.WriteLine("  -x             : exhaustive error output");
             if (TryGetDebugger() != null)
             {
-                output.WriteLine("  -i          : interactive shell");
-                output.WriteLine("  -d          : start debugger");
+                output.WriteLine("  -i             : interactive shell");
+                output.WriteLine("  -d             : start debugger");
             }
             else
             {
@@ -214,8 +224,8 @@ namespace CsLisp
             }
             if (TryGetCompiler() != null)
             {
-                output.WriteLine("  -c          : compile program");
-                output.WriteLine("  -s          : show C# compiler output");
+                output.WriteLine("  -c             : compile program");
+                output.WriteLine("  -s             : show C# compiler output");
             }
             else
             {

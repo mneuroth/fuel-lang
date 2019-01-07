@@ -88,9 +88,10 @@ namespace CsLisp
         /// <param name="scope">The scope.</param>
         /// <param name="moduleName">The module name and path.</param>
         /// <param name="tracing">if set to <c>true</c> [tracing].</param>
+        /// <param name="onlyMacroExpand">if set to <c>true</c> [macro expanding].</param>
         /// <param name="nativeItems">The dictionary with native items.</param>
         /// <returns>The result of the script evaluation</returns>
-        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool tracing = false, Dictionary<string, object> nativeItems = null)
+        public static LispVariant Eval(string lispCode, LispScope scope = null, string moduleName = null, bool tracing = false, bool onlyMacroExpand = false, Dictionary<string, object> nativeItems = null)
         {
             // first create global scope, needed for macro expanding
             var currentScope = scope ?? LispEnvironment.CreateDefaultScope();
@@ -105,7 +106,15 @@ namespace CsLisp
 #else
             var expandedAst = ast;
 #endif
-            var result = LispInterpreter.EvalAst(expandedAst, currentScope);
+            LispVariant result = null;
+            if (onlyMacroExpand)
+            {
+                result = new LispVariant(expandedAst);
+            }
+            else
+            {
+                result = LispInterpreter.EvalAst(expandedAst, currentScope);
+            }
             return result;
         }
 
@@ -117,13 +126,14 @@ namespace CsLisp
         /// <param name="moduleName">The current module name.</param>
         /// <param name="verboseErrorOutput">if set to <c>true</c> [verbose error output].</param>
         /// <param name="tracing">if set to <c>true</c> [tracing].</param>
+        /// <param name="onlyMacroExpand">if set to <c>true</c> [macro expanding].</param>
         /// <returns>The result</returns>
-        public static LispVariant SaveEval(string lispCode, string moduleName = null, bool verboseErrorOutput = false, bool tracing = false)
+        public static LispVariant SaveEval(string lispCode, string moduleName = null, bool verboseErrorOutput = false, bool tracing = false, bool onlyMacroExpand = false)
         {
             LispVariant result;
             try
             {
-                result = Eval(lispCode, scope: null, moduleName: moduleName, tracing: tracing);
+                result = Eval(lispCode, scope: null, moduleName: moduleName, tracing: tracing, onlyMacroExpand: onlyMacroExpand);
             }
             catch (Exception exc)
             {

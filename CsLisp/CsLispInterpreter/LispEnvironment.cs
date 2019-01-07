@@ -227,6 +227,7 @@ namespace CsLisp
 
         private const string ArgsCount = "argscount";
         private const string Args = "args";
+        private const string Arg = "arg";
         public const string Apply = "apply";
         public const string Eval = "eval";
         public const string EvalStr = "evalstr";
@@ -338,6 +339,7 @@ namespace CsLisp
 
             scope["search"] = CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos.");
             scope["slice"] = CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len.");
+            scope["replace"] = CreateFunction(Replace, "(replace expr1 searchtxt replacetxt)", "Returns a string of the given string expr1 with replacing searchtxt with replacetxt.");
             scope["trim"] = CreateFunction(Trim, "(trim expr1)", "Returns a string with no starting and trailing whitespaces.");
             scope["lower-case"] = CreateFunction(LowerCase, "(lower-case expr1)", "Returns a string with only lower case characters.");
             scope["upper-case"] = CreateFunction(UpperCase, "(upper-case expr1)", "Returns a string with only upper case characters.");
@@ -377,13 +379,17 @@ namespace CsLisp
             scope["rest"] = CreateFunction(Rest, "(rest list)", "see: cdr");
             scope["cdr"] = CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list.");
             scope["nth"] = CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list.");
+            scope["push"] = CreateFunction(Push, "(push elem list [index])", "Inserts the element at the given index (default value 0) into the list (implace) and returns the updated list.");
+            scope["pop"] = CreateFunction(Pop, "(pop list [index])", "Removes the element at the given index (default value 0) from the list and returns the removed element.");
             scope["append"] = CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements.");
             scope["reverse"] = CreateFunction(Reverse, "(reverse expr)", "Returns a list or string with a reverted order.");
+            scope["rval"] = CreateFunction(RValue, "(rval expr)", "Returns a RValue of the expr, disables LValue evaluation.", isSpecialForm: true);
             scope[Sym] = CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol.");
             scope[Str] = CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string.");
 
             scope[ArgsCount] = CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of arguments for the current function.");
-            scope[Args] = CreateFunction(ArgsFcn, "(args number)", "Returns the value of the [number] argument for the current function.");
+            scope[Args] = CreateFunction(ArgsFcn, "(args)", "Returns all the values of the arguments for the current function.");
+            scope[Arg] = CreateFunction(ArgFcn, "(arg number)", "Returns the value of the [number] argument for the current function.");
             scope[Apply] = CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments.");
             scope[Eval] = CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast).");
             scope[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");
@@ -821,25 +827,49 @@ namespace CsLisp
         {
             CheckOptionalArgs("search", 2, 4, args, scope);
 
-            var searchText = ((LispVariant)args[0]).ToString();
-            var source = ((LispVariant)args[1]).ToString();
+            var arg0 = (LispVariant)args[0];
+            var arg1 = (LispVariant)args[1];
             var pos = args.Length > 2 ? ((LispVariant)args[2]).ToInt() : -1;
             var len = args.Length > 3 ? ((LispVariant)args[3]).ToInt() : -1;
+
             int foundPos = -1;
-            if (pos >= 0)
+            if (arg1.IsString)
             {
-                if (len >= 0)
+                var searchText = arg0.ToString();
+                var source = arg1.ToString();
+                if (pos >= 0)
                 {
-                    foundPos = source.IndexOf(searchText, pos, len);
+                    if (len >= 0)
+                    {
+                        foundPos = source.IndexOf(searchText, pos, len);
+                    }
+                    else
+                    {
+                        foundPos = source.IndexOf(searchText, pos);
+                    }
                 }
                 else
                 {
-                    foundPos = source.IndexOf(searchText, pos);
+                    foundPos = source.IndexOf(searchText);
+                }
+            }
+            else if (arg1.IsList)
+            {
+                var list = arg1.ListValue;
+                int i = 0;
+                foreach(var elem in list)
+                {
+                    if (arg0.Equals(elem))
+                    {
+                        foundPos = i;
+                        break;
+                    }
+                    i++;
                 }
             }
             else
             {
-                foundPos = source.IndexOf(searchText);
+                throw new LispException($"search not supported for type {arg1.GetType()}");
             }
             return new LispVariant(foundPos);
         }
@@ -859,6 +889,17 @@ namespace CsLisp
             {
                 value = value.Substring(startPos);
             }
+            return new LispVariant(value);
+        }
+
+        public static LispVariant Replace(object[] args, LispScope scope)
+        {
+            CheckArgs("replace", 3, args, scope);
+
+            var value = ((LispVariant)args[0]).ToString();
+            var search = ((LispVariant)args[1]).ToString();
+            var replace = ((LispVariant)args[2]).ToString();
+            value = value.Replace(search, replace);
             return new LispVariant(value);
         }
 
@@ -1054,7 +1095,16 @@ namespace CsLisp
                 return new LispVariant(val.StringValue.Substring(0, 1));
             }
             var elements = val.ListValue;
-            return new LispVariant(elements.First());
+            if (scope.NeedsLValue)
+            {
+                List<object> container = elements as List<object>;
+                Action<object> action = (v) => { container[0] = v; };
+                return new LispVariant(LispType.LValue, action);
+            }
+            else
+            {
+                return new LispVariant(elements.First());
+            }
         }
 
         public static LispVariant Last(object[] args, LispScope scope)
@@ -1067,7 +1117,16 @@ namespace CsLisp
                 return new LispVariant(val.StringValue.Substring(val.StringValue.Length-1));
             }
             var elements = val.ListValue;
-            return new LispVariant(elements.Last());
+            if (scope.NeedsLValue)
+            {
+                List<object> container = elements as List<object>;
+                Action<object> action = (v) => { container[container.Count - 1] = v; };
+                return new LispVariant(LispType.LValue, action);
+            }
+            else
+            {
+                return new LispVariant(elements.Last());
+            }
         }
 
         public static LispVariant Rest(object[] args, LispScope scope)
@@ -1094,7 +1153,62 @@ namespace CsLisp
                 return new LispVariant(val.StringValue.Substring(index, 1));
             }
             var elements = val.ListValue;
-            return new LispVariant(elements.ElementAt(index));
+            if(scope.NeedsLValue)
+            {
+                List<object> container = elements as List<object>;
+                Action<object> action = (v) => { container[index] = v; };
+                return new LispVariant(LispType.LValue, action);
+            }
+            else
+            {
+                return new LispVariant(elements.ElementAt(index));
+            }
+        }
+
+        public static LispVariant Push(object[] args, LispScope scope)
+        {
+            CheckOptionalArgs("push", 2, 3, args, scope);
+
+            LispVariant val = (LispVariant)args[0];
+            LispVariant list = (LispVariant)args[1];
+            var pos = args.Length > 2 ? ((LispVariant)args[2]).ToInt() : 0;
+            if (list.IsList)
+            {
+                var elements = list.ListRef;
+                if (pos < elements.Count)
+                {
+                    elements.Insert(pos, val);
+                    return new LispVariant(elements);
+                }
+                return new LispVariant(LispType.Nil);
+            }
+            else
+            {
+                throw new LispException($"push not supported for type {GetLispType(list)}");
+            }
+        }
+
+        public static LispVariant Pop(object[] args, LispScope scope)
+        {
+            CheckOptionalArgs("pop", 1, 2, args, scope);
+
+            LispVariant list = (LispVariant)args[0];
+            var pos = args.Length > 1 ? ((LispVariant)args[1]).ToInt() : 0;
+            if (list.IsList)
+            {
+                var elements = list.ListRef;
+                if (pos < elements.Count)
+                {
+                    var elem = elements.ElementAt(pos);
+                    elements.RemoveAt(pos);
+                    return new LispVariant(elem);
+                }
+                return new LispVariant(LispType.Nil);
+            }
+            else
+            {
+                throw new LispException($"pop not supported for type {GetLispType(list)}");
+            }
         }
 
         public static LispVariant Append(object[] args, LispScope scope)
@@ -1123,6 +1237,17 @@ namespace CsLisp
             }
             var elements = val.ListValue;
             return new LispVariant(elements.Reverse());
+        }
+
+        public static LispVariant RValue(object[] args, LispScope scope)
+        {
+            CheckArgs("val", 1, args, scope);
+
+            var originalLValue = scope.NeedsLValue;
+            scope.NeedsLValue = false;
+            var value = EvalArgIfNeeded(args[0], scope);
+            scope.NeedsLValue = originalLValue;
+            return new LispVariant(value);
         }
 
         public static LispVariant Symbol(object[] args, LispScope scope)
@@ -1159,6 +1284,14 @@ namespace CsLisp
         }
 
         public static LispVariant ArgsFcn(object[] args, LispScope scope)
+        {
+            CheckArgs(Apply, 0, args, scope);
+
+            var array = ((LispVariant)scope[ArgsMeta]).ListValue.ToArray();
+            return new LispVariant(array);
+        }
+
+        public static LispVariant ArgFcn(object[] args, LispScope scope)
         {
             CheckArgs(Apply, 1, args, scope);
 
@@ -1264,10 +1397,21 @@ namespace CsLisp
         {
             CheckArgs(Setf, 2, args, scope);
 
-            var symbol = EvalArgIfNeeded(args[0], scope);       // TODO: get l-value... working gulp
+            var originalNeedsLValue = scope.NeedsLValue;
+            scope.NeedsLValue = true;
+            var symbol = EvalArgIfNeeded(args[0], scope);
+            scope.NeedsLValue = originalNeedsLValue;  
             var symbolName = symbol != null ? symbol.ToString() : null;
             var value = LispInterpreter.EvalAst(args[1], scope);
-            scope.SetInScopes(symbolName, value);
+            if(symbol.IsLValue)
+            {
+                Action<object> action = (Action<object>)symbol.Value;
+                action(value);
+            }
+            else
+            {
+                scope.SetInScopes(symbolName, value);
+            }
             return value;
         }
 
@@ -2056,6 +2200,16 @@ namespace CsLisp
             }
 
             return nativeClass;
+        }
+
+        private static string GetLispType(object obj)
+        {
+            LispVariant lispVariant = obj as LispVariant;
+            if (lispVariant != null)
+            {
+                return lispVariant.TypeString;
+            }
+            return obj.GetType().ToString();
         }
 
         #endregion
