@@ -659,27 +659,23 @@ namespace QtLispUnitTests
 #endif
 		}
 
-		TEST_METHOD(Test_MacrosExpandDefineStruct)
+              		TEST_METHOD(Test_MacrosExpandDefineStruct)
 		{
-			const string macroExpandScript = "(do\
-		    (define-macro-expand defstruct (name field1)\
-				(do\
-					; (quoted-macro-args) --> '(<formal-args>)\
-					; (macro-args-len) --> arg count --> REPLACE --> (len '(<formal-args>))\
-					; (macro-args 0) --> arg[0] --> REPLACE --> (nth 0 '(<formal-args>))\
-\
-						(defn (sym (+ (str make-) (str name))) ((sym field1) (nth 2 (quoted-macro-args)))\
-							;; (list (eval (nth 1 (quoted-macro-args))) (eval (nth 2 (quoted-macro-args))))\
-							(list (arg 0) (arg 1))\
-							)\
-\
-							(println 'a (nth 1 (quoted-macro-args)) (nth 2 (quoted-macro-args)))\
-								)\
-							)\
-\
-					      (defstruct point x y)\
-						  (def p (make-point 2 3))\
-						)";
+			const string macroExpandScript = "(do \
+  (define-macro-expand defstruct (name field1) \
+        (do            \
+ \
+	       (defn (sym (+ (str make-) (str name))) ((sym field1) (nth 2 (quoted-macro-args))) \
+              (list (arg 0) (arg 1)) \
+	       ) \
+ \
+    	   (println 'a (nth 1 (quoted-macro-args)) (nth 2 (quoted-macro-args))) \
+        ) \
+  ) \
+    \
+  (defstruct point x y) \
+  (def p (make-point 2 3)) \
+)";
 #ifdef ENABLE_COMPILE_TIME_MACROS
 					{
 						std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
