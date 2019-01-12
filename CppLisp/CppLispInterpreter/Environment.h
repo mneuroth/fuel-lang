@@ -117,6 +117,8 @@ namespace CppLisp
 		static std::shared_ptr<object> GetMacro(std::shared_ptr<object> funcName, std::shared_ptr<LispScope> scope);
 		static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> GetExpression(std::shared_ptr<object> item);
 		static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> CheckForList(const string & functionName, std::shared_ptr<object> listObj, std::shared_ptr<LispScope> scope);
+
+		static string LispEnvironment::GetLispType(std::shared_ptr<object> obj);
 	};
 }
 

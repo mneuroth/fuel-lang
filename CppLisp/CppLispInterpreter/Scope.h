@@ -106,11 +106,16 @@ namespace CppLisp
 		/*public*/ bool IsInEval; // { get; set; }
 
 		/// <summary>
-		/// Gets or sets the flag which indicates that an return function is executed.
+		/// Gets or sets the flag which indicates that a return function is executed.
 		/// </summary>
 		/*public*/ bool IsInReturn; // { get; set; }
 
-			/// <summary>
+		/// <summary>
+		/// Gets or sets the flag which indicates that a L-Value is needed.
+		/// </summary>
+		/*public*/ bool NeedsLValue; // { get; set; }
+			
+		/// <summary>
         /// Gets or sets the current token.
         /// </summary>
 		/*public*/ std::shared_ptr<LispToken> CurrentToken; // { get; set; }

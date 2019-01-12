@@ -115,7 +115,10 @@ namespace CppLisp
         //#region properties
 
     private:
-        /*private*/ static double Tolerance; //{ get; set; }
+		// disable assignment operator
+		LispVariant & operator=(const LispVariant & other);
+		
+		/*private*/ static double Tolerance; //{ get; set; }
 
     public:
         /*public*/ LispUnQuoteModus IsUnQuoted; //{ get; private set; }
@@ -178,15 +181,21 @@ namespace CppLisp
             /*get {*/ return Type == LispType::_Function; //}
         }
 
-        /*public*/ bool inline IsSymbol() const
+        /*public*/ inline bool IsSymbol() const
         {
             /*get {*/ return Type == LispType::_Symbol; //}
         }
 
-        /*public*/ bool inline IsNativeObject() const
+        /*public*/ inline bool IsNativeObject() const
         {
             /*get {*/ return Type == LispType::_NativeObject; //}
         }
+
+		/*public*/ inline bool IsLValue() const
+		{
+			/*get {*/ return Type == LispType::_LValue; //}
+		}
+
 
         //#endregion
 
@@ -221,6 +230,8 @@ namespace CppLisp
         /// <param name="val">The value.</param>
         /// <param name="unQuoted">The unquoted modus.</param>
 		/*public*/ explicit LispVariant(std::shared_ptr<object> val, LispUnQuoteModus unQuoted /*= LispUnQuoteModus::_None*/);
+
+		explicit LispVariant(std::function<void(std::shared_ptr<object>)> action);
 
 		LispVariant(const LispVariant & other);
 
@@ -262,6 +273,7 @@ namespace CppLisp
         /*public*/ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ListValue() const;
 
 		/*public*/ const IEnumerable<std::shared_ptr<object>> & ListValueRef() const;
+		/*public*/ IEnumerable<std::shared_ptr<object>> & ListValueNotConstRef();
 
         /*public*/ double DoubleValue() const;
 
@@ -280,6 +292,8 @@ namespace CppLisp
 		/*public*/ double ToDouble() const;
 
 		/*public*/ string StringValue() const;
+
+		/*public*/ std::function<void(std::shared_ptr<object>)> ToSetterAction() const;
 
         /// <summary>
         /// Comverts this value into a string representation used by the compiler module.
@@ -312,7 +326,7 @@ namespace CppLisp
         /// true if the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>; otherwise, false.
         /// </returns>
         /// <param name="other">The object to compare with the current object. </param><filterpriority>2</filterpriority>
-		/*public override*/ bool Equals(std::shared_ptr<object>  other);
+		/*public override*/ bool Equals(std::shared_ptr<object>  other) const;
 
         //#endregion
 

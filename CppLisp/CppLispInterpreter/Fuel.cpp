@@ -66,6 +66,7 @@ namespace CppLisp
 		string script = /*null*/string::Empty;
 		var loadFiles = true;
 		var trace = false;
+		var macroExpand = false;
 		//var compile = false;
 		var wasDebugging = false;
 		//var showCompileOutput = false;
@@ -98,6 +99,10 @@ namespace CppLisp
 		{
 			script = "(println (htmldoc))";
 			loadFiles = false;
+		}
+		if (Contains(args, "--macro-expand"))
+		{
+			macroExpand = true;
 		}
 		if (Contains(args, "-x"))
 		{
@@ -182,16 +187,20 @@ namespace CppLisp
 				//}
 				//else
 				{
-					result = Lisp::SaveEval(script, /*moduleName:*/ fileName, /*verboseErrorOutput:*/ lengthyErrorOutput, /*tracing:*/ trace, output, input);
+					result = Lisp::SaveEval(script, /*moduleName:*/ fileName, /*verboseErrorOutput:*/ lengthyErrorOutput, /*tracing:*/ trace, output, input, macroExpand);
 				}
 			}
 		}
 		else if (!string::IsNullOrEmpty(script) && !wasDebugging)
 		{
 			// process -e option
-			result = Lisp::SaveEval(script, /*moduleName:*/ "cmdline", /*verboseErrorOutput:*/ false, /*tracing:*/ false, output, input);
+			result = Lisp::SaveEval(script, /*moduleName:*/ "cmdline", /*verboseErrorOutput:*/ false, /*tracing:*/ false, output, input, macroExpand);
 		}
 
+		if (macroExpand)
+		{
+			output->WriteLine(string("Macro expand: ") + result->ToString());
+		}
 		if (trace)
 		{
 			output->WriteLine(string("Result=") + result->ToString());
@@ -215,6 +224,7 @@ namespace CppLisp
 		output->WriteLine("  -l=\"path\"   : path to library");
 		output->WriteLine("  --doc       : show language documentation");
 		output->WriteLine("  --html      : show language documentation in html");
+		output->WriteLine("  --macro-expand : expand all macros and show resulting code");
 		output->WriteLine("  -m          : measure execution time");
 		output->WriteLine("  -t          : enable tracing");
 		output->WriteLine("  -x          : exhaustive error output");

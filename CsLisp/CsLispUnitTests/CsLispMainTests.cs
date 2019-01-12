@@ -225,6 +225,7 @@ namespace LispUnitTests
                 Fuel.Main(args);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains(@"Syntax: (argscount)"));
+                Assert.IsTrue(s.Contains(@"Syntax: (args)"));
                 Assert.IsTrue(s.Contains(@"Syntax: (arg number)"));
             }
         }

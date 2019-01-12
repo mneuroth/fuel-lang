@@ -347,6 +347,13 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_ListPush3()
+        {
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push z l 2) (print l))");
+            Assert.AreEqual("(a b z c)", result.ToString());
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(LispException))]
         public void Test_ListPushError()
         {
@@ -1136,7 +1143,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        public void Test_Arg1()
+        public void Test_Argscount1()
         {
             LispVariant result = Lisp.Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (+ x x))) (f 5 6 7))");
             Assert.AreEqual(10, result.ToInt());
@@ -1963,6 +1970,14 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (def s \"this is a long text\") (replace s \"verylong\" \"short\"))");
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("this is a long text", result.StringValue);
+        }
+
+        [TestMethod]
+        public void Test_Replace4()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is a long text with a lot of words a\") (replace s \"a \" \"an \"))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("this is an long text with an lot of words a", result.StringValue);
         }
 
         [TestMethod]

@@ -33,6 +33,7 @@ namespace CppLisp
 		Debugger = null;
 		IsInEval = false;
 		IsInReturn = false;
+		NeedsLValue = false;
 		Name = fcnName;
 		ModuleName = moduleName ? *moduleName : string::Empty;
 		//GlobalScope = globalScope != null ? globalScope : shared_from_this();

@@ -29,6 +29,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <stdlib.h>
 
@@ -75,6 +76,18 @@ namespace std
 
 namespace CppLisp
 {
+	inline std::string & do_replace(std::string & s, const std::string & searchTxt, const std::string & replaceTxt)
+	{
+		if (!searchTxt.empty())
+		{
+			for (size_t pos = 0; (pos = s.find(searchTxt, pos)) != std::string::npos; pos += replaceTxt.size())
+			{
+				s.replace(pos, searchTxt.size(), replaceTxt);
+			}
+		}
+		return s;
+	}
+
 	//
 	// Class to wrap the stl string class with functions of the C# string class
 	//
@@ -107,7 +120,13 @@ namespace CppLisp
 			return string(substr(offs, length));
 		}
 
-        inline size_t IndexOf(const string & txt, const string & /*arg*//*StringComparison.InvariantCulture*/) const
+		inline string Replace(const string & searchTxt, const string & replaceTxt) const
+		{
+			std::string s = *this;
+			return do_replace(s, searchTxt.c_str(), replaceTxt.c_str());
+		}
+		
+		inline size_t IndexOf(const string & txt, const string & /*arg*//*StringComparison.InvariantCulture*/) const
 		{
             return find(txt);
 		}

@@ -102,6 +102,11 @@ namespace CppLisp
             std::vector<T>::insert(this->end(), other.begin(), other.end());
 		}
 
+		inline void Insert(int index, const T & elem)
+		{
+			std::vector<T>::insert(this->begin() + index, elem);
+		}
+
 		IEnumerable<T> Skip(int skipNoOfElements)
 		{
 			IEnumerable<T> temp(*this);

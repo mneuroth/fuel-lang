@@ -1241,13 +1241,13 @@ namespace CsLisp
 
         public static LispVariant RValue(object[] args, LispScope scope)
         {
-            CheckArgs("val", 1, args, scope);
+            CheckArgs("rval", 1, args, scope);
 
             var originalLValue = scope.NeedsLValue;
             scope.NeedsLValue = false;
             var value = EvalArgIfNeeded(args[0], scope);
             scope.NeedsLValue = originalLValue;
-            return new LispVariant(value);
+            return value; //  new LispVariant(value);
         }
 
         public static LispVariant Symbol(object[] args, LispScope scope)
@@ -1278,14 +1278,14 @@ namespace CsLisp
 
         public static LispVariant ArgsCountFcn(object[] args, LispScope scope)
         {
-            CheckArgs(Apply, 0, args, scope);
+            CheckArgs("argscount", 0, args, scope);
 
             return new LispVariant(((LispVariant)scope[ArgsMeta]).ListValue.Count());
         }
 
         public static LispVariant ArgsFcn(object[] args, LispScope scope)
         {
-            CheckArgs(Apply, 0, args, scope);
+            CheckArgs("args", 0, args, scope);
 
             var array = ((LispVariant)scope[ArgsMeta]).ListValue.ToArray();
             return new LispVariant(array);
@@ -1293,7 +1293,7 @@ namespace CsLisp
 
         public static LispVariant ArgFcn(object[] args, LispScope scope)
         {
-            CheckArgs(Apply, 1, args, scope);
+            CheckArgs("arg", 1, args, scope);
 
             var index = ((LispVariant) args[0]).IntValue;
             var array = ((LispVariant) scope[ArgsMeta]).ListValue.ToArray();

@@ -48,6 +48,11 @@ namespace CppLisp
 		IsUnQuoted = unQuoted;
 	}
 
+	LispVariant::LispVariant(std::function<void(std::shared_ptr<object>)> action)
+		: LispVariant(LispType::_LValue, std::make_shared<object>(action), LispUnQuoteModus::_None)
+	{
+	}
+
 	LispVariant::LispVariant(std::shared_ptr<object> val, LispUnQuoteModus unQuoted /*= LispUnQuoteModus::_None*/)
 		: LispVariant(TypeOf(val), val, unQuoted)
 	{
@@ -300,7 +305,7 @@ namespace CppLisp
 		return item->ToString();
 	}
 
-	bool LispVariant::Equals(std::shared_ptr<object>  other)
+	bool LispVariant::Equals(std::shared_ptr<object>  other) const
 	{
 		if (other->IsLispVariant())
 		{
@@ -490,6 +495,10 @@ namespace CppLisp
 		{
 			return l.IsUndefined() && r.IsUndefined();
 		}
+		if (l.IsString() || r.IsString())
+		{
+			return l.ToString() == r.ToString();
+		}
 		if (l.IsDouble() || r.IsDouble())
 		{
 			return /*Math.A*/fabs(l.ToDouble() - r.ToDouble()) < Tolerance;
@@ -497,10 +506,6 @@ namespace CppLisp
 		if (l.IsInt() || r.IsInt())
 		{
 			return l.ToInt() == r.ToInt();
-		}
-		if (l.IsString() || r.IsString())
-		{
-			return l.ToString() == r.ToString();
 		}
 		throw CreateInvalidOperationException("==", l, r);
 	}
@@ -616,6 +621,27 @@ namespace CppLisp
 			throw CreateInvalidCastException("list");
 		}
 		return Value->ToEnumerableOfObjectRef(); // ((IEnumerable)Value).Cast<object>();
+		//}
+	}
+
+	IEnumerable<std::shared_ptr<object>> & LispVariant::ListValueNotConstRef()
+	{
+		//get
+		//{
+			// Nil is an empty list () !
+		if (Type == LispType::_Nil)
+		{
+			return g_Empty;
+		}
+		//if (IsNativeObject() && NativeObjectValue()->IsIEnumerableOfObject())
+		//{
+		//	return NativeObjectValue()->ToEnumerableOfObjectRef();
+		//}
+		if (Type != LispType::_List)
+		{
+			throw CreateInvalidCastException("list");
+		}
+		return Value->ToEnumerableOfObjectNotConstRef(); // ((IEnumerable)Value).Cast<object>();
 		//}
 	}
 

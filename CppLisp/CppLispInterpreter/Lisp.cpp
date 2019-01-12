@@ -47,7 +47,7 @@ namespace CppLisp
 		return block + code + "\n)";
 	}
 
-	std::shared_ptr<LispVariant> Lisp::Eval(const string & lispCode, std::shared_ptr<LispScope> scope/*= null*/, const string & moduleName/*= null*/, bool tracing/*, Dictionary<string, object> nativeItems = null*/, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp)
+	std::shared_ptr<LispVariant> Lisp::Eval(const string & lispCode, std::shared_ptr<LispScope> scope/*= null*/, const string & moduleName/*= null*/, bool tracing/*, Dictionary<string, object> nativeItems = null*/, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp, bool onlyMacroExpand)
 	{
 		// first create global scope, needed for macro expanding
 		var currentScope = scope == null ? LispEnvironment::CreateDefaultScope() : scope;
@@ -64,16 +64,24 @@ namespace CppLisp
 #else
 		var expandedAst = std::make_shared<object>(*ast);
 #endif
-		var result = LispInterpreter::EvalAst(expandedAst, currentScope);
+		std::shared_ptr<LispVariant> result;
+		if (onlyMacroExpand)
+		{
+			result = std::make_shared<LispVariant>(LispVariant(expandedAst));
+		}
+		else
+		{
+			result = LispInterpreter::EvalAst(expandedAst, currentScope);
+		}
 		return result;
 	}
 
-	std::shared_ptr<LispVariant> Lisp::SaveEval(const string & lispCode, const string & moduleName, bool verboseErrorOutput, bool tracing, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp)
+	std::shared_ptr<LispVariant> Lisp::SaveEval(const string & lispCode, const string & moduleName, bool verboseErrorOutput, bool tracing, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp, bool onlyMacroExpand)
 	{
 		std::shared_ptr<LispVariant> result;
 		try
 		{
-			result = Eval(lispCode, /*scope:*/ null, /*moduleName :*/ moduleName, /*tracing :*/ tracing, outp, inp);
+			result = Eval(lispCode, /*scope:*/ null, /*moduleName :*/ moduleName, /*tracing :*/ tracing, outp, inp, onlyMacroExpand);
 		}
 		catch (LispException exc)
 		{

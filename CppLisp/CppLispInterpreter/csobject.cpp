@@ -66,6 +66,12 @@ namespace CppLisp
 		m_Data.pScope = new LispScope(value);
 	}
 
+	object::object(std::function<void(std::shared_ptr<object>)> action)
+		: m_Type(ObjectType::__LValue)
+	{
+		m_Data.pAction = new std::function<void(std::shared_ptr<object>)>(action);
+	}
+
 	object::object(const object & other)
 	{
 		m_Type = other.m_Type;
@@ -97,6 +103,10 @@ namespace CppLisp
 		else if (IsLispMacroCompileTimeExpand())
 		{
 			m_Data.pCompileMacro = new LispMacroCompileTimeExpand(*(other.ToLispMacroCompileTimeExpand()));
+		}
+		else if (other.IsLValue())
+		{
+			m_Data.pAction = new std::function<void(std::shared_ptr<object>)>(*(other.m_Data.pAction));
 		}
 		else if (other.IsString())
 		{
@@ -195,6 +205,10 @@ namespace CppLisp
 		else if (IsLispMacroCompileTimeExpand())
 		{
 			delete m_Data.pCompileMacro;
+		}
+		else if (IsLValue())
+		{
+			delete m_Data.pAction;
 		}
 		else if (IsString())
 		{
@@ -337,6 +351,16 @@ namespace CppLisp
 		return g_Nil;
 	}
 
+	LispVariant & object::ToLispVariantNotConstRef()
+	{
+		if (IsLispVariant())
+		{
+			// return a reference
+			return *(m_Data.pVariant);
+		}
+		return g_Nil;
+	}
+
 	LispScope * object::GetLispScopeRef() const
 	{
 		if (IsLispScope())
@@ -390,6 +414,15 @@ namespace CppLisp
 		return null;
 	}
 
+	std::function<void(std::shared_ptr<object>)> object::ToSetterAction() const
+	{
+		if (IsLValue())
+		{
+			return *(m_Data.pAction);
+		}
+		return null;
+	}
+
 	const LispFunctionWrapper & object::ToLispFunctionWrapper() const
 	{
 		if (IsLispFunctionWrapper())
@@ -400,6 +433,11 @@ namespace CppLisp
 	}
 
 	const IEnumerable<std::shared_ptr<object>> & object::ToEnumerableOfObjectRef() const
+	{
+		return *(m_Data.pList); // IEnumerable<std::shared_ptr<object>>(*(m_Data.pList));
+	}
+
+	IEnumerable<std::shared_ptr<object>> & object::ToEnumerableOfObjectNotConstRef()
 	{
 		return *(m_Data.pList); // IEnumerable<std::shared_ptr<object>>(*(m_Data.pList));
 	}

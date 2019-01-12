@@ -239,7 +239,8 @@ namespace QtLispUnitTests
 
 				string s = output->GetContent();
 				Assert::IsTrue(s.Contains("Syntax: (argscount)"));
-				Assert::IsTrue(s.Contains("Syntax: (args number)"));
+				Assert::IsTrue(s.Contains("Syntax: (args)"));
+				Assert::IsTrue(s.Contains("Syntax: (arg number)"));
 			}
 		}
 

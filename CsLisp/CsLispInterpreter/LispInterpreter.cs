@@ -309,7 +309,7 @@ namespace CsLisp
             return new LispBreakpointPosition(-1, -1, -1);
         }
 
-        private static IEnumerable<object> RepaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, bool macroArgsReplace, ref bool replacedAnything)
+        private static IEnumerable<object> ReplaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, bool macroArgsReplace, ref bool replacedAnything)
         {
             var ret = new List<object>();
             foreach(var elem in expression)
@@ -331,7 +331,7 @@ namespace CsLisp
                 // is it an expression? --> recursive call
                 else if (LispEnvironment.IsExpression(elem))
                 {
-                    IEnumerable<object> temp = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(elem)/*.ToArray()*/, macroArgsReplace, ref replacedAnything);
+                    IEnumerable<object> temp = ReplaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(elem)/*.ToArray()*/, macroArgsReplace, ref replacedAnything);
                     ret.Add(temp);
                 }
                 // current element is not the symbol which should by replaced !
@@ -352,7 +352,7 @@ namespace CsLisp
             bool replaced = false;
             IEnumerable<object> realArguments = astAsList.Skip(1).ToList();
             List<object> quotedRealArguments = new List<object>() { new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments };
-            expression = RepaceSymbolWithValueInExpression(new LispVariant(LispType.Symbol, "quoted-macro-args"), quotedRealArguments, expression, true, ref replaced);
+            expression = ReplaceSymbolWithValueInExpression(new LispVariant(LispType.Symbol, "quoted-macro-args"), quotedRealArguments, expression, true, ref replaced);
 
             foreach (var formalArgument in formalArguments)
             {
@@ -365,7 +365,7 @@ namespace CsLisp
                 {
                     value = new LispVariant(astAsList[i]);
                 }
-                expression = RepaceSymbolWithValueInExpression((LispVariant)formalArgument, value, expression, false, ref anyMacroReplaced);
+                expression = ReplaceSymbolWithValueInExpression((LispVariant)formalArgument, value, expression, false, ref anyMacroReplaced);
                 i++;
             }
             return expression;

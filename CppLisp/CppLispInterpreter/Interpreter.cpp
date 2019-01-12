@@ -277,7 +277,7 @@ namespace CppLisp
 		return /*new*/ LispBreakpointPosition(-1, -1, -1);
 	}
 
-	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::RepaceSymbolWithValueInExpression(const LispVariant & symbol, std::shared_ptr<object> symbolValue, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, /*ref*/ bool & replacedAnything)
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ReplaceSymbolWithValueInExpression(const LispVariant & symbol, std::shared_ptr<object> symbolValue, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, bool macroArgsReplace, /*ref*/ bool & replacedAnything)
 	{
 		var ret = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
 		for (var elem : *expression)
@@ -285,13 +285,20 @@ namespace CppLisp
 			// is the current element the symbol which should be replaced? --> Yes
 			if (symbol.SymbolCompare(elem))
 			{
-				(*ret).Add(symbolValue);
+				if (symbolValue->IsIEnumerableOfObject() && macroArgsReplace)
+				{
+					(*ret).AddRange(symbolValue->ToEnumerableOfObjectRef());
+				}
+				else
+				{
+					(*ret).Add(symbolValue);
+				}
 				replacedAnything = true;
 			}
 			// is it an expression? --> recursive call
 			else if (LispEnvironment::IsExpression(elem))
 			{
-				std::shared_ptr<IEnumerable<std::shared_ptr<object>>> temp = RepaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment::GetExpression(elem)/*.ToArray()*/, /*ref*/ replacedAnything);
+				std::shared_ptr<IEnumerable<std::shared_ptr<object>>> temp = ReplaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment::GetExpression(elem)/*.ToArray()*/, macroArgsReplace, /*ref*/ replacedAnything);
 				(*ret).Add(std::make_shared<object>(*temp));
 			}
 			// current element is not the symbol which should by replaced !
@@ -305,7 +312,18 @@ namespace CppLisp
 
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ReplaceFormalArgumentsInExpression(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> formalArguments, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, /*ref*/ bool & anyMacroReplaced)
 	{
+// TODO gulp working
 		int i = 1;
+
+		// replace (quoted-macro-args) --> '(<real_args>)
+		bool replaced = false;
+		IEnumerable<std::shared_ptr<object>> realArguments = astAsList->Skip(1)/*.ToList()*/;
+		IEnumerable<std::shared_ptr<object>> lst;
+		lst.Add(std::make_shared<object>(LispVariant(LispType::_Symbol, std::make_shared<object>(LispEnvironment::Quote))));
+		lst.Add(std::make_shared<object>(LispVariant(std::make_shared<object>(realArguments))));
+		/*List<object>*/std::shared_ptr<object> quotedRealArguments = std::make_shared<object>(lst); //  new List<object>() { new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments };
+		expression = ReplaceSymbolWithValueInExpression(LispVariant(LispType::_Symbol, std::make_shared<object>("quoted-macro-args")), quotedRealArguments, expression, true, /*ref*/ replaced);
+
 		for (var formalArgument : *formalArguments)
 		{
 			std::shared_ptr<object> value;
@@ -318,7 +336,7 @@ namespace CppLisp
 			{
 				value = std::make_shared<object>(LispVariant(astAsList->ToArray()[i]));
 			}
-			expression = RepaceSymbolWithValueInExpression(/*(LispVariant)*/formalArgument->ToLispVariantRef(), value, expression, /*ref*/ anyMacroReplaced);
+			expression = ReplaceSymbolWithValueInExpression(/*(LispVariant)*/formalArgument->ToLispVariantRef(), value, expression, false, /*ref*/ anyMacroReplaced);
 			i++;
 		}
 		return expression;

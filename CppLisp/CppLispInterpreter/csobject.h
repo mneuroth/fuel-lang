@@ -52,7 +52,8 @@ namespace CppLisp
         _Symbol = 8,
         _NativeObject = 9,
         //_Array = 10,
-        _Error = 999
+		_LValue = 11,
+		_Error = 999
     };
     
 	enum ObjectType
@@ -74,6 +75,7 @@ namespace CppLisp
 		__IEnumerableOfObject = 14,
 		__VoidPtr = 15,
 		__LispScope = 16,
+		__LValue = 17,
 		__LispMacroRuntimeEvaluate = 100,
 		__LispMacroCompileTimeExpand = 101,
         __Error = 999
@@ -99,6 +101,7 @@ namespace CppLisp
 			LispFunctionWrapper * pFunctionWrapper;
 			LispMacroRuntimeEvaluate * pMacro;
 			LispMacroCompileTimeExpand * pCompileMacro;
+			std::function<void(std::shared_ptr<object>)> * pAction;
 		} m_Data;
 
 		void CleanUpMemory();
@@ -155,6 +158,8 @@ namespace CppLisp
 		explicit object(const LispMacroCompileTimeExpand & value);
 
 		explicit object(const LispScope & value);
+
+		explicit object(std::function<void(std::shared_ptr<object>)> action);
 
 		~object();
 
@@ -255,6 +260,11 @@ namespace CppLisp
 			return m_Type == ObjectType::__LispMacroCompileTimeExpand;
 		}
 
+		inline bool IsLValue() const
+		{
+			return m_Type == ObjectType::__LValue;
+		}
+
 		inline ObjectType GetType() const
 		{
 			return m_Type;
@@ -270,13 +280,16 @@ namespace CppLisp
 
 		// get a copy of the data
 		const IEnumerable<std::shared_ptr<object>> & ToEnumerableOfObjectRef() const;
+		IEnumerable<std::shared_ptr<object>> & ToEnumerableOfObjectNotConstRef();
 		const LispVariant & ToLispVariantRef() const;
+		LispVariant & ToLispVariantNotConstRef();
 		std::shared_ptr<LispVariant> ToLispVariant() const;
 		const IEnumerable<std::shared_ptr<object>> & ToListRef() const;
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToList() const;
 		std::shared_ptr<LispToken> ToLispToken() const;
 		std::shared_ptr<LispMacroRuntimeEvaluate> ToLispMacroRuntimeEvaluate() const;
 		std::shared_ptr<LispMacroCompileTimeExpand> ToLispMacroCompileTimeExpand() const;
+		std::function<void(std::shared_ptr<object>)> ToSetterAction() const;
 		string ToString() const;
 	};
 }

@@ -100,7 +100,7 @@ namespace CppLisp
 		/// <param name="tracing">if set to <c>true</c> [tracing].</param>
 		/// <param name="nativeItems">The dictionary with native items.</param>
 		/// <returns>The result of the script evaluation</returns>
-		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, std::shared_ptr<LispScope> scope = 0/*= null*/, const string & moduleName = "test"/*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null);
+		/*public*/ static std::shared_ptr<LispVariant> Eval(const string & lispCode, std::shared_ptr<LispScope> scope = 0/*= null*/, const string & moduleName = "test"/*= null*/, bool tracing = false/*, Dictionary<string, object> nativeItems = null*/, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null, bool onlyMacroExpand = false);
 
 		/// <summary>
 		/// Evals the specified lisp code.
@@ -110,8 +110,9 @@ namespace CppLisp
 		/// <param name="moduleName">The current module name.</param>
 		/// <param name="verboseErrorOutput">if set to <c>true</c> [verbose error output].</param>
 		/// <param name="tracing">if set to <c>true</c> [tracing].</param>
+        /// <param name="onlyMacroExpand">if set to <c>true</c> [macro expanding].</param>
 		/// <returns>The result</returns>
-		/*public*/ static std::shared_ptr<LispVariant> SaveEval(const string & lispCode, const string & moduleName = /* null*/ "main", bool verboseErrorOutput = false, bool tracing = false, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null);
+		/*public*/ static std::shared_ptr<LispVariant> SaveEval(const string & lispCode, const string & moduleName = /* null*/ "main", bool verboseErrorOutput = false, bool tracing = false, std::shared_ptr<TextWriter> outp = null, std::shared_ptr<TextReader> inp = null, bool onlyMacroExpand = false);
 
 		//#endregion
 
