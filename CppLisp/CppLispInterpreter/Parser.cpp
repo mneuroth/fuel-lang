@@ -104,7 +104,7 @@ namespace CppLisp
 			else if (token->Type == LispTokenType::UnQuote || token->Type == LispTokenType::UnQuoteSplicing)
 			{
 				var unquote = std::make_shared<IEnumerable<std::shared_ptr<object>>>();
-				LispUnQuoteModus unquotedModus = token->Type == LispTokenType::UnQuote ? LispUnQuoteModus::_UnQuote : LispUnQuoteModus::_UnQuoteSplicing;
+                //LispUnQuoteModus unquotedModus = token->Type == LispTokenType::UnQuote ? LispUnQuoteModus::_UnQuote : LispUnQuoteModus::_UnQuoteSplicing;
 				unquote->push_back/*Add*/(std::make_shared<object>(LispVariant(LispType::_Symbol, std::make_shared<object>(object(token->Type == LispTokenType::UnQuote ? LispEnvironment::UnQuote : LispEnvironment::UnQuoteSplicing)))));
 
 				std::shared_ptr<object> quotedList = null;

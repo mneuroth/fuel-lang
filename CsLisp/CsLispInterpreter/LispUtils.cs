@@ -24,6 +24,7 @@
  * */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -253,6 +254,35 @@ namespace CsLisp
             const string block = "(do ";
             offset = block.Length;
             return block + code + "\n)";
+        }
+
+        /// <summary>
+        /// Dump a given (recursive) list.
+        /// </summary>
+        /// <param name="astAsList">A list.</param>
+        /// <returns>String representing the list.</returns>
+        public static string DumpList(object astAsList)
+        {
+            string ret = "(";
+            IEnumerable<object> list = astAsList as IEnumerable<object>;
+            if (list != null)
+            {
+                foreach (var elem in list)
+                {
+                    if (elem is IEnumerable<object>)
+                    {
+                        ret += DumpList(elem);
+                    }
+                    else
+                    {
+                        ret += elem.ToString();
+                    }
+                    ret += ",";
+                }
+            }
+            ret += ")";
+
+            return ret;
         }
 
         #endregion

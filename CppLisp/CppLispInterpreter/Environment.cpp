@@ -664,8 +664,8 @@ static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<obj
 
 	var searchText = ((LispVariant)args[0]).ToString();
 	const LispVariant & arg1 = args[1]->ToLispVariantRef();
-	size_t pos = args.size() > 2 ? ((LispVariant)args[2]).ToInt() : std::string::npos;
-	size_t len = args.size() > 3 ? ((LispVariant)args[3]).ToInt() : std::string::npos;
+	size_t pos = args.size() > 2 ? (size_t)((LispVariant)args[2]).ToInt() : std::string::npos;
+	size_t len = args.size() > 3 ? (size_t)((LispVariant)args[3]).ToInt() : std::string::npos;
 	size_t foundPos = std::string::npos;
 	if (arg1.IsString())
 	{

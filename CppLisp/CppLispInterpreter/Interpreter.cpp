@@ -289,6 +289,10 @@ namespace CppLisp
 				{
 					(*ret).AddRange(symbolValue->ToEnumerableOfObjectRef());
 				}
+				if (symbolValue->IsList() && macroArgsReplace)
+				{
+					(*ret).AddRange(*(symbolValue->ToList()));
+				}
 				else
 				{
 					(*ret).Add(symbolValue);
@@ -327,14 +331,14 @@ namespace CppLisp
 		for (var formalArgument : *formalArguments)
 		{
 			std::shared_ptr<object> value;
-			auto elem = astAsList->ToArray()[i];
+			auto elem = (*astAsList)[i];
 			if (elem->IsIEnumerableOfObject() || elem->IsList())
 			{
 				value = elem;
 			}
 			else
 			{
-				value = std::make_shared<object>(LispVariant(astAsList->ToArray()[i]));
+				value = std::make_shared<object>(LispVariant((*astAsList)[i]));
 			}
 			expression = ReplaceSymbolWithValueInExpression(/*(LispVariant)*/formalArgument->ToLispVariantRef(), value, expression, false, /*ref*/ anyMacroReplaced);
 			i++;

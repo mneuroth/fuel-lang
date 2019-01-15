@@ -29,18 +29,6 @@
 
 namespace CppLisp
 {
-	template <class T>
-	string IEnumerable<T>::DumpList() const 
-	{
-		string ret = "(";
-		for (var elem : *this)
-		{
-			ret += elem->ToString();
-			ret += ",";
-		}
-		return ret + ")";
-	}
-
 	void TextWriter::Write(const string & txt)
 	{
 		if (m_bToString)
