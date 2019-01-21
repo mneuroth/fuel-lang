@@ -9,5 +9,8 @@ compiler:
 # Build steps
 script:
   - pwd
-  - ls 
-  - build_linux.sh
+  - ls -lrt 
+  - ./build_linux.sh
+  - gcc -v
+  
+  
