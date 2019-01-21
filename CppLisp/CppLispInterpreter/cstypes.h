@@ -154,7 +154,7 @@ namespace CppLisp
 		}
 
 		// for debugging...
-		string IEnumerable<T>::DumpList() const
+		string DumpList() const
 		{
 			string ret = "(";
 			for (var elem : *this)
