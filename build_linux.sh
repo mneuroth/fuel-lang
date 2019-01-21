@@ -17,5 +17,5 @@ $CXX -c -O2 -std=gnu++11 -fexceptions    Utils.cpp
 $CXX -c -O2 -std=gnu++11 -fexceptions    Variant.cpp
 $CXX -c -O2 -std=gnu++11 -fexceptions    fuel.cpp
 $CXX fuel.o Variant.o Utils.o Tokenizer.o Token.o Scope.o Parser.o Lisp.o Interpreter.o Exception.o Environment.o Debugger.o cstypes.o csstring.o csobject.o -o fuel -lstdc++ -lm -lgcc
-ls -lrt
+./fuel -v
 
