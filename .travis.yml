@@ -1,1 +1,13 @@
-# Enable C++ supportlanguage: cpp# Compiler selectioncompiler:  - clang  - gcc# Build stepsscript:  - build_linux.sh
+# Enable C++ support
+language: cpp
+
+# Compiler selection
+compiler:
+  - clang
+  - gcc
+
+# Build steps
+script:
+  - pwd
+  - ls 
+  - build_linux.sh
