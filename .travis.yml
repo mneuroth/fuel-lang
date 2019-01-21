@@ -21,9 +21,6 @@ install:
   
 # Build steps
 script:
-  - pwd
-  - ls -lrt 
   - ./build_linux.sh
-  - gcc -v
   
   
