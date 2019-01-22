@@ -2,12 +2,11 @@ cd CppLisp
 cd CppLispInterpreter
 echo $CXX
 if [[ $CXX == clang* ]]; then
-    echo "use clang++"
-    qmake "QMAKE_CXX = clang++" CppLispInterpreter.pro
+    qmake "QMAKE_CXX = clang++" "QMAKE_LINK=clang++" CppLispInterpreter.pro
 else
-    echo "use g++"
     qmake CppLispInterpreter.pro
 fi
+$CXX -v
 make 
 ./fuel -v
 ./fuel  -e "(println (platform))"
@@ -15,7 +14,7 @@ make
 cd ..
 cd QtLispInterpreterUnitTests
 if [[ $CXX == clang* ]]; then
-    qmake "QMAKE_CXX = clang++" QtLispInterpreterUnitTests.pro
+    qmake "QMAKE_CXX = clang++" "QMAKE_LINK=clang++" QtLispInterpreterUnitTests.pro
 else
     qmake QtLispInterpreterUnitTests.pro
 fi
