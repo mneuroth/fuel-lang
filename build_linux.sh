@@ -1,12 +1,10 @@
 cd CppLisp
 cd CppLispInterpreter
-echo $CXX
 if [[ $CXX == clang* ]]; then
     qmake "QMAKE_CXX = clang++" "QMAKE_LINK=clang++" CppLispInterpreter.pro
 else
     qmake CppLispInterpreter.pro
 fi
-$CXX -v
 make 
 ./fuel -v
 ./fuel  -e "(println (platform))"
