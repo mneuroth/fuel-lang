@@ -1,6 +1,10 @@
 # Enable C++ support
 language: cpp
 
+os:
+  - linux
+  - osx
+  
 # Compiler selection
 compiler:
   - clang
