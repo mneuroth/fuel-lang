@@ -4,7 +4,8 @@ language: cpp
 os:
   - linux
   - osx
-  before_install:
+  
+before_install:
   - brew install qt5
   
 # Compiler selection
