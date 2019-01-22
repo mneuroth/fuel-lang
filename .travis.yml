@@ -6,9 +6,6 @@ compiler:
   - clang
   - gcc
 
-#install:
-#  - sudo apt-get install -y qt5-default qttools5-dev-tools
-  
 addons:
   apt:
     sources:
@@ -26,7 +23,6 @@ install:
   
 # Build steps
 script:
-  - qmake -v
   - ./build_linux.sh
   
   
