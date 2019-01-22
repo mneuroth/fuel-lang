@@ -1,7 +1,7 @@
 cd CppLisp
 cd CppLispInterpreter
 echo $CXX
-if [ $CXX = clang++ ]; then
+if [[ $CXX == clang* ]]; then
     echo "use clang++"
     qmake "QMAKE_CXX = clang++" CppLispInterpreter.pro
 else
@@ -14,7 +14,7 @@ make
 #ls -l
 cd ..
 cd QtLispInterpreterUnitTests
-if [ $CXX = clang++ ]; then
+if [[ $CXX == clang* ]]; then
     qmake "QMAKE_CXX = clang++" QtLispInterpreterUnitTests.pro
 else
     qmake QtLispInterpreterUnitTests.pro
