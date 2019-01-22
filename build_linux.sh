@@ -1,9 +1,7 @@
 cd CppLisp
 cd CppLispInterpreter
-qmake CppLispInterpreter.pro
+qmake "QMAKE_CXX = clang++" CppLispInterpreter.pro
 make 
-g++ -v
-gcc -v
 ./fuel -v
 ./fuel  -e "(println (platform))"
 #ls -l
