@@ -367,7 +367,7 @@ static std::shared_ptr<LispVariant> _Sleep(const std::vector<std::shared_ptr<obj
 	return std::make_shared<LispVariant>(LispVariant());
 }
 
-static std::shared_ptr<LispVariant> Datetime(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
+static std::shared_ptr<LispVariant> Datetime(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
 {
 	std::time_t t = std::time(0);   // get time now
 	std::tm* now = std::localtime(&t);
