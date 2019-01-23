@@ -26,6 +26,7 @@ matrix:
           - g++-6
           - qt5-default
           - qttools5-dev-tools
+          - mono
     
     - os: osx
       compiler: clang
@@ -42,5 +43,7 @@ install:
 # Build steps
 script:
   - ./build_linux.sh
+  - cd CsLisp
+  - msbuild /p:Configuration=Release CsLisp.sln
   
   
