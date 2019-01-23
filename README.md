@@ -147,10 +147,10 @@ look at the TestAppUsingFuel project.
 
 Compiling
 ---------
-To compile the C# version of fuel just open the solution file CsLisp/CsLisp.sln in 
+To compile the C# version of fuel just open the solution file CsLisp/CsLisp.sln in
 Microsoft Visual Studio and build the solution.
 
-To compile the C++ version of fuel open the solution file CppLisp/CppLisp.sln in  
+To compile the C++ version of fuel open the solution file CppLisp/CppLisp.sln in
 Microsoft Visual Studio and build the solution. Or use the qmake tool from [Qt](https://www.qt.io/):
 
     >cd CppLisp/CppLispInterpreter

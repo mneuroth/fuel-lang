@@ -32,8 +32,11 @@ install:
 # Build steps
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ls -lrt /usr/local/opt/qt/bin; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd CppLisp/CppLispInterpreter; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/opt/qt/bin/qmake -v; fi
-  - which qmake
-  - ./build_linux.sh
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/opt/qt/bin/qmake CppLispInterpreter.pro; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./fuel -v; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./build_linux.sh ; fi
   
   
