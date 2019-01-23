@@ -122,7 +122,7 @@ void QtLispInterpreterUnitTestsTest::testStringIndexOf()
     CppLisp::string target("abc def blub 123");
 
     QVERIFY((size_t)4 == target.IndexOf("def", ""));
-    size_t st = target.IndexOf("test", "");
+    ///*size_t st =*/ target.IndexOf("test", "");
     QVERIFY(std::string::npos == target.IndexOf("test", "nix"));
 }
 
