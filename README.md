@@ -144,7 +144,19 @@ http://mneuroth.de/projects/Fuel.html.
 Or inspect the demo and test scripts and
 look at the TestAppUsingFuel project.
 
-  
+
+Compiling
+---------
+To compile the C# version of fuel just open the solution file CsLisp/CsLisp.sln in 
+Microsoft Visual Studio and build the solution.
+
+To compile the C++ version of fuel open the solution file CppLisp/CppLisp.sln in  
+Microsoft Visual Studio and build the solution. Or use the qmake tool from [Qt](https://www.qt.io/):
+
+    >cd CppLisp/CppLispInterpreter
+    >qmake CppLispInterpreter.pro
+    >make
+
 Deployment  
 ----------
 The binary distribution of FUEL for the .NET platform consists of the following components:
@@ -174,7 +186,7 @@ FUEL is released under the MIT license:
 
 >  FUEL(isp) is a fast usable embeddable lisp interpreter.
 >  
->  Copyright (c) 2016-2018 Michael Neuroth
+>  Copyright (c) 2016-2019 Michael Neuroth
 >
 >  Permission is hereby granted, free of charge, to any person obtaining
 >  a copy of this software and associated documentation files (the "Software"),
