@@ -8,6 +8,7 @@ os:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=/usr/local/opt/qt/bin:$PATH; fi
   
 # Compiler selection
 compiler:
@@ -31,17 +32,6 @@ install:
   
 # Build steps
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo $PATH; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=/usr/local/opt/qt/bin:$PATH; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo $PATH; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ls -lrt /usr/local/opt/qt/bin; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cd CppLisp/CppLispInterpreter; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/opt/qt/bin/qmake -v; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then /usr/local/opt/qt/bin/qmake CppLispInterpreter.pro; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./fuel -v; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./build_linux.sh ; fi
-  - qmake -v
   - ./build_linux.sh
   
   
