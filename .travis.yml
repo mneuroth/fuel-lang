@@ -1,31 +1,40 @@
 # Enable C++ support
 language: cpp
 
-os:
-  - linux
-  - osx
+matrix:
+  include:
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-precise-3.8
+          packages:
+          - clang-3.8
+          - qt5-default
+          - qttools5-dev-tools
+    
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-precise-3.8
+          packages:
+          - g++-6
+          - qt5-default
+          - qttools5-dev-tools
+    
+    - os: osx
+      compiler: clang
   
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=/usr/local/opt/qt/bin:$PATH; fi
   
-# Compiler selection
-compiler:
-  - clang
-  - gcc
-
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.8
-    packages:
-    - g++-6
-    - clang-3.8
-    - qt5-default
-    - qttools5-dev-tools
-
 install:
 - "[ $CXX = g++ ] && export CXX=g++-6 || true"
 - "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
