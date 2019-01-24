@@ -47,17 +47,23 @@ install:
 # Build steps
 script:
   #- ./build_linux.sh
+  - echo $CXX
+  - echo $TRAVIS_OS_NAME
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./build_linux.sh    ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cl     ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then csc     ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then msbuild     ; fi
+  - cd
+  - pwd
   - cd CsLisp
+  - msbuild
   - msbuild /p:Configuration=Release CsLisp.sln
   - ls -lrt
   - cd bin
   - cd Release
   - chmod +x fuel.exe
   - ls -lrt
-  - ./fuel.exe -v
-  - ./fuel  -e "(println (platform))"
+  - mono ./fuel.exe -v
+  - mono ./fuel  -e \"(println (platform))\"
   #- csc
+  -cl 
