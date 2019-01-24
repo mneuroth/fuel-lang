@@ -22,7 +22,7 @@ matrix:
         apt:
           sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.8
+          #- llvm-toolchain-precise-3.8
           packages:
           - g++-6
           - qt5-default
@@ -54,11 +54,12 @@ script:
   #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cl     ; fi
   #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then csc     ; fi
   #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then msbuild     ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install qt-sdk     ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install qtcreator     ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then qmake -v     ; fi
   - ls -lrt
-  - cd ..
-  - cd ..
-  - ls -lrt
+  #- cd ..
+  #- cd ..
+  #- ls -lrt
   - cd CsLisp
   - msbuild
   - msbuild /p:Configuration=Release CsLisp.sln
