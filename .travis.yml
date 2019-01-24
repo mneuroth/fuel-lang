@@ -48,7 +48,9 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cl     ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then csc     ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then msbuild     ; fi
-  #- cd CsLisp
-  #- msbuild /p:Configuration=Release CsLisp.sln
-  
-  
+  - cd CsLisp
+  - msbuild /p:Configuration=Release CsLisp.sln
+  - cd Release
+  - ./fuel -v
+  - ./fuel.exe -v
+  - csc
