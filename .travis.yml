@@ -3,7 +3,7 @@
 matrix:
   include:
     - os: linux
-      language: csharp
+      language: cpp
       compiler: clang
       addons:
         apt:
@@ -49,12 +49,16 @@ script:
   #- ./build_linux.sh
   - echo "$CXX"
   - echo "$TRAVIS_OS_NAME"
+  - ls -lrt
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./build_linux.sh    ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cl     ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then csc     ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then msbuild     ; fi
-  - cd
-  - pwd
+  #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cl     ; fi
+  #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then csc     ; fi
+  #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then msbuild     ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install qt-sdk     ; fi
+  - ls -lrt
+  - cd ..
+  - cd ..
+  - ls -lrt
   - cd CsLisp
   - msbuild
   - msbuild /p:Configuration=Release CsLisp.sln
@@ -63,6 +67,5 @@ script:
   - cd Release
   - chmod +x fuel.exe
   - ls -lrt
-  - mono ./fuel.exe -v
-  - mono ./fuel  -e \"(println (platform))\"
-  - cl 
+  - mono fuel.exe -v
+  - mono fuel.exe -e "(println (platform))"
