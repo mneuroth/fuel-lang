@@ -8,7 +8,6 @@ fi
 make 
 ./fuel -v
 ./fuel  -e "(println (platform))"
-#ls -l
 cd ..
 cd QtLispInterpreterUnitTests
 if [[ $CXX == clang* ]]; then
@@ -18,4 +17,3 @@ else
 fi
 make 
 ./tst_qtlispinterpreterunitteststest
-#ls -l

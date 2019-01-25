@@ -1,16 +1,6 @@
-pwd
-msbuild
-which msbuild
-which mono
-ls -lrt
 cd CsLisp
-# msbuild
-#MsBuild.exe /p:Configuration=Release CsLisp.sln
-msbuild /p:Configuration=Release CsLisp.sln
-ls -lrt
+msbuild /p:Configuration=Release /p:ExcludeFromBuild=Test CsLisp.sln
 cd bin
 cd Release
-# chmod +x fuel.exe
-ls -lrt
 mono fuel.exe -v
 mono fuel.exe -e "(println (platform))"

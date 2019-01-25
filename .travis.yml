@@ -47,25 +47,17 @@ matrix:
       script:
       - export PATH=$MSBUILD_PATH:$PATH
       - cd CppLisp
-      - ls -lrt
-      - MsBuild.exe /help
-      - MsBuild.exe CppLisp.sln
-      - MsBuild.exe /property:Configuration="Debug" CppLisp.sln 
-      - MsBuild.exe /property:Configuration="Release" CppLisp.sln 
-      - MsBuild.exe /property:Configuration="Debug;Release" CppLisp.sln 
-      - MsBuild.exe /property:BuildConfiguration="Debug;Release" CppLisp.sln 
-      - MsBuild.exe -help
+      - MsBuild.exe /property:Configuration="Debug" /property:ExcludeFromBuild=Test CppLisp.sln 
+      - MsBuild.exe /property:Configuration="Release" /property:ExcludeFromBuild=Test CppLisp.sln 
+      #- MsBuild.exe -help
       - cd x64
-      #- cd Release
-      - cd Debug
-      - ./fuel.exe -v
-      - ./fuel  -e "(println (platform))"
-      - cd ..
+      #- cd Debug
+      #- ./fuel.exe -v
+      #- ./fuel  -e "(println (platform))"
+      #- cd ..
       - cd Release
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
-      - cl 
-      - csc
   
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
