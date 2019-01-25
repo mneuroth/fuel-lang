@@ -46,7 +46,17 @@ matrix:
       - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"      
       script:
       - export PATH=$MSBUILD_PATH:$PATH
+      - echo $PATH
+      - echo $MSBUILD_PATH
       - ls -lrt /c
+      - ls -lrt "/c/Program Files (x86)"
+      - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio"
+      - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio/2017"
+      - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools"
+      - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild"
+      - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0"
+      - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin"
+      - echo $PATH
       - msbuild
   
 before_install:
