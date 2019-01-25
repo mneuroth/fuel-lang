@@ -56,7 +56,7 @@ matrix:
       #- ./fuel.exe -v
       #- ./fuel  -e "(println (platform))"
       #- cd ..
-      - cd Release
+      - cd ContinousIntgration
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
   
