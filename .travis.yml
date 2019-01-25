@@ -49,11 +49,11 @@ matrix:
       - cd CppLisp
       - ls -lrt
       #- MsBuild.exe
-      #- MsBuild.exe CppLisp.sln
-      - MsBuild.exe /p:Configuration=Release CppLisp.sln
+      - MsBuild.exe CppLisp.sln
+      #- MsBuild.exe /p:Configuration=Release CppLisp.sln
       - cd x64
-      - cd Release
-      #- cd Debug
+      #- cd Release
+      - cd Debug
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
   
