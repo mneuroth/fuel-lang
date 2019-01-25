@@ -14,6 +14,8 @@ matrix:
           - clang-3.8
           - qt5-default
           - qttools5-dev-tools
+      script:
+      - ./build_cpp.sh
     
     - os: linux
       language: csharp
@@ -22,18 +24,25 @@ matrix:
         apt:
           sources:
           - ubuntu-toolchain-r-test
-          #- llvm-toolchain-precise-3.8
           packages:
           - g++-6
           - qt5-default
           - qttools5-dev-tools
+      script:
+      - ./build_cpp.sh
+      - ./build_cs.sh
     
     - os: osx
       language: csharp
       compiler: clang
+      script:
+      - ./build_cpp.sh
   
     - os: windows
       language: cpp
+      compiler: msc
+      script:
+      - ./build_cpp.sh
   
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
@@ -45,28 +54,28 @@ install:
 - "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
   
 # Build steps
-script:
+#script:
   #- ./build_linux.sh
-  - echo "$CXX"
-  - echo "$TRAVIS_OS_NAME"
-  - ls -lrt
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./build_linux.sh    ; fi
+#  - echo "$CXX"
+#  - echo "$TRAVIS_OS_NAME"
+#  - ls -lrt
+#  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./build_linux.sh    ; fi
   #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cl     ; fi
   #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then csc     ; fi
   #- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then msbuild     ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install qtcreator     ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then qmake -v     ; fi
-  - ls -lrt
+#  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install qtcreator     ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then qmake -v     ; fi
+#  - ls -lrt
   #- cd ..
   #- cd ..
   #- ls -lrt
-  - cd CsLisp
-  - msbuild
-  - msbuild /p:Configuration=Release CsLisp.sln
-  - ls -lrt
-  - cd bin
-  - cd Release
-  - chmod +x fuel.exe
-  - ls -lrt
-  - mono fuel.exe -v
-  - mono fuel.exe -e "(println (platform))"
+#  - cd CsLisp
+#  - msbuild
+#  - msbuild /p:Configuration=Release CsLisp.sln
+#  - ls -lrt
+#  - cd bin
+#  - cd Release
+#  - chmod +x fuel.exe
+#  - ls -lrt
+#  - mono fuel.exe -v
+#  - mono fuel.exe -e "(println (platform))"
