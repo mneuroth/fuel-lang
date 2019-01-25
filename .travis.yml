@@ -50,12 +50,18 @@ matrix:
       - ls -lrt
       #- MsBuild.exe
       - MsBuild.exe CppLisp.sln
-      #- MsBuild.exe /p:Configuration=Release CppLisp.sln
+      - MsBuild.exe CppLisp.sln /p:BuildConfiguration="Debug;Release"
       - cd x64
       #- cd Release
       - cd Debug
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
+      - cd ..
+      - cd Release
+      - ./fuel.exe -v
+      - ./fuel  -e "(println (platform))"
+      - cl 
+      - csc
   
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
