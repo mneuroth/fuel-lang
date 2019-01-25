@@ -46,7 +46,9 @@ matrix:
       - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"      
       script:
       - cd CppLisp
-      - MsBuild.exe CppLisp.sln
+      - ls -lrt
+      - MsBuild.exe
+      #- MsBuild.exe CppLisp.sln
       #- MsBuild.exe /p:Configuration=Release CppLisp.sln
       - cd x64
       #- cd Release
