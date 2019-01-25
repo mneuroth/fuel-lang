@@ -47,8 +47,9 @@ matrix:
       script:
       - export PATH=$MSBUILD_PATH:$PATH
       - cd CppLisp
-      - MsBuild.exe /property:Configuration="Debug" /property:ExcludeFromBuild=Test CppLisp.sln 
-      - MsBuild.exe /property:Configuration="Release" /property:ExcludeFromBuild=Test CppLisp.sln 
+      #- MsBuild.exe /property:Configuration="Debug" /property:ExcludeFromBuild=Test CppLisp.sln 
+      #- MsBuild.exe /property:Configuration="Release" /property:ExcludeFromBuild=Test CppLisp.sln 
+      - MsBuild.exe /property:Configuration="ContinousIntgration" CppLisp.sln       
       #- MsBuild.exe -help
       - cd x64
       #- cd Debug
