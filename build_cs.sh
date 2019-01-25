@@ -1,4 +1,5 @@
 pwd
+ls -lrt
 cd CsLisp
 # msbuild
 msbuild /p:Configuration=Release CsLisp.sln

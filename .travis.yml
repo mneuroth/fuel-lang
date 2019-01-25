@@ -37,12 +37,17 @@ matrix:
       compiler: clang
       script:
       - ./build_cpp.sh
+      - ./build_cs.sh
   
     - os: windows
       language: cpp
       compiler: msc
+      env:
+      - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"      
       script:
-      - ./build_cpp.sh
+      - export PATH=$MSBUILD_PATH:$PATH
+      - ls -lrt /c
+      - msbuild
   
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
