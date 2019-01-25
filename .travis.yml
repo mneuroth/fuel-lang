@@ -45,14 +45,15 @@ matrix:
       env:
       - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"      
       script:
+      - export PATH=$MSBUILD_PATH:$PATH
       - cd CppLisp
       - ls -lrt
-      - MsBuild.exe
+      #- MsBuild.exe
       #- MsBuild.exe CppLisp.sln
-      #- MsBuild.exe /p:Configuration=Release CppLisp.sln
+      - MsBuild.exe /p:Configuration=Release CppLisp.sln
       - cd x64
-      #- cd Release
-      - cd Debug
+      - cd Release
+      #- cd Debug
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
   
