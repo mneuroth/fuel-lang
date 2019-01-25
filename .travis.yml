@@ -57,7 +57,9 @@ matrix:
       - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0"
       - ls -lrt "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin"
       - echo $PATH
-      - msbuild
+      - MsBuild.exe
+      - cd CppLisp
+      - MsBuild.exe /p:Configuration=Release CppLisp.sln
   
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
