@@ -51,8 +51,10 @@ matrix:
       - MsBuild.exe /help
       - MsBuild.exe CppLisp.sln
       - MsBuild.exe /property:Configuration="Debug" CppLisp.sln 
+      - MsBuild.exe /property:Configuration="Release" CppLisp.sln 
       - MsBuild.exe /property:Configuration="Debug;Release" CppLisp.sln 
       - MsBuild.exe /property:BuildConfiguration="Debug;Release" CppLisp.sln 
+      - MsBuild.exe -help
       - cd x64
       #- cd Release
       - cd Debug
