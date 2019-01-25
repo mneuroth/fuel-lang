@@ -48,9 +48,9 @@ matrix:
       - export PATH=$MSBUILD_PATH:$PATH
       - cd CppLisp
       - ls -lrt
-      #- MsBuild.exe
+      - MsBuild.exe /help
       - MsBuild.exe CppLisp.sln
-      - MsBuild.exe CppLisp.sln /p:BuildConfiguration="Debug;Release"
+      - MsBuild.exe /property:BuildConfiguration="Debug;Release" CppLisp.sln 
       - cd x64
       #- cd Release
       - cd Debug
