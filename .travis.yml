@@ -45,16 +45,13 @@ matrix:
       env:
       - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"      
       script:
-      - export PATH=$MSBUILD_PATH:$PATH
-      - echo $PATH
-      - echo $MSBUILD_PATH
-      - echo $PATH
-      - pwd
-      - MsBuild.exe
       - cd CppLisp
-      - MsBuild.exe
-      - MsBuild.exe CppLisp.sln
-      #- MsBuild.exe /p:Configuration=Release CppLisp.sln
+      #- MsBuild.exe CppLisp.sln
+      - MsBuild.exe /p:Configuration=Release CppLisp.sln
+      - cd x64
+      - cd Release
+      - ./fuel.exe -v
+      - ./fuel  -e "(println (platform))"
   
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
