@@ -33,14 +33,11 @@ matrix:
     
     - os: linux
       language: csharp
-      compiler: gcc
+      compiler: mono
       addons:
         apt:
           sources:
           - ubuntu-toolchain-r-test
-          packages:
-          - qt5-default
-          - qttools5-dev-tools
       script:
       - ./build_cs.sh
     
@@ -49,14 +46,14 @@ matrix:
       compiler: clang
       before_install:
       - brew update
-      - brew install
+      - brew install qt
       - export PATH=/usr/local/opt/qt/bin:$PATH
       script:
       - ./build_cpp.sh
   
     - os: osx
       language: csharp
-      compiler: clang
+      compiler: mono
       script:
       - ./build_cs.sh
   
@@ -80,11 +77,6 @@ matrix:
       - cd ContinousIntgration
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
-  
-#before_install:
-#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
-#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt; fi
-#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=/usr/local/opt/qt/bin:$PATH; fi
   
 install:
 - "[ $CXX = g++ ] && export CXX=g++-6 || true"
