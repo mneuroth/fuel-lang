@@ -18,7 +18,7 @@ matrix:
       - ./build_cpp.sh
     
     - os: linux
-      language: csharp
+      language: cpp
       compiler: gcc
       addons:
         apt:
@@ -30,13 +30,34 @@ matrix:
           - qttools5-dev-tools
       script:
       - ./build_cpp.sh
+    
+    - os: linux
+      language: csharp
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - qt5-default
+          - qttools5-dev-tools
+      script:
       - ./build_cs.sh
     
+    - os: osx
+      language: cpp
+      compiler: clang
+      before_install:
+      - brew update
+      - brew install
+      - export PATH=/usr/local/opt/qt/bin:$PATH
+      script:
+      - ./build_cpp.sh
+  
     - os: osx
       language: csharp
       compiler: clang
       script:
-      - ./build_cpp.sh
       - ./build_cs.sh
   
     - os: windows
@@ -60,10 +81,10 @@ matrix:
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
   
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=/usr/local/opt/qt/bin:$PATH; fi
+#before_install:
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=/usr/local/opt/qt/bin:$PATH; fi
   
 install:
 - "[ $CXX = g++ ] && export CXX=g++-6 || true"
