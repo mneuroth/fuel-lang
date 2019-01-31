@@ -1,4 +1,4 @@
-# Multi language build script for cshaarp and c++
+# Multi language build script for csharp and c++
 
 matrix:
   include:
