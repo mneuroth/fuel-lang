@@ -304,6 +304,8 @@ namespace CsLisp
             scope["htmldoc"] = CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format.");
             scope["break"] = CreateFunction(Break, "(break)", "Sets a breakpoint in the code.");
             scope["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
+            scope["delvar"] = CreateFunction(DelVar, "(delvar name)", "Deletes a local variable with the given name and returns a success flag.");
+            scope["need-l-value"] = CreateFunction(NeedLValue, "(need-l-value)", "Returns #t if a l-value is needed as return value of the current function.");
             scope["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
             scope["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
             scope["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
@@ -527,6 +529,22 @@ namespace CsLisp
             scope.DumpVars();
             return new LispVariant();
         }
+
+        private static LispVariant DelVar(object[] args, LispScope scope)
+        {
+            CheckArgs("delvar", 1, args, scope);
+
+            var name = ((LispVariant)args[0]);
+            var ok = scope.Remove(name.ToString());
+            return new LispVariant(ok);
+        }
+
+        private static LispVariant NeedLValue(object[] args, LispScope scope)
+        {
+            CheckArgs("need-l-value", 0, args, scope);
+
+            return new LispVariant(scope.NeedsLValue);
+        }        
 
         private static LispVariant TracePrint(object[] args, LispScope scope)
         {
@@ -1648,6 +1666,7 @@ namespace CsLisp
 
                     // save the current call stack to resolve variables in closures
                     childScope.ClosureChain = scope;
+                    childScope.NeedsLValue = scope.NeedsLValue;     // support setf in recursive calls
 
                     LispVariant ret;
                     try
@@ -1698,7 +1717,15 @@ namespace CsLisp
         private static string GetFormalArgsAsString(object args)
         {
             string result = string.Empty;
-            IEnumerable<object> theArgs = (IEnumerable<object>)args;
+            IEnumerable<object> theArgs = null;
+            if (args is LispVariant)
+            {
+                theArgs = ((LispVariant) args).ListValue;
+            }
+            else
+            {
+                theArgs = (IEnumerable<object>)args;
+            }
             foreach (var s in theArgs)
             {
                 if (result.Length > 0)

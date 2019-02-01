@@ -345,10 +345,8 @@ namespace CsLisp
 
         private static IEnumerable<object> ReplaceFormalArgumentsInExpression(IEnumerable<object> formalArguments, IList<object> astAsList, IEnumerable<object> expression, ref bool anyMacroReplaced)
         {
-// TODO gulp working
-            int i = 1;
-
             // replace (quoted-macro-args) --> '(<real_args>)
+            int i = 1;
             bool replaced = false;
             IEnumerable<object> realArguments = astAsList.Skip(1).ToList();
             List<object> quotedRealArguments = new List<object>() { new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments };

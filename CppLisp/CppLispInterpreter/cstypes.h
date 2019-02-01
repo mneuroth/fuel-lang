@@ -187,6 +187,11 @@ namespace CppLisp
 		{
 			return std::map<K, V>::find(key) != std::map<K, V>::end();
 		}
+
+		inline bool Remove(const K & key)
+		{
+			return std::map<K, V>::erase(key) > 0;
+		}
 	};
 
 	// **********************************************************************

@@ -309,6 +309,22 @@ static std::shared_ptr<LispVariant> Vars(const std::vector<std::shared_ptr<objec
 	return std::make_shared<LispVariant>(LispVariant());
 }
 
+static std::shared_ptr<LispVariant> DelVar(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("delvar", 1, args, scope);
+
+	var name = ((LispVariant)args[0]);
+	var ok = scope->Remove(name.ToString());
+	return std::make_shared<LispVariant>(std::make_shared<object>(ok));
+}
+
+static std::shared_ptr<LispVariant> NeedLValue(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("need-l-value", 0, args, scope);
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(scope->NeedsLValue));
+}
+
 static std::shared_ptr<LispVariant> TracePrint(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	var status = args[0]->ToLispVariantRef();
@@ -1610,6 +1626,7 @@ std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> 
 
 		// save the current call stack to resolve variables in closures
 		childScope->ClosureChain = scope;
+		childScope->NeedsLValue = scope->NeedsLValue;     // support setf in recursive calls
 
 		std::shared_ptr<LispVariant> ret;
 		try
@@ -1663,10 +1680,24 @@ static std::shared_ptr<LispToken> GetTokenBeforeDefn(std::shared_ptr<object> ite
 	return null;
 }
 
+static const IEnumerable<std::shared_ptr<object>> & GetEnumerableFromArgs(std::shared_ptr<object> args)
+{
+	if (args->IsLispVariant())
+	{
+		const LispVariant & tempVal = args->ToLispVariantRef();
+		if (tempVal.IsList())
+		{
+			return tempVal.ListValueRef();
+		}
+	}
+	return args->ToEnumerableOfObjectRef();
+}
+
 static string GetFormalArgsAsString(std::shared_ptr<object> args)
 {
 	string result = string::Empty;
-	const IEnumerable<std::shared_ptr<object>> & theArgs = args->ToEnumerableOfObjectRef();
+	
+	const IEnumerable<std::shared_ptr<object>> & theArgs = GetEnumerableFromArgs(args);
 	for(var s : theArgs)
 	{
 		if (result.size() > 0)
@@ -1947,6 +1978,8 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["htmldoc"] = CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format.");
 	(*scope)["break"] = CreateFunction(Break, "(break)", "Sets a breakpoint in the code.");
 	(*scope)["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
+	(*scope)["delvar"] = CreateFunction(DelVar, "(delvar name)", "Deletes a local variable with the given name and returns a success flag.");
+	(*scope)["need-l-value"] = CreateFunction(NeedLValue, "(need-l-value)", "Returns #t if a l-value is needed as return value of the current function.");
 	(*scope)["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
 	(*scope)["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
     (*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");

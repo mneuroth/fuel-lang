@@ -87,31 +87,30 @@
 
   (define-macro-eval defstruct (name)
     (do
-;; TODO Frage: wie kommt man innerhalb des macros an die formalten argumente (symbole)? --> (macro-argcount), (macro-arg pos) ??? oder statement einschmuggeln mit formalen argumenten ?
-	  ;;(println (arg 0))
-	  ;;(println a)
-	  ;;(println "blub defstruct")
-	  ;;(println (argscount))
-	  (println (quoted-macro-args))
-
-	  ;; support: (type ), (setf ), (debugger support)
-
-;;	  (defn (sym (+ "make-" (str name))) ((nth 0 (quoted-macro-args)) (nth 1 (quoted-macro-args)))
-;;		(list name (arg 0) (arg 1))
-;;	  )
-	  (defn (sym (+ "make-" (str name))) (rest (quoted-macro-args))
-		(+ (list name) (args))
-	  )
-
-	  (defn (sym (+ "is-" (str name) "-p")) (data)
-		(and (== (type data) 6) (== (first data) name))
-	  )
-
-	  (dotimes (i (len (quoted-macro-args)))
-  	    (defn (sym (+ "get-" (str name) "-" (str (nth (+ i 1) (quoted-macro-args))))) (data)
-		  (nth (+ i 1) data)
-	    )
+        
+      (eval 
+	     (list 'defn (sym (+ "make-" name)) (cdr (quoted-macro-args)) 
+            `(list ,(sym (+ "#" name)) ,@(cdr (quoted-macro-args)))
+         )
       )
+
+	  (eval 
+	     (list 'defn (sym (+ "is-" name "-p")) '(data)		 
+            `(and (== (type data) 6) (== (first data) ,(sym (+ "#" name))))
+         )
+	  )
+
+	  (dotimes (__i (- (len (quoted-macro-args)) 1))
+	    (eval
+  			(list 'defn (sym (+ "get-" name "-" (str (nth (+ __i 1) (quoted-macro-args))))) '(data)
+			   `(nth (+ ,__i 1) data)  
+               ;; TODO: handle case when (need-l-value) is #t --> return l-value of struct list
+			)
+        )
+      )
+      
+      ;; remove temporary local variable needed for code generation
+      (delvar '__i)
 	)
   )
 

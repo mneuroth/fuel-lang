@@ -316,10 +316,8 @@ namespace CppLisp
 
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ReplaceFormalArgumentsInExpression(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> formalArguments, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, /*ref*/ bool & anyMacroReplaced)
 	{
-// TODO gulp working
-		int i = 1;
-
 		// replace (quoted-macro-args) --> '(<real_args>)
+		int i = 1;
 		bool replaced = false;
 		IEnumerable<std::shared_ptr<object>> realArguments = astAsList->Skip(1)/*.ToList()*/;
 		IEnumerable<std::shared_ptr<object>> lst;

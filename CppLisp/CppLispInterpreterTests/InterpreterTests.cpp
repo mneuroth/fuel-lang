@@ -126,6 +126,22 @@ namespace QtLispUnitTests
 			Assert::AreEqual("(a b c \"xyz\")", result->ToString().c_str());
 		}
 
+		TEST_METHOD(Test_SetfWithMacros)
+		//[DeploymentItem(@"Library\fuellib.fuel", "Library")]
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (defstruct point x y) (def p (make-point 12 17)) (setf (get-point-x p) 9) (println p))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("(#point 9 17)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_DefstructMacro)
+		//[DeploymentItem(@"Library\fuellib.fuel", "Library")]
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (defstruct point x y) (def p (make-point 12 17)))");
+			Assert::IsTrue(result->IsList());
+			Assert::AreEqual("(#point 12 17)", result->ToString().c_str());
+		}
+
 		TEST_METHOD(Test_QuoteList)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def l '(a b c)))");
@@ -181,6 +197,47 @@ namespace QtLispUnitTests
 			result = Lisp::Eval("(eval 42)");
 			Assert::AreEqual(42, result->ToInt());
 		}
+
+		TEST_METHOD(Test_Eval4)
+        {
+            const string script = "(do  \
+                                      (defn defstructfunc (name)  \
+                                        (do \
+                                          (def structsym (sym (+ \"#\" name))) \
+                                          (list 'defn (sym (+ \"make-\" name)) (cdr (args))  \
+                                              `(list ,structsym ,@(cdr(args))) \
+                                          ) \
+                                        ) \
+                                      ) \
+ \
+                                      (def f (defstructfunc point x y z)) \
+                                      (eval f) \
+                                      (def p (make-point 1 2 3)) \
+                                    )";
+			std::shared_ptr<LispVariant> result = Lisp::Eval(script);
+            Assert::AreEqual(true, result->IsList());
+            Assert::AreEqual("(#point 1 2 3)", result->ToString().c_str());
+        }
+
+		TEST_METHOD(Test_Eval5)
+        {
+            const string script = "(do \
+                                      (defn defsimplefunc ()  \
+                                        (do \
+                                          (list 'defn 'simplefunc '(a b)  \
+                                              '(+ a b) \
+                                          ) \
+                                        ) \
+                                      ) \
+ \
+                                      (def f (defsimplefunc)) \
+                                      (eval f) \
+                                      (def p (simplefunc 1 2))  \
+                                    )";
+			std::shared_ptr<LispVariant> result = Lisp::Eval(script);
+            Assert::AreEqual(true, result->IsInt());
+            Assert::AreEqual("3", result->ToString().c_str());
+        }
 
 		TEST_METHOD(Test_EvalStr)
 		{
@@ -659,27 +716,53 @@ namespace QtLispUnitTests
 #endif
 		}
 
-              		TEST_METHOD(Test_MacrosExpandDefineStruct)
+        TEST_METHOD(Test_MacrosExpandDefineStruct)
 		{
-			const string macroExpandScript = "(do \
-  (define-macro-expand defstruct (name field1) \
-        (do            \
+			const string macroExpandScript = "(do\
+  (define-macro-eval dotimes (counterinfo statements)\
+      (do\
+        (def (first 'counterinfo) 0)\
+        (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))\
+          (do\
+             (eval 'statements)\
+             (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))\
+          )\
+        )\
+      )\
+  )\
  \
-	       (defn (sym (+ (str make-) (str name))) ((sym field1) (nth 2 (quoted-macro-args))) \
-              (list (arg 0) (arg 1)) \
-	       ) \
+    (define-macro-eval defstruct (name) \
+    (do \
  \
-    	   (println 'a (nth 1 (quoted-macro-args)) (nth 2 (quoted-macro-args))) \
-        ) \
-  ) \
-    \
-  (defstruct point x y) \
-  (def p (make-point 2 3)) \
+      (eval\
+         (list 'defn (sym (+ \"make-\" name)) (cdr (quoted-macro-args)) \
+                  `(list ,(sym (+ \"#\" name)) ,@(cdr(quoted-macro-args))) \
+         )\
+      )\
+ \
+	  (eval\
+         (list 'defn (sym (+ \"is-\" name \"-p\")) '(data)	\
+            `(and(== (type data) 6) (== (first data) ,(sym (+ \"#\" name)))) \
+         ) \
+	  )\
+ \
+	  (dotimes (i (- (len (quoted-macro-args)) 1)) \
+        (eval\
+              (list 'defn (sym (+ \"get-\" name \"-\" (str (nth (+ i 1) (quoted-macro-args))))) '(data) \
+			     `(nth (+ ,i 1) data) \
+            )\
+        )\
+      )\
+	)\
+  )\
+  \
+  (defstruct point x y)\
+  (def p (make-point 2 3))\
 )";
 #ifdef ENABLE_COMPILE_TIME_MACROS
 					{
 						std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
-						Assert::AreEqual("(2 3)", result->ToString().c_str());
+						Assert::AreEqual("(#point 2 3)", result->ToString().c_str());
 					}
 #else
 					{
@@ -923,8 +1006,8 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_String1)
 		{
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(println \"hello \\\\ \\' öäü \n \\\"blub\\\"\")");
-			Assert::AreEqual("hello \\ ' öäü \n \"blub\"", result->ToString().c_str());
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(println \"hello \\\\ \\' Ã¶Ã¤Ã¼ \n \\\"blub\\\"\")");
+			Assert::AreEqual("hello \\ ' Ã¶Ã¤Ã¼ \n \"blub\"", result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_String2)
@@ -960,7 +1043,7 @@ namespace QtLispUnitTests
 		TEST_METHOD(Test_Closure2)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn g (x) (do (+ x 2))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
-			Assert::AreEqual(13, result->	ToInt());
+			Assert::AreEqual(13, result->ToInt());
 		}
 
 		TEST_METHOD(Test_Closure3)
@@ -2059,6 +2142,34 @@ namespace QtLispUnitTests
 			Assert::IsTrue(result->IsUndefined());
 		}
 	
+		TEST_METHOD(Test_DelVar1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 8) (delvar 'a))");
+			Assert::IsTrue(result->IsBool());
+			Assert::AreEqual(true, result->ToBool());
+		}
+
+		TEST_METHOD(Test_DelVar2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 8) (delvar 'b))");
+			Assert::IsTrue(result->IsBool());
+			Assert::AreEqual(false, result->ToBool());
+		}
+
+		TEST_METHOD(Test_NeedLValue1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 7) (defn test () (do (println (need-l-value)) (return 'a))) (setf (test) 8) (println a))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("8", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_NeedLValue2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 7) (defn test () (need-l-value)) (println (test)))");
+			Assert::IsTrue(result->IsString());
+			Assert::AreEqual("#f", result->ToString().c_str());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects

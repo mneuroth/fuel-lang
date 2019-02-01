@@ -129,7 +129,7 @@ namespace CppLisp
 			//foreach (var item in Tokens)
 			for (std::shared_ptr<LispToken> item : Tokens)
 			{
-				if (*item == *token)
+				if ((token.get() != 0) && (*item == *token))
 				{
 					return previous;
 				}

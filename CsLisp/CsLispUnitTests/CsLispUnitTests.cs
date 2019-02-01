@@ -131,6 +131,24 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
+        public void Test_SetfWithMacros()
+        {
+            LispVariant result = Lisp.Eval("(do (import fuellib) (defstruct point x y) (def p (make-point 12 17)) (setf (get-point-x p) 9) (println p))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("(#point 9 17)", result.ToString());
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Library\fuellib.fuel", "Library")]
+        public void Test_DefstructMacro()
+        {
+            LispVariant result = Lisp.Eval("(do (import fuellib) (defstruct point x y) (def p (make-point 12 17)))");
+            Assert.IsTrue(result.IsList);
+            Assert.AreEqual("(#point 12 17)", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_QuoteList()
         {
             LispVariant result = Lisp.Eval("(do (def a 1) (def l '(a b c)))");
@@ -193,6 +211,49 @@ namespace LispUnitTests
             Assert.AreEqual(true, result.ToBool());
             result = Lisp.Eval("(eval 42)");
             Assert.AreEqual(42, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_Eval4()
+        {
+            const string script = @"(do 
+                                      (defn defstructfunc (name) 
+                                        (do
+                                          (def structsym (sym (+ ""#"" name)))
+                                          (list 'defn (sym (+ ""make-"" name)) (cdr (args)) 
+                                              `(list ,structsym ,@(cdr(args)))
+                                          )
+                                        )
+                                      )
+
+                                      (def f (defstructfunc point x y z))
+                                      (eval f)
+                                      (def p (make-point 1 2 3))                                      
+                                    )";
+            LispVariant result = Lisp.Eval(script);
+            Assert.AreEqual(true, result.IsList);
+            Assert.AreEqual("(#point 1 2 3)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Eval5()
+        {
+            const string script = @"(do 
+                                      (defn defsimplefunc () 
+                                        (do
+                                          (list 'defn 'simplefunc '(a b) 
+                                              '(+ a b)
+                                          )
+                                        )
+                                      )
+
+                                      (def f (defsimplefunc))
+                                      (eval f)
+                                      (def p (simplefunc 1 2))                                      
+                                    )";
+            LispVariant result = Lisp.Eval(script);
+            Assert.AreEqual(true, result.IsInt);
+            Assert.AreEqual("3", result.ToString());
         }
 
         [TestMethod]
@@ -703,19 +764,41 @@ namespace LispUnitTests
         public void Test_MacrosExpandDefineStruct()
         {
             const string macroExpandScript = @"(do
-  (define-macro-expand defstruct (name field1)
-        (do            
-; (quoted-macro-args) --> '(<formal-args>)
-; (macro-args-len) --> arg count --> REPLACE --> (len '(<formal-args>))
-; (macro-args 0) --> arg[0] --> REPLACE --> (nth 0 '(<formal-args>))
-
-	      (defn (sym (+ (str make-) (str name))) ((sym field1) (nth 2 (quoted-macro-args)))
-            ;;(list (eval (nth 1 (quoted-macro-args))) (eval (nth 2 (quoted-macro-args))))
-            (list (arg 0) (arg 1))
-	      )
-
-    	   (println 'a (nth 1 (quoted-macro-args)) (nth 2 (quoted-macro-args)))
+  (define-macro-eval dotimes (counterinfo statements)
+      (do
+        (def (first 'counterinfo) 0)
+        (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))
+          (do
+             (eval 'statements)
+             (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))
+          )
         )
+      )
+  )
+
+    (define-macro-eval defstruct (name)
+    (do
+        
+      (eval
+         (list 'defn (sym (+ ""make-"" name)) (cdr (quoted-macro-args)) 
+                  `(list ,(sym (+ ""#"" name)) ,@(cdr(quoted-macro-args)))
+         )
+      )
+
+	  (eval
+         (list 'defn (sym (+ ""is-"" name ""-p"")) '(data)		 
+            `(and(== (type data) 6) (== (first data) ,(sym (+ ""#"" name))))
+         )
+	  )
+
+	  (dotimes (i (- (len (quoted-macro-args)) 1))
+        (eval
+              (list 'defn (sym (+ ""get-"" name ""-"" (str (nth (+ i 1) (quoted-macro-args))))) '(data)
+			     `(nth (+ ,i 1) data)
+            )
+        )
+      )
+	)
   )
   
   (defstruct point x y)
@@ -724,7 +807,7 @@ namespace LispUnitTests
             if (LispUtils.IsCompileTimeMacroEnabled)
             {
                 LispVariant result = Lisp.Eval(macroExpandScript);
-                Assert.AreEqual("(2 3)", result.ToString());
+                Assert.AreEqual("(#point 2 3)", result.ToString());
             }
             else
             {
@@ -2102,6 +2185,38 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(do (float \"a text\"))");
             Assert.IsTrue(result.IsUndefined);
+        }
+
+        [TestMethod]
+        public void Test_DelVar1()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 8) (delvar 'a))");
+            Assert.IsTrue(result.IsBool);
+            Assert.AreEqual(true, result.ToBool());
+        }
+
+        [TestMethod]
+        public void Test_DelVar2()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 8) (delvar 'b))");
+            Assert.IsTrue(result.IsBool);
+            Assert.AreEqual(false, result.ToBool());
+        }
+
+        [TestMethod]
+        public void Test_NeedLValue1()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 7) (defn test () (do (println (need-l-value)) (return 'a))) (setf (test) 8) (println a))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("8", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_NeedLValue2()
+        {
+            LispVariant result = Lisp.Eval("(do (def a 7) (defn test () (need-l-value)) (println (test)))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("#f", result.ToString());
         }
     }
 }
