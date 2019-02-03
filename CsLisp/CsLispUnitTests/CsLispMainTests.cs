@@ -89,7 +89,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new string[0];
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.StartsWith(Lisp.Name));
             }
@@ -102,20 +102,9 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "simple.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.StartsWith("hello world !"));
-            }
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"..\..\..\Scripts\simple.fuel")]
-        public void Test_DummyMainFile()
-        {
-            using (ConsoleRedirector cr = new ConsoleRedirector())
-            {
-                var args = new[] { "simple.fuel" };
-                Assert.IsTrue(true);
             }
         }
 
@@ -126,7 +115,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "error.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Error executing script"));
                 Assert.IsTrue(s.Contains("printx"));
@@ -141,7 +130,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-x", "error.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Error executing script"));
                 Assert.IsTrue(s.Contains("printx"));
@@ -157,7 +146,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-h" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.StartsWith(Lisp.Name));
             }
@@ -169,7 +158,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-v" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.StartsWith(Lisp.ProgramName + " " + Lisp.Version + " from " + Lisp.Date));
             }
@@ -181,7 +170,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(print (+ 1 2))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s == "3");
             }
@@ -193,7 +182,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(println \"hello world\") (println \"done.\")" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("hello world"));
                 Assert.IsTrue(s.Contains("done"));
@@ -206,7 +195,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
             {
                 var args = new[] { "-i" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains(@".\Library\fuellib.fuel"));
                 Assert.IsTrue(s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=.\Library\fuellib.fuel"));
@@ -219,7 +208,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector("doc\ndoc if"))
             {
                 var args = new[] { "-i" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains(@"doc --> (doc functionname ...)"));
                 Assert.IsTrue(s.Contains(@"Returns and shows the documentation of all builtin functions or for the given function name(s)."));
@@ -233,7 +222,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector("searchdoc arg"))
             {
                 var args = new[] { "-i" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains(@"Syntax: (argscount)"));
                 Assert.IsTrue(s.Contains(@"Syntax: (args)"));
@@ -248,7 +237,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "multiprintln.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("hello\nworld\ndone."));
             }
@@ -262,7 +251,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "writereadfile.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("exists file =  #t"));
                 Assert.IsTrue(s.Contains("test non existing file =  #f"));
@@ -278,7 +267,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] {"teststdlib.fuel"};
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("DictCount= 2"));
                 Assert.IsTrue(s.Contains("NewDictCount= 0"));
@@ -286,7 +275,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains(@"File= .\FuelCompiler.dll"));
                 Assert.IsTrue(s.Contains(@"File= .\FuelDebugger.dll"));
                 Assert.IsTrue(s.Contains(@"File= .\FuelInterpreter.dll"));
-                Assert.IsTrue(s.Contains(@"File= .\fuel.exe"));
+                //Assert.IsTrue(s.Contains(@"File= .\fuel.exe"));
                 Assert.IsTrue(s.Contains(@"File= .\teststdlib.fuel"));
                 Assert.IsTrue(s.Contains("ListCount= 4"));
                 Assert.IsTrue(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
@@ -308,7 +297,7 @@ namespace LispUnitTests
             using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
             {
                 var args = new[] { "-c", "simple.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 Assert.IsTrue(File.Exists("simple.fuel.exe"));
             }
         }
@@ -320,7 +309,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-m", "simple.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Execution time ="));
             }
@@ -333,7 +322,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-t", "simple.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("--> do"));
                 Assert.IsTrue(s.Contains("--> print"));
@@ -347,7 +336,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-s", "simple.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("public static void Main(string[] args)"));
             }
@@ -363,7 +352,7 @@ namespace LispUnitTests
             using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
             {
                 var args = new[] { "-c", "controlflow.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 Assert.IsTrue(File.Exists("controlflow.fuel.exe"));
             }
         }
@@ -374,7 +363,7 @@ namespace LispUnitTests
             using (var cr = new ConsoleRedirector("help\nfuncs\nbuiltins\nq\n"))
             {
                 var args = new[] { "-i" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
 
                 string result = cr.ToString();
                 TestContext.WriteLine("Result=" + result);
@@ -398,7 +387,7 @@ namespace LispUnitTests
                     (print (* 3 4 5)))";
 
                 var args = new[] { "-d", "-e", script };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("DBG>"));
                 Assert.IsTrue(s.Contains("Type \"help\" for informations."));
@@ -419,7 +408,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout"))
             {
                 var args = new[] { "-d", "testdebugger.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG>                    x --> 4                                        : Int "));
                 Assert.IsTrue(s.Contains("       1 name=<main>                              lineno=11   module=testdebugger.fuel"));
@@ -444,7 +433,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector("b \"module name\":4 (== a 4)\nlist"))
             {
                 var args = new[] { "-d", "simple.fuel" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("#1   line=4     module=module name               condition=(== a 4)"));
             }
@@ -458,7 +447,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector("b .\\testmodule.fuel:4\nlist\nr\nk\nl"))
             {
                 var args = new[] { "-d", "test.fuel", "-l=." };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
                 Assert.IsTrue(s.Contains("#1   line=4     module=.\\testmodule.fuel         condition="));
@@ -474,7 +463,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "--doc" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("lambda"));
                 Assert.IsTrue(s.Contains("Syntax: (lambda (arguments) block)"));
@@ -489,7 +478,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(print ( (+ 1 2))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Brackets out of balance --> line=2 start=17 stop=18 module="));
             }
@@ -501,7 +490,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "dummy (print (+ 1 2))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("List expected in do --> line=1 start=0 stop=5 module="));
             }
@@ -513,7 +502,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(unknown-fcn (+ 1 2))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Function \"unknown-fcn\" not found --> line=1 start=1 stop=12"));
             }
@@ -525,7 +514,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(setf a 5)" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Symbol a not found --> line=1 start=1 stop=5"));
             }
@@ -537,7 +526,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(do (print 3) 5)" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("List expected in do --> line=1 start=13 stop=15"));
             }
@@ -549,7 +538,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(do (print 3) (defn x))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Bad argument count in def, has 1 expected 3 --> line=1 start=15 stop=19"));
             }
@@ -561,7 +550,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(do (print 3) (map 3 '(1 2 3)))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("No function in map --> line=1 start=15 stop=18"));
             }
@@ -573,7 +562,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(do (print 3) (map (lambda (x) (print x)) 3))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("No list in map --> line=1 start=40 stop=40"));
             }
@@ -585,7 +574,7 @@ namespace LispUnitTests
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
                 var args = new[] { "-e", "(do (print 3) (def 4 \"test\"))" };
-                Fuel.Main(args);
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("Symbol expected --> line=1 start=15 stop=18"));
             }

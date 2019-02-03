@@ -24,6 +24,7 @@
  * */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using CsLisp;
@@ -2099,7 +2100,7 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(do (% 7.4 2.8))");
             Assert.IsTrue(result.IsDouble);
-            Assert.AreEqual("1,8", result.DoubleValue.ToString());
+            Assert.AreEqual("1.8", result.DoubleValue.ToString(CultureInfo.InvariantCulture));
         }
 
         [TestMethod]

@@ -57,6 +57,7 @@
     <Compile Include="LispException.cs" />
     <Compile Include="Lisp.cs" />
     <Compile Include="LispInterpreter.cs" />
+    <Compile Include="LispMainHelper.cs" />
     <Compile Include="LispParser.cs" />
     <Compile Include="LispScope.cs" />
     <Compile Include="LispStopDebuggerException.cs" />
