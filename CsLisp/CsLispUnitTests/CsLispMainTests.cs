@@ -109,6 +109,17 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"..\..\..\Scripts\simple.fuel")]
+        public void Test_DummyMainFile()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "simple.fuel" };
+                Assert.IsTrue(true);
+            }
+        }
+
+        [TestMethod]
         [DeploymentItem(@"..\..\..\Scripts\error.fuel")]
         public void Test_MainFileError()
         {
