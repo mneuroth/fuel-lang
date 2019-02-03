@@ -2,6 +2,7 @@
 #include <QtTest>
 
 #include "../CppLispInterpreter/Variant.h"
+#include "../CppLispInterpreter/Lisp.h"
 
 using namespace CppLisp;
 
@@ -20,6 +21,22 @@ private Q_SLOTS:
     void testVariantEqualOp();
     void testVariantCastError();
     void testStringIndexOf();
+    void Test_Comments();
+    void Test_DoAndPrint();
+    void Test_PrintLnMultilines();
+    void Test_PrintTrace();
+    void Test_If1();
+    void Test_If2();
+    void Test_If3();
+    void Test_If4();
+    void Test_If5();
+    void Test_Setf1();
+    void Test_SetfWithNth();
+    void Test_SetfWithFirst();
+    void Test_SetfWithLast();
+    void Test_SetfWithMacros();
+    void Test_DefstructMacro();
+    void Test_QuoteList();
 };
 
 QtLispInterpreterUnitTestsTest::QtLispInterpreterUnitTestsTest()
@@ -124,6 +141,108 @@ void QtLispInterpreterUnitTestsTest::testStringIndexOf()
     QVERIFY((size_t)4 == target.IndexOf("def", ""));
     ///*size_t st =*/ target.IndexOf("test", "");
     QVERIFY(std::string::npos == target.IndexOf("test", "nix"));
+}
+
+void QtLispInterpreterUnitTestsTest::Test_Comments()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\") ; a comment\n(println; separate lists with comments\n\"world\"));comment in last line");
+    QVERIFY(QString("world") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_DoAndPrint()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\")\n (println \"world\"))");
+    QVERIFY(QString("world") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_PrintLnMultilines()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\nworld\"))");
+    QVERIFY(QString("hello\nworld") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_PrintTrace()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))");
+    QVERIFY(QString("hello world17") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_If1()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(if #t (+ 1 2) (- 3 5))");
+    QVERIFY(3 == result->ToInt());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_If2()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(if #f (* 1 0) (/ 6 3))");
+    QVERIFY(2 == result->ToInt());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_If3()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1 0)");
+    QVERIFY(1 == result->ToInt());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_If4()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(if false 1 0)");
+    QVERIFY(0 == result->ToInt());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_If5()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(if true 1)");
+    QVERIFY(1 == result->ToInt());
+    result = Lisp::Eval("(if false 1)");
+    QVERIFY(result.get() == 0);
+}
+
+void QtLispInterpreterUnitTestsTest::Test_Setf1()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (setf (first (list 'a 'b 'c)) 9))");
+    QVERIFY(9 == result->ToInt());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_SetfWithNth()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c d)) (setf (nth 2 l) 9) (print l))");
+    QVERIFY(QString("(a b 9 d)") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_SetfWithFirst()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c d)) (setf (first l) 21) (print l))");
+    QVERIFY(QString("(21 b c d)") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_SetfWithLast()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c d)) (setf (last l) \"xyz\") (print l))");
+    QVERIFY(QString("(a b c \"xyz\")") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_SetfWithMacros()
+//[DeploymentItem(@"Library\fuellib.fuel", "Library")]
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (defstruct point x y) (def p (make-point 12 17)) (setf (get-point-x p) 9) (println p))");
+    QVERIFY(result->IsString());
+    QVERIFY(QString("(#point 9 17)") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_DefstructMacro()
+//[DeploymentItem(@"Library\fuellib.fuel", "Library")]
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (defstruct point x y) (def p (make-point 12 17)))");
+    QVERIFY(result->IsList());
+    QVERIFY(QString("(#point 12 17)") == result->ToString().c_str());
+}
+
+void QtLispInterpreterUnitTestsTest::Test_QuoteList()
+{
+    std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def l '(a b c)))");
+    QVERIFY(QString("(a b c)") == result->ToString().c_str());
 }
 
 QTEST_APPLESS_MAIN(QtLispInterpreterUnitTestsTest)
