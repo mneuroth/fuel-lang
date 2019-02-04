@@ -27,8 +27,8 @@ private Q_SLOTS:
     {
         qDebug("INIT fuel unit tests.");
         QDir aCurrentDir(".");
-        aCurrentDir.mkpath("./library");
-        QFile::copy(":/fuellib.fuel", "./library/fuellib.fuel");
+        aCurrentDir.mkpath("./Library");
+        QFile::copy(":/fuellib.fuel", "./Library/fuellib.fuel");
     }
 
     void testCreateVariant();
@@ -2010,6 +2010,226 @@ private Q_SLOTS:
         QVERIFY(result->IsString());
         QCOMPARE("this is an long text with an lot of words a", result->StringValue().c_str());
     }
+
+    void Test_UnaryMinusInt()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 8) (- a))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(-8, result->IntValue());
+    }
+
+    void Test_UnaryMinusDouble()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1.234) (- a))");
+        QVERIFY(result->IsDouble());
+        QCOMPARE(-1.234, result->DoubleValue());
+    }
+
+    void Test_UnaryMinusString()
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a \"nix\") (- a))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_ModuloInt()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (% 7 3))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(1, result->IntValue());
+    }
+
+    void Test_ModuloDouble()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (% 7.4 2.8))");
+        QVERIFY(result->IsDouble());
+        QCOMPARE("1.800000", std::to_string(result->DoubleValue()).c_str());
+    }
+
+    void Test_NotEnoughFunctionArguments()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x y z) (add (str x) (str y) (str z))) (f 3))");
+        QVERIFY(result->IsString());
+        QCOMPARE("3NILNIL", result->StringValue().c_str());
+    }
+
+    void Test_IntConversion1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int 7.4))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(7, result->IntValue());
+    }
+
+    void Test_IntConversion2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int \"61.234\"))");
+        QVERIFY(result->IsUndefined());
+    }
+
+    void Test_IntConversion3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int #t))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(1, result->IntValue());
+    }
+
+    void Test_IntConversion4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int #f))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(0, result->IntValue());
+    }
+
+    void Test_IntConversion5()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (int \"a text\"))");
+        QVERIFY(result->IsUndefined());
+    }
+
+    void Test_FloatConversion1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float 7))");
+        QVERIFY(result->IsDouble());
+        QCOMPARE(7.0, result->DoubleValue());
+    }
+
+    void Test_FloatConversion2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float \"61.234\"))");
+        QVERIFY(result->IsDouble());
+        QCOMPARE(61.234, result->DoubleValue());
+    }
+
+    void Test_FloatConversion3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float #t))");
+        QVERIFY(result->IsDouble());
+        QCOMPARE(1.0, result->DoubleValue());
+    }
+
+    void Test_FloatConversion4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float #f))");
+        QVERIFY(result->IsDouble());
+        QCOMPARE(0.0, result->DoubleValue());
+    }
+
+    void Test_FloatConversion5()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (float \"a text\"))");
+        QVERIFY(result->IsUndefined());
+    }
+
+    void Test_DelVar1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 8) (delvar 'a))");
+        QVERIFY(result->IsBool());
+        QCOMPARE(true, result->ToBool());
+    }
+
+    void Test_DelVar2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 8) (delvar 'b))");
+        QVERIFY(result->IsBool());
+        QCOMPARE(false, result->ToBool());
+    }
+
+    void Test_NeedLValue1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 7) (defn test () (do (println (need-l-value)) (return 'a))) (setf (test) 8) (println a))");
+        QVERIFY(result->IsString());
+        QCOMPARE("8", result->ToString().c_str());
+    }
+
+    void Test_NeedLValue2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 7) (defn test () (need-l-value)) (println (test)))");
+        QVERIFY(result->IsString());
+        QCOMPARE("#f", result->ToString().c_str());
+    }
+
+    // TODO / NOT IMPLEMENTED:
+    // Test_CreateNative
+    // Test_RegisterNativeObjects
+    // Test_StdLibArray
+    // Test_StdLibDictionary
+    // Test_StdLibFile
+    // Test_StdLibList
+    // Test_StdLibListSort
+    // Test_StdLibMath
+    // Test_StdLibMath2
+
+    // TODO --> open points:
+    // compare functions in lisp available ? --> (== f g) where f and g are functions: (defn f (x) (+ x x))
+
+    // ***************************************************
+
+    void Test_SingleParserEmptyCode()
+    {
+        std::shared_ptr<object> result = LispParser::Parse("()");
+        QVERIFY(result.get() != 0);
+        QVERIFY(result->IsList());
+        QCOMPARE((size_t)0, result->ToList()->size());
+    }
+
+    void Test_SingleParser1()
+    {
+        std::shared_ptr<object> result = LispParser::Parse("(print 1 2.54 \"string\")");
+        QVERIFY(result.get() != 0);
+        QVERIFY(result->IsList());
+        var resultAsArray = result->ToEnumerableOfObjectRef();
+        QCOMPARE((size_t)4, resultAsArray.size());
+
+        var value = resultAsArray[0]->ToLispVariant();
+        QVERIFY(value->IsSymbol());
+        QCOMPARE("print", value->Value->ToString().c_str());
+        value = resultAsArray[1]->ToLispVariant();
+        QVERIFY(value->IsInt());
+        QCOMPARE(1, (int)*(value->Value));
+        value = resultAsArray[2]->ToLispVariant();
+        QVERIFY(value->IsDouble());
+        QCOMPARE(2.54, (double)*(value->Value));
+        value = resultAsArray[3]->ToLispVariant();
+        QVERIFY(value->IsString());
+        QCOMPARE("string", value->Value->ToString().c_str());
+    }
+
+    void Test_SingleParser2()
+    {
+        std::shared_ptr<object> result = LispParser::Parse("(do (print #t 2.54 \"string\"))");
+        QVERIFY(result.get() != 0);
+        QVERIFY(result->IsList());
+        var resultAsArrayDo = result->ToEnumerableOfObjectRef();
+        QCOMPARE((size_t)2, resultAsArrayDo.size());
+
+        var value = resultAsArrayDo[0]->ToLispVariant();
+        QVERIFY(value->IsSymbol());
+        QCOMPARE("do", value->Value->ToString().c_str());
+
+        var listValue = resultAsArrayDo[1]->ToList();
+        var resultAsArray = listValue->ToArray();
+        value = resultAsArray[1]->ToLispVariant();
+        QVERIFY(value->IsBool());
+        QCOMPARE(true, (bool)*(value->Value));
+        value = resultAsArray[2]->ToLispVariant();
+        QVERIFY(value->IsDouble());
+        QCOMPARE(2.54, (double)*(value->Value));
+        value = resultAsArray[3]->ToLispVariant();
+        QVERIFY(value->IsString());
+        QCOMPARE("string", value->Value->ToString().c_str());
+    }
+
+    // ***************************************************
 
     void cleanupTestCase()
     {
