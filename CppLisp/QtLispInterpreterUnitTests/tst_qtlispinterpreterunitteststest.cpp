@@ -561,6 +561,415 @@ private Q_SLOTS:
         QCOMPARE(9, result->ToInt());
     }
 
+    void Test_MacrosEvaluateNested()
+    {
+        const string macroExpandScript = "(do\
+        (define-macro-eval first-macro\
+            (a b)\
+            (do\
+                (println first-macro)\
+                (def i 1)\
+                (+ a b i)\
+            )\
+        )\
+\
+        (define-macro-eval second-macro\
+            (x y)\
+            (do\
+                (println second-macro)\
+                (* x y (first-macro (+ x 1) (+ y 2)))\
+            )\
+        )\
+\
+        (def m (second-macro 4 3))\
+    )";
+
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+            QCOMPARE("132", result->ToString().c_str());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("first-macro"));
+            QVERIFY(s.Contains("second-macro"));
+        }
+    }
+
+    void Test_MacrosEvaluateRecursive()
+    {
+        const string macroExpandScript = "(do\
+        (define-macro-eval first-macro\
+            (a b)\
+            (do\
+                (println first-macro)\
+                (def i 1)\
+                (+ a b i)\
+            )\
+        )\
+\
+        (define-macro-eval second-macro\
+            (x y)\
+            (do\
+                (println second-macro)\
+                (* x y (first-macro x (+ y 4)))\
+            )\
+        )\
+\
+        (def m (second-macro 4 3))\
+    )";
+
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+            QCOMPARE("144", result->ToString().c_str());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("first-macro"));
+            QVERIFY(s.Contains("second-macro"));
+        }
+    }
+
+    void Test_MacrosEvaluateDoubleMacroCall()
+    {
+        const string macroExpandScript = "(do\
+        (define-macro-eval first-macro\
+            (a b)\
+            (do\
+                (println first-macro)\
+                (def i 1)\
+                (+ a b i)\
+            )\
+        )\
+\
+        (define-macro-eval second-macro\
+            (x y)\
+            (do\
+                (println second-macro)\
+                (* x y)\
+            )\
+        )\
+\
+        (def m (second-macro 4 (first-macro 6 3)))\
+    )";
+
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+            QCOMPARE("40", result->ToString().c_str());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("first-macro"));
+            QVERIFY(s.Contains("second-macro"));
+        }
+    }
+
+    void Test_MacrosExpand1()
+    {
+#ifdef ENABLE_COMPILE_TIME_MACROS
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (define-macro-expand blub (x y) (println x y)) (println (quote (1 2 3))) (blub 3 4))");
+        QCOMPARE("3 4", result->ToString().c_str());
+#else
+        QVERIFY(true);
+#endif
+    }
+
+    void Test_MacrosExpand2()
+    {
+        const string macroExpandScript = "(do\
+            (define-macro-expand first-macro\
+                (a b)\
+                (do\
+                    (def i 1)\
+                    (+ a b i)\
+                )\
+            )\
+\
+            (define-macro-expand second-macro\
+                (x y)\
+                (do\
+                    (* x y (first-macro x y))\
+                )\
+            )\
+\
+            (def m (second-macro 4 3))\
+        )";
+#ifdef ENABLE_COMPILE_TIME_MACROS
+        std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+        QCOMPARE("96", result->ToString().c_str());
+#else
+        QVERIFY(true);
+#endif
+    }
+
+    void Test_MacrosExpandDefineStruct()
+    {
+        const string macroExpandScript = "(do\
+(define-macro-eval dotimes (counterinfo statements)\
+  (do\
+    (def (first 'counterinfo) 0)\
+    (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))\
+      (do\
+         (eval 'statements)\
+         (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))\
+      )\
+    )\
+  )\
+)\
+\
+(define-macro-eval defstruct (name) \
+(do \
+\
+  (eval\
+     (list 'defn (sym (+ \"make-\" name)) (cdr (quoted-macro-args)) \
+              `(list ,(sym (+ \"#\" name)) ,@(cdr(quoted-macro-args))) \
+     )\
+  )\
+\
+  (eval\
+     (list 'defn (sym (+ \"is-\" name \"-p\")) '(data)	\
+        `(and(== (type data) 6) (== (first data) ,(sym (+ \"#\" name)))) \
+     ) \
+  )\
+\
+  (dotimes (i (- (len (quoted-macro-args)) 1)) \
+    (eval\
+          (list 'defn (sym (+ \"get-\" name \"-\" (str (nth (+ i 1) (quoted-macro-args))))) '(data) \
+             `(nth (+ ,i 1) data) \
+        )\
+    )\
+  )\
+)\
+)\
+\
+(defstruct point x y)\
+(def p (make-point 2 3))\
+)";
+#ifdef ENABLE_COMPILE_TIME_MACROS
+                {
+                    std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
+                    QCOMPARE("(#point 2 3)", result->ToString().c_str());
+                }
+#else
+                {
+                    QVERIFY(true);
+                }
+#endif
+    }
+
+    void Test_MacrosExpandNested()
+    {
+        const string macroExpandScript = "(do\
+            (define-macro-expand first-macro\
+                (a b)\
+                (do\
+                    (println first-macro)\
+                    (def i 1)\
+                    (+ a b i)\
+                )\
+            )\
+\
+            (define-macro-expand second-macro\
+                (x y)\
+                (do\
+                    (println second-macro)\
+                        (* x y (first-macro (+ x 1) (+ y 2)))\
+                    )\
+                )\
+\
+            (def m (second-macro 4 3))\
+        )";
+
+#ifdef ENABLE_COMPILE_TIME_MACROS
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+            QCOMPARE("132", result->ToString().c_str());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("first-macro"));
+            QVERIFY(s.Contains("second-macro"));
+        }
+#else
+        QVERIFY(true);
+#endif
+    }
+
+    void Test_MacrosExpandRecursive()
+    {
+        const string macroExpandScript = "(do\
+            (define-macro-expand first-macro\
+                (a b)\
+                (do\
+                    (println first-macro)\
+                    (def i 1)\
+                    (+ a b i)\
+                )\
+            )\
+\
+            (define-macro-expand second-macro\
+                (x y)\
+                (do\
+                    (println second-macro)\
+                    (* x y (first-macro x (+ y 4)))\
+                )\
+            )\
+\
+            (def m (second-macro 4 3))\
+        )";
+
+#ifdef ENABLE_COMPILE_TIME_MACROS
+            //using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var scope = LispEnvironment::CreateDefaultScope();
+                scope->Output->EnableToString(true);
+                std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+                QCOMPARE("144", result->ToString().c_str());
+
+                string s = scope->Output->GetContent().Trim();
+                QVERIFY(s.Contains("first-macro"));
+                QVERIFY(s.Contains("second-macro"));
+            }
+#else
+            QVERIFY(true);
+#endif
+    }
+
+    void Test_MacrosExpandDoubleMacroCall()
+    {
+        const string macroExpandScript = "(do\
+            (define-macro-expand first-macro\
+                (a b)\
+                (do\
+                    (println first-macro)\
+                    (def i 1)\
+                    (+ a b i)\
+                )\
+            )\
+\
+            (define-macro-expand second-macro\
+                (x y)\
+                (do\
+                    (println second-macro)\
+                    (* x y)\
+                )\
+            )\
+\
+            (def m (second-macro 4 (first-macro 6 3)))\
+        )";
+
+#ifdef ENABLE_COMPILE_TIME_MACROS
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript, scope);
+            QCOMPARE("40", result->ToString().c_str());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("first-macro"));
+            QVERIFY(s.Contains("second-macro"));
+        }
+#else
+        QVERIFY(true);
+#endif
+    }
+
+    void Test_MacrosSetf1()
+    {
+#ifdef ENABLE_COMPILE_TIME_MACROS
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result =
+                Lisp::Eval(
+                    "(do (def a 42) (define-macro-expand my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))", scope);
+            QCOMPARE("blubxyz", result->ToString().c_str());
+        }
+#else
+        QVERIFY(true);
+#endif
+    }
+
+    void Test_MacrosSetf2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (defn my-setf (x value) (setf x value)) (my-setf a (+ 8 9)) (println a))");
+        QCOMPARE(42, result->ToInt());
+    }
+
+    void Test_MacrosSetf3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (define-macro-eval my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))");
+        QCOMPARE("blubxyz", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a '(42 99 102 \"hello\")) (def b 55) (println (type a)) (println (nth 3 `(1 2 3 ,@a))))");
+        QCOMPARE("42", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (println `(1 2 3 ,a)))");
+        QCOMPARE("(1 2 3 42)", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (def lst (list 6 8 12)) (println (quasiquote (1 2 3 ,a ,@lst))))");
+        QCOMPARE("(1 2 3 42 6 8 12)", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (def lst (list 6 8 12)) (println (quasiquote (1 2 3 ,a ,lst))))");
+        QCOMPARE("(1 2 3 42 (6 8 12))", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote5()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (println (quasiquote (1 2 3 ,(+ 3 a)))))");
+        QCOMPARE("(1 2 3 45)", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote6()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (println (quasiquote (1 2 3 ,@(list 9 8 7 a)))))");
+        QCOMPARE("(1 2 3 9 8 7 42)", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote7()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def args '(1 2 3)) `,(first args))");
+        QCOMPARE("1", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote8()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def args '(1 2 3)) `(,(first args)))");
+        QCOMPARE("(1)", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote9()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do `(b))");
+        QCOMPARE("(b)", result->ToString().c_str());
+    }
+
+    void Test_Quasiquote10()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do `a)");
+        QCOMPARE("a", result->ToString().c_str());
+    }
+
     void cleanupTestCase()
     {
         qDebug("CLEANUP fuel unit tests.");

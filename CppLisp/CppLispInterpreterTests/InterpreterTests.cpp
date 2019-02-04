@@ -157,7 +157,7 @@ namespace QtLispUnitTests
 		TEST_METHOD(Test_DefWithNil)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a nil) (println a))");
-			Assert::AreEqual(LispToken::NilConst.c_str()	, result->ToString().c_str());
+			Assert::AreEqual(LispToken::NilConst.c_str(), result->ToString().c_str());
 		}
 
 		TEST_METHOD(Test_Fn)
@@ -641,7 +641,6 @@ namespace QtLispUnitTests
 			}
 		}
 
-
 		TEST_METHOD(Test_MacrosEvaluateDoubleMacroCall)
 		{
 			const string macroExpandScript = "(do\
@@ -850,7 +849,6 @@ namespace QtLispUnitTests
 				Assert::IsTrue(true);
 #endif
 		}
-
 
 		TEST_METHOD(Test_MacrosExpandDoubleMacroCall)
 		{
