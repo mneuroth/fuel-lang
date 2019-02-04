@@ -10,6 +10,11 @@
 
 using namespace CppLisp;
 
+double Math_Round(double val)
+{
+    return round(val);
+}
+
 class QtLispInterpreterUnitTestsTest : public QObject
 {
     Q_OBJECT
@@ -183,6 +188,377 @@ private Q_SLOTS:
         QCOMPARE(true, result->ToBool());
         result = Lisp::Eval("(eval 42)");
         QCOMPARE(42, result->ToInt());
+    }
+
+    void Test_Eval4()
+    {
+        const string script = "(do  \
+                                  (defn defstructfunc (name)  \
+                                    (do \
+                                      (def structsym (sym (+ \"#\" name))) \
+                                      (list 'defn (sym (+ \"make-\" name)) (cdr (args))  \
+                                          `(list ,structsym ,@(cdr(args))) \
+                                      ) \
+                                    ) \
+                                  ) \
+\
+                                  (def f (defstructfunc point x y z)) \
+                                  (eval f) \
+                                  (def p (make-point 1 2 3)) \
+                                )";
+        std::shared_ptr<LispVariant> result = Lisp::Eval(script);
+        QCOMPARE(true, result->IsList());
+        QCOMPARE("(#point 1 2 3)", result->ToString().c_str());
+    }
+
+    void Test_Eval5()
+    {
+        const string script = "(do \
+                                  (defn defsimplefunc ()  \
+                                    (do \
+                                      (list 'defn 'simplefunc '(a b)  \
+                                          '(+ a b) \
+                                      ) \
+                                    ) \
+                                  ) \
+\
+                                  (def f (defsimplefunc)) \
+                                  (eval f) \
+                                  (def p (simplefunc 1 2))  \
+                                )";
+        std::shared_ptr<LispVariant> result = Lisp::Eval(script);
+        QCOMPARE(true, result->IsInt());
+        QCOMPARE("3", result->ToString().c_str());
+    }
+
+    void Test_EvalStr()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(evalstr \"(def x 456)\")");
+        QCOMPARE(456, result->ToInt());
+    }
+
+    void Test_Doc()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(doc 'if)");
+        var s = result->ToString();
+        QVERIFY(s.Contains("-------------------------------------------------"));
+        QVERIFY(s.Contains("if  [special form]"));
+        QVERIFY(s.Contains("Syntax: (if cond then-block [else-block])"));
+        QVERIFY(s.Contains("The if statement."));
+    }
+
+    void Test_DocForDefn()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("; this is a fcn documenataion\n(defn blub (x) (+ x 1))\n(doc 'blub)");
+        var s = result->ToString();
+        QVERIFY(s.Contains("-------------------------------------------------"));
+        QVERIFY(s.Contains("blub"));
+        QVERIFY(s.Contains("Syntax: (blub x)"));
+        QVERIFY(s.Contains("; this is a fcn documenataion"));
+    }
+
+    void Test_NoAutoDocForDefn()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(defn blub (x y ) (+ x y 1))\n(doc 'blub)");
+        var s = result->ToString();
+        QVERIFY(s.Contains("-------------------------------------------------"));
+        QVERIFY(s.Contains("blub"));
+        QVERIFY(s.Contains("Syntax: (blub x y)"));
+    }
+
+    void Test_TickCount()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(tickcount)");
+        QVERIFY(result->IsInt());
+    }
+
+    void Test_While1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 1) (def b 1) (while (< a 10) (do (setf a (+ a 1)) (setf b (+ b 1)))))");
+        QCOMPARE(10, result->ToInt());
+    }
+
+    void Test_Defn1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def g_prn \"START:\") (defn prn (x) (setf g_prn (add g_prn x))) (prn \"34\") (println g_prn))");
+        QCOMPARE("START:34", result->ToString().c_str());
+    }
+
+    void Test_AddString()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(+ \"abc\" \"def() ; blub\" \"xxx\")");
+        QCOMPARE("abcdef() ; blubxxx", result->ToString().c_str());
+    }
+
+    void Test_AddLists()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(+ '(1 2 3) '(\"hello world\" 2.3 42))");
+        string s = result->ToString();
+        QCOMPARE("(1 2 3 \"hello world\" 2.300000 42)", result->ToString().c_str());
+    }
+
+    void Test_ListFirst()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(first '(1 2 3))");
+        QCOMPARE(1, result->ToInt());
+    }
+
+    void Test_ListFirstSymbol()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(first '(a b c))");
+        QCOMPARE("a", result->ToString().c_str());
+    }
+
+    void Test_ListLast()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(last '(1 2 3))");
+        QCOMPARE(3, result->ToInt());
+    }
+
+    void Test_ListLastSymbol()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(last '(abc def xyz))");
+        QCOMPARE("xyz", result->ToString().c_str());
+    }
+
+    void Test_ListCar()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(car '(\"abc\" 2 3))");
+        QCOMPARE("abc", result->ToString().c_str());
+    }
+
+    void Test_ListRest()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(rest '(1 2 3))");
+        QCOMPARE("(2 3)", result->ToString().c_str());
+    }
+
+    void Test_ListCdr()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(cdr '(\"nix\" 1 2 3))");
+        QCOMPARE("(1 2 3)", result->ToString().c_str());
+    }
+
+    void Test_ListLength()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(len '(1 2 3))");
+        QCOMPARE(3, result->ToInt());
+    }
+
+    void Test_ListAppend()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(append (list 4 54 3) (list 7 9))");
+        QCOMPARE("(4 54 3 7 9)", result->ToString().c_str());
+    }
+
+    void Test_ListPush1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push z l))");
+        QCOMPARE("(z a b c)", result->ToString().c_str());
+    }
+
+    void Test_ListPush2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push z l 2))");
+        QCOMPARE("(a b z c)", result->ToString().c_str());
+    }
+
+    void Test_ListPush3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push z l 2) (print l))");
+        QCOMPARE("(a b z c)", result->ToString().c_str());
+    }
+
+    void Test_ListPushError()
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 42) (push z l 2))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_ListPop1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (def a (pop l)) (print a l))");
+        QCOMPARE("a (b c)", result->ToString().c_str());
+    }
+
+    void Test_ListPop2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '()) (def a (pop l)) (print a l))");
+        QCOMPARE("NIL ()", result->ToString().c_str());
+    }
+
+    void Test_ListPop3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '()) (def a (pop l)) (print a l))");
+        QCOMPARE("NIL ()", result->ToString().c_str());
+    }
+
+    void Test_ListPop4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (def a (pop l 5)) (print a l))");
+        QCOMPARE("NIL (a b c)", result->ToString().c_str());
+    }
+
+    void Test_ListPop5()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (def a (pop l 1)) (print a l))");
+        QCOMPARE("b (a c)", result->ToString().c_str());
+    }
+
+    void Test_ListPopError()
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 5) (def a (pop l)) (print a l))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_LogicalOperators()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(list (and #t #f) (and #t #t) (or #t #f) (or #f #f) (or #t #f #t))");
+        QCOMPARE("(#f #t #t #f #t)", result->ToString().c_str());
+    }
+
+    void Test_CompareOperators1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(list (= 1 2) (= 4 4) (== \"blub\" \"blub\") (== #t #f) (equal 3 4))");
+        QCOMPARE("(#f #t #t #f #f)", result->ToString().c_str());
+        result = Lisp::Eval("(do (def a ()) (== a ()))");
+        QCOMPARE(true, result->BoolValue());
+        result = Lisp::Eval("(do (def a 42) (== a ()))");
+        QCOMPARE(false, result->BoolValue());
+        result = Lisp::Eval("(do (def a blub) (def b nix) (== a b))");
+        QCOMPARE(false, result->BoolValue());
+        result = Lisp::Eval("(do (def a blub) (def b blub) (== a b))");
+        QCOMPARE(true, result->BoolValue());
+        result = Lisp::Eval("(do (def a blub) (def b blub) (== a b))");
+        QCOMPARE(true, result->BoolValue());
+        result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 2 3 4)) (== a b))");
+        QCOMPARE(false, result->BoolValue());
+        result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 1 2 3)) (== a b))");
+        QCOMPARE(true, result->BoolValue());
+        result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 1 (sym 2) 3)) (== a b))");
+        QCOMPARE(false, result->BoolValue());
+        result = Lisp::Eval("(do (def a blub) (def b nix) (!= a b))");
+        QCOMPARE(true, result->BoolValue());
+        result = Lisp::Eval("(do (def a 7) (def b 7) (!= a b))");
+        QCOMPARE(false, result->BoolValue());
+    }
+
+    void Test_CompareOperators2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(list (< 1 2) (< 4 1) (> 5 2) (> 1 3) (> 4.0 4.0))");
+        QCOMPARE("(#t #f #t #f #f)", result->ToString().c_str());
+        result = Lisp::Eval("(do (def a \"abc\") (def b \"def\") (< a b))");
+        QCOMPARE(true, result->BoolValue());
+        result = Lisp::Eval("(do (def a \"abc\") (def b \"abc\") (< a b))");
+        QCOMPARE(false, result->BoolValue());
+        result = Lisp::Eval("(do (def a \"abc\") (def b \"def\") (<= a b))");
+        QCOMPARE(true, result->BoolValue());
+        result = Lisp::Eval("(do (def a \"abc\") (def b \"abc\") (<= a b))");
+        QCOMPARE(true, result->BoolValue());
+    }
+
+    void Test_CompareOperators3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(list (<= 1 2) (<= 4 1) (>= 5 2) (>= 1 3) (>= 4.0 4.0) (<= 42 42))");
+        QCOMPARE("(#t #f #t #f #t #t)", result->ToString().c_str());
+    }
+
+    void Test_Not()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(list (! #t) (not #t) (not #f) (! #f))");
+        QCOMPARE("(#f #f #t #t)", result->ToString().c_str());
+    }
+
+    void Test_Arithmetric1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(+ 1 2 3 4)");
+        QCOMPARE(10, result->ToInt());
+    }
+
+    void Test_Arithmetric2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(+ 1.1 2.2 3.3 4.3)");
+        int res = (int)Math_Round(result->ToDouble() * 10.0);
+        QCOMPARE(109, res);
+    }
+
+    void Test_Arithmetric3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(* 3 8 2)");
+        QCOMPARE(48, result->ToInt());
+    }
+
+    void Test_Arithmetric4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(/ 1.0 2.0)");
+        int res = (int)Math_Round(result->ToDouble() * 10.0);
+        QCOMPARE(5, res);
+    }
+
+    void Test_Arithmetric5()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(/ 10 2)");
+        QCOMPARE(5, result->ToInt());
+    }
+
+    void Test_Arithmetric6()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(- 42 12 6)");
+        QCOMPARE(24, result->ToInt());
+    }
+
+    void Test_Arithmetric7()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(- 42.5 0.5)");
+        int res = (int)Math_Round(result->ToDouble() * 10.0);
+        QCOMPARE(420, res);
+    }
+
+    void Test_Arithmetric8()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(sub 42.5 1.5 2.0)");
+        int res = (int)Math_Round(result->ToDouble() * 10.0);
+        QCOMPARE(390, res);
+    }
+
+    void Test_Arithmetric9()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(div 12 3)");
+        QCOMPARE(4, result->ToInt());
+    }
+
+    void Test_Arithmetric10()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(mul 2 3 4)");
+        QCOMPARE(24, result->ToInt());
+    }
+
+    void Test_Arithmetric11()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(add 2 3 4)");
+        QCOMPARE(9, result->ToInt());
     }
 
     void cleanupTestCase()

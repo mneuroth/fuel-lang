@@ -17,3 +17,5 @@ else
 fi
 make 
 ./tst_qtlispinterpreterunitteststest
+ls -lrt
+ls .. -lrt
