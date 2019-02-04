@@ -888,9 +888,7 @@ private Q_SLOTS:
         {
             var scope = LispEnvironment::CreateDefaultScope();
             scope->Output->EnableToString(true);
-            std::shared_ptr<LispVariant> result =
-                Lisp::Eval(
-                    "(do (def a 42) (define-macro-expand my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))", scope);
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (define-macro-expand my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))", scope);
             QCOMPARE("blubxyz", result->ToString().c_str());
         }
 #else
@@ -968,6 +966,242 @@ private Q_SLOTS:
     {
         std::shared_ptr<LispVariant> result = Lisp::Eval("(do `a)");
         QCOMPARE("a", result->ToString().c_str());
+    }
+
+    void Test_Quote1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def x 42) (println 'x))");
+        QCOMPARE("x", result->ToString().c_str());
+    }
+
+    void Test_Quote2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do 'x)");
+        QCOMPARE("x", result->ToString().c_str());
+    }
+
+    void Test_Quote3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do '(a b 6 x))");
+        QCOMPARE("(a b 6 x)", result->ToString().c_str());
+    }
+
+    void Test_EvalQuasiQuote1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 4) (def lst '(a 2 3)) (eval `,(first lst)))");
+        QCOMPARE("4", result->ToString().c_str());
+    }
+
+    void Test_String1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(println \"hello \\\\ \\' öäü \n \\\"blub\\\"\")");
+        QCOMPARE("hello \\ ' öäü \n \"blub\"", result->ToString().c_str());
+    }
+
+    void Test_String2()
+    {
+        std::shared_ptr<LispVariant>  result = Lisp::Eval("(string \"hello\" \"-\" \"world\")");
+        QCOMPARE("hello-world", result->ToString().c_str());
+    }
+
+    void Test_Map()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(map (lambda (x) (+ x 1)) '(1 2 3))");
+        QCOMPARE("(2 3 4)", result->ToString().c_str());
+    }
+
+    void Test_Reduce1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(reduce (lambda (x y) (+ x y)) '(1 2 3) 0)");
+        QCOMPARE(6, result->ToInt());
+    }
+
+    void Test_Reduce2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(reduce (lambda (x y) (* x y)) '(2 3 4 5) 2)");
+        QCOMPARE(240, result->ToInt());
+    }
+
+    void Test_Closure1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn addx (delta) (lambda (x) (+ x delta))) (def addclosure (addx 41)) (println (addclosure 1)))");
+        QCOMPARE(42, result->ToInt());
+    }
+
+    void Test_Closure2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn g (x) (do (+ x 2))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+        QCOMPARE(13, result->ToInt());
+    }
+
+    void Test_Closure3()
+    {
+        try
+        {
+            Lisp::Eval("(do (defn g (x) (do (+ x 2 i))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_Closure4()
+    {
+// TODO working...
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn g (x) (do (+ x 2))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
+        QCOMPARE(13, result->ToInt());
+    }
+
+    void Test_RecursiveCall1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn addConst (x a) (+ x a)) (def add2 (lambda (x) (addConst x 2))) (println (addConst 8 2)) (println (add2 4)))");
+        QCOMPARE(6, result->ToInt());
+    }
+
+    void Test_Return1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (return (+ x x))) (println (f 7)))");
+        QCOMPARE(14, result->ToInt());
+    }
+
+    void Test_Return2()
+    {
+        // return statement was not implmented correctly until 25.7.2018...
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (return (+ x x)) (return 9))) (println (f 7)))");
+        QCOMPARE(14, result->ToInt());
+    }
+
+    /* TODO --> not implemented yet for C++
+    void Test_Call1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def obj 0) (setf obj (call \"CsLisp.DummyNative\")) (println obj (type obj)) (call obj \"Test\"))");
+        QCOMPARE(42, result->ToInt());
+    }
+
+    void Test_CallStatic()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (call-static \"System.IO.File\" Exists \"dummy\"))");
+        QCOMPARE(false, result->ToBool());
+    }
+*/
+
+    void Test_CallStaticError()
+    {
+        try
+        {
+            Lisp::Eval("(do (call-static \"System.IO.File\" NotExistingFunction \"dummy\"))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_Apply1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(apply (lambda (x) (println \"hello\" x)) '(55))");
+        QCOMPARE("hello 55", result->ToString().c_str());
+    }
+
+    void Test_Apply2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def f (lambda (x) (+ x x))) (apply f '(5)))");
+        QCOMPARE(10, result->ToInt());
+    }
+
+    void Test_Apply3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def f '+) (apply f '(5 6 7)))");
+        QCOMPARE(18, result->ToInt());
+    }
+
+    void Test_Argscount1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (+ x x))) (f 5 6 7))");
+        QCOMPARE(10, result->ToInt());
+    }
+
+    void Test_Arg2()
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (println \"count=\" (argscount)) (println (arg 0)) (println (arg 1)) (println (arg 2)) (println \"additional=\" (nth 1 _additionalArgs)) (+ x x))) (f 5 6 7))", scope);
+            QCOMPARE(10, result->ToInt());
+
+            string s = scope->Output->GetContent().Trim();
+            QCOMPARE(true, s.Contains("count= 3"));
+            QCOMPARE(true, s.Contains("5"));
+            QCOMPARE(true, s.Contains("6"));
+            QCOMPARE(true, s.Contains("7"));
+            QCOMPARE(true, s.Contains("additional= 7"));
+        }
+    }
+
+    void Test_Arg3()
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f (x) (do (arg 7) (+ x x))) (f 5 6 7))");
+            QCOMPARE(10, result->ToInt());
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_Arg4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f () (do (def z (arg 2)) (+ z z))) (f 5 6 7))");
+        QCOMPARE(14, result->ToInt());
+    }
+
+    void Test_Args1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn f () (do (def z (args)))) (f 5 6 7))");
+        QCOMPARE("(5 6 7)", result->ToString().c_str());
+    }
+
+    void Test_Cons1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(cons 1 2)");
+        QCOMPARE("(1 2)", result->ToString().c_str());
+    }
+
+    void Test_Cons2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(cons 1 '(2 3 4))");
+        QCOMPARE("(1 2 3 4)", result->ToString().c_str());
+    }
+
+    void Test_Cons3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(cons 12)");
+        QCOMPARE("(12)", result->ToString().c_str());
+    }
+
+    void Test_Cons4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(cons)");
+        QCOMPARE("()", result->ToString().c_str());
     }
 
     void cleanupTestCase()
