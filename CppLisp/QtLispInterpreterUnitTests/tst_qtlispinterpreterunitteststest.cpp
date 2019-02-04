@@ -1204,6 +1204,813 @@ private Q_SLOTS:
         QCOMPARE("()", result->ToString().c_str());
     }
 
+    void Test_Nop()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(nop)");
+        QVERIFY(result->IsUndefined());
+    }
+
+    void Test_Symbol()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(sym a)");
+        QVERIFY(result->IsSymbol());
+        QCOMPARE("a", result->StringValue().c_str());
+    }
+
+    void Test_Str()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(str abc)");
+        QVERIFY(result->IsString());
+        QCOMPARE("abc", result->StringValue().c_str());
+    }
+
+    void Test_MapError1()
+    {
+        try
+        {
+            Lisp::Eval("(map 4 '(1 2 3))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_MapError2()
+    {
+        try
+        {
+            Lisp::Eval("(map (lambda (x) (+ x 1)) 4)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_ReduceError1()
+    {
+        try
+        {
+            Lisp::Eval("(reduce \"blub\" '(1 2 3) 0)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_ReduceError2()
+    {
+        try
+        {
+            Lisp::Eval("(reduce (lambda (x y) (+ x y))  \"test\" 0)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_SetfError()
+    {
+        try
+        {
+            Lisp::Eval("(setf a 2.0)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_Parser1()
+    {
+        try
+        {
+            Lisp::Eval("(println \"hello\"))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_Parser2()
+    {
+        try
+        {
+            Lisp::Eval("((println \"hello\")");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_Parser3()
+    {
+        try
+        {
+            Lisp::Eval("(blub 1 2 3)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_NotError()
+    {
+        try
+        {
+            Lisp::Eval("(not a 2.0)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_CompareError1()
+    {
+        try
+        {
+            Lisp::Eval("(> 2.0)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_CompareError2()
+    {
+        try
+        {
+            Lisp::Eval("(> 2.0 5 234)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_ScriptToLong()
+    {
+        try
+        {
+            Lisp::Eval("(setf a 2.0) asdf");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_DefError()
+    {
+        try
+        {
+            Lisp::Eval("(def 1 2)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_DoError()
+    {
+        try
+        {
+            Lisp::Eval("(do (def a 2) blub (setf a 5))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_IfError()
+    {
+        try
+        {
+            Lisp::Eval("(if #t 1 2 3)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_FunctionNotFound()
+    {
+        try
+        {
+            Lisp::Eval("(unknown-fcn 1 2 3)");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_BracketsOutOfBalance1()
+    {
+        try
+        {
+            Lisp::Eval("(do (println 2)))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_BracketsOutOfBalance2()
+    {
+        try
+        {
+            Lisp::Eval("(do ( (println 2))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_UnexpectedToken1()
+    {
+        try
+        {
+            Lisp::Eval("blub (do (println 2))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_UnexpectedTokenButIsBracketsOutOfBalance()
+    {
+        try
+        {
+            Lisp::Eval("(do (println 2)) asfd");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_LispVariantToString()
+    {
+        LispVariant result(std::make_shared<object>("hello"));
+        string s = result.ToString();
+        QCOMPARE("hello", s.c_str());
+    }
+
+    void Test_LispScope1()
+    {
+        LispScope scope;
+        var result = scope.GetPreviousToken(std::make_shared<LispToken>("a", 0, 0, 1));
+        QVERIFY(result.get() == 0);
+    }
+
+    void Test_LispTokenToString()
+    {
+        LispToken token("(", 0, 1, 1);
+        string s = token.ToString();
+        QCOMPARE("(", s.c_str());
+    }
+
+    void Test_Type1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(type 7)");
+        QVERIFY(result->IsInt());
+        QCOMPARE(3, result->IntValue());
+    }
+
+    void Test_Type2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(type #f)");
+        QVERIFY(result->IsInt());
+        QCOMPARE(2, result->IntValue());
+    }
+
+    void Test_Type3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(type '(2 3 1))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(6, result->IntValue());
+    }
+
+    void Test_Type4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(type aSymbol)");
+        QVERIFY(result->IsInt());
+        QCOMPARE(8, result->IntValue());
+    }
+
+    void Test_Type5()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(type \"a string\")");
+        QVERIFY(result->IsInt());
+        QCOMPARE(5, result->IntValue());
+    }
+
+    void Test_TypeStr()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(typestr 1.23)");
+        QVERIFY(result->IsString());
+        QCOMPARE("Double", result->Value->ToString().c_str());
+    }
+
+    void Test_Vars()
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 4) (def b \"asdf\") (vars))", scope);
+            QVERIFY(result->IsUndefined());
+
+            string s = scope->Output->GetContent().Trim();
+            QCOMPARE(true, s.Contains("a --> 4"));
+            QCOMPARE(true, s.Contains("b --> \"asdf\""));
+        }
+    }
+
+    void Test_Fuel()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(fuel)");
+        QVERIFY(result->IsString());
+        QVERIFY(result->StringValue().Contains("fuel version"));
+    }
+
+    void Test_Copyright()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(copyright)");
+        QVERIFY(result->IsString());
+        QVERIFY(result->StringValue().Contains("Copyright: MIT-License"));
+    }
+
+    void Test_Help()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(help)");
+        QVERIFY(result->IsString());
+        QVERIFY(result->StringValue().Contains("available functions:"));
+    }
+
+    void Test_Import()
+    //[DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import \"Library\\\\fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (println x))))", scope);
+            QVERIFY(result->IsInt());
+            QCOMPARE(3, result->IntValue());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("1"));
+            QVERIFY(s.Contains("7"));
+            QVERIFY(s.Contains("7"));
+        }
+    }
+
+    void Test_Import2()
+    //[DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (foreach '(1 4 6) (lambda (x) (println x))))", scope);
+            QVERIFY(result->IsInt());
+            QCOMPARE(3, result->IntValue());    // is last value of internal loop variable in foreach
+
+            // test results
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("1"));
+            QVERIFY(s.Contains("4"));
+            QVERIFY(s.Contains("6"));
+        }
+    }
+
+    void Test_BadForeach()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (foreach))");
+        QVERIFY(result->IsUndefined());
+    }
+
+    void Test_Break()
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(break)", scope);
+            QVERIFY(result->IsUndefined());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("no debugger support"));
+        }
+    }
+
+    void Test_ReadLine()
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("some input\nmore input\n"))
+        {
+            var scope = LispEnvironment::CreateDefaultScope();
+            scope->Output->EnableToString(true);
+            scope->Input->EnableFromString(true);
+            scope->Input->SetContent("some input\nmore input\n");
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a (readline)) (println a) (def b (readline)) (println b))", scope);
+            QVERIFY(result->IsString());
+            QCOMPARE("more input", result->ToString().c_str());
+
+            string s = scope->Output->GetContent().Trim();
+            QVERIFY(s.Contains("some input"));
+            QVERIFY(s.Contains("more input"));
+        }
+    }
+
+    void Test_ReadLineWithArgs()
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("some input\nmore input\n"))
+        {
+            try
+            {
+                var scope = LispEnvironment::CreateDefaultScope();
+                scope->Output->EnableToString(true);
+                std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a (readline 1)) (println a)", scope);
+                QVERIFY(false);
+            }
+            catch (const CppLisp::LispException &)
+            {
+                QVERIFY(true);
+            }
+            catch (...)
+            {
+                QVERIFY(false);
+            }
+        }
+    }
+
+    void Test_ParseInteger()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"42\") (def i (parse-integer s)))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(42, result->IntValue());
+    }
+
+    void Test_ParseIntegerError()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"nonumber\") (def i (parse-integer s)))");
+        QVERIFY(result->IsUndefined());
+    }
+
+    void Test_ParseFloat()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"42.789\") (def f (parse-float s)))");
+        QVERIFY(result->IsDouble());
+        QCOMPARE(42.789, result->DoubleValue());
+    }
+
+    void Test_ParseFloatError()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"nonumber\") (def f (parse-float s)))");
+        QVERIFY(result->IsUndefined());
+    }
+
+    void Test_Slice1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s 0 4))");
+        QVERIFY(result->IsString());
+        QCOMPARE("this", result->StringValue().c_str());
+    }
+
+    void Test_Slice2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s 8 -1))");
+        QVERIFY(result->IsString());
+        QCOMPARE("a string", result->StringValue().c_str());
+    }
+
+    void Test_Slice3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s 5 4))");
+        QVERIFY(result->IsString());
+        QCOMPARE("is a", result->StringValue().c_str());
+    }
+
+    void Test_SliceError()
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_FirstForString()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (first s))");
+        QVERIFY(result->IsString());
+        QCOMPARE("t", result->StringValue().c_str());
+    }
+
+    void Test_LastForString()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (last s))");
+        QVERIFY(result->IsString());
+        QCOMPARE("g", result->StringValue().c_str());
+    }
+
+    void Test_RestForString()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (rest s))");
+        QVERIFY(result->IsString());
+        QCOMPARE("his is a string", result->StringValue().c_str());
+    }
+
+    void Test_NthForString()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (nth 5 s))");
+        QVERIFY(result->IsString());
+        QCOMPARE("i", result->StringValue().c_str());
+    }
+
+    void Test_LenForString()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (len s))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(16, result->IntValue());
+    }
+
+    void Test_Trim()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \" \t   this is a string  \") (trim s))");
+        QVERIFY(result->IsString());
+        QCOMPARE("this is a string", result->StringValue().c_str());
+    }
+
+    void Test_LowerCase()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"THIS is A stRing\") (lower-case s))");
+        QVERIFY(result->IsString());
+        QCOMPARE("this is a string", result->StringValue().c_str());
+    }
+
+    void Test_UpperCase()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"THIS is A stRing 8 ,.!?\") (upper-case s))");
+        QVERIFY(result->IsString());
+        QCOMPARE("THIS IS A STRING 8 ,.!?", result->StringValue().c_str());
+    }
+
+    void Test_Find1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 5 l))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(1, result->IntValue());
+    }
+
+    void Test_Find2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import \"Library\\\\fuellib.fuel\") (def l '(1 5 7)) (find 9 l))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(-1, result->IntValue());
+    }
+
+    void Test_DoTimes1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (def l '()) (dotimes (ix 7) (setf l (cons ix l))) (println l))");
+        QVERIFY(result->IsString());
+        QCOMPARE("(6 5 4 3 2 1 0)", result->StringValue().c_str());
+    }
+
+    void Test_DoTimes2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (import fuellib) (def l '()) (dotimes (i 7) (setf l (cons i l))) (dotimes (i 9) (setf l (cons i l))) (println l))");
+        QVERIFY(result->IsString());
+        QCOMPARE("(8 7 6 5 4 3 2 1 0 6 5 4 3 2 1 0)", result->StringValue().c_str());
+    }
+
+    void Test_Reverse()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l (list 1 2 b \"nix\" 4.5)) (print (reverse l)))");
+        QVERIFY(result->IsString());
+        QCOMPARE("(4.500000 \"nix\" b 2 1)", result->StringValue().c_str());
+    }
+
+    void Test_ReverseString()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text\") (print (reverse s)))");
+        QVERIFY(result->IsString());
+        QCOMPARE("txet si siht", result->StringValue().c_str());
+    }
+
+    void Test_Search1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text\") (print (search \"tex\" s)))");
+        QVERIFY(result->IsString());
+        QCOMPARE("8", result->StringValue().c_str());
+    }
+
+    void Test_Search2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text\") (search \"tes\" s))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(-1, result->IntValue());
+    }
+
+    void Test_Search3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search b l))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(1, result->IntValue());
+    }
+
+    void Test_Search4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search 4 l))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(2, result->IntValue());
+    }
+
+    void Test_Search5()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search \"blub\" l))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(5, result->IntValue());
+    }
+
+    void Test_Search6()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search nix l))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(-1, result->IntValue());
+    }
+
+    void Test_Search7()
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 5.234) (search nix l))");
+            QVERIFY(result->IsInt());
+            QCOMPARE(-1, result->IntValue());
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    void Test_Replace1()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a long text\") (replace s \"long\" \"short\"))");
+        QVERIFY(result->IsString());
+        QCOMPARE("this is a short text", result->StringValue().c_str());
+    }
+
+    void Test_Replace2()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a long long text\") (replace s \"long\" \"short\"))");
+        QVERIFY(result->IsString());
+        QCOMPARE("this is a short short text", result->StringValue().c_str());
+    }
+
+    void Test_Replace3()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a long text\") (replace s \"verylong\" \"short\"))");
+        QVERIFY(result->IsString());
+        QCOMPARE("this is a long text", result->StringValue().c_str());
+    }
+
+    void Test_Replace4()
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a long text with a lot of words a\") (replace s \"a \" \"an \"))");
+        QVERIFY(result->IsString());
+        QCOMPARE("this is an long text with an lot of words a", result->StringValue().c_str());
+    }
+
     void cleanupTestCase()
     {
         qDebug("CLEANUP fuel unit tests.");

@@ -17,5 +17,8 @@ else
 fi
 make 
 ls -lrt
-ls -lrt library
+ls -lrt .. 
 ./tst_qtlispinterpreterunitteststest
+ls -lrt
+ls -lrt library
+qmake -v
