@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="fuellib.fuel">../../Library/fuellib.fuel</file>
+    </qresource>
+</RCC>

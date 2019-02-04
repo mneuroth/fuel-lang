@@ -21,6 +21,12 @@ TEMPLATE = app
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+# see: https://stackoverflow.com/questions/3984104/qmake-how-to-copy-a-file-to-the-output
+# OTHER_FILES += ../../Library/fuellib.fuel
+#fuellib.files = ../../Library/fuellib.fuel
+#fuellib.path = ./library
+#INSTALLS += fuellib
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -30,3 +36,6 @@ include(../CppLispInterpreter/CppLispInterpreter.pri)
 
 SOURCES += \
         tst_qtlispinterpreterunitteststest.cpp
+
+RESOURCES += \
+    fueltesteresources.qrc
