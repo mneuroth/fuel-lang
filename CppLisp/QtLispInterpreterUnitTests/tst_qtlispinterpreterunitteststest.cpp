@@ -2500,7 +2500,7 @@ private Q_SLOTS:
             QVERIFY(s.StartsWith(Lisp::Name));
         }
     }
-
+/*
     TEST_METHOD(Test_MainFile)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -2555,7 +2555,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("Exception in"));
         }
     }
-
+*/
     TEST_METHOD(Test_MainHelp)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -2685,7 +2685,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("Syntax: (arg number)"));
         }
     }
-
+/*
     TEST_METHOD(Test_MultiPrintLn)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -2754,7 +2754,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("--> print"));
         }
     }
-
+*/
     TEST_METHOD(Test_MainInteractive)
     {
         //using (var cr = new ConsoleRedirector("help\nfuncs\nbuiltins\nq\n"))
@@ -2812,7 +2812,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs
         }
     }
-
+/*
     TEST_METHOD(Test_DebugFile)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout"))
@@ -2844,7 +2844,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
         }
     }
-
+*/
     TEST_METHOD(Test_DebugSetBreakpoints)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector("b \"module name\":4 (== a 4)\nlist"))
@@ -2864,7 +2864,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("#1   line=4     module=module name               condition=(== a 4)"));
         }
     }
-
+/*
     TEST_METHOD(Test_DebugModule)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector("b .\\testmodule.fuel:4\nlist\nr\nk\nl"))
@@ -2889,7 +2889,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("x --> 8                                        : Int"));
         }
     }
-
+*/
     TEST_METHOD(Test_Documentation)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector())
