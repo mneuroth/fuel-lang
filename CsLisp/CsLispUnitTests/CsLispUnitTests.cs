@@ -2219,5 +2219,13 @@ namespace LispUnitTests
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("#f", result.ToString());
         }
+
+        [TestMethod]
+        public void Test_ImportPathTest()
+        {
+            LispVariant result = Lisp.Eval("(do (import \"Library/fuellib.fuel\") (def s \"some text\") (strlen s))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(9, result.ToInt());
+        }
     }
 }

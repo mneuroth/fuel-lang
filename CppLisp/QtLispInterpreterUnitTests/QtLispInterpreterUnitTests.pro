@@ -35,8 +35,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 include(../CppLispInterpreter/CppLispInterpreter.pri)
 
 SOURCES += \
-        tst_qtlispinterpreterunitteststest.cpp \
-        ../CppLispInterpreter/fuel.cpp
+        tst_qtlispinterpreterunitteststest.cpp
 
 RESOURCES += \
     fueltesteresources.qrc
