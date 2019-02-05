@@ -456,7 +456,7 @@ const std::string DirectorySeparatorChar("/");
 const std::string OtherDirectorySeparatorChar("\\");
 #endif
 
-static string ConvertToLocalDirectorySeperators(const string & path)
+string ConvertToLocalDirectorySeperators(const string & path)
 {
 	return path.Replace(OtherDirectorySeparatorChar, DirectorySeparatorChar);
 }

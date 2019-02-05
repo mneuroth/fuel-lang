@@ -19,6 +19,8 @@ double Math_Round(double val)
     return round(val);
 }
 
+string ConvertToLocalDirectorySeperators(const string & path);
+
 class QtLispInterpreterUnitTestsTest : public QObject
 {
     Q_OBJECT
@@ -2638,7 +2640,7 @@ private Q_SLOTS:
             Fuel::MainExtended(args, output, input);
 
             string s = output->GetContent();
-            QVERIFY(s.Contains(".\\Library\\fuellib.fuel"));
+            QVERIFY(s.Contains(ConvertToLocalDirectorySeperators(".\\Library\\fuellib.fuel")));
             //QVERIFY(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
             QVERIFY(s.Contains("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel"));
         }
