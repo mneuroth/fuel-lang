@@ -2642,7 +2642,7 @@ private Q_SLOTS:
             string s = output->GetContent();
             QVERIFY(s.Contains(ConvertToLocalDirectorySeperators(".\\Library\\fuellib.fuel")));
             //QVERIFY(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
-            QVERIFY(s.Contains("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel"));
+            QVERIFY(s.Contains(ConvertToLocalDirectorySeperators("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel")));
         }
     }
 
