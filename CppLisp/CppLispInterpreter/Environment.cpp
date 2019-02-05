@@ -448,19 +448,26 @@ namespace CppLisp
 	extern string LispUtils_LibraryPath;
 }
 
-static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
-{
 #if defined(_WIN32) || defined(_WIN64)
-	const std::string DirectorySeparatorChar("\\");
+const std::string DirectorySeparatorChar("\\");
+const std::string OtherDirectorySeparatorChar("/");
 #else
-	const std::string DirectorySeparatorChar("/");
+const std::string DirectorySeparatorChar("/");
+const std::string OtherDirectorySeparatorChar("\\");
 #endif
 
+static string ConvertToLocalDirectorySeperators(const string & path)
+{
+	return path.Replace(OtherDirectorySeparatorChar, DirectorySeparatorChar);
+}
+
+static std::shared_ptr<LispVariant> Import(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
 	std::shared_ptr<LispVariant> result = std::make_shared<LispVariant>();
 	for(var modu : args)
 	{
 		string code = string::Empty;
-		string orgModuleFileName = modu->ToLispVariantRef().StringValue();
+		string orgModuleFileName = ConvertToLocalDirectorySeperators(modu->ToLispVariantRef().StringValue());
 		string fileName = orgModuleFileName;
 		if (!File_Exists(fileName))
 		{

@@ -16,9 +16,9 @@ else
     qmake QtLispInterpreterUnitTests.pro
 fi
 make 
-ls -lrt
-ls -lrt .. 
+#ls -lrt
+#ls -lrt .. 
 ./tst_qtlispinterpreterunitteststest
-ls -lrt
-ls -lrt library
-qmake -v
+#ls -lrt
+#ls -lrt Library
+#qmake -v

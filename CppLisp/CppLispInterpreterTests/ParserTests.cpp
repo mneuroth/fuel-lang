@@ -29,6 +29,8 @@
 
 #include "../CppLispInterpreter/Parser.h"
 
+#include "FuelUnitTestHelper.h"
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace CppLisp;
@@ -42,56 +44,56 @@ namespace QtLispUnitTests
 		TEST_METHOD(Test_SingleParserEmptyCode)
         {
 			std::shared_ptr<object> result = LispParser::Parse("()");
-            Assert::IsNotNull(result.get());
-			Assert::IsTrue(result->IsList());
-			Assert::AreEqual<size_t>(0, result->ToList()->size());
+			QVERIFY(result.get() != 0);
+			QVERIFY(result->IsList());
+			QCOMPARE((size_t)0, result->ToList()->size());
         }
 
 		TEST_METHOD(Test_SingleParser1)
         {
 			std::shared_ptr<object> result = LispParser::Parse("(print 1 2.54 \"string\")");
-            Assert::IsNotNull(result.get());
-			Assert::IsTrue(result->IsList());
+			QVERIFY(result.get() != 0);
+			QVERIFY(result->IsList());
 			var resultAsArray = result->ToEnumerableOfObjectRef();
-            Assert::AreEqual<size_t>(4, resultAsArray.size());
+            QCOMPARE((size_t)4, resultAsArray.size());
 
             var value = resultAsArray[0]->ToLispVariant();
-            Assert::IsTrue(value->IsSymbol());
-            Assert::AreEqual("print", value->Value->ToString().c_str());
+            QVERIFY(value->IsSymbol());
+            QCOMPARE("print", value->Value->ToString().c_str());
             value = resultAsArray[1]->ToLispVariant();
-            Assert::IsTrue(value->IsInt());
-            Assert::AreEqual<int>(1, (int)*(value->Value));
+            QVERIFY(value->IsInt());
+            QCOMPARE(1, (int)*(value->Value));
             value = resultAsArray[2]->ToLispVariant();
-            Assert::IsTrue(value->IsDouble());
-            Assert::AreEqual<double>(2.54, (double)*(value->Value));
+            QVERIFY(value->IsDouble());
+            QCOMPARE(2.54, (double)*(value->Value));
             value = resultAsArray[3]->ToLispVariant();
-            Assert::IsTrue(value->IsString());
-            Assert::AreEqual("string", value->Value->ToString().c_str());
+            QVERIFY(value->IsString());
+            QCOMPARE("string", value->Value->ToString().c_str());
         }
 
 		TEST_METHOD(Test_SingleParser2)
 		{
 			std::shared_ptr<object> result = LispParser::Parse("(do (print #t 2.54 \"string\"))");
-            Assert::IsNotNull(result.get());
-			Assert::IsTrue(result->IsList());
+			QVERIFY(result.get() != 0);
+			QVERIFY(result->IsList());
 			var resultAsArrayDo = result->ToEnumerableOfObjectRef();
-			Assert::AreEqual<size_t>(2, resultAsArrayDo.size());
+			QCOMPARE((size_t)2, resultAsArrayDo.size());
 
             var value = resultAsArrayDo[0]->ToLispVariant();
-            Assert::IsTrue(value->IsSymbol());
-            Assert::AreEqual("do", value->Value->ToString().c_str());
+            QVERIFY(value->IsSymbol());
+            QCOMPARE("do", value->Value->ToString().c_str());
 
             var listValue = resultAsArrayDo[1]->ToList();
             var resultAsArray = listValue->ToArray();
             value = resultAsArray[1]->ToLispVariant();
-            Assert::IsTrue(value->IsBool());
-            Assert::AreEqual(true, (bool)*(value->Value));
+            QVERIFY(value->IsBool());
+            QCOMPARE(true, (bool)*(value->Value));
             value = resultAsArray[2]->ToLispVariant();
-            Assert::IsTrue(value->IsDouble());
-            Assert::AreEqual(2.54, (double)*(value->Value));
+            QVERIFY(value->IsDouble());
+            QCOMPARE(2.54, (double)*(value->Value));
             value = resultAsArray[3]->ToLispVariant();
-            Assert::IsTrue(value->IsString());
-            Assert::AreEqual("string", value->Value->ToString().c_str());
+            QVERIFY(value->IsString());
+            QCOMPARE("string", value->Value->ToString().c_str());
         }
 	};
 }

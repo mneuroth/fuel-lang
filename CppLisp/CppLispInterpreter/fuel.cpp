@@ -264,14 +264,3 @@ namespace CppLisp
 		return dbg;
 	}
 };
-
-int main(int argc, char *argv[])
-{
-	std::vector<CppLisp::string> args;
-	for (int i = 1; i < argc; i++)
-	{
-		args.push_back(argv[i]);
-	}
-	CppLisp::Fuel::Main(args);
-	return 0;
-}

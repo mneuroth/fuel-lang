@@ -23,29 +23,15 @@
 *
 * */
 
-#include "stdafx.h"
+#include "fuel.h"
 
-#include "CppUnitTest.h"
-
-#include "../CppLispInterpreter/Parser.h"
-
-#include "FuelUnitTestHelper.h"
-
-using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-
-using namespace CppLisp;
-
-namespace QtLispUnitTests
+int main(int argc, char *argv[])
 {
-	TEST_CLASS(UnitTestRuntime)
+	std::vector<CppLisp::string> args;
+	for (int i = 1; i < argc; i++)
 	{
-	public:
-		TEST_METHOD(Test_TestIndexOfInString)
-		{
-			CppLisp::string target("abc def blub 123");
-
-			QCOMPARE((size_t)4, target.IndexOf("def", "nix"));
-			QCOMPARE(CppLisp::string::npos, target.IndexOf("test", "nix"));
-		}
-	};
+		args.push_back(argv[i]);
+	}
+	CppLisp::Fuel::Main(args);
+	return 0;
 }

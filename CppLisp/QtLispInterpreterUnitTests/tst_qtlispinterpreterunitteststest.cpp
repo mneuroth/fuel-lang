@@ -1,12 +1,16 @@
 #include <QString>
 #include <QtTest>
 #include <QDir>
-#include <qtestcase.h>
+#include <QtTest/QTest>
 
 #include <QDebug>
 
+#include "tst_qtlisputils.h"
+
 #include "../CppLispInterpreter/Variant.h"
+#include "../CppLispInterpreter/Debugger.h"
 #include "../CppLispInterpreter/Lisp.h"
+#include "../CppLispInterpreter/fuel.h"
 
 using namespace CppLisp;
 
@@ -20,9 +24,12 @@ class QtLispInterpreterUnitTestsTest : public QObject
     Q_OBJECT
 
 public:
-    QtLispInterpreterUnitTestsTest();
+    QtLispInterpreterUnitTestsTest()
+    {
+    }
 
 private Q_SLOTS:
+
     void initTestCase()
     {
         qDebug("INIT fuel unit tests.");
@@ -31,15 +38,247 @@ private Q_SLOTS:
         QFile::copy(":/fuellib.fuel", "./Library/fuellib.fuel");
     }
 
-    void testCreateVariant();
-    void testVariantCompare();
-    void testVariantConvert();
-    void testVariantOperations();
-    void testVariantEqualOp();
-    void testVariantCastError();
-    void testStringIndexOf();
+    // *****************************
 
-    void Test_Comments()
+    TEST_METHOD(Test_CreateVariant)
+    {
+        LispVariant * variant = new LispVariant(LispType::_Nil);
+        QVERIFY(variant != 0);
+
+        delete variant;
+        variant = new LispVariant(std::make_shared<object>(3));
+        QVERIFY(variant->IsInt());
+        QCOMPARE(3, variant->IntValue());
+
+        delete variant;
+        variant = new LispVariant(std::make_shared<object>(3.1415));
+        QVERIFY(variant->IsDouble());
+        QCOMPARE(3.1415, variant->DoubleValue());
+
+        delete variant;
+        variant = new LispVariant(std::make_shared<object>(string("text")));
+        QVERIFY(variant->IsString());
+
+        delete variant;
+        variant = new LispVariant(std::make_shared<object>("blub"));
+        QVERIFY(variant->IsString());
+        QVERIFY(string("blub") == variant->ToString());
+    }
+
+    TEST_METHOD(Test_VariantCompare)
+    {
+        std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+        std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
+        std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
+        std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(string("abc"))));
+        QVERIFY(variant1->CompareTo(variant2) < 0);
+        QVERIFY(variant2->CompareTo(variant1) > 0);
+        QVERIFY(variant1->CompareTo(std::make_shared<object>(1.23)) > 0);
+        QVERIFY(variant1->CompareTo(std::make_shared<object>(-5)) > 0);
+        QVERIFY(variant3->CompareTo(std::make_shared<object>(42)) == 0);
+        QVERIFY(variant4->CompareTo(std::make_shared<object>("abc")) == 0);
+        QVERIFY(variant4->CompareTo(std::make_shared<object>("xyz")) < 0);
+    }
+
+    TEST_METHOD(Test_VariantConvert)
+    {
+        std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+        std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
+        std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
+        std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>("4.5")));
+        std::shared_ptr<LispVariant> variant5 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(true)));
+        std::shared_ptr<LispVariant> variant6 = std::make_shared<LispVariant>(LispVariant(LispType::_Int, std::make_shared<object>(0)));
+        QCOMPARE(true, variant1->ToBool());
+        QCOMPARE(true, variant3->ToBool());
+        QCOMPARE(false, variant6->ToBool());
+        QCOMPARE(4.5, variant4->ToDouble());
+        QCOMPARE(1.0, variant5->ToDouble());
+        QCOMPARE(56, variant2->ToInt());
+        QCOMPARE(true, variant2->ToBool());
+    }
+
+    TEST_METHOD(Test_VariantOperations)
+    {
+        std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+        std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
+        std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
+        std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(45)));
+        QCOMPARE(1890, (*variant3 * *variant4).ToInt());
+        QCOMPARE(60.4, (*variant1 + *variant2).ToDouble());
+    }
+
+    TEST_METHOD(Test_VariantEqualOp)
+    {
+        std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+        std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
+        QVERIFY(!LispVariant::EqualOp(*variant1, *variant2));
+        QVERIFY(LispVariant::EqualOp(*variant1, *variant1));
+    }
+
+    TEST_METHOD(Test_VariantCastError)
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> variant = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
+            //Assert::IsNotNull(variant);
+            int value = variant->IntValue();
+            QCOMPARE(4, value);      // will not be evaluated because of expected exception !
+            QVERIFY(false);
+        }
+        catch (LispException)
+        {
+            QVERIFY(true);
+        }
+    }
+
+    // *****************************
+
+    TEST_METHOD(Test_TokenizerEmptyCode)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)0, result.Count());
+
+        result = LispTokenizer::Tokenize("     \t \n   ");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)0, result.Count());
+    }
+
+    TEST_METHOD(Test_Tokenizer1)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("()");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)2, result.Count());
+        QCOMPARE("(", result.First()->ToString().c_str());
+        QCOMPARE(")", result.Last()->ToString().c_str());
+
+        result = LispTokenizer::Tokenize("  (  \n    )  ");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)2, result.Count());
+        QCOMPARE("(", result.First()->ToString().c_str());
+        QCOMPARE(")", result.Last()->ToString().c_str());
+    }
+
+    TEST_METHOD(Test_Tokenizer2)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("(+ 1 #t 3.1415 \"asdf blub\" #f )");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)8, result.Count());
+        var resultAsArray = result.ToArray();
+        QCOMPARE("(", resultAsArray[0]->ToString().c_str());
+        QVERIFY(LispTokenType::ListStart == resultAsArray[0]->Type);
+        QCOMPARE("+", resultAsArray[1]->ToString().c_str());
+        QVERIFY(LispTokenType::Symbol == resultAsArray[1]->Type);
+        QCOMPARE(1, (int)*(resultAsArray[2]->Value));
+        QVERIFY(LispTokenType::Int == resultAsArray[2]->Type);
+        QCOMPARE(true, (bool)*(resultAsArray[3]->Value));
+        QVERIFY(LispTokenType::True == resultAsArray[3]->Type);
+        QCOMPARE(3.1415, (double)*(resultAsArray[4]->Value));
+        QVERIFY(LispTokenType::Double == resultAsArray[4]->Type);
+        QCOMPARE("asdf blub", resultAsArray[5]->ToString().c_str());
+        QVERIFY(LispTokenType::String == resultAsArray[5]->Type);
+        bool o = (bool)*(resultAsArray[6]->Value);
+        QCOMPARE(false, (bool)*(resultAsArray[6]->Value));
+        QVERIFY(LispTokenType::False == resultAsArray[6]->Type);
+        QCOMPARE(")", resultAsArray[7]->ToString().c_str());
+        QVERIFY(LispTokenType::ListEnd == resultAsArray[7]->Type);
+    }
+
+    TEST_METHOD(Test_Tokenizer3)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("(do (print (* 9 9)))");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)11, result.Count());
+        var resultAsArray = result.ToArray();
+        QCOMPARE("(", resultAsArray[0]->ToString().c_str());
+        QCOMPARE("do", resultAsArray[1]->ToString().c_str());
+        QVERIFY(LispTokenType::Symbol == resultAsArray[1]->Type);
+        QCOMPARE("(", resultAsArray[2]->ToString().c_str());
+        QCOMPARE("print", resultAsArray[3]->ToString().c_str());
+        QCOMPARE("(", resultAsArray[4]->ToString().c_str());
+        QCOMPARE("*", resultAsArray[5]->ToString().c_str());
+        QCOMPARE(9, (int)*(resultAsArray[6]->Value));
+        QCOMPARE(9, (int)*(resultAsArray[7]->Value));
+        QCOMPARE(")", resultAsArray[8]->ToString().c_str());
+        QCOMPARE(")", resultAsArray[9]->ToString().c_str());
+        QCOMPARE(")", resultAsArray[10]->ToString().c_str());
+    }
+
+    TEST_METHOD(Test_Tokenizer4)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("(do\n (print (* 9 9)) ; this is a comment\n)\n");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)12, result.Count());
+        var resultAsArray = result.ToArray();
+        QCOMPARE("(", resultAsArray[0]->ToString().c_str());
+        QCOMPARE("do", resultAsArray[1]->ToString().c_str());
+        QCOMPARE("(", resultAsArray[2]->ToString().c_str());
+        QCOMPARE("print", resultAsArray[3]->ToString().c_str());
+        QCOMPARE("(", resultAsArray[4]->ToString().c_str());
+        QCOMPARE("*", resultAsArray[5]->ToString().c_str());
+        QCOMPARE(9, (int)*(resultAsArray[6]->Value));
+        QCOMPARE(9, (int)*(resultAsArray[7]->Value));
+        QCOMPARE(")", resultAsArray[8]->ToString().c_str());
+        QCOMPARE(")", resultAsArray[9]->ToString().c_str());
+        QCOMPARE("; this is a comment\n", resultAsArray[10]->ToString().c_str());
+        QVERIFY(LispTokenType::Comment == resultAsArray[10]->Type);
+        QCOMPARE(")", resultAsArray[11]->ToString().c_str());
+    }
+
+    TEST_METHOD(Test_Tokenizer5)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("(test '(1 2 3))");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)9, result.Count());
+        var resultAsArray = result.ToArray();
+        QCOMPARE("'", resultAsArray[2]->ToString().c_str());
+        QVERIFY(LispTokenType::Quote == resultAsArray[2]->Type);
+
+        result = LispTokenizer::Tokenize("(test `(1 2 3))");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)9, result.Count());
+        resultAsArray = result.ToArray();
+        QCOMPARE("`", resultAsArray[2]->ToString().c_str());
+        QVERIFY(LispTokenType::QuasiQuote == resultAsArray[2]->Type);
+
+        result = LispTokenizer::Tokenize("(test ,a)");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)5, result.Count());
+        resultAsArray = result.ToArray();
+        QCOMPARE(",", resultAsArray[2]->ToString().c_str());
+        QVERIFY(LispTokenType::UnQuote == resultAsArray[2]->Type);
+
+        result = LispTokenizer::Tokenize("(test ,@a)");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)5, result.Count());
+        resultAsArray = result.ToArray();
+        QCOMPARE(",@", resultAsArray[2]->ToString().c_str());
+        QVERIFY(LispTokenType::UnQuoteSplicing == resultAsArray[2]->Type);
+    }
+
+    TEST_METHOD(Test_Tokenizer6)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("(test nil)");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)4, result.Count());
+        var resultAsArray = result.ToArray();
+        QCOMPARE(LispToken::NilConst.c_str(), resultAsArray[2]->ToString().c_str());
+        QVERIFY(LispTokenType::Nil == resultAsArray[2]->Type);
+    }
+
+    TEST_METHOD(Test_Tokenizer7)
+    {
+        IEnumerable<std::shared_ptr<LispToken>> result = LispTokenizer::Tokenize("(test \"blub\nhello\")");
+        //Assert::IsNotNull(result);
+        QCOMPARE((size_t)4, result.Count());
+        var resultAsArray = result.ToArray();
+        QCOMPARE("blub\nhello", resultAsArray[2]->ToString().c_str());
+        QVERIFY(LispTokenType::String == resultAsArray[2]->Type);
+    }
+
+    // *****************************
+
+    TEST_METHOD(Test_Comments)
     {
         std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println \"hello\") ; a comment\n(println; separate lists with comments\n\"world\"));comment in last line");
         QCOMPARE("world", result->ToString().c_str());
@@ -2231,115 +2470,603 @@ private Q_SLOTS:
 
     // ***************************************************
 
+    TEST_METHOD(Test_Debugger)
+    {
+        std::shared_ptr<LispDebugger> debugger = std::make_shared<LispDebugger>();
+        QVERIFY(debugger.get() != 0);
+    }
+
+    TEST_METHOD(Test_Main)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            Fuel::MainExtended(std::vector<string>(), output, input);
+
+            string s = output->GetContent().Trim();
+            QVERIFY(s.StartsWith(Lisp::Name));
+        }
+    }
+
+    TEST_METHOD(Test_MainFile)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("scripts\\simple.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.StartsWith("hello world !"));
+        }
+    }
+
+    TEST_METHOD(Test_MainFileError)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("scripts\\error.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Error executing script"));
+            QVERIFY(s.Contains("printx"));
+            QVERIFY(s.Contains("not found"));
+        }
+    }
+
+    TEST_METHOD(Test_MainFileErrorDetailed)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-x");
+            args.push_back("scripts\\error.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Error executing script"));
+            QVERIFY(s.Contains("printx"));
+            QVERIFY(s.Contains("not found"));
+            QVERIFY(s.Contains("Callstack"));
+            QVERIFY(s.Contains("Exception in"));
+        }
+    }
+
+    TEST_METHOD(Test_MainHelp)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-h");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent().Trim();
+            QVERIFY(s.StartsWith(Lisp::Name));
+        }
+    }
+
+    TEST_METHOD(Test_MainVersion)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-v");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent().Trim();
+            QVERIFY(s.StartsWith(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date));
+        }
+    }
+
+    TEST_METHOD(Test_MainExecute)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(print (+ 1 2))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s == "3");
+        }
+    }
+
+    TEST_METHOD(Test_MainExecuteAutoBlockDecorate)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(println \"hello world\") (println \"done.\")");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("hello world"));
+            QVERIFY(s.Contains("done"));
+        }
+    }
+
+    TEST_METHOD(Test_MainInteractiveImport)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
+        {
+            string useForInput = "(import fuellib)\nmacros\nmodules\nfuncs\n";
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-i");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains(".\\Library\\fuellib.fuel"));
+            //QVERIFY(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
+            QVERIFY(s.Contains("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel"));
+        }
+    }
+
+    TEST_METHOD(Test_MainInteractiveDoc)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("doc\ndoc if"))
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            string useForInput = "doc\ndoc if";
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-i");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("doc --> (doc functionname ...)"));
+            QVERIFY(s.Contains("Returns and shows the documentation of all builtin functions or for the given function name(s)."));
+            QVERIFY(s.Contains("-------------------------------"));
+        }
+    }
+
+    TEST_METHOD(Test_MainInteractiveSearchDoc)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("searchdoc arg"))
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            string useForInput = "searchdoc arg";
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-i");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Syntax: (argscount)"));
+            QVERIFY(s.Contains("Syntax: (args)"));
+            QVERIFY(s.Contains("Syntax: (arg number)"));
+        }
+    }
+
+    TEST_METHOD(Test_MultiPrintLn)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("TestData\\multiprintln.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("hello\nworld\ndone."));
+        }
+    }
+
+    TEST_METHOD(Test_WriteAndReadFile)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("TestData\\writereadfile.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("exists file =  #t"));
+            QVERIFY(s.Contains("test non existing file =  #f"));
+            QVERIFY(s.Contains("is equal =  #t"));
+        }
+    }
+
+    TEST_METHOD(Test_Profile)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-m");
+            args.push_back("TestData\\simple.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Execution time ="));
+        }
+    }
+
+    TEST_METHOD(Test_Trace)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-t");
+            args.push_back("TestData\\simple.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("--> do"));
+            QVERIFY(s.Contains("--> print"));
+        }
+    }
+
+    TEST_METHOD(Test_MainInteractive)
+    {
+        //using (var cr = new ConsoleRedirector("help\nfuncs\nbuiltins\nq\n"))
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            string useForInput = "help\nfuncs\nbuiltins\nq\n";
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-i");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            //TestContext.WriteLine("Result=" + result);
+            QVERIFY(s.Contains("DBG>"));
+            QVERIFY(s.Contains("Type \"help\" for informations."));
+            QVERIFY(s.Contains("help for interactive loop:")); // help
+            QVERIFY(s.Contains("equal --> function (equal expr1 expr2)             : Function"));
+            QVERIFY(s.Contains("define-macro --> function (define-macro name (arguments) statement) : Function  : module=<builtin>"));
+        }
+    }
+
+    TEST_METHOD(Test_MainDebuggerExecute)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n"))
+        {
+            const string script = "(do\n\
+(def a 42)\n\
+(print (+ 1 2))\n\
+(print (* 3 4 5)))\n";
+
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            string useForInput = "r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n";
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-d");
+            args.push_back("-e");
+            args.push_back(script);
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("DBG>"));
+            QVERIFY(s.Contains("Type \"help\" for informations."));
+            QVERIFY(s.Contains("--> do line=1 start=1 stop=3"));
+            QVERIFY(s.Contains("help for interactive loop:")); // help
+            QVERIFY(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
+            QVERIFY(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
+            QVERIFY(s.Contains("a --> 42                                       : Int")); // locals / globals
+            QVERIFY(s.Contains("(def a 42)")); // code
+            QVERIFY(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs
+        }
+    }
+
+    TEST_METHOD(Test_DebugFile)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout"))
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            string useForInput = "b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout";
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-d");
+            args.push_back("TestData\\testdebugger.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("FUEL(isp)-DBG>                    x --> 4                                        : Int "));
+            QVERIFY(s.Contains("       1 name=<main>                              lineno=11   module=TestData\\testdebugger.fuel"));
+            QVERIFY(s.Contains("       2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
+            QVERIFY(s.Contains("-->    3 name=f                                   lineno=4    module=TestData\\testdebugger.fuel"));
+            QVERIFY(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+            QVERIFY(s.Contains("#1   line=4     module=TestData\\testdebugger.fuel condition="));
+            QVERIFY(s.Contains("-->    2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
+            QVERIFY(s.Contains("  4 B  --> 	   (+ x 1)"));
+            QVERIFY(s.Contains("  8    --> 	   (* x x (f x))"));
+            QVERIFY(s.Contains("  4 B      	   (+ x 1)"));
+            QVERIFY(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
+            QVERIFY(s.Contains("FUEL(isp) v0.99.3 (for C++) from 12.1.2019, (C) by Michael Neuroth"));
+            QVERIFY(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
+        }
+    }
+
+    TEST_METHOD(Test_DebugSetBreakpoints)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("b \"module name\":4 (== a 4)\nlist"))
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            string useForInput = "b \"module name\":4 (== a 4)\nlist";
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-d");
+            args.push_back("TestData\\simple.fuel");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("#1   line=4     module=module name               condition=(== a 4)"));
+        }
+    }
+
+    TEST_METHOD(Test_DebugModule)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector("b .\\testmodule.fuel:4\nlist\nr\nk\nl"))
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            string useForInput = "b .\\Library\\testmodule.fuel:4\nlist\nr\nk\nl";
+            input->SetContent(useForInput);
+            input->EnableFromString(true);
+            std::vector<string> args;
+            args.push_back("-d");
+            args.push_back("TestData\\test.fuel");
+            args.push_back("-l=.");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+            QVERIFY(s.Contains("#1   line=4     module=.\\Library\\testmodule.fuel condition="));
+            QVERIFY(s.Contains("       1 name=<main>                              lineno=4    module=TestData\\test.fuel"));
+            QVERIFY(s.Contains("-->    2 name=blub                                lineno=4    module=.\\Library\\testmodule.fuel"));
+            QVERIFY(s.Contains("x --> 8                                        : Int"));
+        }
+    }
+
+    TEST_METHOD(Test_Documentation)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("--doc");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("lambda"));
+            QVERIFY(s.Contains("Syntax: (lambda (arguments) block)"));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestParserBracketsOutOfBalance)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(print ( (+ 1 2))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Brackets out of balance --> line=2 start=17 stop=18 module="));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestParserUnexpectedToken)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("dummy (print (+ 1 2))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("List expected in do --> line=1 start=0 stop=5 module="));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestFunctionNotFound)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(unknown-fcn (+ 1 2))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Function \"unknown-fcn\" not found --> line=1 start=1 stop=12"));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestSymbolNotFound)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(setf a 5)");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Symbol a not found --> line=1 start=1 stop=5"));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestListExpectedInDo)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(do (print 3) 5)");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("List expected in do --> line=1 start=13 stop=15"));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestBadArgumentCount)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(do (print 3) (defn x))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Bad argument count in def, has 1 expected 3 --> line=1 start=15 stop=19"));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestNoFunction)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(do (print 3) (map 3 '(1 2 3)))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("No function in map --> line=1 start=15 stop=18"));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestNoList)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(do (print 3) (map (lambda (x) (print x)) 3))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("No list in map --> line=1 start=40 stop=40"));
+        }
+    }
+
+    TEST_METHOD(Test_MainTestSymbolExpected)
+    {
+        //using (ConsoleRedirector cr = new ConsoleRedirector())
+        {
+            std::shared_ptr<TextWriter> output = std::make_shared<TextWriter>();
+            std::shared_ptr<TextReader> input = std::make_shared<TextReader>();
+            output->EnableToString(true);
+            std::vector<string> args;
+            args.push_back("-e");
+            args.push_back("(do (print 3) (def 4 \"test\"))");
+            Fuel::MainExtended(args, output, input);
+
+            string s = output->GetContent();
+            QVERIFY(s.Contains("Symbol expected --> line=1 start=15 stop=18"));
+        }
+    }
+
+    // *****************************
+
+    TEST_METHOD(Test_TestIndexOfInString)
+    {
+        CppLisp::string target("abc def blub 123");
+
+        QCOMPARE((size_t)4, target.IndexOf("def", "nix"));
+        QCOMPARE(CppLisp::string::npos, target.IndexOf("test", "nix"));
+    }
+
+    // *****************************
+    // *****************************
+
     void cleanupTestCase()
     {
         qDebug("CLEANUP fuel unit tests.");
     }
 };
-
-QtLispInterpreterUnitTestsTest::QtLispInterpreterUnitTestsTest()
-{
-}
-
-void QtLispInterpreterUnitTestsTest::testCreateVariant()
-{
-    LispVariant * variant = new LispVariant(LispType::_Nil);
-    QVERIFY(variant != 0);
-
-    delete variant;
-    variant = new LispVariant(std::make_shared<object>(3));
-    QVERIFY(variant->IsInt());
-    QVERIFY(3 == variant->IntValue());
-
-    delete variant;
-    variant = new LispVariant(std::make_shared<object>(3.1415));
-    QVERIFY(variant->IsDouble());
-    QVERIFY(3.1415 == variant->DoubleValue());
-
-    delete variant;
-    variant = new LispVariant(std::make_shared<object>(string("text")));
-    QVERIFY(variant->IsString());
-
-    delete variant;
-    variant = new LispVariant(std::make_shared<object>("blub"));
-    QVERIFY(variant->IsString());
-    QVERIFY(string("blub") == variant->ToString());
-}
-
-void QtLispInterpreterUnitTestsTest::testVariantCompare()
-{
-    std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
-    std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
-    std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
-    std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(string("abc"))));
-    QVERIFY(variant1->CompareTo(variant2) < 0);
-    QVERIFY(variant2->CompareTo(variant1) > 0);
-    QVERIFY(variant1->CompareTo(std::make_shared<object>(1.23)) > 0);
-    QVERIFY(variant1->CompareTo(std::make_shared<object>(-5)) > 0);
-    QVERIFY(variant3->CompareTo(std::make_shared<object>(42)) == 0);
-    QVERIFY(variant4->CompareTo(std::make_shared<object>("abc")) == 0);
-    QVERIFY(variant4->CompareTo(std::make_shared<object>("xyz")) < 0);
-}
-
-void QtLispInterpreterUnitTestsTest::testVariantConvert()
-{
-    std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
-    std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
-    std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
-    std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>("4.5")));
-    std::shared_ptr<LispVariant> variant5 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(true)));
-    std::shared_ptr<LispVariant> variant6 = std::make_shared<LispVariant>(LispVariant(LispType::_Int, std::make_shared<object>(0)));
-    QVERIFY(true == variant1->ToBool());
-    QVERIFY(true == variant3->ToBool());
-    QVERIFY(false == variant6->ToBool());
-    QVERIFY(4.5 == variant4->ToDouble());
-    QVERIFY(1.0 == variant5->ToDouble());
-    QVERIFY(56 == variant2->ToInt());
-    QVERIFY(true == variant2->ToBool());
-}
-
-void QtLispInterpreterUnitTestsTest::testVariantOperations()
-{
-    std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
-    std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
-    std::shared_ptr<LispVariant> variant3 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(42)));
-    std::shared_ptr<LispVariant> variant4 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(45)));
-    QVERIFY(1890 == (*variant3 * *variant4).ToInt());
-    QVERIFY(60.4 == (*variant1 + *variant2).ToDouble());
-}
-
-void QtLispInterpreterUnitTestsTest::testVariantEqualOp()
-{
-    std::shared_ptr<LispVariant> variant1 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
-    std::shared_ptr<LispVariant> variant2 = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(56.1)));
-    QVERIFY(!LispVariant::EqualOp(*variant1, *variant2));
-    QVERIFY(LispVariant::EqualOp(*variant1, *variant1));
-}
-
-void QtLispInterpreterUnitTestsTest::testVariantCastError()
-{
-    try
-    {
-        std::shared_ptr<LispVariant> variant = std::make_shared<LispVariant>(LispVariant(std::make_shared<object>(4.3)));
-        //Assert::IsNotNull(variant);
-        int value = variant->IntValue();
-        QVERIFY(4 == value);      // will not be evaluated because of expected exception !
-        QVERIFY(false);
-    }
-    catch (LispException)
-    {
-        QVERIFY(true);
-    }
-}
-
-void QtLispInterpreterUnitTestsTest::testStringIndexOf()
-{
-    CppLisp::string target("abc def blub 123");
-
-    QVERIFY((size_t)4 == target.IndexOf("def", ""));
-    ///*size_t st =*/ target.IndexOf("test", "");
-    QVERIFY(std::string::npos == target.IndexOf("test", "nix"));
-}
 
 QTEST_APPLESS_MAIN(QtLispInterpreterUnitTestsTest)
 

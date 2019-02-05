@@ -29,6 +29,8 @@
 
 #include "../CppLispInterpreter/fuel.h"
 
+#include "FuelUnitTestHelper.h"
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace CppLisp;
@@ -42,7 +44,7 @@ namespace QtLispUnitTests
 		TEST_METHOD(Test_Debugger)
 		{
 			std::shared_ptr<LispDebugger> debugger = std::make_shared<LispDebugger>();
-			Assert::IsNotNull(debugger.get());
+			QVERIFY(debugger.get() != 0);
 		}
 
 		TEST_METHOD(Test_Main)
@@ -55,7 +57,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(std::vector<string>(), output, input);
 
 				string s = output->GetContent().Trim();
-				Assert::IsTrue(s.StartsWith(Lisp::Name));
+				QVERIFY(s.StartsWith(Lisp::Name));
 			}
 		}
 
@@ -71,7 +73,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.StartsWith("hello world !"));
+				QVERIFY(s.StartsWith("hello world !"));
 			}
 		}
 
@@ -87,9 +89,9 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Error executing script"));
-				Assert::IsTrue(s.Contains("printx"));
-				Assert::IsTrue(s.Contains("not found"));
+				QVERIFY(s.Contains("Error executing script"));
+				QVERIFY(s.Contains("printx"));
+				QVERIFY(s.Contains("not found"));
 			}
 		}
 
@@ -106,11 +108,11 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Error executing script"));
-				Assert::IsTrue(s.Contains("printx"));
-				Assert::IsTrue(s.Contains("not found"));
-				Assert::IsTrue(s.Contains("Callstack"));
-				Assert::IsTrue(s.Contains("Exception in"));
+				QVERIFY(s.Contains("Error executing script"));
+				QVERIFY(s.Contains("printx"));
+				QVERIFY(s.Contains("not found"));
+				QVERIFY(s.Contains("Callstack"));
+				QVERIFY(s.Contains("Exception in"));
 			}
 		}
 
@@ -126,7 +128,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent().Trim();
-				Assert::IsTrue(s.StartsWith(Lisp::Name));
+				QVERIFY(s.StartsWith(Lisp::Name));
 			}
 		}
 
@@ -142,7 +144,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent().Trim();
-				Assert::IsTrue(s.StartsWith(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date));
+				QVERIFY(s.StartsWith(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date));
 			}
 		}
 
@@ -159,7 +161,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 				
 				string s = output->GetContent();
-				Assert::IsTrue(s == "3");
+				QVERIFY(s == "3");
 			}
 		}
 
@@ -176,8 +178,8 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("hello world"));
-				Assert::IsTrue(s.Contains("done"));
+				QVERIFY(s.Contains("hello world"));
+				QVERIFY(s.Contains("done"));
 			}
 		}
 
@@ -196,9 +198,9 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains(".\\Library\\fuellib.fuel"));
-				//Assert::IsTrue(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
-				Assert::IsTrue(s.Contains("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel"));
+				QVERIFY(s.Contains(".\\Library\\fuellib.fuel"));
+				//QVERIFY(s.Contains("Dict-Remove--> function(Dict - Remove obj p0) : Function: module = .\\Library\\fuellib.fuel"));
+				QVERIFY(s.Contains("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel"));
 			}
 		}
 
@@ -217,9 +219,9 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("doc --> (doc functionname ...)"));
-				Assert::IsTrue(s.Contains("Returns and shows the documentation of all builtin functions or for the given function name(s)."));
-				Assert::IsTrue(s.Contains("-------------------------------"));
+				QVERIFY(s.Contains("doc --> (doc functionname ...)"));
+				QVERIFY(s.Contains("Returns and shows the documentation of all builtin functions or for the given function name(s)."));
+				QVERIFY(s.Contains("-------------------------------"));
 			}
 		}
 
@@ -238,9 +240,9 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Syntax: (argscount)"));
-				Assert::IsTrue(s.Contains("Syntax: (args)"));
-				Assert::IsTrue(s.Contains("Syntax: (arg number)"));
+				QVERIFY(s.Contains("Syntax: (argscount)"));
+				QVERIFY(s.Contains("Syntax: (args)"));
+				QVERIFY(s.Contains("Syntax: (arg number)"));
 			}
 		}
 
@@ -256,7 +258,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("hello\nworld\ndone."));
+				QVERIFY(s.Contains("hello\nworld\ndone."));
 			}
 		}
 
@@ -272,9 +274,9 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("exists file =  #t"));
-				Assert::IsTrue(s.Contains("test non existing file =  #f"));
-				Assert::IsTrue(s.Contains("is equal =  #t"));
+				QVERIFY(s.Contains("exists file =  #t"));
+				QVERIFY(s.Contains("test non existing file =  #f"));
+				QVERIFY(s.Contains("is equal =  #t"));
 			}
 		}
 
@@ -291,7 +293,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Execution time ="));
+				QVERIFY(s.Contains("Execution time ="));
 			}
 		}
 
@@ -308,8 +310,8 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("--> do"));
-				Assert::IsTrue(s.Contains("--> print"));
+				QVERIFY(s.Contains("--> do"));
+				QVERIFY(s.Contains("--> print"));
 			}
 		}
 
@@ -329,11 +331,11 @@ namespace QtLispUnitTests
 
 				string s = output->GetContent();
 				//TestContext.WriteLine("Result=" + result);
-				Assert::IsTrue(s.Contains("DBG>"));
-				Assert::IsTrue(s.Contains("Type \"help\" for informations."));
-				Assert::IsTrue(s.Contains("help for interactive loop:")); // help
-				Assert::IsTrue(s.Contains("equal --> function (equal expr1 expr2)             : Function"));
-				Assert::IsTrue(s.Contains("define-macro --> function (define-macro name (arguments) statement) : Function  : module=<builtin>"));
+				QVERIFY(s.Contains("DBG>"));
+				QVERIFY(s.Contains("Type \"help\" for informations."));
+				QVERIFY(s.Contains("help for interactive loop:")); // help
+				QVERIFY(s.Contains("equal --> function (equal expr1 expr2)             : Function"));
+				QVERIFY(s.Contains("define-macro --> function (define-macro name (arguments) statement) : Function  : module=<builtin>"));
 			}
 		}
 	
@@ -359,15 +361,15 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("DBG>"));
-				Assert::IsTrue(s.Contains("Type \"help\" for informations."));
-				Assert::IsTrue(s.Contains("--> do line=1 start=1 stop=3"));
-				Assert::IsTrue(s.Contains("help for interactive loop:")); // help
-				Assert::IsTrue(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
-				Assert::IsTrue(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
-				Assert::IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
-				Assert::IsTrue(s.Contains("(def a 42)")); // code
-				Assert::IsTrue(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs                    
+				QVERIFY(s.Contains("DBG>"));
+				QVERIFY(s.Contains("Type \"help\" for informations."));
+				QVERIFY(s.Contains("--> do line=1 start=1 stop=3"));
+				QVERIFY(s.Contains("help for interactive loop:")); // help
+				QVERIFY(s.Contains("#2   line=4     module=command-line              condition=(= a 42)")); // list
+				QVERIFY(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
+				QVERIFY(s.Contains("a --> 42                                       : Int")); // locals / globals                               
+				QVERIFY(s.Contains("(def a 42)")); // code
+				QVERIFY(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs                    
 			}
 		}
 
@@ -387,19 +389,19 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("FUEL(isp)-DBG>                    x --> 4                                        : Int "));
-				Assert::IsTrue(s.Contains("       1 name=<main>                              lineno=11   module=TestData\\testdebugger.fuel"));
-				Assert::IsTrue(s.Contains("       2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
-				Assert::IsTrue(s.Contains("-->    3 name=f                                   lineno=4    module=TestData\\testdebugger.fuel"));
-				Assert::IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
-				Assert::IsTrue(s.Contains("#1   line=4     module=TestData\\testdebugger.fuel condition="));
-				Assert::IsTrue(s.Contains("-->    2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
-				Assert::IsTrue(s.Contains("  4 B  --> 	   (+ x 1)"));
-				Assert::IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
-				Assert::IsTrue(s.Contains("  4 B      	   (+ x 1)"));
-				Assert::IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
-				Assert::IsTrue(s.Contains("FUEL(isp) v0.99.3 (for C++) from 12.1.2019, (C) by Michael Neuroth"));
-				Assert::IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
+				QVERIFY(s.Contains("FUEL(isp)-DBG>                    x --> 4                                        : Int "));
+				QVERIFY(s.Contains("       1 name=<main>                              lineno=11   module=TestData\\testdebugger.fuel"));
+				QVERIFY(s.Contains("       2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
+				QVERIFY(s.Contains("-->    3 name=f                                   lineno=4    module=TestData\\testdebugger.fuel"));
+				QVERIFY(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+				QVERIFY(s.Contains("#1   line=4     module=TestData\\testdebugger.fuel condition="));
+				QVERIFY(s.Contains("-->    2 name=g                                   lineno=8    module=TestData\\testdebugger.fuel"));
+				QVERIFY(s.Contains("  4 B  --> 	   (+ x 1)"));
+				QVERIFY(s.Contains("  8    --> 	   (* x x (f x))"));
+				QVERIFY(s.Contains("  4 B      	   (+ x 1)"));
+				QVERIFY(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
+				QVERIFY(s.Contains("FUEL(isp) v0.99.3 (for C++) from 12.1.2019, (C) by Michael Neuroth"));
+				QVERIFY(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
 			}
 		}
 
@@ -419,7 +421,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("#1   line=4     module=module name               condition=(== a 4)"));
+				QVERIFY(s.Contains("#1   line=4     module=module name               condition=(== a 4)"));
 			}
 		}
 
@@ -440,11 +442,11 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
-				Assert::IsTrue(s.Contains("#1   line=4     module=.\\Library\\testmodule.fuel condition="));
-				Assert::IsTrue(s.Contains("       1 name=<main>                              lineno=4    module=TestData\\test.fuel"));
-				Assert::IsTrue(s.Contains("-->    2 name=blub                                lineno=4    module=.\\Library\\testmodule.fuel"));
-				Assert::IsTrue(s.Contains("x --> 8                                        : Int"));
+				QVERIFY(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
+				QVERIFY(s.Contains("#1   line=4     module=.\\Library\\testmodule.fuel condition="));
+				QVERIFY(s.Contains("       1 name=<main>                              lineno=4    module=TestData\\test.fuel"));
+				QVERIFY(s.Contains("-->    2 name=blub                                lineno=4    module=.\\Library\\testmodule.fuel"));
+				QVERIFY(s.Contains("x --> 8                                        : Int"));
 			}
 		}
 
@@ -460,8 +462,8 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("lambda"));
-				Assert::IsTrue(s.Contains("Syntax: (lambda (arguments) block)"));
+				QVERIFY(s.Contains("lambda"));
+				QVERIFY(s.Contains("Syntax: (lambda (arguments) block)"));
 			}
 		}
 
@@ -478,7 +480,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Brackets out of balance --> line=2 start=17 stop=18 module="));
+				QVERIFY(s.Contains("Brackets out of balance --> line=2 start=17 stop=18 module="));
 			}
 		}
 
@@ -495,7 +497,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("List expected in do --> line=1 start=0 stop=5 module="));
+				QVERIFY(s.Contains("List expected in do --> line=1 start=0 stop=5 module="));
 			}
 		}
 
@@ -512,7 +514,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Function \"unknown-fcn\" not found --> line=1 start=1 stop=12"));
+				QVERIFY(s.Contains("Function \"unknown-fcn\" not found --> line=1 start=1 stop=12"));
 			}
 		}
 
@@ -529,7 +531,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Symbol a not found --> line=1 start=1 stop=5"));
+				QVERIFY(s.Contains("Symbol a not found --> line=1 start=1 stop=5"));
 			}
 		}
 
@@ -546,7 +548,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("List expected in do --> line=1 start=13 stop=15"));
+				QVERIFY(s.Contains("List expected in do --> line=1 start=13 stop=15"));
 			}
 		}
 		
@@ -563,7 +565,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Bad argument count in def, has 1 expected 3 --> line=1 start=15 stop=19"));
+				QVERIFY(s.Contains("Bad argument count in def, has 1 expected 3 --> line=1 start=15 stop=19"));
 			}
 		}
 
@@ -580,7 +582,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("No function in map --> line=1 start=15 stop=18"));
+				QVERIFY(s.Contains("No function in map --> line=1 start=15 stop=18"));
 			}
 		}
 
@@ -597,7 +599,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("No list in map --> line=1 start=40 stop=40"));
+				QVERIFY(s.Contains("No list in map --> line=1 start=40 stop=40"));
 			}
 		}
 
@@ -614,7 +616,7 @@ namespace QtLispUnitTests
 				Fuel::MainExtended(args, output, input);
 
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("Symbol expected --> line=1 start=15 stop=18"));
+				QVERIFY(s.Contains("Symbol expected --> line=1 start=15 stop=18"));
 			}
 		}
 
@@ -632,24 +634,24 @@ namespace QtLispUnitTests
 
 				// TODO --> does not work for C++ yet
 				string s = output->GetContent();
-				Assert::IsTrue(s.Contains("DictCount= 2"));
-				Assert::IsTrue(s.Contains("NewDictCount= 0"));
-				Assert::IsTrue(s.Contains("DirListType= List"));
-				Assert::IsTrue(s.Contains("File= .\\FuelCompiler.dll"));
-				Assert::IsTrue(s.Contains("File= .\\FuelDebugger.dll"));
-				Assert::IsTrue(s.Contains("File= .\\FuelInterpreter.dll"));
-				Assert::IsTrue(s.Contains("File= .\\fuel.exe"));
-				Assert::IsTrue(s.Contains("File= .\\teststdlib.fuel"));
-				Assert::IsTrue(s.Contains("ListCount= 4"));
-				Assert::IsTrue(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
-				Assert::IsTrue(s.Contains("newitem= 12"));
-				Assert::IsTrue(s.Contains("NewListCount= 0"));
-				Assert::IsTrue(s.Contains("ArrayCount= 5"));
-				Assert::IsTrue(s.Contains("ArrayItem1= 1"));
-				Assert::IsTrue(s.Contains("ArrayItem2= blub"));
-				Assert::IsTrue(s.Contains("ArrayItem3= #t"));
-				Assert::IsTrue(s.Contains("ArrayItem4= 42"));
-				Assert::IsTrue(s.Contains("ArrayItem5= 123"));
+				QVERIFY(s.Contains("DictCount= 2"));
+				QVERIFY(s.Contains("NewDictCount= 0"));
+				QVERIFY(s.Contains("DirListType= List"));
+				QVERIFY(s.Contains("File= .\\FuelCompiler.dll"));
+				QVERIFY(s.Contains("File= .\\FuelDebugger.dll"));
+				QVERIFY(s.Contains("File= .\\FuelInterpreter.dll"));
+				QVERIFY(s.Contains("File= .\\fuel.exe"));
+				QVERIFY(s.Contains("File= .\\teststdlib.fuel"));
+				QVERIFY(s.Contains("ListCount= 4"));
+				QVERIFY(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
+				QVERIFY(s.Contains("newitem= 12"));
+				QVERIFY(s.Contains("NewListCount= 0"));
+				QVERIFY(s.Contains("ArrayCount= 5"));
+				QVERIFY(s.Contains("ArrayItem1= 1"));
+				QVERIFY(s.Contains("ArrayItem2= blub"));
+				QVERIFY(s.Contains("ArrayItem3= #t"));
+				QVERIFY(s.Contains("ArrayItem4= 42"));
+				QVERIFY(s.Contains("ArrayItem5= 123"));
 			}
 		}
 */
