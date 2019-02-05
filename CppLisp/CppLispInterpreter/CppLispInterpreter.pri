@@ -13,7 +13,8 @@ SOURCES += \
         $$PWD/Debugger.cpp \
         $$PWD/Utils.cpp \
         $$PWD/Exception.cpp \
-        $$PWD/Lisp.cpp
+        $$PWD/Lisp.cpp \
+        $$PWD/Fuel.cpp
 
 HEADERS += \
         $$PWD/csobject.h \
