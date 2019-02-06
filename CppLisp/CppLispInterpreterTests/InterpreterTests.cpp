@@ -682,7 +682,7 @@ namespace QtLispUnitTests
 		TEST_METHOD(Test_MacrosExpand1)
 		{
 #ifdef ENABLE_COMPILE_TIME_MACROS
-			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (define-macro-expand blub (x y) (println x y)) (println (quote (1 2 3))) (blub 3 4))");
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (define-macro-expand blub (x y) '(println x y)) (println (quote (1 2 3))) (blub 3 4))");
 			QCOMPARE("3 4", result->ToString().c_str());
 #else
 			QVERIFY(true);
@@ -694,17 +694,17 @@ namespace QtLispUnitTests
 			const string macroExpandScript = "(do\
 				(define-macro-expand first-macro\
 					(a b)\
-					(do\
+					'(do\
 						(def i 1)\
 						(+ a b i)\
-					)\
+					 )\
 				)\
 \
 				(define-macro-expand second-macro\
 					(x y)\
-					(do\
+					'(do\
 						(* x y (first-macro x y))\
-					)\
+					 )\
 				)\
 \
 				(def m (second-macro 4 3))\
@@ -777,20 +777,20 @@ namespace QtLispUnitTests
 			const string macroExpandScript = "(do\
 				(define-macro-expand first-macro\
 					(a b)\
-					(do\
+					'(do\
 						(println first-macro)\
 						(def i 1)\
 						(+ a b i)\
-					)\
+					 )\
 				)\
 \
 				(define-macro-expand second-macro\
 					(x y)\
-					(do\
+					'(do\
 						(println second-macro)\
 							(* x y (first-macro (+ x 1) (+ y 2)))\
 						)\
-					)\
+					 )\
 \
 				(def m (second-macro 4 3))\
 			)";
@@ -817,19 +817,19 @@ namespace QtLispUnitTests
 			const string macroExpandScript = "(do\
 				(define-macro-expand first-macro\
 					(a b)\
-					(do\
+					'(do\
 						(println first-macro)\
 						(def i 1)\
 						(+ a b i)\
-					)\
+					 )\
 				)\
 \
 				(define-macro-expand second-macro\
 					(x y)\
-					(do\
+					'(do\
 						(println second-macro)\
 						(* x y (first-macro x (+ y 4)))\
-					)\
+					 )\
 				)\
 \
 				(def m (second-macro 4 3))\
@@ -857,19 +857,19 @@ namespace QtLispUnitTests
 			const string macroExpandScript = "(do\
 				(define-macro-expand first-macro\
 					(a b)\
-					(do\
+					'(do\
 						(println first-macro)\
 						(def i 1)\
 						(+ a b i)\
-					)\
+					 )\
 				)\
 \
 				(define-macro-expand second-macro\
 					(x y)\
-					(do\
+					'(do\
 						(println second-macro)\
 						(* x y)\
-					)\
+					 )\
 				)\
 \
 				(def m (second-macro 4 (first-macro 6 3)))\
@@ -898,9 +898,7 @@ namespace QtLispUnitTests
 			{
 				var scope = LispEnvironment::CreateDefaultScope();
 				scope->Output->EnableToString(true);
-				std::shared_ptr<LispVariant> result =
-					Lisp::Eval(
-						"(do (def a 42) (define-macro-expand my-setf (x value) (setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))", scope);
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a 42) (define-macro-expand my-setf (x value) '(setf x value)) (my-setf a (+ \"blub\" \"xyz\")) (println a))", scope);
 				QCOMPARE("blubxyz", result->ToString().c_str());
 			}
 #else

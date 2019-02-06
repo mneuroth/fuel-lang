@@ -156,6 +156,12 @@ Microsoft Visual Studio and build the solution. Or use the qmake tool from [Qt](
     >cd CppLisp/CppLispInterpreter
     >qmake CppLispInterpreter.pro
     >make
+    
+The CMake build tool is also supported:
+
+    >cd CppLisp/CppLispInterpreter
+    >cmake CMakeLists.txt
+    >make    
 
 Deployment  
 ----------

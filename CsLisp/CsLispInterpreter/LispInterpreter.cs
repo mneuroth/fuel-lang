@@ -261,7 +261,8 @@ namespace CsLisp
                 if (macro is LispMacroCompileTimeExpand)
                 {
                     var macroExpand = (LispMacroCompileTimeExpand)macro;
-                    return ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, ref anyMacroReplaced);
+                    var astWithReplacedArguments = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, ref anyMacroReplaced);
+                    return EvalAst(astWithReplacedArguments, globalScope);
                 }
             }
 

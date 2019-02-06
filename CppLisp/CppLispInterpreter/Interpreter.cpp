@@ -239,7 +239,9 @@ namespace CppLisp
 			if (macro->IsLispMacroCompileTimeExpand())
 			{
 				var macroExpand = macro->ToLispMacroCompileTimeExpand();
-				return std::make_shared<object>(*ReplaceFormalArgumentsInExpression(macroExpand->FormalArguments, std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList), macroExpand->Expression, /*ref*/ anyMacroReplaced));
+				var astWithReplacedArguments = std::make_shared<object>(*ReplaceFormalArgumentsInExpression(macroExpand->FormalArguments, std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList), macroExpand->Expression, /*ref*/ anyMacroReplaced));
+				var processedAst = EvalAst(astWithReplacedArguments, globalScope);
+				return std::make_shared<object>(*(processedAst->ListValue())); //  std::make_shared<object>(*processedAst);
 			}
 		}
 
