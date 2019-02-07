@@ -1054,7 +1054,7 @@ private Q_SLOTS:
                     (println first-macro)\
                     (def i 1)\
                     (+ a b i)\
-                '')\
+                 )\
             )\
 \
             (define-macro-expand second-macro\
