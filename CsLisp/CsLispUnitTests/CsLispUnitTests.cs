@@ -1,4 +1,4 @@
-﻿/*
+/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
  * Copyright (c) 2016 Michael Neuroth
@@ -1569,7 +1569,7 @@ namespace LispUnitTests
 
                 string s = cr.ToString().Trim();
                 Assert.IsTrue(s.Contains("1"));
-                Assert.IsTrue(s.Contains("7"));
+                Assert.IsTrue(s.Contains("5"));
                 Assert.IsTrue(s.Contains("7"));
             }
         }

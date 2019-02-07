@@ -130,7 +130,7 @@ namespace CppLisp
 
 				bool anyMacroReplaced = false;
 				var runtimeMacro = macro->ToLispMacroRuntimeEvaluate();
-				var expression = ReplaceFormalArgumentsInExpression(runtimeMacro->FormalArguments, astAsList, runtimeMacro->Expression, /*ref*/ anyMacroReplaced);
+				var expression = ReplaceFormalArgumentsInExpression(runtimeMacro->FormalArguments, astAsList, runtimeMacro->Expression, scope, /*ref*/ anyMacroReplaced);
 
 				return EvalAst(std::make_shared<object>(*expression), scope);
 			}
@@ -239,7 +239,7 @@ namespace CppLisp
 			if (macro->IsLispMacroCompileTimeExpand())
 			{
 				var macroExpand = macro->ToLispMacroCompileTimeExpand();
-				var astWithReplacedArguments = std::make_shared<object>(*ReplaceFormalArgumentsInExpression(macroExpand->FormalArguments, std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList), macroExpand->Expression, /*ref*/ anyMacroReplaced));
+				var astWithReplacedArguments = std::make_shared<object>(*ReplaceFormalArgumentsInExpression(macroExpand->FormalArguments, std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList), macroExpand->Expression, globalScope, /*ref*/ anyMacroReplaced));
 				var processedAst = EvalAst(astWithReplacedArguments, globalScope);
 				return std::make_shared<object>(*(processedAst->ListValue())); //  std::make_shared<object>(*processedAst);
 			}
@@ -316,7 +316,7 @@ namespace CppLisp
 		return ret;
 	}
 
-	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ReplaceFormalArgumentsInExpression(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> formalArguments, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, /*ref*/ bool & anyMacroReplaced)
+	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ReplaceFormalArgumentsInExpression(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> formalArguments, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, std::shared_ptr<LispScope> scope, /*ref*/ bool & anyMacroReplaced)
 	{
 		// replace (quoted-macro-args) --> '(<real_args>)
 		int i = 1;
@@ -334,7 +334,7 @@ namespace CppLisp
 			auto elem = (*astAsList)[i];
 			if (elem->IsIEnumerableOfObject() || elem->IsList())
 			{
-				value = elem;
+				value = /*elem;*/ ExpandMacros((*astAsList)[i], scope, /*ref*/ anyMacroReplaced);
 			}
 			else
 			{

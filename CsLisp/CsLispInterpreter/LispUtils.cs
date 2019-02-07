@@ -285,6 +285,25 @@ namespace CsLisp
             return ret;
         }
 
+        /// <summary>
+        /// Returns a container if possible.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <returns>The container.</returns>
+        public static IEnumerable<object> GetAsContainer(object item)
+        {
+            if (item is IEnumerable<object>)
+            {
+                return item as IEnumerable<object>;
+            }
+            if ((item is LispVariant) && ((LispVariant)item).IsList)
+            {
+                return ((LispVariant)item).ListRef;
+            }
+
+            return null;
+        }
+
         #endregion
     }
 

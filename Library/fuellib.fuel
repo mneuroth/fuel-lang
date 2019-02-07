@@ -78,54 +78,56 @@
              (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))
           )
         )
+        (delvar (first 'counterinfo))
       )
   )
 
   (define-macro-eval setq (symbol value)
-	  (setf symbol value)
+    (setf symbol value)
   )
 
+  ;; macro to define structs, example: (defstruct point x y) creates a struct with name point which has two fields with name x and y
   (define-macro-eval defstruct (name)
     (do
         
       (eval 
-	     (list 'defn (sym (+ "make-" name)) (cdr (quoted-macro-args)) 
+        (list 'defn (sym (+ "make-" name)) (cdr (quoted-macro-args)) 
             `(list ,(sym (+ "#" name)) ,@(cdr (quoted-macro-args)))
          )
       )
 
-	  (eval 
-	     (list 'defn (sym (+ "is-" name "-p")) '(data)		 
+    (eval 
+        (list 'defn (sym (+ "is-" name "-p")) '(data) 
             `(and (== (type data) 6) (== (first data) ,(sym (+ "#" name))))
          )
-	  )
+    )
 
-	  (dotimes (__i (- (len (quoted-macro-args)) 1))
-	    (eval
-  			(list 'defn (sym (+ "get-" name "-" (str (nth (+ __i 1) (quoted-macro-args))))) '(data)
-			   `(nth (+ ,__i 1) data)  
+    (dotimes (__i (- (len (quoted-macro-args)) 1))
+        (eval
+            (list 'defn (sym (+ "get-" name "-" (str (nth (+ __i 1) (quoted-macro-args))))) '(data)
+            `(nth (+ ,__i 1) data)  
                ;; TODO: handle case when (need-l-value) is #t --> return l-value of struct list
-			)
+            )
         )
       )
       
       ;; remove temporary local variable needed for code generation
       (delvar '__i)
-	)
+    )
   )
 
-  ;; foreach loop  
+  ;; foreach loop, example: (foreach '(1 2 3) (lambda (x) (println x)))  
   (defn foreach (container fcn) 
      (do 
-	   (def __i 0)
-	   (def max (len container))
-	   (while (< __i max)
-	     (do 
-		   (apply fcn (list (nth __i container)))
-		   (setf __i (+ __i 1))
-		 )
-	   )
-	 )
+       (def __i 0)
+       (def max (len container))
+       (while (< __i max)
+          (do 
+            (apply fcn (list (nth __i container)))
+            (setf __i (+ __i 1))
+          )
+    )
+    )
   )
 
   ;; create list of symbols count=4 --> (p1 p2 p3 p4)
@@ -136,7 +138,7 @@
          (while (< i argcount)
            (do 
              (setf result (append result (list (sym (+ "p" (string i))))))
-  			 (setf i (+ i 1))
+             (setf i (+ i 1))
            )
          )
          (return result)
@@ -167,7 +169,7 @@
          (while (< i argcount)
            (do 
              (setf _result (append _result (list (sym (+ "p" (string i))))))
-  			 (setf i (+ i 1))
+             (setf i (+ i 1))
            )
          )
          '(println _result)
@@ -209,53 +211,53 @@
             (setf result (+ result "))"))
             ;(setf result (+ result (str '(gdefn (sym (string "create-" lisp-name)) () (call full-class-name)))))
             ;(setf result (str '(gdefn (sym (string "create-" lisp-name)) () (call full-class-name))))
-			
-			(def methodInfos (native-methods full-class-name))
-			(foreach methodInfos 
+
+            (def methodInfos (native-methods full-class-name))
+            (foreach methodInfos 
                (lambda (methodNameAndArgCount) 
-    			   (do 
-    			     (def methodName (first methodNameAndArgCount))
-    			     (def methodArgsCount (nth 1 methodNameAndArgCount))
+                 (do 
+                     (def methodName (first methodNameAndArgCount))
+                     (def methodArgsCount (nth 1 methodNameAndArgCount))
                      (def isStatic (nth 2 methodNameAndArgCount))
-    			     (def netMethodName (nth 3 methodNameAndArgCount))
+                     (def netMethodName (nth 3 methodNameAndArgCount))
                      (def method-expr (create-native-method-expression (+ (str lisp-name) "-") full-class-name methodName netMethodName isStatic methodArgsCount))
                      ;(eval method-expr)
                      (setf result (+ result (str method-expr)))
                      ;(println method-expr)
                      ;(def method (create-native-method (+ (str lisp-name) "-") methodName methodArgsCount))
                      ;(evalstr method)
-    			   )
-			   )
-			)
+                 )
+               )
+            )
 
-			(def fieldInfos (native-fields full-class-name))
-			(foreach fieldInfos 
+            (def fieldInfos (native-fields full-class-name))
+            (foreach fieldInfos 
                (lambda (fieldName) 
-    			   (do 
+                  (do 
                      ;	(gdef Math-PI (field System.Math PI))
-					 (def field-expr (list 'def (sym (string lisp-name "-" fieldName)) (list 'field full-class-name fieldName) ))
-					 ;(eval field-expr)
+                     (def field-expr (list 'def (sym (string lisp-name "-" fieldName)) (list 'field full-class-name fieldName) ))
+                     ;(eval field-expr)
                      (setf result (+ result (str field-expr)))
-    			   )
-			   )
-			)
+                  )
+               )
+            )
             (setf result (+ result ")"))
-			;(println result)
+            ;(println result)
             (return result)
         )     
   )
   
   ;; create the standard library for fuel on .NET platforms
   (if (isNET)
-	(do
-	  (evalstr (create-native "Math" "System.Math"))
-	  (evalstr (create-native "File" "System.IO.File"))
-	  (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
-	  (evalstr (create-native "Directory" "System.IO.Directory"))
-	  (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
-	  (evalstr (create-native "Array" "System.Object[]"))
-	  (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
-	)
+    (do
+      (evalstr (create-native "Math" "System.Math"))
+      (evalstr (create-native "File" "System.IO.File"))
+      (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
+      (evalstr (create-native "Directory" "System.IO.Directory"))
+      (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
+      (evalstr (create-native "Array" "System.Object[]"))
+      (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
+    )
   )
   
 ;  (evalstr "(defn yyy (x) (+ x x x))")

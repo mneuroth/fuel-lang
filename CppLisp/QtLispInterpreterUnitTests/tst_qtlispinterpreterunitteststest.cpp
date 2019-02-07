@@ -1921,7 +1921,7 @@ private Q_SLOTS:
 
             string s = scope->Output->GetContent().Trim();
             QVERIFY(s.Contains("1"));
-            QVERIFY(s.Contains("7"));
+            QVERIFY(s.Contains("5"));
             QVERIFY(s.Contains("7"));
         }
     }

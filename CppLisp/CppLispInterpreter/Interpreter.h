@@ -95,7 +95,7 @@ namespace CppLisp
 		/*private*/ static LispBreakpointPosition GetPosInfo(std::shared_ptr<object> item);
 
 		/*private*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ReplaceSymbolWithValueInExpression(const LispVariant & symbol, std::shared_ptr<object> symbolValue, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, bool macroArgsReplace, /*ref*/ bool & replacedAnything);
-		/*private*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ReplaceFormalArgumentsInExpression(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> formalArguments, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, /*ref*/ bool & anyMacroReplaced);
+		/*private*/ static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ReplaceFormalArgumentsInExpression(std::shared_ptr<IEnumerable<std::shared_ptr<object>>> formalArguments, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> expression, std::shared_ptr<LispScope> scope, /*ref*/ bool & anyMacroReplaced);
 		/*private*/ static bool IsSymbol(std::shared_ptr<object> elem);
 
         //#endregion

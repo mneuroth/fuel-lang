@@ -152,7 +152,7 @@ namespace CsLisp
 
                     bool anyMacroReplaced = false;
                     var runtimeMacro = (LispMacroRuntimeEvaluate)macro;
-                    var expression = ReplaceFormalArgumentsInExpression(runtimeMacro.FormalArguments, astAsList, runtimeMacro.Expression, ref anyMacroReplaced);
+                    var expression = ReplaceFormalArgumentsInExpression(runtimeMacro.FormalArguments, astAsList, runtimeMacro.Expression, scope, ref anyMacroReplaced);
 
                     return EvalAst(expression, scope);
                 }
@@ -190,6 +190,9 @@ namespace CsLisp
             var arguments = new object[astWithResolvedValues.Count - 1];
             for (var i = 1; i < astWithResolvedValues.Count; i++)
             {
+                //var asContainer = LispUtils.GetAsContainer(astWithResolvedValues[i]);
+                //var needEvaluation = (asContainer != null) && !functionWrapper.IsSpecialForm;
+                //arguments[i - 1] = needEvaluation ? EvalAst(asContainer, scope) : astWithResolvedValues[i];
                 var needEvaluation = (astWithResolvedValues[i] is IEnumerable<object>) &&
                                      !functionWrapper.IsSpecialForm;
                 arguments[i - 1] = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
@@ -261,7 +264,7 @@ namespace CsLisp
                 if (macro is LispMacroCompileTimeExpand)
                 {
                     var macroExpand = (LispMacroCompileTimeExpand)macro;
-                    var astWithReplacedArguments = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, ref anyMacroReplaced);
+                    var astWithReplacedArguments = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, globalScope, ref anyMacroReplaced).ToList();   // PATCH
                     return EvalAst(astWithReplacedArguments, globalScope);
                 }
             }
@@ -344,7 +347,7 @@ namespace CsLisp
             return ret;
         }
 
-        private static IEnumerable<object> ReplaceFormalArgumentsInExpression(IEnumerable<object> formalArguments, IList<object> astAsList, IEnumerable<object> expression, ref bool anyMacroReplaced)
+        private static IEnumerable<object> ReplaceFormalArgumentsInExpression(IEnumerable<object> formalArguments, IList<object> astAsList, IEnumerable<object> expression, LispScope scope, ref bool anyMacroReplaced)
         {
             // replace (quoted-macro-args) --> '(<real_args>)
             int i = 1;
@@ -358,7 +361,15 @@ namespace CsLisp
                 object value;
                 if (astAsList[i] is IEnumerable<object>)
                 {
-                    value = astAsList[i];
+                    value = ExpandMacros(astAsList[i], scope, ref anyMacroReplaced);
+                    if (value is LispVariant)
+                    {
+                        var vairantValue = value as LispVariant;
+                        if (vairantValue.IsList)
+                        {
+                            value = vairantValue.ListValue;
+                        }
+                    }
                 }
                 else
                 {

@@ -1401,30 +1401,30 @@ std::shared_ptr<object> UnQuoteIfNeeded(std::shared_ptr<object> item, bool & isS
 	return item;
 }
 
-static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToEnumerable(std::shared_ptr<object> obj)
-{
-	if (obj->IsIEnumerableOfObject() /*enumerable != null*/ || obj->IsList())
-	{
-		var enumerable = obj->ToEnumerableOfObjectRef() /*as IEnumerable<object>*/;
-		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(enumerable);
-	}
-	if (obj->IsLispVariant())
-	{
-		const LispVariant & variant = obj->ToLispVariantRef() /*as LispVariant*/;
-		if (variant.IsList())
-		{
-			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(variant.ListValueRef());
-		}
-		else
-		{
-			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(IEnumerable<std::shared_ptr<object>>());
-		}
-	}
-	else
-	{
-		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(IEnumerable<std::shared_ptr<object>>());
-	}
-}
+//static std::shared_ptr<IEnumerable<std::shared_ptr<object>>> ToEnumerable(std::shared_ptr<object> obj)
+//{
+//	if (obj->IsIEnumerableOfObject() /*enumerable != null*/ || obj->IsList())
+//	{
+//		var enumerable = obj->ToEnumerableOfObjectRef() /*as IEnumerable<object>*/;
+//		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(enumerable);
+//	}
+//	if (obj->IsLispVariant())
+//	{
+//		const LispVariant & variant = obj->ToLispVariantRef() /*as LispVariant*/;
+//		if (variant.IsList())
+//		{
+//			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(variant.ListValueRef());
+//		}
+//		else
+//		{
+//			return std::make_shared<IEnumerable<std::shared_ptr<object>>>(IEnumerable<std::shared_ptr<object>>());
+//		}
+//	}
+//	else
+//	{
+//		return std::make_shared<IEnumerable<std::shared_ptr<object>>>(IEnumerable<std::shared_ptr<object>>());
+//	}
+//}
 
 std::shared_ptr<LispVariant> unquote_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
