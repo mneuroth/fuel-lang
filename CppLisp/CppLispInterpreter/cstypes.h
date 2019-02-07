@@ -87,7 +87,7 @@ namespace CppLisp
 			return std::vector<T>::back();
 		}
 
-		inline const T ElementAt(int index) const
+		inline const T ElementAt(size_t index) const
 		{
 			return (*this)[index];
 		}

@@ -712,7 +712,7 @@ static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<obj
 	else if (arg1.IsList())
 	{
 		var list = arg1.ListValueRef();
-		int i = 0;
+		size_t i = 0;
 		//foreach(var elem in list)
 		for (var elem : list)
 		{
@@ -726,7 +726,7 @@ static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<obj
 	}
 	else
 	{
-		throw LispException("search not supported for type " + string(args[1]->GetType()));
+		throw LispException("search not supported for type " + string((int)args[1]->GetType()));
 	}
 	return std::make_shared<LispVariant>(std::make_shared<object>((int)foundPos));
 }
@@ -736,11 +736,11 @@ static std::shared_ptr<LispVariant> Slice(const std::vector<std::shared_ptr<obje
 	CheckArgs("slice", 3, args, scope);
 
 	var value = ((LispVariant)args[0]).ToString();
-	var startPos = ((LispVariant)args[1]).ToInt();
+	var startPos = (size_t)((LispVariant)args[1]).ToInt();
 	var len = ((LispVariant)args[2]).ToInt();
 	if (len >= 0)
 	{
-		value = value.Substring(startPos, len);
+		value = value.Substring(startPos, (size_t)len);
 	}
 	else
 	{
@@ -1057,7 +1057,7 @@ static std::shared_ptr<LispVariant> Nth(const std::vector<std::shared_ptr<object
 {
 	CheckArgs("nth", 2, args, scope);
 
-	var index = args[0]->ToLispVariantRef().IntValue();
+	var index = (size_t)args[0]->ToLispVariantRef().IntValue();
 	const LispVariant & val = args[1]->ToLispVariantRef();
 	if (val.IsString())
 	{
