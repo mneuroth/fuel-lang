@@ -1,0 +1,85 @@
+
+double TestLoopAndSum(int max)
+{
+    int i = 0;
+    double sum = 0.0;
+    
+    while( i < max )
+    {
+      sum = sum + i;
+      i = i + 1;
+    }
+    
+    return sum;
+}
+
+double g(double x)
+{
+    return x * 3.4;
+}
+  
+double f(double x)
+{
+    return x * (x + 2.1 + g(x));
+}
+
+double TestCalls(int max)
+{
+    double result = 0;
+    int n;
+       
+    for( n=0; n<max; n++ )
+    {
+        result = f(n);
+    }
+        
+    return result;
+}
+
+int count_found(string searchtext, string text)
+{
+    int count = 0;
+    int pos = 0;
+    int found = true;
+    while( found )
+    {
+        pos = string_find_pos(text, searchtext, pos);
+        found = pos >= 0;
+        if( found )
+        {
+            count = count + 1;
+            pos = pos + 1;
+        }
+    }    
+    return count;
+}
+    
+int TestStrings(int max, string s)
+{
+    string result = "";
+  /*
+    var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    arr.forEach(
+      function(x)
+      {
+        result = result + x + " --> " + s + "\n";
+      } );
+  */     
+    int i; 
+    for( i=1; i<16; i++ )
+    {
+        result = result + i + " --> " + s + "\n";
+    } 
+    
+    __println( "found pos = " + string_find(result, "content") );
+    __println( "count     = " + count_found("content", result) );
+    __println( "count     = " + count_found("tests", result) );
+        
+    return string_length(result);
+}  
+  
+string sLongString = "This is a very long string with out ony meaningful content. It is used for string manipulation tests! And for string search tests.";
+  
+__println( "***LoopAndSum =" + TestLoopAndSum(100000) );
+__println( "***Calls      =" + TestCalls(30000) );
+__println( "***Strings    =" + TestStrings(1000, sLongString) );

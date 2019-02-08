@@ -2,16 +2,99 @@
 
   (import fuellib)
 
-  (def max 1000)
-  (def i 0)
-  (def sum 0.0)
-
-  (while (< i max)
+  (defn TestLoopAndSum (max)
+    (do 
+      (def i 0)
+      (def sum 0.0)
+    
+      (while (< i max)
+         (do
+            (setf sum (+ sum i))
+            (setf i (+ i 1))
+         )
+      )
+      (return sum)
+    )
+  )
+  
+  (defn g (x)
+      (* x 3.4)
+  )
+  
+  (defn f (x)
+      (* x (+ x 2.1 (g x)))
+  )
+  
+  (defn TestCalls (max)
+    (do
+        (def result 0)
+        
+        (dotimes (n max) 
+           (do
+              (setf result (f n))       
+           )
+        )
+        
+        (return result)
+    )
+  )
+  
+  (defn count_found (searchtext text)
      (do
-        (setf sum (+ sum i))
-        (setf i (+ i 1))
+         (def count 0)
+         (def pos 0)
+         (def found #t)
+         (while (== found #t)
+             (do
+                 (setf pos (search searchtext text pos))
+                 (setf found (>= pos 0))
+                 (if (== found #t) 
+                   (do 
+                       (setf count (+ count 1))
+                       (setf pos (+ pos 1))
+                   )
+                 )
+             )
+         )
+         (return count)
      )
   )
-  (println "result=" sum)
+  
+  (defn TestStrings (max s)
+    (do
+        (def result "")
 
+        (foreach '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15) 
+            (lambda (x)
+              (do
+                (setf result (+ result (str x) " --> " s "\n"))
+              )
+            )
+        )
+        
+        (println "found pos = " (search "content" result))
+        (println "count     = " (count_found "content" result))
+        (println "count     = " (count_found "tests" result))
+        
+        (len result)
+    )
+  )
+  
+  (defn TestMath (max)
+    (do
+      (def i 0)
+
+      (while (< i max)
+         (do
+             ; TODO
+         )
+      )
+    )
+  )
+  
+  (def sLongString "This is a very long string with out ony meaningful content. It is used for string manipulation tests! And for string search tests.")
+  
+  (println "LoopAndSum =" (TestLoopAndSum 100000))
+  (println "Calls      =" (TestCalls 30000))
+  (println "Strings    =" (TestStrings 1000 sLongString))
 )
