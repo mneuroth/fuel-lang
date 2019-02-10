@@ -281,7 +281,7 @@ namespace CppLisp
 
 		std::string GetTypeName() const;
 
-		size_t GetHash() const;
+		size_t GetHash(std::shared_ptr<LispScope> scope) const;
 
 		bool Equals(const object & other) const;
 

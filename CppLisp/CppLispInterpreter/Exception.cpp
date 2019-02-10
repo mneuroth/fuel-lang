@@ -37,6 +37,11 @@ namespace CppLisp
 			AddModuleNameAndStackInfos(scope->ModuleName, scope->DumpStackToString());
 			AddTokenInfos(scope->CurrentToken);
 		}
+		else 
+		{
+			AddModuleNameAndStackInfos("???", "???");
+			AddTokenInfos(null);
+		}
 	}
 
 	LispException::LispException(const string & text, std::shared_ptr<LispToken> token, const string & moduleName, const string & stackInfo)

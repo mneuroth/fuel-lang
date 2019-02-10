@@ -230,7 +230,7 @@ namespace CppLisp
 		}
 	}
 
-	size_t object::GetHash() const
+	size_t object::GetHash(std::shared_ptr<LispScope> scope) const
 	{
 		switch (m_Type)
 		{
@@ -247,27 +247,27 @@ namespace CppLisp
 			case __String:
 				return std::hash<std::string>{}(*(m_Data.pString));
 			case __List:
-				throw LispException("No hash available for Lisp type.");
+				throw LispException("No hash available for Lisp type.", scope.get());
 			case __Function:
-				throw LispException("No hash available for Function type.");
+				throw LispException("No hash available for Function type.", scope.get());
 			case __Symbol:
-				throw LispException("No hash available for Symbol type.");
+				throw LispException("No hash available for Symbol type.", scope.get());
 			case __NativeObject:
-				throw LispException("No hash available for NativeObject type.");
+				throw LispException("No hash available for NativeObject type.", scope.get());
 			case __LispVariant:
-				throw LispException("No hash available for LispVariant type.");
+				throw LispException("No hash available for LispVariant type.", scope.get());
 			case __LispFunctionWrapper:
-				throw LispException("No hash available for FunctionWrapper type.");
+				throw LispException("No hash available for FunctionWrapper type.", scope.get());
 			case __LispToken:
-				throw LispException("No hash available for LispToken type.");
+				throw LispException("No hash available for LispToken type.", scope.get());
 			case __IEnumerableOfObject:
-				throw LispException("No hash available for IEnuerableOfObject type.");
+				throw LispException("No hash available for IEnuerableOfObject type.", scope.get());
 			case __VoidPtr:
-				throw LispException("No hash available for VoidPtr type.");
+				throw LispException("No hash available for VoidPtr type.", scope.get());
 			case __LispScope:
-				throw LispException("No hash available for LispScope type.");
+				throw LispException("No hash available for LispScope type.", scope.get());
 			case __Error:
-				throw LispException("No hash available for Error type.");
+				throw LispException("No hash available for Error type.", scope.get());
 			default:
 				return std::hash<std::string>{}("###undefined###");
 		}

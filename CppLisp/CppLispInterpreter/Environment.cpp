@@ -1296,7 +1296,7 @@ static std::shared_ptr<LispVariant> DictSet(const std::vector<std::shared_ptr<ob
 	CheckArgs("dict-set", 3, args, scope);
 
 	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
-	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash(scope);
 	var value = args[2]->ToLispVariant();
 	dict[key] = value->Value;
 
@@ -1308,7 +1308,7 @@ static std::shared_ptr<LispVariant> DictGet(const std::vector<std::shared_ptr<ob
 	CheckArgs("dict-get", 2, args, scope);
 
 	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
-	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash(scope);
 	var result = dict.ContainsKey(key) ? dict[key] : std::make_shared<object>(object());
 
 	return std::make_shared<LispVariant>(result);
@@ -1319,7 +1319,7 @@ static std::shared_ptr<LispVariant> DictRemove(const std::vector<std::shared_ptr
 	CheckArgs("dict-remove", 2, args, scope);
 
 	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
-	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash(scope);
 	var ok = dict.Remove(key);
 
 	return std::make_shared<LispVariant>(std::make_shared<object>(ok));
@@ -1330,7 +1330,7 @@ static std::shared_ptr<LispVariant> DictRemove(const std::vector<std::shared_ptr
 //	CheckArgs("dict-keys", 1, args, scope);
 //
 //	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
-//	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+//	size_t key = args[1]->ToLispVariant()->Value->GetHash(scope);
 //	List<LispVariant> result = new List<LispVariant>();
 //	foreach(var key in nativeDict.Keys)
 //	{
@@ -1355,7 +1355,7 @@ static std::shared_ptr<LispVariant> DictContainsKey(const std::vector<std::share
 	CheckArgs("dict-contains-key", 2, args, scope);
 
 	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
-	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash(scope);
 	var result = dict.ContainsKey(key);
 
 	return std::make_shared<LispVariant>(std::make_shared<object>(result));
