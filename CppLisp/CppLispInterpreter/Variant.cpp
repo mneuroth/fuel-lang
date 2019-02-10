@@ -685,7 +685,7 @@ namespace CppLisp
 	{
 		//get
 		//{
-		if (IsNativeObject() && Type != LispType::_Nil)
+		if (IsNativeObject() && Type != LispType::_NativeObject)
 		{
 			throw CreateInvalidCastException("native object");
 		}

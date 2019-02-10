@@ -112,10 +112,20 @@ namespace CppLisp
 		{
 			m_Data.pString = new string(other.ToString());
 		}
+		else if (other.IsDictionary())
+		{
+			m_Data.pDictionary = new Dictionary<size_t, std::shared_ptr<object>>(other.ToDictionary());
+		}
 		else
 		{
 			m_Data = other.m_Data;
 		}
+	}
+
+	object::object(const Dictionary<size_t, std::shared_ptr<object>> & value)
+		: m_Type(ObjectType::__Dictionary)
+	{
+		m_Data.pDictionary = new Dictionary<size_t, std::shared_ptr<object>>(value);
 	}
 
 	object::~object()
@@ -214,6 +224,54 @@ namespace CppLisp
 		{
 			delete m_Data.pString;
 		}
+		else if (IsDictionary())
+		{
+			delete m_Data.pDictionary;
+		}
+	}
+
+	size_t object::GetHash() const
+	{
+		switch (m_Type)
+		{
+			case __Undefined:
+				return std::hash<std::string>{}("###undefined###");
+			case __Nil:
+				return std::hash<std::string>{}("###nil###");
+			case __Bool:
+				return std::hash<bool>{}(m_Data.b);
+			case __Int:
+				return std::hash<int>{}(m_Data.i);
+			case __Double:
+				return std::hash<double>{}(m_Data.d);
+			case __String:
+				return std::hash<std::string>{}(*(m_Data.pString));
+			case __List:
+				throw LispException("No hash available for Lisp type.");
+			case __Function:
+				throw LispException("No hash available for Function type.");
+			case __Symbol:
+				throw LispException("No hash available for Symbol type.");
+			case __NativeObject:
+				throw LispException("No hash available for NativeObject type.");
+			case __LispVariant:
+				throw LispException("No hash available for LispVariant type.");
+			case __LispFunctionWrapper:
+				throw LispException("No hash available for FunctionWrapper type.");
+			case __LispToken:
+				throw LispException("No hash available for LispToken type.");
+			case __IEnumerableOfObject:
+				throw LispException("No hash available for IEnuerableOfObject type.");
+			case __VoidPtr:
+				throw LispException("No hash available for VoidPtr type.");
+			case __LispScope:
+				throw LispException("No hash available for LispScope type.");
+			case __Error:
+				throw LispException("No hash available for Error type.");
+			default:
+				return std::hash<std::string>{}("###undefined###");
+		}
+//		return std::hash<std::string>{}(*(m_Data.pString));
 	}
 
 	std::string object::GetTypeName() const 
@@ -300,6 +358,8 @@ namespace CppLisp
 			case __NativeObject:
 				return "NativeObject";
 				//__Array = 10,
+			case __Dictionary:
+				return "Dictionary";
 			case __LispVariant:
 				return m_Data.pVariant->ToString();
 			case __LispFunctionWrapper:
@@ -317,6 +377,16 @@ namespace CppLisp
 			default:
 				return "<unknown>";
 		}
+	}
+
+	Dictionary<size_t, std::shared_ptr<object>> & object::ToDictionary()
+	{
+		return *(m_Data.pDictionary);
+	}
+
+	const Dictionary<size_t, std::shared_ptr<object>> & object::ToDictionary() const
+	{
+		return *(m_Data.pDictionary);
 	}
 
 	std::shared_ptr<LispToken> object::ToLispToken() const

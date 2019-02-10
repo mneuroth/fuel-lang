@@ -396,6 +396,17 @@ namespace CsLisp
             scope[Eval] = CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast).");
             scope[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");
 
+            // additional data types
+            scope["make-dict"] = CreateFunction(MakeDict, "(make-dict)", "Returns a new dictionary.");
+            scope["dict-set"] = CreateFunction(DictSet, "(dict-set dict key value)", "Sets the value for the key in the dictionary.");
+            scope["dict-get"] = CreateFunction(DictGet, "(dict-get dict key)", "Returns the value for the key or nil if key is not in dictionary.");
+            scope["dict-remove"] = CreateFunction(DictRemove, "(dict-remove dict key)", "Removes the value / key pair from the directory and returns success flag.");
+            scope["dict-keys"] = CreateFunction(DictKeys, "(dict-keys dict)", "Returns all keys in the dictionary.");
+            scope["dict-clear"] = CreateFunction(DictClear, "(dict-clear dict)", "Clears the dictionary.");
+            scope["dict-contains-key"] = CreateFunction(DictContainsKey, "(dict-contains-key dict key)", "Returns #t if key is contained in dictionary, otherwise #f.");
+            scope["dict-contains-value"] = CreateFunction(DictContainsValue, "(dict-contains-value dict key)", "Returns #t if value is contained in dictionary, otherwise #f.");
+            // ggf. setf support
+
             // special forms
             scope[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", isSpecialForm: true);
             scope[Or] = CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", isSpecialForm: true);
@@ -1095,6 +1106,13 @@ namespace CsLisp
             CheckArgs("len", 1, args, scope);
 
             LispVariant val = (LispVariant)args[0];
+            if (val.IsNativeObject)
+            {
+                if (val.Value is Dictionary<object, object>)
+                {
+                    return new LispVariant(((Dictionary<object, object>)val.Value).Count);
+                }
+            }
             if (val.IsString)
             {
                 return new LispVariant(val.StringValue.Length);
@@ -1370,6 +1388,104 @@ namespace CsLisp
             scope.IsInEval = false;
             scope.ModuleName = tempModuleName;
             return result;
+        }
+
+        #endregion
+
+        #region additional types
+
+        public static LispVariant MakeDict(object[] args, LispScope scope)
+        {
+            CheckArgs("make-dict", 0, args, scope);
+
+            return new LispVariant(LispType.NativeObject, new Dictionary<object, object>());
+        }
+
+        public static LispVariant DictSet(object[] args, LispScope scope)
+        {
+            CheckArgs("dict-set", 3, args, scope);
+
+            var dict = (LispVariant)args[0];
+            var key = (LispVariant)args[1];
+            var value = (LispVariant)args[2];
+            var nativeDict = dict.Value as Dictionary<object, object>;
+            nativeDict[key.Value] = value;
+
+            return value;
+        }
+
+        public static LispVariant DictGet(object[] args, LispScope scope)
+        {
+            CheckArgs("dict-get", 2, args, scope);
+
+            var dict = (LispVariant)args[0];
+            var key = (LispVariant)args[1];
+            var nativeDict = dict.Value as Dictionary<object, object>;
+            var result = nativeDict.ContainsKey(key.Value) ? nativeDict[key.Value] : new LispVariant();
+
+            return (LispVariant)result;
+        }
+
+        public static LispVariant DictRemove(object[] args, LispScope scope)
+        {
+            CheckArgs("dict-remove", 2, args, scope);
+
+            var dict = (LispVariant)args[0];
+            var key = (LispVariant)args[1];
+            var nativeDict = dict.Value as Dictionary<object, object>;
+            var ok = nativeDict.Remove(key.Value);
+
+            return new LispVariant(ok);
+        }
+
+        public static LispVariant DictKeys(object[] args, LispScope scope)
+        {
+            CheckArgs("dict-keys", 1, args, scope);
+
+            var dict = (LispVariant)args[0];
+            var nativeDict = dict.Value as Dictionary<object, object>;
+            List<LispVariant> result = new List<LispVariant>();
+            foreach(var key in nativeDict.Keys)
+            {
+                result.Add(new LispVariant(LispVariant.GetTypeFor(key), key));
+            }
+
+            return new LispVariant(result);
+        }
+
+        public static LispVariant DictClear(object[] args, LispScope scope)
+        {
+            CheckArgs("dict-clean", 1, args, scope);
+
+            var dict = (LispVariant)args[0];
+            var nativeDict = dict.Value as Dictionary<object, object>;
+            nativeDict.Clear();
+
+            return new LispVariant();
+        }
+
+        public static LispVariant DictContainsKey(object[] args, LispScope scope)
+        {
+            CheckArgs("dict-contains-key", 2, args, scope);
+
+            var dict = (LispVariant)args[0];
+            var key = (LispVariant)args[1];
+            var nativeDict = dict.Value as Dictionary<object, object>;
+            var result = nativeDict.ContainsKey(key.Value);
+
+            return new LispVariant(result);
+        }
+
+        public static LispVariant DictContainsValue(object[] args, LispScope scope)
+        {
+            CheckArgs("dict-contains-value", 2, args, scope);
+
+            var dict = (LispVariant)args[0];
+            var value = (LispVariant)args[1];
+            var nativeDict = dict.Value as Dictionary<object, object>;
+            var result = nativeDict.ContainsValue(value);
+
+            return new LispVariant(result);
         }
 
         #endregion

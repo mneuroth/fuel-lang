@@ -972,6 +972,13 @@ static std::shared_ptr<LispVariant> Length(const std::vector<std::shared_ptr<obj
 	CheckArgs("len", 1, args, scope);
 
 	const LispVariant & val = args[0]->ToLispVariantRef();
+	if (val.IsNativeObject())
+	{
+		if (val.Value->IsDictionary())
+		{
+			return std::make_shared<LispVariant>(std::make_shared<object>((int)val.Value->ToDictionary().size()));
+		}
+	}
 	if (val.IsString())
 	{
 		return std::make_shared<LispVariant>(std::make_shared<object>((int)val.StringValue().size()));
@@ -1275,6 +1282,95 @@ static std::shared_ptr<LispVariant> EvalStrFcn(const std::vector<std::shared_ptr
 	scope->IsInEval = false;
 	scope->ModuleName = tempModuleName;
 	return result;
+}
+
+static std::shared_ptr<LispVariant> MakeDict(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("make-dict", 0, args, scope);
+
+	return std::make_shared<LispVariant>(LispVariant(LispType::_NativeObject, std::make_shared<object>(Dictionary<size_t, std::shared_ptr<object>>())));
+}
+
+static std::shared_ptr<LispVariant> DictSet(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("dict-set", 3, args, scope);
+
+	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	var value = args[2]->ToLispVariant();
+	dict[key] = value->Value;
+
+	return value;
+}
+
+static std::shared_ptr<LispVariant> DictGet(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("dict-get", 2, args, scope);
+
+	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	var result = dict.ContainsKey(key) ? dict[key] : std::make_shared<object>(object());
+
+	return std::make_shared<LispVariant>(result);
+}
+
+static std::shared_ptr<LispVariant> DictRemove(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("dict-remove", 2, args, scope);
+
+	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	var ok = dict.Remove(key);
+
+	return std::make_shared<LispVariant>(ok);
+}
+
+//static std::shared_ptr<LispVariant> DictKeys(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+//{
+//	CheckArgs("dict-keys", 1, args, scope);
+//
+//	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
+//	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+//	List<LispVariant> result = new List<LispVariant>();
+//	foreach(var key in nativeDict.Keys)
+//	{
+//		result.Add(new LispVariant(LispVariant.GetTypeFor(key), key));
+//	}
+//
+//	return new LispVariant(result);
+//}
+
+static std::shared_ptr<LispVariant> DictClear(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("dict-clean", 1, args, scope);
+
+	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
+	dict.Clear();
+
+	return std::make_shared<LispVariant>();
+}
+
+static std::shared_ptr<LispVariant> DictContainsKey(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("dict-contains-key", 2, args, scope);
+
+	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	var result = dict.ContainsKey(key);
+
+	return std::make_shared<LispVariant>(result);
+}
+
+static std::shared_ptr<LispVariant> DictContainsValue(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("dict-contains-value", 2, args, scope);
+
+	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
+	size_t key = args[1]->ToLispVariant()->Value->GetHash();
+	var value = args[2]->ToLispVariant();
+	var result = dict.ContainsValue(value->Value);
+
+	return std::make_shared<LispVariant>(result);
 }
 
 static std::shared_ptr<LispVariant> bool_operation_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, std::function<bool(bool, bool)> func, bool initial)
@@ -2076,6 +2172,16 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[Apply] = CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments.");
 	(*scope)[Eval] = CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast).");
 	(*scope)[EvalStr] = CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string.");
+
+	// additional data types
+	(*scope)["make-dict"] = CreateFunction(MakeDict, "(make-dict)", "Returns a new dictionary.");
+	(*scope)["dict-set"] = CreateFunction(DictSet, "(dict-set dict key value)", "Sets the value for the key in the dictionary.");
+	(*scope)["dict-get"] = CreateFunction(DictGet, "(dict-get dict key)", "Returns the value for the key or nil if key is not in dictionary.");
+	(*scope)["dict-remove"] = CreateFunction(DictRemove, "(dict-remove dict key)", "Removes the value / key pair from the directory and returns success flag.");
+	//(*scope)["dict-keys"] = CreateFunction(DictKeys, "(dict-keys dict)", "Returns all keys in the dictionary.");
+	(*scope)["dict-clear"] = CreateFunction(DictClear, "(dict-clear dict)", "Clears the dictionary.");
+	(*scope)["dict-contains-key"] = CreateFunction(DictContainsKey, "(dict-contains-key dict key)", "Returns #t if key is contained in dictionary, otherwise #f.");
+	(*scope)["dict-contains-value"] = CreateFunction(DictContainsValue, "(dict-contains-value dict key)", "Returns #t if value is contained in dictionary, otherwise #f.");
 
 	// special forms
 	(*scope)[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);

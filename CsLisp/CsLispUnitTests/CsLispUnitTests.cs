@@ -2033,6 +2033,17 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_Search8()
+        {
+            LispVariant result = Lisp.Eval("(do (def s \"this is text, with more text items for search.\") (search \"text\" s))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(8, result.IntValue);
+            result = Lisp.Eval("(do (def s \"this is text, with more text items for search.\") (search \"text\" s 9))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(24, result.IntValue);
+        }
+
+        [TestMethod]
         public void Test_Replace1()
         {
             LispVariant result = Lisp.Eval("(do (def s \"this is a long text\") (replace s \"long\" \"short\"))");

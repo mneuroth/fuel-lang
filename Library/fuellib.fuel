@@ -52,6 +52,11 @@
       (len s)
   )
 
+  ;; returns the number of key/value items in a dictionary
+  (defn dict-len (d)
+      (len d)
+  )
+
   ;; returns index or position of key if the key is found in the list or string
   (defn find (key _list)
     (do

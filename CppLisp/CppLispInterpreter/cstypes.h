@@ -188,9 +188,28 @@ namespace CppLisp
 			return std::map<K, V>::find(key) != std::map<K, V>::end();
 		}
 
+		inline bool ContainsValue(const V & value) const
+		{
+			auto iter = std::map<K, V>::begin();
+			while (iter != std::map<K, V>::end())
+			{
+				if (*iter == value)
+				{
+					return true;
+				}
+				iter++;
+			}
+			return false;
+		}
+
 		inline bool Remove(const K & key)
 		{
 			return std::map<K, V>::erase(key) > 0;
+		}
+
+		inline void Clear()
+		{
+			std::map<K, V>::clear();
 		}
 	};
 

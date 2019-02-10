@@ -76,6 +76,7 @@ namespace CppLisp
 		__VoidPtr = 15,
 		__LispScope = 16,
 		__LValue = 17,
+		__Dictionary = 18,
 		__LispMacroRuntimeEvaluate = 100,
 		__LispMacroCompileTimeExpand = 101,
         __Error = 999
@@ -102,6 +103,7 @@ namespace CppLisp
 			LispMacroRuntimeEvaluate * pMacro;
 			LispMacroCompileTimeExpand * pCompileMacro;
 			std::function<void(std::shared_ptr<object>)> * pAction;
+			Dictionary<size_t, std::shared_ptr<object>> * pDictionary;
 		} m_Data;
 
 		void CleanUpMemory();
@@ -160,6 +162,8 @@ namespace CppLisp
 		explicit object(const LispScope & value);
 
 		explicit object(std::function<void(std::shared_ptr<object>)> action);
+
+		explicit object(const Dictionary<size_t, std::shared_ptr<object>> & value);
 
 		~object();
 
@@ -220,6 +224,11 @@ namespace CppLisp
 			return m_Type == ObjectType::__String;
 		}
 
+		inline bool IsDictionary() const
+		{
+			return m_Type == ObjectType::__Dictionary;
+		}
+
 		inline bool IsLispVariant() const
 		{
 			return m_Type == ObjectType::__LispVariant;
@@ -272,6 +281,8 @@ namespace CppLisp
 
 		std::string GetTypeName() const;
 
+		size_t GetHash() const;
+
 		bool Equals(const object & other) const;
 
 		// get references to data
@@ -291,6 +302,8 @@ namespace CppLisp
 		std::shared_ptr<LispMacroCompileTimeExpand> ToLispMacroCompileTimeExpand() const;
 		std::function<void(std::shared_ptr<object>)> ToSetterAction() const;
 		string ToString() const;
+		Dictionary<size_t, std::shared_ptr<object>> & ToDictionary();
+		const Dictionary<size_t, std::shared_ptr<object>> & ToDictionary() const;
 	};
 }
 

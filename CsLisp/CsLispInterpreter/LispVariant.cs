@@ -254,6 +254,36 @@ namespace CsLisp
             return new LispVariant(LispType.Error, errorMessage);
         }
 
+        /// <summary>
+        /// Gets the LispType for the object.
+        /// </summary>
+        /// <param name="obj">The object to determin the type for.</param>
+        /// <returns>The LispType</returns>
+        public static LispType GetTypeFor(object obj)
+        {
+            if(obj is int)
+            {
+                return LispType.Int;
+            }
+            if (obj is double)
+            {
+                return LispType.Double;
+            }
+            if (obj is bool)
+            {
+                return LispType.Bool;
+            }
+            if (obj is string)
+            {
+                return LispType.String;
+            }
+            if (obj is IEnumerable)
+            {
+                return LispType.List;
+            }
+            return LispType.Undefined;
+        }
+
         #endregion
 
         #region IComparable
