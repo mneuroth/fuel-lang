@@ -1322,7 +1322,7 @@ static std::shared_ptr<LispVariant> DictRemove(const std::vector<std::shared_ptr
 	size_t key = args[1]->ToLispVariant()->Value->GetHash();
 	var ok = dict.Remove(key);
 
-	return std::make_shared<LispVariant>(ok);
+	return std::make_shared<LispVariant>(std::make_shared<object>(ok));
 }
 
 //static std::shared_ptr<LispVariant> DictKeys(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -1358,7 +1358,7 @@ static std::shared_ptr<LispVariant> DictContainsKey(const std::vector<std::share
 	size_t key = args[1]->ToLispVariant()->Value->GetHash();
 	var result = dict.ContainsKey(key);
 
-	return std::make_shared<LispVariant>(result);
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
 }
 
 static std::shared_ptr<LispVariant> DictContainsValue(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -1366,11 +1366,10 @@ static std::shared_ptr<LispVariant> DictContainsValue(const std::vector<std::sha
 	CheckArgs("dict-contains-value", 2, args, scope);
 
 	Dictionary<size_t, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
-	size_t key = args[1]->ToLispVariant()->Value->GetHash();
 	var value = args[2]->ToLispVariant();
 	var result = dict.ContainsValue(value->Value);
 
-	return std::make_shared<LispVariant>(result);
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
 }
 
 static std::shared_ptr<LispVariant> bool_operation_form(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, std::function<bool(bool, bool)> func, bool initial)

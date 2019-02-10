@@ -2228,6 +2228,16 @@ private Q_SLOTS:
         }
     }
 
+    TEST_METHOD(Test_Search8)
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is text, with more text items for search.\") (search \"text\" s))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(8, result->IntValue());
+        result = Lisp::Eval("(do (def s \"this is text, with more text items for search.\") (search \"text\" s 9))");
+        QVERIFY(result->IsInt());
+        QCOMPARE(24, result->IntValue());
+    }
+
     TEST_METHOD(Test_Replace1)
     {
         std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a long text\") (replace s \"long\" \"short\"))");

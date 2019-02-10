@@ -193,7 +193,7 @@ namespace CppLisp
 			auto iter = std::map<K, V>::begin();
 			while (iter != std::map<K, V>::end())
 			{
-				if (*iter == value)
+				if (*(iter->second) == *(value))
 				{
 					return true;
 				}
