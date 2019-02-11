@@ -103,7 +103,7 @@ namespace CppLisp
 			LispMacroRuntimeEvaluate * pMacro;
 			LispMacroCompileTimeExpand * pCompileMacro;
 			std::function<void(std::shared_ptr<object>)> * pAction;
-			Dictionary<size_t, std::shared_ptr<object>> * pDictionary;
+			Dictionary<LispVariant, std::shared_ptr<object>> * pDictionary;
 		} m_Data;
 
 		void CleanUpMemory();
@@ -163,7 +163,7 @@ namespace CppLisp
 
 		explicit object(std::function<void(std::shared_ptr<object>)> action);
 
-		explicit object(const Dictionary<size_t, std::shared_ptr<object>> & value);
+		explicit object(const Dictionary<LispVariant, std::shared_ptr<object>> & value);
 
 		~object();
 
@@ -302,8 +302,8 @@ namespace CppLisp
 		std::shared_ptr<LispMacroCompileTimeExpand> ToLispMacroCompileTimeExpand() const;
 		std::function<void(std::shared_ptr<object>)> ToSetterAction() const;
 		string ToString() const;
-		Dictionary<size_t, std::shared_ptr<object>> & ToDictionary();
-		const Dictionary<size_t, std::shared_ptr<object>> & ToDictionary() const;
+		Dictionary<LispVariant, std::shared_ptr<object>> & ToDictionary();
+		const Dictionary<LispVariant, std::shared_ptr<object>> & ToDictionary() const;
 	};
 }
 

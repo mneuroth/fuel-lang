@@ -114,7 +114,7 @@ namespace CppLisp
 		}
 		else if (other.IsDictionary())
 		{
-			m_Data.pDictionary = new Dictionary<size_t, std::shared_ptr<object>>(other.ToDictionary());
+			m_Data.pDictionary = new Dictionary<LispVariant, std::shared_ptr<object>>(other.ToDictionary());
 		}
 		else
 		{
@@ -122,10 +122,10 @@ namespace CppLisp
 		}
 	}
 
-	object::object(const Dictionary<size_t, std::shared_ptr<object>> & value)
+	object::object(const Dictionary<LispVariant, std::shared_ptr<object>> & value)
 		: m_Type(ObjectType::__Dictionary)
 	{
-		m_Data.pDictionary = new Dictionary<size_t, std::shared_ptr<object>>(value);
+		m_Data.pDictionary = new Dictionary<LispVariant, std::shared_ptr<object>>(value);
 	}
 
 	object::~object()
@@ -379,12 +379,12 @@ namespace CppLisp
 		}
 	}
 
-	Dictionary<size_t, std::shared_ptr<object>> & object::ToDictionary()
+	Dictionary<LispVariant, std::shared_ptr<object>> & object::ToDictionary()
 	{
 		return *(m_Data.pDictionary);
 	}
 
-	const Dictionary<size_t, std::shared_ptr<object>> & object::ToDictionary() const
+	const Dictionary<LispVariant, std::shared_ptr<object>> & object::ToDictionary() const
 	{
 		return *(m_Data.pDictionary);
 	}

@@ -435,36 +435,36 @@ namespace CppLisp
 		throw CreateInvalidOperationException("%", *this, r);
 	}
 
-	LispVariant LispVariant::operator <(const LispVariant & r) const
+	bool LispVariant::operator <(const LispVariant & r) const
 	{
 		if (IsDouble() || r.IsDouble())
 		{
-			return /*new*/ LispVariant(std::make_shared<object>(ToDouble() < r.ToDouble()));
+			return ToDouble() < r.ToDouble();
 		}
 		if (IsInt() || r.IsInt())
 		{
-			return /*new*/ LispVariant(std::make_shared<object>(ToInt() < r.ToInt()));
+			return ToInt() < r.ToInt();
 		}
 		if (IsString() || r.IsString())
 		{
-			return /*new*/ LispVariant(std::make_shared<object>(string::CompareOrdinal(ToString(), r.ToString()) < 0));
+			return string::CompareOrdinal(ToString(), r.ToString()) < 0;
 		}
 		throw CreateInvalidOperationException("< or >", *this, r);
 	}
 
-	LispVariant LispVariant::operator <=(const LispVariant & r) const
+	bool LispVariant::operator <=(const LispVariant & r) const
 	{
 		if (IsDouble() || r.IsDouble())
 		{
-			return /*new*/ LispVariant(std::make_shared<object>(ToDouble() <= r.ToDouble()));
+			return ToDouble() <= r.ToDouble();
 		}
 		if (IsInt() || r.IsInt())
 		{
-			return /*new*/ LispVariant(std::make_shared<object>(ToInt() <= r.ToInt()));
+			return ToInt() <= r.ToInt();
 		}
 		if (IsString() || r.IsString())
 		{
-			return /*new*/ LispVariant(std::make_shared<object>(string::CompareOrdinal(ToString(), r.ToString()) <= 0));
+			return string::CompareOrdinal(ToString(), r.ToString()) <= 0;
 		}
 		throw CreateInvalidOperationException("<= or >=", *this, r);
 	}
