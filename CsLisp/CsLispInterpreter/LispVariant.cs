@@ -89,6 +89,10 @@ namespace CsLisp
             {
                 if (Type == LispType.NativeObject)
                 {
+                    if (NativeObjectValue is Dictionary<object, object>)
+                    {
+                        return "NativeDictionary";
+                    }
                     return Type+"<"+Value.GetType()+">";                    
                 }
                 return Type.ToString();
@@ -420,31 +424,58 @@ namespace CsLisp
 
         public string NativeObjectStringRepresentation
         {
-            get
+            get { return GetNativeObjectStringRepresentation(NativeObjectValue); }
+        }
+
+        private static string GetNativeObjectStringRepresentation(object obj)
+        {
+            string result = string.Empty;
+
+            object native = obj;
+            if (native is IEnumerable<object>)
             {
-                string result = string.Empty;
-
-                object native = NativeObjectValue;
-                if (native is IEnumerable<object>)
+                var container = (IEnumerable<object>) native;
+                foreach (var element in container)
                 {
-                    var container = (IEnumerable<object>)native;
-                    foreach (var element in container)
+                    if (result.Length > 0)
                     {
-                        if (result.Length > 0)
-                        {
-                            result += " ";
-                        }
-                        result += element != null ? element.ToString() : LispToken.Nil;
+                        result += " ";
                     }
-                    result = "(" + result + ")";
-                }
-                else
-                {
-                    result = native.ToString();
+
+                    result += element != null ? GetNativeObjectStringRepresentation(element) : LispToken.Nil;
                 }
 
-                return result;
+                result = "(" + result + ")";
             }
+            else if (native is Dictionary<object, object>)
+            {                
+                var container = (Dictionary<object, object>) native;
+                foreach (KeyValuePair<object, object> element in container)
+                {
+                    if (result.Length > 0)
+                    {
+                        result += ", ";
+                    }
+
+                    result += "[" + GetNativeObjectStringRepresentation(element.Key) + " : " + GetNativeObjectStringRepresentation(element.Value) + "]";
+                }
+
+                result = "{ " + result + " }";
+            }
+            else if (native is string)
+            {
+                result = "\"" + native.ToString() + "\"";
+            }
+            else if (native is LispVariant)
+            {
+                result = ((LispVariant) native).ToStringDebugger();
+            }
+            else
+            {
+                result = native.ToString();
+            }
+
+            return result;
         }
 
         public bool ToBool()

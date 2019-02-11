@@ -2185,6 +2185,83 @@ namespace QtLispUnitTests
 			QCOMPARE(9, result->IntValue());
 		}
 
+		TEST_METHOD(Test_DictMake)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)))");
+			QVERIFY(result->IsNativeObject());
+			QCOMPARE("{  }", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_DictSet)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (println d))");
+			QVERIFY(result->IsString());
+			QCOMPARE("{ [\"key1\" : 42], [7 : \"some text\"] }", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_DictGet)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-get d 7))");
+			QVERIFY(result->IsString());
+			QCOMPARE("some text", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_DictLen)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (len d))");
+			QVERIFY(result->IsInt());
+			QCOMPARE(2, result->ToInt());
+		}
+
+		TEST_METHOD(Test_DictClear)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-clear d) (len d))");
+			QVERIFY(result->IsInt());
+			QCOMPARE(0, result->ToInt());
+		}
+
+		TEST_METHOD(Test_DictKeys)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-keys d))");
+			QVERIFY(result->IsList());
+			QCOMPARE("(\"key1\" 7)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_DictRemove)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-remove d 7) (println d))");
+			QVERIFY(result->IsString());
+			QCOMPARE("{ [\"key1\" : 42] }", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_DictContainsKey1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-key d 8))");
+			QVERIFY(result->IsBool());
+			QCOMPARE(false, result->ToBool());
+		}
+
+		TEST_METHOD(Test_DictContainsKey2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-key d \"key1\"))");
+			QVERIFY(result->IsBool());
+			QCOMPARE(true, result->ToBool());
+		}
+
+		TEST_METHOD(Test_DictContainsValue1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-value d 99))");
+			QVERIFY(result->IsBool());
+			QCOMPARE(false, result->ToBool());
+		}
+
+		TEST_METHOD(Test_DictContainsValue2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-value d 42))");
+			QVERIFY(result->IsBool());
+			QCOMPARE(true, result->ToBool());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects

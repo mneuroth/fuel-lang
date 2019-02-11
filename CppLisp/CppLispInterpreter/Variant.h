@@ -367,6 +367,9 @@ namespace CppLisp
 
         //#endregion
     };
+
+	template <class T>
+	const T & ToType(const LispVariant & variant);
 }
 
 #endif

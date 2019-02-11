@@ -564,4 +564,3 @@ namespace CppLisp
 		}
 	}
 }
-

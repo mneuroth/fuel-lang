@@ -2238,5 +2238,93 @@ namespace LispUnitTests
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(9, result.ToInt());
         }
+
+        [TestMethod]
+        public void Test_DictMake()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)))");
+            Assert.IsTrue(result.IsNativeObject);
+            Assert.AreEqual("{  }", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_DictSet()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (println d))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("{ [\"key1\" : 42], [7 : \"some text\"] }", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_DictGet()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-get d 7))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("some text", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_DictLen()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (len d))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(2, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_DictClear()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-clear d) (len d))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual(0, result.ToInt());
+        }
+
+        [TestMethod]
+        public void Test_DictKeys()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-keys d))");
+            Assert.IsTrue(result.IsList);
+            Assert.AreEqual("(\"key1\" 7)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_DictRemove()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-remove d 7) (println d))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("{ [\"key1\" : 42] }", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_DictContainsKey1()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-key d 8))");
+            Assert.IsTrue(result.IsBool);
+            Assert.AreEqual(false, result.ToBool());
+        }
+
+        [TestMethod]
+        public void Test_DictContainsKey2()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-key d \"key1\"))");
+            Assert.IsTrue(result.IsBool);
+            Assert.AreEqual(true, result.ToBool());
+        }
+
+        [TestMethod]
+        public void Test_DictContainsValue1()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-value d 99))");
+            Assert.IsTrue(result.IsBool);
+            Assert.AreEqual(false, result.ToBool());
+        }
+
+        [TestMethod]
+        public void Test_DictContainsValue2()
+        {
+            LispVariant result = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"key1\" 42) (dict-set d 7 \"some text\") (dict-contains-value d 42))");
+            Assert.IsTrue(result.IsBool);
+            Assert.AreEqual(true, result.ToBool());
+        }
     }
 }

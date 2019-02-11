@@ -278,7 +278,7 @@ namespace LispUnitTests
                 //Assert.IsTrue(s.Contains(@"File= .\fuel.exe"));
                 Assert.IsTrue(s.Contains(@"File= .\teststdlib.fuel"));
                 Assert.IsTrue(s.Contains("ListCount= 4"));
-                Assert.IsTrue(s.Contains("item= System.Collections.Generic.Dictionary`2[System.Object,System.Object]"));
+                Assert.IsTrue(s.Contains("item= {  }"));
                 Assert.IsTrue(s.Contains("newitem= 12"));
                 Assert.IsTrue(s.Contains("NewListCount= 0"));
                 Assert.IsTrue(s.Contains("ArrayCount= 5"));

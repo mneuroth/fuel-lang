@@ -128,6 +128,10 @@ namespace CppLisp
 		case _Symbol:
 			return "Symbol";
 		case _NativeObject:
+			if (Value->IsDictionary())
+			{
+				return "NativeDictionary";
+			}
 			return /*Type+*/string("NativeObject<") + Value->GetTypeName() + string(">");
 			//_Array = 10,
 		case _Error:
@@ -693,13 +697,13 @@ namespace CppLisp
 		//}
 	}
 
-	string LispVariant::NativeObjectStringRepresentation() const
+	static string GetNativeObjectStringRepresentation(std::shared_ptr<object> obj)
 	{
 		//get
 		//{
 		string result = string::Empty;
 
-		std::shared_ptr<object> native = NativeObjectValue();
+		std::shared_ptr<object> native = obj;
 		if (native->IsIEnumerableOfObject())
 		{
 			const IEnumerable<std::shared_ptr<object>> & container = native->ToEnumerableOfObjectRef();
@@ -713,6 +717,30 @@ namespace CppLisp
 			}
 			result = "(" + result + ")";
 		}
+		else if (native->IsDictionary())
+		{
+			var container = native->ToDictionary();
+			//foreach(KeyValuePair<object, object> element in container)
+			for (var element : container)
+			{
+				if (result.Length() > 0)
+				{
+					result += ", ";
+				}
+
+				result += "[" + GetNativeObjectStringRepresentation(element.first.Value) + " : " + GetNativeObjectStringRepresentation(element.second) + "]";
+			}
+
+			result = "{ " + result + " }";
+		}
+		else if (native->IsString())
+		{
+			result = "\"" + native->ToString() + "\"";
+		}
+		else if (native->IsLispVariant())
+		{
+			result = native->ToLispVariantRef().ToStringDebugger();
+		}
 		else
 		{
 			result = native->ToString();
@@ -720,6 +748,11 @@ namespace CppLisp
 
 		return result;
 		//}
+	}
+
+	string LispVariant::NativeObjectStringRepresentation() const
+	{
+		return GetNativeObjectStringRepresentation(NativeObjectValue());
 	}
 
 	/*private*/ string LispVariant::ExpandContainerToString(std::shared_ptr<object> maybeContainer)
@@ -755,6 +788,12 @@ namespace CppLisp
 	bool LispVariant::operator!=(const LispVariant & other) const
 	{
 		return !(*this == other);
+	}
+
+	template <class T>
+	const T & ToType(const LispVariant & variant)
+	{
+		return (T)variant;
 	}
 
 }

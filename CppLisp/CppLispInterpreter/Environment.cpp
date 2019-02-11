@@ -1366,7 +1366,7 @@ static std::shared_ptr<LispVariant> DictContainsValue(const std::vector<std::sha
 	CheckArgs("dict-contains-value", 2, args, scope);
 
 	Dictionary<LispVariant, std::shared_ptr<object>> &  dict = args[0]->ToLispVariantRef().Value->ToDictionary();
-	var value = args[2]->ToLispVariant();
+	var value = args[1]->ToLispVariant();
 	var result = dict.ContainsValue(value->Value);
 
 	return std::make_shared<LispVariant>(std::make_shared<object>(result));
@@ -2061,6 +2061,18 @@ string LispEnvironment::GetLispType(std::shared_ptr<object> obj)
 		return lispVariant.TypeString();
 	}
 	return obj->GetTypeName();
+}
+
+template <class T1, class T2>
+static std::shared_ptr<LispVariant> fuel_func_wrapper_1_arg(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("f", 1, args, scope);
+
+	const LispVariant & val = args[0]->ToLispVariantRef();
+	T2 i = ToType<T2>(val);	// cast operatoren fuer LispVariant ueberladen?
+	T1 result = f(i);
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
 }
 
 std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
