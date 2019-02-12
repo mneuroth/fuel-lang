@@ -1,11 +1,13 @@
 cd CppLisp
-cd CppLispInterpreter
 if [[ $CXX == clang* ]]; then
-    qmake "QMAKE_CXX = clang++" "QMAKE_LINK=clang++" CppLispInterpreter.pro
+    qmake -r "QMAKE_CXX = clang++" "QMAKE_LINK=clang++" CppLisp.pro
 else
-    qmake CppLispInterpreter.pro
+    qmake -r CppLisp.pro
 fi
-make 
+make -j 4
+ls -lrt
+cd CppLispInterpreter
+ls -lrt
 ./fuel -v
 ./fuel  -e "(println (platform))"
 cd ..
@@ -15,7 +17,7 @@ if [[ $CXX == clang* ]]; then
 else
     qmake QtLispInterpreterUnitTests.pro
 fi
-make 
+make -j 4 
 #ls -lrt
 #ls -lrt .. 
 ./tst_qtlispinterpreterunitteststest
