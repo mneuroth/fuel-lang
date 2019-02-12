@@ -139,6 +139,7 @@
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
+mkdir "$(TargetDir)Library"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
@@ -162,6 +163,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
+mkdir "$(TargetDir)Library"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
@@ -190,6 +192,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
+mkdir "$(TargetDir)Library"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
@@ -218,6 +221,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
+mkdir "$(TargetDir)Library"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
@@ -245,6 +249,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
+mkdir "$(TargetDir)Library"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
@@ -272,6 +277,7 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)scripts"
 mkdir "$(TargetDir)TestData"
+mkdir "$(TargetDir)Library"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\scripts\*.*" "$(TargetDir)scripts"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\*.*" "$(TargetDir)TestData"
 xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Library"
