@@ -5,9 +5,8 @@ else
     qmake -r CppLisp.pro
 fi
 make -j 4
-ls -lrt
-cd CppLispInterpreter
-ls -lrt
+cd CppLisp
+#ls -lrt
 ./fuel -v
 ./fuel  -e "(println (platform))"
 cd ..
