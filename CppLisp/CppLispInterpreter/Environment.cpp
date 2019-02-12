@@ -2063,14 +2063,30 @@ string LispEnvironment::GetLispType(std::shared_ptr<object> obj)
 	return obj->GetTypeName();
 }
 
+int f(int val)
+{
+	return val * val;
+}
+
 template <class T1, class T2>
-static std::shared_ptr<LispVariant> fuel_func_wrapper_1_arg(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> fuel_func_wrapper_f(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("f", 1, args, scope);
 
 	const LispVariant & val = args[0]->ToLispVariantRef();
-	T2 i = ToType<T2>(val);	// cast operatoren fuer LispVariant ueberladen?
+	T2 i = ToType<T2>(val);
 	T1 result = f(i);
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
+}
+
+template <class T1, class T2>
+static std::shared_ptr<LispVariant> fuel_func_wrapper_1_arg(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, std::function<T1(T2)> func, const string & func_name)
+{
+	CheckArgs(func_name, 1, args, scope);
+
+	T2 a1 = ToType<T2>(args[0]->ToLispVariantRef());
+	T1 result = func(a1);
 
 	return std::make_shared<LispVariant>(std::make_shared<object>(result));
 }
@@ -2083,6 +2099,9 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[Macros] = std::make_shared<object>(LispScope(Macros, scope));
 	(*scope)[Tracebuffer] = std::make_shared<object>(""); // new StringBuilder();
 	(*scope)[Traceon] = std::make_shared<object>(false);
+
+	(*scope)["wrapper_f"] = CreateFunction(fuel_func_wrapper_f<int, int>, "(wrapper_f val)", "Test wrapper function.");
+	(*scope)["wrapper_ff"] = CreateFunction([](const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope) -> std::shared_ptr<LispVariant> { return fuel_func_wrapper_1_arg<int, int>(args, scope, f, "wrapper_ff"); }, "(wrapper_f val)", "Test wrapper function.");
 
 	(*scope)["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
 	(*scope)["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
