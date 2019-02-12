@@ -59,7 +59,7 @@ matrix:
   
     - os: windows
       language: cpp
-      compiler: msc
+      compiler: cl
       env:
       - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"      
       script:

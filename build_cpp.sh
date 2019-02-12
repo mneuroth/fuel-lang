@@ -7,6 +7,10 @@ fi
 make -j 4
 cd CppLisp
 #ls -lrt
+cp fuel ../CppLispInterpreter
+cd ..
+cd CppLispInterpreter
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ./fuel -v
 ./fuel  -e "(println (platform))"
 cd ..
