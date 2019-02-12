@@ -5,15 +5,15 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 Release {
-    SUBDIRTARGET = release
+    SUBDIRTARGET = release/
 }
 Debug {
-    SUBDIRTARGET = debug
+    SUBDIRTARGET = debug/
 }
 
 INCLUDEPATH += ../CppLispInterpreter
 
-LIBS += $${OUT_PWD}/../CppLispInterpreter/$${SUBDIRTARGET}/libCppLispInterpreter.a
+LIBS += $${OUT_PWD}/../CppLispInterpreter/$${SUBDIRTARGET}libCppLispInterpreter.a
 
 SOURCES += \
         FuelMain.cpp
