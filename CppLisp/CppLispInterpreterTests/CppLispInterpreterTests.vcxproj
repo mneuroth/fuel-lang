@@ -314,11 +314,6 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <ClCompile Include="TokenizerTests.cpp" />
     <ClCompile Include="VariantTests.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CppLispInterpreter\CppLisp.vcxproj">
-      <Project>{9aa445a5-ef08-4e35-9471-2487f57c46e6}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

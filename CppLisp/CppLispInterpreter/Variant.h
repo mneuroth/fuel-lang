@@ -293,6 +293,26 @@ namespace CppLisp
 
 		/*public*/ string StringValue() const;
 
+		operator bool() const
+		{
+			return ToBool();
+		}
+
+		operator int() const
+		{
+			return ToInt();
+		}
+
+		operator double() const
+		{
+			return ToDouble();
+		}
+
+		operator string() const
+		{
+			return StringValue();
+		}
+
 		/*public*/ std::function<void(std::shared_ptr<object>)> ToSetterAction() const;
 
         /// <summary>
@@ -369,7 +389,10 @@ namespace CppLisp
     };
 
 	template <class T>
-	const T & ToType(const LispVariant & variant);
+    T ToType(const LispVariant & variant)
+	{
+		return (T)variant;
+	}
 }
 
 #endif

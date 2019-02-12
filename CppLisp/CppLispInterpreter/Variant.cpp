@@ -789,11 +789,4 @@ namespace CppLisp
 	{
 		return !(*this == other);
 	}
-
-	template <class T>
-	const T & ToType(const LispVariant & variant)
-	{
-		return (T)variant;
-	}
-
 }

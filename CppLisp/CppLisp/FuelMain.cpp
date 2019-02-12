@@ -23,15 +23,10 @@
 *
 * */
 
-#include "fuel.h"
+//#include "fuel.h"
+extern "C" int fuel_main(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
-	std::vector<CppLisp::string> args;
-	for (int i = 1; i < argc; i++)
-	{
-		args.push_back(argv[i]);
-	}
-	CppLisp::Fuel::Main(args);
-	return 0;
+	return fuel_main(argc, argv);
 }
