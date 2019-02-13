@@ -47,20 +47,18 @@
 #define FUEL_DEBUGGER_NAME "libFuelDebugger.dylib"
 #endif
 
-//******************************************************************
-/** Funktion zum Laden von DLLs */
 void * SimpleLoadLibrary(const char * sDllName)
 {
 #ifdef _WIN32
-    return (void *)LoadLibrary( (LPCWSTR)sDllName);
+	std::string s(sDllName);
+	std::wstring stemp = std::wstring(s.begin(), s.end());
+    return (void *)LoadLibrary( (LPCWSTR)stemp.c_str() );
 #endif
 #if defined( __linux__ ) || defined( __APPLE__ )
     return (void *)dlopen( sDllName, RTLD_LAZY );
 #endif
 }
 
-//******************************************************************
-/** Funktion zum Entladen von DLLs */
 bool SimpleFreeLibrary(void * hDllModule)
 {
 #ifdef _WIN32
@@ -71,8 +69,6 @@ bool SimpleFreeLibrary(void * hDllModule)
 #endif
 }
 
-//******************************************************************
-/** Funktion zum Laden von Funktionen auf DLLs */
 void * SimpleGetProcAddress(void * hDllModule, const char * sProcName)
 {
 #ifdef _WIN32
@@ -81,6 +77,16 @@ void * SimpleGetProcAddress(void * hDllModule, const char * sProcName)
 #if defined( __linux__ ) || defined( __APPLE__ )
 	return (void *)dlsym( (void *)hDllModule, sProcName );
 #endif
+}
+
+static void * g_hDebuggerDLL = 0;
+
+static void DisconnectDebugger()
+{
+	if (g_hDebuggerDLL != 0)
+	{
+		SimpleFreeLibrary(g_hDebuggerDLL);
+	}
 }
 
 namespace CppLisp
@@ -262,6 +268,8 @@ namespace CppLisp
 		{
 			output->WriteLine("Execution time = {0} s", std::to_string((/*Environment.TickCount*/Environment_GetTickCount() - startTickCount) * 0.001));
 		}
+
+		DisconnectDebugger();
 	}
 
 	void Fuel::Usage(std::shared_ptr<TextWriter> output)
@@ -317,10 +325,13 @@ namespace CppLisp
 
 		typedef ILispDebugger * (*fcnGetDebugger)();
 
-		void * hDLL = SimpleLoadLibrary(FUEL_DEBUGGER_NAME);
-		if (hDLL)
+		if (g_hDebuggerDLL == 0)
 		{
-			fcnGetDebugger pGetDebugger = (fcnGetDebugger)SimpleGetProcAddress(hDLL, "create_debugger");
+			g_hDebuggerDLL = SimpleLoadLibrary(FUEL_DEBUGGER_NAME);
+		}
+		if (g_hDebuggerDLL)
+		{
+			fcnGetDebugger pGetDebugger = (fcnGetDebugger)SimpleGetProcAddress(g_hDebuggerDLL, "create_debugger");
 			if (pGetDebugger)
 			{
 				dbg = std::shared_ptr<ILispDebugger>((*pGetDebugger)());
