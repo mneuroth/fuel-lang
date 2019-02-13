@@ -36,9 +36,6 @@
 #endif
 
 #if defined( __linux__ ) || defined( __APPLE__ )
-#include <unistd.h>			// fuer: usleep(), execvp(), vfork()
-#include <stdlib.h>			// fuer: system()
-#include <time.h>			// fuer: clock()
 #include <dlfcn.h>			// fuer: 
 #endif
 
@@ -55,10 +52,10 @@
 void * SimpleLoadLibrary(const char * sDllName)
 {
 #ifdef _WIN32
-	return (void *)LoadLibrary( /*(LPCWSTR)*/sDllName);
+    return (void *)LoadLibrary( (LPCWSTR)sDllName);
 #endif
 #if defined( __linux__ ) || defined( __APPLE__ )
-	return (void *)0; //dlopen( sDllName, RTLD_LAZY );
+    return (void *)dlopen( sDllName, RTLD_LAZY );
 #endif
 }
 
@@ -70,7 +67,7 @@ bool SimpleFreeLibrary(void * hDllModule)
 	return FreeLibrary((HMODULE)hDllModule) == TRUE;
 #endif
 #if defined( __linux__ ) || defined( __APPLE__ )
-	return 0; //dlclose( (void *)hDllModule );
+    return dlclose( (void *)hDllModule );
 #endif
 }
 
