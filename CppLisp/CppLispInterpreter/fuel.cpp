@@ -32,7 +32,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#define FUELDEBUGGER_NAME "FuelDebugger.dll"
+#define FUEL_DEBUGGER_NAME "FuelDebugger.dll"
 #endif
 
 #if defined( __linux__ ) || defined( __APPLE__ )
@@ -40,11 +40,11 @@
 #endif
 
 #if defined( __linux__ )
-#define FUELDEBUGGER_NAME "FuelDebugger.so"
+#define FUEL_DEBUGGER_NAME "libFuelDebugger.so"
 #endif
 
 #if defined( __APPLE__ )
-#define FUELDEBUGGER_NAME "FuelDebugger.dylib"
+#define FUEL_DEBUGGER_NAME "libFuelDebugger.dylib"
 #endif
 
 //******************************************************************
@@ -317,7 +317,7 @@ namespace CppLisp
 
 		typedef ILispDebugger * (*fcnGetDebugger)();
 
-		void * hDLL = SimpleLoadLibrary(FUELDEBUGGER_NAME);
+		void * hDLL = SimpleLoadLibrary(FUEL_DEBUGGER_NAME);
 		if (hDLL)
 		{
 			fcnGetDebugger pGetDebugger = (fcnGetDebugger)SimpleGetProcAddress(hDLL, "create_debugger");
