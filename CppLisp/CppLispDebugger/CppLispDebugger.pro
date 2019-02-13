@@ -13,7 +13,7 @@ Debug {
 
 INCLUDEPATH += ../CppLispInterpreter
 
-LIBS += -L$${OUT_PWD}/../CppLispInterpreter/$${SUBDIRTARGET} -lCppLispInterpreter
+LIBS += -L$${OUT_PWD}/../CppLispInterpreter/$${SUBDIRTARGET} -lFuelInterpreter
 
 SOURCES     += Debugger.cpp
 

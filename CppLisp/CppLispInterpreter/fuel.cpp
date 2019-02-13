@@ -50,9 +50,13 @@
 void * SimpleLoadLibrary(const char * sDllName)
 {
 #ifdef _WIN32
+#ifdef UNICODE
 	std::string s(sDllName);
 	std::wstring stemp = std::wstring(s.begin(), s.end());
     return (void *)LoadLibrary( (LPCWSTR)stemp.c_str() );
+#else
+    return (void *)LoadLibrary( (LPCSTR)sDllName );
+#endif
 #endif
 #if defined( __linux__ ) || defined( __APPLE__ )
     return (void *)dlopen( sDllName, RTLD_LAZY );
