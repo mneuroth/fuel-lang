@@ -85,6 +85,10 @@ void * SimpleGetProcAddress(void * hDllModule, const char * sProcName)
 
 static void * g_hDebuggerDLL = 0;
 
+#ifdef UNIT_TEST
+extern "C" CppLisp::ILispDebugger * create_debugger();
+#endif
+
 static void DisconnectDebugger()
 {
 	if (g_hDebuggerDLL != 0)
@@ -327,6 +331,7 @@ namespace CppLisp
 	{
 		std::shared_ptr<ILispDebugger> dbg = 0;
 
+#ifndef UNIT_TEST
 		typedef ILispDebugger * (*fcnGetDebugger)();
 
 		if (g_hDebuggerDLL == 0)
@@ -341,6 +346,9 @@ namespace CppLisp
 				dbg = std::shared_ptr<ILispDebugger>((*pGetDebugger)());
 			}
 		}
+#else
+		dbg = std::shared_ptr<ILispDebugger>(create_debugger());		
+#endif
 		
 		return dbg;
 	}
