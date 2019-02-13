@@ -8,9 +8,9 @@
 #include "tst_qtlisputils.h"
 
 #include "../CppLispInterpreter/Variant.h"
-#include "../CppLispInterpreter/Debugger.h"
 #include "../CppLispInterpreter/Lisp.h"
 #include "../CppLispInterpreter/fuel.h"
+#include "../CppLispDebugger/Debugger.h"
 
 using namespace CppLisp;
 
