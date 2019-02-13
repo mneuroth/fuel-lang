@@ -68,7 +68,7 @@ namespace CppLisp
 	/// <summary>
 	/// Lisp token.
 	/// </summary>
-	/*public*/ class LispToken
+	/*public*/ class DLLEXPORT LispToken
 	{
 	public:
 		//#region constants

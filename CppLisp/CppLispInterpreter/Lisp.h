@@ -67,7 +67,7 @@ namespace CppLisp
 	/// <summary>
 	/// The FUEL lisp interpreter.
 	/// </summary>
-	/*public*/ class Lisp
+	/*public*/ class DLLEXPORT Lisp
 	{
 	public:
 		//#region constants

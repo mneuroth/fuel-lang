@@ -29,13 +29,7 @@
 #include "csstring.h"
 #include "Utils.h"
 #include "Lisp.h"
-#include "Debugger.h"
-
-#ifdef _MSC_VER
-#define DLLEXPORT __declspec(dllexport)
-#else
-#define DLLEXPORT
-#endif
+#include "DebuggerInterface.h"
 
 extern "C" DLLEXPORT int fuel_main(int argc, char *argv[]);
 
@@ -44,7 +38,7 @@ namespace CppLisp
 	/// <summary>
 	/// Fast Usable Embeddable Lisp Interpreter and Compiler (FUEL).
 	/// </summary>
-	 /*public*/ class Fuel
+	 /*public*/ class DLLEXPORT Fuel
 	{
 	public:
 		/*public*/ static void Main(std::vector<string> args);

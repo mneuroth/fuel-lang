@@ -48,7 +48,7 @@ namespace CppLisp
     /// <summary>
     /// The lisp runtime scope. That is something like a stack item.
     /// </summary>
-    /*public*/ class LispScope : public Dictionary<string, std::shared_ptr<object>>, public std::enable_shared_from_this<LispScope>
+    /*public*/ class DLLEXPORT LispScope : public Dictionary<string, std::shared_ptr<object>>, public std::enable_shared_from_this<LispScope>
     {
 	private:
 

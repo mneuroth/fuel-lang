@@ -34,7 +34,7 @@ namespace CppLisp
 	/// <summary>
 	/// The FUEL lisp tokenizer
 	/// </summary>
-	/*public*/ class LispTokenizer
+	/*public*/ class DLLEXPORT LispTokenizer
 	{
 	public:
 		//#region public static methods

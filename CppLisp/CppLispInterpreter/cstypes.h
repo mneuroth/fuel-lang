@@ -271,7 +271,7 @@ namespace CppLisp
 
 	// **********************************************************************
 	// Implement C++ version of TextWriter class of C#
-	class TextWriter
+	class DLLEXPORT TextWriter
 	{
 	private:
 		bool	m_bToString;
@@ -301,7 +301,7 @@ namespace CppLisp
 
 	// **********************************************************************
 	// Implement C++ version of TextWriter class of C#
-	class TextReader
+	class DLLEXPORT TextReader
 	{
 	private:
 		bool								m_bFromString;
@@ -322,7 +322,7 @@ namespace CppLisp
 	};
 
 	// **********************************************************************
-	struct LispFunctionWrapper
+	struct DLLEXPORT LispFunctionWrapper
 	{
 	private:
 		bool m_bIsSpecialForm;

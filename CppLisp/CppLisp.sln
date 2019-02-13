@@ -8,8 +8,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppLispInterpreter", "CppLi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppLisp", "CppLisp\CppLisp.vcxproj", "{0828F905-5C78-47FF-B0A3-10BB5EAE4A92}"
 	ProjectSection(ProjectDependencies) = postProject
+		{B400A137-5A80-4162-91CC-75353FD1C7B6} = {B400A137-5A80-4162-91CC-75353FD1C7B6}
 		{2696E985-88A9-44C8-B83C-340130400F7F} = {2696E985-88A9-44C8-B83C-340130400F7F}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppLispDebugger", "CppLispDebugger\CppLispDebugger.vcxproj", "{B400A137-5A80-4162-91CC-75353FD1C7B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +58,18 @@ Global
 		{0828F905-5C78-47FF-B0A3-10BB5EAE4A92}.Release|x64.Build.0 = Release|x64
 		{0828F905-5C78-47FF-B0A3-10BB5EAE4A92}.Release|x86.ActiveCfg = Release|Win32
 		{0828F905-5C78-47FF-B0A3-10BB5EAE4A92}.Release|x86.Build.0 = Release|Win32
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.ContinousIntgration|x64.ActiveCfg = ContinousIntgration|x64
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.ContinousIntgration|x64.Build.0 = ContinousIntgration|x64
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.ContinousIntgration|x86.ActiveCfg = ContinousIntgration|Win32
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.ContinousIntgration|x86.Build.0 = ContinousIntgration|Win32
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Debug|x64.ActiveCfg = Debug|x64
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Debug|x64.Build.0 = Debug|x64
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Debug|x86.ActiveCfg = Debug|Win32
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Debug|x86.Build.0 = Debug|Win32
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Release|x64.ActiveCfg = Release|x64
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Release|x64.Build.0 = Release|x64
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Release|x86.ActiveCfg = Release|Win32
+		{B400A137-5A80-4162-91CC-75353FD1C7B6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

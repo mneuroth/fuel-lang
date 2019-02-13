@@ -33,6 +33,16 @@
 
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+#ifdef _EXPORTING
+#define DLLEXPORT __declspec(dllexport)
+#else
+#define DLLEXPORT __declspec(dllimport)
+#endif
+#else
+#define DLLEXPORT
+#endif
+
 #if defined( __ANDROID__ )
 
 #include <string>
@@ -91,7 +101,7 @@ namespace CppLisp
 	//
 	// Class to wrap the stl string class with functions of the C# string class
 	//
-	class string : public std::string
+	class DLLEXPORT string : public std::string
 	{
 	public:
 		string();

@@ -10,7 +10,6 @@ SOURCES += \
         $$PWD/Interpreter.cpp \
         $$PWD/Scope.cpp \
         $$PWD/Variant.cpp \
-        $$PWD/Debugger.cpp \
         $$PWD/Utils.cpp \
         $$PWD/Exception.cpp \
         $$PWD/Lisp.cpp \
@@ -29,6 +28,5 @@ HEADERS += \
         $$PWD/Variant.h \
         $$PWD/Exception.h \
         $$PWD/DebuggerInterface.h \
-        $$PWD/Debugger.h \
         $$PWD/Utils.h \
         $$PWD/Lisp.h

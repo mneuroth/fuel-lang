@@ -37,7 +37,7 @@
 #include "csstring.h"
 #include "csobject.h"
 
-extern std::string ReadFileOrEmptyString(const std::string & fileName);
+extern DLLEXPORT std::string ReadFileOrEmptyString(const std::string & fileName);
 
 namespace CppLisp
 {
@@ -81,7 +81,7 @@ namespace CppLisp
 	/// <summary>
 	/// The runtime environment for the FUEL lisp interpreter.
 	/// </summary>
-	class LispEnvironment
+	class DLLEXPORT LispEnvironment
 	{
 	public:
 		// constants

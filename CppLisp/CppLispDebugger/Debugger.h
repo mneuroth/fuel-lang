@@ -36,6 +36,18 @@
 #include "Environment.h"
 #include "Utils.h"
 
+#ifdef _MSC_VER
+#ifdef _DBGEXPORTING
+#define DBGDLLEXPORT __declspec(dllexport)
+#else
+#define DBGDLLEXPORT __declspec(dllimport)
+#endif
+#else
+#define DBGDLLEXPORT
+#endif
+
+extern "C" DBGDLLEXPORT CppLisp::ILispDebugger * create_debugger();
+
 namespace CppLisp
 {
 	// ********************************************************************
@@ -61,7 +73,7 @@ namespace CppLisp
     /// The debugger module for FUEL. 
     /// Enabled command line debugging for FUEL.
     /// </summary>
-    /*public*/ class LispDebugger : public ILispDebugger
+    /*public*/ class DBGDLLEXPORT LispDebugger : public ILispDebugger
     {
 	private:
         //#region constants

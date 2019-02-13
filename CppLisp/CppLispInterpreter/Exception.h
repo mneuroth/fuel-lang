@@ -43,7 +43,7 @@ namespace CppLisp
 	/// <summary>
     /// Exception for the FUEL lisp interpreter
     /// </summary>
-    /*public*/ class LispException //: Exception
+    /*public*/ class DLLEXPORT LispException //: Exception
     {
 	public:
 		string Message;

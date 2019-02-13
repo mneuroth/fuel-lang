@@ -30,8 +30,8 @@
 
 namespace CppLisp
 {
-	void ShowVersion(std::shared_ptr<TextWriter> output);
-	void ShowAbout(std::shared_ptr<TextWriter> output);
+	DLLEXPORT void ShowVersion(std::shared_ptr<TextWriter> output);
+	DLLEXPORT void ShowAbout(std::shared_ptr<TextWriter> output);
 }
 
 #endif

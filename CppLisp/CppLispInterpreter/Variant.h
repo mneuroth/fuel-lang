@@ -103,7 +103,7 @@ namespace CppLisp
     /// <summary>
     /// Generic data container for lisp data types.
     /// </summary>
-    /*public*/ class LispVariant
+    /*public*/ class DLLEXPORT LispVariant
     {
         //#region constants
 

@@ -34,7 +34,7 @@ namespace CppLisp
 	/// <summary>
 	/// The FUEL lisp parser.
 	/// </summary>
-    /*public*/ class LispParser
+    /*public*/ class DLLEXPORT LispParser
 	{
 		//#region constants
 			

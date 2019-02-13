@@ -28,6 +28,7 @@
 #include "CppUnitTest.h"
 
 #include "../CppLispInterpreter/fuel.h"
+#include "../CppLispDebugger/Debugger.h"
 
 #include "FuelUnitTestHelper.h"
 

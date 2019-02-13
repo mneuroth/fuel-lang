@@ -83,7 +83,7 @@ namespace CppLisp
     };
 
 	// variant object
-	class object
+	class DLLEXPORT object
 	{
 	private:
 		ObjectType m_Type;

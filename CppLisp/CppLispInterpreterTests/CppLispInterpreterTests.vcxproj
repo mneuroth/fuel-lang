@@ -105,21 +105,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\CppLispInterpreter;$(SolutionDir)\CppLispDebugger</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\CppLispInterpreter;$(SolutionDir)\CppLispDebugger</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\CppLispInterpreter;$(SolutionDir)\CppLispDebugger</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ContinousIntgration|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\CppLispInterpreter;$(SolutionDir)\CppLispDebugger</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\CppLispInterpreter;$(SolutionDir)\CppLispDebugger</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ContinousIntgration|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\CppLispInterpreter;$(SolutionDir)\CppLispDebugger</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -296,21 +302,6 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\CppLispInterpreter\csobject.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\csstring.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\cstypes.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Debugger.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Environment.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Exception.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\fuel.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Interpreter.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Lisp.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Parser.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Scope.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Token.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Tokenizer.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Utils.cpp" />
-    <ClCompile Include="..\CppLispInterpreter\Variant.cpp" />
     <ClCompile Include="InterpreterTests.cpp" />
     <ClCompile Include="MainTest.cpp" />
     <ClCompile Include="ParserTests.cpp" />
@@ -325,6 +316,14 @@ xcopy /Y /S "$(SolutionDir)..\CsLisp\TestData\testmodule.fuel" "$(TargetDir)Libr
     </ClCompile>
     <ClCompile Include="TokenizerTests.cpp" />
     <ClCompile Include="VariantTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CppLispDebugger\CppLispDebugger.vcxproj">
+      <Project>{b400a137-5a80-4162-91cc-75353fd1c7b6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CppLispInterpreter\CppLispInterpreter.vcxproj">
+      <Project>{2696e985-88a9-44c8-b83c-340130400f7f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -27,12 +27,18 @@
 #include "Lisp.h"
 
 #include "cstypes.h"
+#include "csstring.h"
 
 using namespace CppLisp;
 
 const string LispDebugger::Prompt = /*Lisp::Name*/string("FUEL(isp)") + "> ";
 
 const string LispDebugger::DbgPrompt = /*Lisp::Name*/string("FUEL(isp)") + "-DBG> ";
+
+extern "C" CppLisp::ILispDebugger * create_debugger()
+{
+	return new CppLisp::LispDebugger();
+}
 
 namespace CppLisp
 {
