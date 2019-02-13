@@ -34,6 +34,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../CppLispInterpreter/CppLispInterpreter.pri)
 
+unix {
+    LIBS += -ldl
+}
+
 INCLUDEPATH += ../CppLispInterpreter
 
 DEFINES += UNIT_TEST
