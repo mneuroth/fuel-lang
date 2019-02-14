@@ -81,19 +81,26 @@ matrix:
         - export ANDROID_NDK_HOME=$WORKING_DIR/android-ndk-r16b
         - export ANDROID_NDK=$WORKING_DIR/android-ndk-r16b
         - export PATH=$PATH:${ANDROID_NDK_HOME}
-        #- echo y | sdkmanager "ndk-bundle"
-        #- echo y | sdkmanager "cmake"
+        ##- echo y | sdkmanager "ndk-bundle"
+        ##- echo y | sdkmanager "cmake"
+        - echo y | sdkmanager "ndk-bundle"
+        - echo y | sdkmanager "cmake;3.6.4111459"
+        - echo y | sdkmanager "lldb;3.1"
         - ls -lrt $ANDROID_NDK_HOME/build
         - ls -lrt $ANDROID_NDK_HOME/build/cmake
+        - ls -lrt $WORKING_DIR/android-ndk-r16b
       #install:
       #  - echo y | sdkmanager "ndk-bundle"
       #  - echo y | sdkmanager "cmake;3.6.4111459"
       #  - echo y | sdkmanager "lldb;3.1"
-      #before_script:
-      #  - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
-      #  - ls -lrt $ANDROID_NDK_HOME
+      before_script:
+        - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
+        - ls -lrt $ANDROID_NDK_HOME
       script:
       - cd CppLisp
+      - cmake CMakeLists.txt
+      - make -j 4
+      - ls -lrt
       - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=android-26 CMakeLists.txt
       - make -j 4
       - ls -lrt
