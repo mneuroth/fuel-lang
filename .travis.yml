@@ -62,8 +62,8 @@ matrix:
     - os: linux
       language: android
       compiler: gcc/cmake
-      jdk:
-      - oraclejdk8
+#      jdk:
+#      - oraclejdk8
       android:
         components:
             - build-tools-26.0.2
@@ -87,10 +87,10 @@ matrix:
 #        - echo y | sdkmanager "cmake"
 #        - ls -lrt $ANDROID_NDK_HOME/build
 #        - ls -lrt $ANDROID_NDK_HOME/build/cmake
-     addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
+#     addons:
+#        apt:
+#          sources:
+#          - ubuntu-toolchain-r-test
           #packages:
           #- g++-6
       script:
