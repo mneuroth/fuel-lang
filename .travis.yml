@@ -61,7 +61,6 @@ matrix:
       - ./build_cs.sh
     
     - os: linux
-      dist: xenial
       language: android
       compiler: gcc/cmake
       addons:
