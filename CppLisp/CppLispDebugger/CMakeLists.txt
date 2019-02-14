@@ -8,8 +8,7 @@ Debugger.h
 Debugger.cpp
 )
 
-target_include_directories(
-    FuelDebugger PUBLIC
+include_directories(
     ../CppLispInterpreter
 )
 
