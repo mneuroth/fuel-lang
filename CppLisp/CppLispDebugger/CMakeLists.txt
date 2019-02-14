@@ -9,6 +9,7 @@ Debugger.cpp
 )
 
 target_include_directories(
+    FuelDebugger PUBLIC
     ../CppLispInterpreter
 )
 
