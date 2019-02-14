@@ -153,16 +153,17 @@ Microsoft Visual Studio and build the solution.
 To compile the C++ version of fuel open the solution file CppLisp/CppLisp.sln in
 Microsoft Visual Studio and build the solution. Or use the qmake tool from [Qt](https://www.qt.io/):
 
-    >cd CppLisp/CppLispInterpreter
-    >qmake CppLispInterpreter.pro
+    >cd CppLisp
+    >qmake -r CppLisp.pro
     >make
     
 The CMake build tool is also supported:
 
-    >cd CppLisp/CppLispInterpreter
+    >cd CppLisp
     >cmake CMakeLists.txt
     >make    
 
+    
 Deployment  
 ----------
 The binary distribution of FUEL for the .NET platform consists of the following components:
@@ -175,7 +176,16 @@ The binary distribution of FUEL for the .NET platform consists of the following 
     FuelInterpreter.dll     
     FuelDebugger.dll          (optional)
     FuelCompiler.dll          (optional)
-  
+
+The binary distribution of FUEL for the native C++ platform(s) consists of the following components:
+
+    LICENSE                   (license)
+    README.md                 (this file)
+    fuel.exe                  (command line application)
+    Library/fuellib.fuel      (standard library)
+    FuelInterpreter.dll     
+    FuelDebugger.dll          (optional)
+    
   
 Platforms  
 ---------
