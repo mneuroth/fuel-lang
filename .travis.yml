@@ -42,6 +42,7 @@ matrix:
           - g++-6
       script:
       - cd CppLisp
+      - cmake --version
       - cmake CMakeLists.txt
       - make -j 4
       - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./CppLispInterpreter:./CppLispDebugger
@@ -60,6 +61,7 @@ matrix:
       - ./build_cs.sh
     
     - os: linux
+      dist: xenial
       language: android
       compiler: gcc/cmake
       addons:
@@ -72,6 +74,7 @@ matrix:
             - build-tools-26.0.2
             - android-26
       before_install:
+        - cmake --version
         - echo $HOME
         - echo $ANDROID_HOME
         - ls -lrt $ANDROID_HOME
