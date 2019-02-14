@@ -19,6 +19,20 @@ matrix:
     
     - os: linux
       language: cpp
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-6
+          - qt5-default
+          - qttools5-dev-tools
+      script:
+      - ./build_cpp.sh
+    
+    - os: linux
+      language: cpp
       compiler: gcc/cmake
       addons:
         apt:
@@ -36,20 +50,6 @@ matrix:
       - ./fuel
     
     - os: linux
-      language: cpp
-      compiler: gcc
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          packages:
-          - g++-6
-          - qt5-default
-          - qttools5-dev-tools
-      script:
-      - ./build_cpp.sh
-    
-    - os: linux
       language: csharp
       compiler: mono
       addons:
@@ -58,6 +58,48 @@ matrix:
           - ubuntu-toolchain-r-test
       script:
       - ./build_cs.sh
+    
+    - os: linux
+      language: android
+      compiler: gcc/cmake
+      jdk:
+      - oraclejdk8
+      android:
+          components:
+              - tools
+              - platform-tools
+              - tools
+              - build-tools-25.0.3
+              - android-24
+              - extra-android-m2repository
+              - extra-google-m2repository
+              - extra-google-google_play_services
+      before_install:
+        - rm -fr $HOME/android-ndk-r16b
+        - curl -L http://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip -O
+        - unzip -oq android-ndk-r16b-linux-x86_64.zip
+        - rm android-ndk-r16b-linux-x86_64.zip
+        - export ANDROID_NDK_HOME=$HOME/android-ndk-r16b
+        - export PATH=$PATH:${ANDROID_NDK_HOME}
+        - echo y | sdkmanager "ndk-bundle"
+        - echo y | sdkmanager "cmake"
+        - ls -lrt $ANDROID_NDK_HOME/build
+        - ls -lrt $ANDROID_NDK_HOME/build/cmake
+     addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          #packages:
+          #- g++-6
+      script:
+      - cd CppLisp
+      - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=android-24 CMakeLists.txt
+      - make -j 4
+      - ls -lrt
+      #- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./CppLispInterpreter:./CppLispDebugger
+      #- ./fuel -v
+      #- ./fuel -e "(println (platform))"
+      #- ./fuel
     
     - os: osx
       language: cpp
