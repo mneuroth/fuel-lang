@@ -5,7 +5,7 @@ project (fuel)
 add_subdirectory(CppLispInterpreter)
 add_subdirectory(CppLispDebugger)
 
-add_executable(fuel FuelMain.cpp)
+add_executable(fuel CppLisp/FuelMain.cpp)
 
 target_link_libraries(fuel FuelInterpreter ${CMAKE_DL_LIBS})
 
