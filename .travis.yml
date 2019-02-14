@@ -67,6 +67,8 @@ matrix:
             - build-tools-26.0.2
             - android-26
       before_install:
+        - echo $HOME
+        - cd ..
         - rm -fr $HOME/android-ndk-r16b
         - curl -L http://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip -O
         - unzip -oq android-ndk-r16b-linux-x86_64.zip
@@ -79,6 +81,7 @@ matrix:
         #- echo y | sdkmanager "cmake"
         - ls -lrt $ANDROID_NDK_HOME/build
         - ls -lrt $ANDROID_NDK_HOME/build/cmake
+        - cd fuel-lang
       script:
       - cd CppLisp
       - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=android-24 CMakeLists.txt
