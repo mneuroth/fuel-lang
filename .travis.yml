@@ -83,8 +83,8 @@ matrix:
         - rm android-ndk-r16b-linux-x86_64.zip
         - export ANDROID_NDK_HOME=$HOME/android-ndk-r16b
         - export PATH=$PATH:${ANDROID_NDK_HOME}
-        - echo y | sdkmanager "ndk-bundle"
-        - echo y | sdkmanager "cmake"
+        #- echo y | sdkmanager "ndk-bundle"
+        #- echo y | sdkmanager "cmake"
         - ls -lrt $ANDROID_NDK_HOME/build
         - ls -lrt $ANDROID_NDK_HOME/build/cmake
 #     addons:
