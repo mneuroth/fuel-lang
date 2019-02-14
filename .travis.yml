@@ -62,6 +62,11 @@ matrix:
     - os: linux
       language: android
       compiler: gcc/cmake
+      addons:
+        apt:
+          packages:
+          - cmake
+          - cmake-data
       android:
         components:
             - build-tools-26.0.2
@@ -87,10 +92,6 @@ matrix:
         - ls -lrt $ANDROID_NDK_HOME/build
         - ls -lrt $ANDROID_NDK_HOME/build/cmake
         - ls -lrt $WORKING_DIR/android-ndk-r16b
-      #install:
-      #  - echo y | sdkmanager "ndk-bundle"
-      #  - echo y | sdkmanager "cmake;3.6.4111459"
-      #  - echo y | sdkmanager "lldb;3.1"
       before_script:
         - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
         - ls -lrt $ANDROID_NDK_HOME
@@ -102,10 +103,10 @@ matrix:
       - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a CMakeLists.txt
       - make -j 4
       - ls -lrt
-      #- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./CppLispInterpreter:./CppLispDebugger
-      #- ./fuel -v
-      #- ./fuel -e "(println (platform))"
-      #- ./fuel
+      - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./CppLispInterpreter:./CppLispDebugger
+      - ./fuel -v
+      - ./fuel -e "(println (platform))"
+      - ./fuel
     
     - os: osx
       language: cpp
