@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 project (FuelDebugger)
 
@@ -6,6 +6,10 @@ file(GLOB fuel_debugger_src
 Debugger.h
 
 Debugger.cpp
+)
+
+target_include_directories(
+    ../CppLispInterpreter
 )
 
 add_library(FuelDebugger SHARED ${fuel_debugger_src})
