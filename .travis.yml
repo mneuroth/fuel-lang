@@ -19,6 +19,24 @@ matrix:
     
     - os: linux
       language: cpp
+      compiler: gcc/cmake
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-6
+      script:
+      - cd CppLisp
+      - cmake CMakeLists.txt
+      - make -j 4
+      - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./CppLispInterpreter:./CppLispDebugger
+      - ./fuel -v
+      - ./fuel -e "(println (platform))"
+      - ./fuel
+    
+    - os: linux
+      language: cpp
       compiler: gcc
       addons:
         apt:
