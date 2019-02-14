@@ -1,6 +1,8 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.1)
 
 project (FuelDebugger)
+
+set (CMAKE_CXX_STANDARD 11)
 
 file(GLOB fuel_debugger_src
 Debugger.h
