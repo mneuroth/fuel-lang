@@ -39,13 +39,13 @@ namespace CppLisp
     /// <summary>
     /// The generic debugger interface for the runtime environment.
     /// </summary>
-    /*public interface*/class ILispDebugger
+    /*public interface*/class DLLEXPORT ILispDebugger
     {
 	public:
 		/// <summary>
 		/// The destructor.
 		/// </summary>
-        virtual ~ILispDebugger() {}
+		//virtual ~ILispDebugger();
 
         /// <summary>
         /// Enters the interactive loop.
