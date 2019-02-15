@@ -91,9 +91,13 @@ matrix:
         - ./configure
         - make -j 4
         - ls -lrt
+        - which cmake
         - sudo apt remove cmake
         - sudo apt remove cmake-data
         - sudo make install
+        - which cmake
+        - export PATH=$PATH:/usr/local/bin
+        - which cmake
         - cmake -version
         - pwd
         - cd ..
