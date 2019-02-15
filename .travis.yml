@@ -83,7 +83,16 @@ matrix:
         - rm -fr $WORKING_DIR/android-ndk-r14b
         - curl -L http://dl.google.com/android/repository/android-ndk-r14b-linux-x86_64.zip -O
         - unzip -oq android-ndk-r14b-linux-x86_64.zip
+        - curl -L https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4.tar.gz -O
+        - tar -xvzf cmake-3.13.4.tar.gz
         - ls -lrt
+        - cd cmake-3.13.4
+        - ./configure
+        - make -j 4
+        - ls -lrt
+        - sudo apt remove cmake
+        - sudo apt remove cmake-data
+        - sudo make install
         - rm android-ndk-r14b-linux-x86_64.zip
         - export ANDROID_NDK_HOME=$WORKING_DIR/android-ndk-r14b
         - export ANDROID_NDK=$WORKING_DIR/android-ndk-r14b
