@@ -42,6 +42,11 @@ namespace CppLisp
     /*public interface*/class ILispDebugger
     {
 	public:
+		/// <summary>
+		/// The destructor.
+		/// </summary>
+		virtual ~ILispDebugger()
+
         /// <summary>
         /// Enters the interactive loop.
         /// </summary>

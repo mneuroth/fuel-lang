@@ -66,7 +66,7 @@ build_script:
   # *** build C# with msc (and execute unit tests) ***
   - cd CsLisp
   - if %cname%==csc MsBuild.exe /m /property:Configuration="Release" CsLisp.sln   
-  - if %cname%==csc cd bin\x64\release
+  - if %cname%==csc cd bin\release
   - if %cname%==csc fuel -v
   #- if %cname%==csc cd ..\..\..\
   #- if %cname%==csc cd CsLispUnitTests
