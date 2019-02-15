@@ -199,18 +199,29 @@ namespace CsLisp
                         else if (function.Function == LispEnvironment.quote_form)
                         {
                             // (quote (1 2 3)) --> new object[] { 1, 2, 3 }
+                            // (quote 'something) --> new LispVariant(LispType.Symbol, "something")
                             code += "/*quote*/new object[] { ";
-                            var aList = (IEnumerable<object>)astWithResolvedValues[i + 1];
                             var temp = string.Empty;
-                            foreach (var item in aList)
+                            if (astWithResolvedValues[i + 1] is IEnumerable<object>)
                             {
-                                if (temp.Length > 0)
+                                var aList = (IEnumerable<object>)astWithResolvedValues[i + 1];
+                                foreach (var item in aList)
                                 {
-                                    temp += ", ";
+                                    if (temp.Length > 0)
+                                    {
+                                        temp += ", ";
+                                    }
+                                    temp += "new LispVariant( ";
+                                    temp += Compile(item, globalScope, string.Empty, null, scopeName).Item1;
+                                    temp += " )";
                                 }
-                                temp += "new LispVariant( ";
-                                temp += Compile(item, globalScope, string.Empty, null, scopeName).Item1;
-                                temp += " )";
+                            }
+                            else
+                            {
+                                LispVariant variant = (LispVariant)astWithResolvedValues[i + 1];
+                                temp += "new LispVariant( LispType.Symbol, \"";
+                                temp += variant.ToString();
+                                temp += "\" )";
                             }
                             code += temp + " }";
                             i++;
@@ -262,10 +273,17 @@ namespace CsLisp
                             code += ".ToBool() )\n{\n";
                             code += Compile(astWithResolvedValues[i + 2], globalScope, "    ", null, scopeName).Item1;
                             code += ";\n}\n";
-                            code += "else\n{\n";
-                            code += Compile(astWithResolvedValues[i + 3], globalScope, "    ", null, scopeName).Item1;
-                            code += ";\n}\n";
-                            i += 3;
+                            if (astWithResolvedValues.Count > i + 3)
+                            {
+                                code += "else\n{\n";
+                                code += Compile(astWithResolvedValues[i + 3], globalScope, "    ", null, scopeName).Item1;
+                                code += ";\n}\n";
+                                i += 3;
+                            }
+                            else
+                            {
+                                i += 2;
+                            }
                         }
                         else if (function.Function == LispEnvironment.while_form)
                         {

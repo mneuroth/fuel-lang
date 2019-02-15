@@ -77,7 +77,7 @@ namespace CsLisp
 
         private static double Tolerance { get; set; }
 
-        public LispUnQuoteModus IsUnQuoted { get; private set; }
+        public LispUnQuoteModus IsUnQuoted { get; set; }
 
         public object Value { get; set; }
 
@@ -581,6 +581,10 @@ namespace CsLisp
 
         public override string ToString()
         {
+            if (IsSymbol)
+            {
+                return Value.ToString();
+            }
             if (IsString)
             {
                 return StringValue;
@@ -608,10 +612,6 @@ namespace CsLisp
             if (IsFunction)
             {
                 return "function " + (FunctionValue.Signature != null ? FunctionValue.Signature : "<unknown>");
-            }
-            if (IsSymbol)
-            {
-                return Value.ToString();
             }
             if (IsNativeObject)
             {

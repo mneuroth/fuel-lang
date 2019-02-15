@@ -2326,5 +2326,58 @@ namespace LispUnitTests
             Assert.IsTrue(result.IsBool);
             Assert.AreEqual(true, result.ToBool());
         }
+
+        [TestMethod]
+        public void Test_Quasiquote11()
+        {
+            LispVariant result = Lisp.Eval("(do (def l (list 1 2 3)) (println `,@l))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("1 2 3", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote12()
+        {
+            LispVariant result = Lisp.Eval("(do (def l 78) (println `,@l))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("78", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote13()
+        {
+            LispVariant result = Lisp.Eval("(do (def l 78) (println `,l))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("78", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_Quasiquote14()
+        {
+            LispVariant result = Lisp.Eval("(do (def l (list 1 2 3)) (println `,l))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("(1 2 3)", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_NestedMacroExpand()
+        {
+            LispVariant result = Lisp.Eval(@"(do
+(define-macro-expand setqq (symbol value)
+   '(setf symbol value)
+)
+
+(define-macro-expand begin (sequence)
+   (list 'do `,@(quoted-macro-args))
+)
+
+(begin
+  (def x 42)
+  (setqq x 4)    
+  (println x)
+))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("4", result.ToString());
+        }
     }
 }

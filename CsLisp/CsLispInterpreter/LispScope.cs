@@ -206,19 +206,22 @@ namespace CsLisp
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="closureScopeFound">The closure scope found.</param>
+        /// <param name="value">The found value.</param>
         /// <returns>True if name was found.</returns>
-        public bool IsInClosureChain(string name, out LispScope closureScopeFound)
+        private bool IsInClosureChain(string name, out LispScope closureScopeFound, out object value)
         {
-            closureScopeFound = null;
             if (ClosureChain != null)
             {
-                if (ClosureChain.ContainsKey(name))
+                if (ClosureChain.TryGetValue(name, out value))
                 {
                     closureScopeFound = ClosureChain;
                     return true;
                 }
-                return ClosureChain.IsInClosureChain(name, out closureScopeFound);
+                return ClosureChain.IsInClosureChain(name, out closureScopeFound, out value);
             }
+
+            closureScopeFound = null;
+            value = null;
             return false;
         }
 
@@ -234,20 +237,17 @@ namespace CsLisp
             var name = elem.ToString();
             LispScope foundClosureScope;
             // first try to resolve in this scope
-            if (ContainsKey(name))
+            if (TryGetValue(name, out result))
             {
-                result = this[name];
             }
             // then try to resolve in closure chain scope(s)
-            else if (IsInClosureChain(name, out foundClosureScope))
+            else if (IsInClosureChain(name, out foundClosureScope, out result))
             {
-                result = foundClosureScope[name];
             }
             // then try to resolve in global scope
             else if (GlobalScope != null &&
-                     GlobalScope.ContainsKey(name))
+                     GlobalScope.TryGetValue(name, out result))
             {
-                result = GlobalScope[name];
             }
             // then try to resolve in scope of loaded modules
             else if (LispEnvironment.IsInModules(name, GlobalScope))
@@ -274,21 +274,25 @@ namespace CsLisp
         public void SetInScopes(string symbolName, object value)
         {
             LispScope foundClosureScope;
-            if (!string.IsNullOrEmpty(symbolName) && ContainsKey(symbolName))
+            object val;
+            if (!string.IsNullOrEmpty(symbolName))
             {
-                this[symbolName] = value;
-            }
-            else if (!string.IsNullOrEmpty(symbolName) && IsInClosureChain(symbolName, out foundClosureScope))
-            {
-                foundClosureScope[symbolName] = value;
-            }
-            else if (!string.IsNullOrEmpty(symbolName) && GlobalScope != null && GlobalScope.ContainsKey(symbolName))
-            {
-                GlobalScope[symbolName] = value;
-            }
-            else
-            {
-                throw new LispException("Symbol " + symbolName + " not found", this);
+                if (ContainsKey(symbolName))
+                {
+                    this[symbolName] = value;
+                }
+                else if (IsInClosureChain(symbolName, out foundClosureScope, out val))
+                {
+                    foundClosureScope[symbolName] = value;
+                }
+                else if (GlobalScope != null && GlobalScope.ContainsKey(symbolName))
+                {
+                    GlobalScope[symbolName] = value;
+                }
+                else
+                {
+                    throw new LispException("Symbol " + symbolName + " not found", this);
+                }
             }
         }
 

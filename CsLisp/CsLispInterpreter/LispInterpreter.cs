@@ -188,14 +188,34 @@ namespace CsLisp
 
             // evaluate arguments, but allow recursive lists
             var arguments = new object[astWithResolvedValues.Count - 1];
-            for (var i = 1; i < astWithResolvedValues.Count; i++)
+            for (var i = 1; i < arguments.Length + 1; i++)
             {
                 //var asContainer = LispUtils.GetAsContainer(astWithResolvedValues[i]);
                 //var needEvaluation = (asContainer != null) && !functionWrapper.IsSpecialForm;
                 //arguments[i - 1] = needEvaluation ? EvalAst(asContainer, scope) : astWithResolvedValues[i];
                 var needEvaluation = (astWithResolvedValues[i] is IEnumerable<object>) &&
                                      !functionWrapper.IsSpecialForm;
-                arguments[i - 1] = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
+                var result = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
+                // process statemens like this: `,@l  with l = (1 2 3)
+                LispVariant variant = result as LispVariant;
+                if (variant != null) 
+                {                    
+                    if (variant.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing && variant.IsList)
+                    {
+                        var lst = variant.ListRef;
+                        var newArguments = new object[arguments.Length + lst.Count - 1];
+                        arguments.CopyTo(newArguments, 0);
+                        foreach (var elem in lst)
+                        {
+                            newArguments[i - 1] = elem;
+                            i++;
+                        }
+
+                        arguments = newArguments;
+                        break;
+                    }
+                }
+                arguments[i - 1] = result;
             }
 
             // debugger processing
@@ -263,9 +283,11 @@ namespace CsLisp
                 var macro = LispEnvironment.GetMacro(function, globalScope);
                 if (macro is LispMacroCompileTimeExpand)
                 {
+                    anyMacroReplaced = true;
                     var macroExpand = (LispMacroCompileTimeExpand)macro;
                     var astWithReplacedArguments = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, globalScope, ref anyMacroReplaced).ToList();   // PATCH
-                    return EvalAst(astWithReplacedArguments, globalScope);
+                    // process recursive macro expands (do not wrap list as LispVariant at this point)
+                    return ConvertLispVariantListToListIfNeeded(EvalAst(astWithReplacedArguments, globalScope));
                 }
             }
 
@@ -274,10 +296,11 @@ namespace CsLisp
             foreach (var elem in astAsList)
             {
                 var expandResult = ExpandMacros(elem, globalScope);
-                // ignore code which is removed in nacri expand phase
+                // ignore code which is removed in macro expand phase
                 if (expandResult != null)
                 {
-                    expandedAst.Add(expandResult);                    
+                    // process recursive macro expands (do not wrap list as LispVariant at this point)
+                    expandedAst.Add(ConvertLispVariantListToListIfNeeded(expandResult));
                 }
             }
 
@@ -286,8 +309,20 @@ namespace CsLisp
 #endif
 
         #endregion
-
+        
         #region private methods
+
+        private static object ConvertLispVariantListToListIfNeeded(object something)
+        {
+            LispVariant variant = something as LispVariant;
+            
+            if (variant != null && variant.IsList)
+            {
+                return variant.ListRef;
+            }
+
+            return something;
+        }
 
         /// <summary>
         /// Get information about position in sourcecode for

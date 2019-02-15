@@ -1606,6 +1606,7 @@ namespace CsLisp
                     {
                         var evalResult = LispInterpreter.EvalAst(item2, scope);
                         splicing = variant.ToString() == UnQuoteSplicing;
+                        evalResult.IsUnQuoted = splicing ? LispUnQuoteModus.UnQuoteSplicing : LispUnQuoteModus.UnQuote;
                         return evalResult;
                     }
                 }
@@ -2283,21 +2284,23 @@ namespace CsLisp
 
         private static object QueryItem(object funcName, LispScope scope, string key)
         {
+            object val, val2;
             if (scope != null &&
-                scope.ContainsKey(key) &&
-                ((LispScope)scope[key]).ContainsKey(funcName.ToString()))
+                scope.TryGetValue(key, out val) &&
+                ((LispScope)val).TryGetValue(funcName.ToString(), out val2))
             {
-                return ((LispScope)scope[key])[funcName.ToString()];
+                return val2;
             }
             return null;
         }
 
         private static bool ExistsItem(object funcName, LispScope scope, string key)
         {
+            object val;
             if (scope != null &&
-                scope.ContainsKey(key))
+                scope.TryGetValue(key, out val))
             {
-                return ((LispScope)scope[key]).ContainsKey(funcName.ToString());
+                return ((LispScope)val).ContainsKey(funcName.ToString());
             }
             return false;
         }
@@ -2309,9 +2312,10 @@ namespace CsLisp
             foreach (KeyValuePair<string, object> kv in importedModules)
             {
                 var module = (LispScope)kv.Value;
-                if (module.ContainsKey(funcName))
+                object val;
+                if (module.TryGetValue(funcName, out val))
                 {
-                    foundValue = module[funcName];
+                    foundValue = val;
                     return true;
                 }
             }
