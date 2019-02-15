@@ -45,7 +45,7 @@ namespace CppLisp
 		/// <summary>
 		/// The destructor.
 		/// </summary>
-		virtual ~ILispDebugger()
+        virtual ~ILispDebugger();
 
         /// <summary>
         /// Enters the interactive loop.
