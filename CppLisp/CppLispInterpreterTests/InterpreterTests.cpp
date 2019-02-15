@@ -2262,6 +2262,54 @@ namespace QtLispUnitTests
 			QCOMPARE(true, result->ToBool());
 		}
 
+		TEST_METHOD(Test_Quasiquote11)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l (list 1 2 3)) (println `,@l))");
+			QVERIFY(result->IsString());
+			QCOMPARE("1 2 3", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote12)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 78) (println `,@l))");
+			QVERIFY(result->IsString());
+			QCOMPARE("78", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote13)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 78) (println `,l))");
+			QVERIFY(result->IsString());
+			QCOMPARE("78", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_Quasiquote14)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l (list 1 2 3)) (println `,l))");
+			QVERIFY(result->IsString());
+			QCOMPARE("(1 2 3)", result->ToString().c_str());
+		}
+
+		TEST_METHOD(Test_NestedMacroExpand)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do\
+				(define-macro-expand setqq (symbol value)\
+					'(setf symbol value)\
+				)\
+\
+				(define-macro-expand begin (sequence)\
+				   (list 'do `,@(quoted-macro-args))\
+				)\
+\
+					(begin\
+					  (def x 42)\
+					  (setqq x 4)\
+				      (println x)\
+					))");
+			QVERIFY(result->IsString());
+			QCOMPARE("4", result->ToString().c_str());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects

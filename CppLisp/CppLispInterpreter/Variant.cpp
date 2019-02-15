@@ -249,6 +249,10 @@ namespace CppLisp
 
 	string LispVariant::ToString() const
 	{
+		if (IsSymbol())
+		{
+			return Value->ToString();
+		}
 		if (IsString())
 		{
 			return StringValue();
@@ -276,10 +280,6 @@ namespace CppLisp
 		if (IsFunction())
 		{
 			return "function " + /*(FunctionValue().Signature != null ?*/ FunctionValue().Signature /*: "<unknown>")*/;
-		}
-		if (IsSymbol())
-		{
-			return Value->ToString();
 		}
 		if (IsNativeObject())
 		{

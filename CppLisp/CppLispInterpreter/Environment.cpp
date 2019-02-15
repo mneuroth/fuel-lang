@@ -1552,6 +1552,7 @@ static std::shared_ptr<object> ProcessQuotedSExpression(const IEnumerable<std::s
 			{
 				var evalResult = LispInterpreter::EvalAst(item2, scope);
 				splicing = variant.ToString() == LispEnvironment::UnQuoteSplicing;
+				evalResult->IsUnQuoted = splicing ? LispUnQuoteModus::_UnQuoteSplicing : LispUnQuoteModus::_UnQuote;
 				return std::make_shared<object>(*evalResult);
 			}
 		}

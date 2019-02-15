@@ -170,7 +170,28 @@ namespace CppLisp
 		for (size_t i = 1; i < astWithResolvedValues->Count(); i++)
 		{
 			var needEvaluation = (arrAstWithResolvedValues[i]->IsList() /*is IEnumerable<object>*/) && !functionWrapper.IsSpecialForm();
-			arguments[i - 1] = needEvaluation ? std::make_shared<object>(*EvalAst(arrAstWithResolvedValues[i], scope)) : arrAstWithResolvedValues[i];
+
+			var result = needEvaluation ? std::make_shared<object>(*EvalAst(arrAstWithResolvedValues[i], scope)) : arrAstWithResolvedValues[i];
+
+			// process statemens like this: `,@l  with l = (1 2 3)
+			if (result->IsLispVariant())
+			{
+				std::shared_ptr<LispVariant> variant = result->ToLispVariant();
+				if (variant->IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing && variant->IsList())
+				{
+					var lst = variant->ListValueRef();
+					arguments.resize(arguments.size() + lst.size() - 1);
+					for(var elem : lst)
+					{
+						arguments[i - 1] = elem;
+						i++;
+					}
+
+					break;
+				}
+			}
+
+			arguments[i - 1] = result;
 		}
 
 		// debugger processing
@@ -196,6 +217,21 @@ namespace CppLisp
 			result = ExpandMacros(result, globalScope, /*ref*/ anyMacroReplaced);
 		} while (anyMacroReplaced);
 		return result;
+	}
+
+	static std::shared_ptr<object> ConvertLispVariantListToListIfNeeded(std::shared_ptr<object> something)
+	{
+		if (something->IsLispVariant())
+		{
+			std::shared_ptr<LispVariant> variant = something->ToLispVariant();
+
+			if (variant.get() != null && variant->IsList())
+			{
+				return std::make_shared<object>(variant->ListValueRef());
+			}
+		}
+
+		return something;
 	}
 
 	std::shared_ptr<object> LispInterpreter::ExpandMacros(std::shared_ptr<object> ast, std::shared_ptr<LispScope> globalScope, /*ref*/ bool & anyMacroReplaced)
@@ -238,10 +274,12 @@ namespace CppLisp
 			var macro = LispEnvironment::GetMacro(function, globalScope);
 			if (macro->IsLispMacroCompileTimeExpand())
 			{
+				anyMacroReplaced = true;
 				var macroExpand = macro->ToLispMacroCompileTimeExpand();
 				var astWithReplacedArguments = std::make_shared<object>(*ReplaceFormalArgumentsInExpression(macroExpand->FormalArguments, std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList), macroExpand->Expression, globalScope, /*ref*/ anyMacroReplaced));
-				var processedAst = EvalAst(astWithReplacedArguments, globalScope);
-				return std::make_shared<object>(*(processedAst->ListValue())); //  std::make_shared<object>(*processedAst);
+				// process recursive macro expands (do not wrap list as LispVariant at this point)
+				var processedAst = ConvertLispVariantListToListIfNeeded(EvalAst(astWithReplacedArguments, globalScope)->Value);
+				return std::make_shared<object>(*processedAst);
 			}
 		}
 
@@ -250,10 +288,11 @@ namespace CppLisp
 		for (var elem : astAsList)
 		{
 			var expandResult = ExpandMacros(elem, globalScope);
-			// ignore code which is removed in nacri expand phase
+			// ignore code which is removed in macro expand phase
 			if (expandResult != null)
 			{
-				expandedAst->Add(expandResult);
+				// process recursive macro expands (do not wrap list as LispVariant at this point)
+				expandedAst->Add(ConvertLispVariantListToListIfNeeded(expandResult));
 			}
 		}
 
