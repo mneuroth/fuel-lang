@@ -8,8 +8,8 @@ make -j 4
 ls -lrt
 cd CppLisp
 ls -lrt
-cp ../CppLispInterpreter/libFuelInterpreter.*
-cp ../CppLispDebugger/libFuelDebugger.*
+cp ../CppLispInterpreter/libFuelInterpreter.* .
+cp ../CppLispDebugger/libFuelDebugger.* .
 mkdir Library
 cp ../../Library/fuellib.fuel Library
 zip -u fuel-lang-unix-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/*.fuel
