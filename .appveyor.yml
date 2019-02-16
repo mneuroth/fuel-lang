@@ -32,14 +32,18 @@ install:
   - if not %cname%==mingw set make=nmake.exe
 
 build_script:
+  - echo %APPVEYOR_BUILD_FOLDER%
+  - cd 
   - echo %cname%
   # *** build C++ with msc ***
   - cd CppLisp
   - if %cname%==msc MsBuild.exe /m /property:Configuration="Release" CppLisp.sln   
   - if %cname%==msc cd x64\release
   - if %cname%==msc fuel -v
-  - if %cname%==msc zip -u fuel-lang-msc64-bin.zip *.exe *.dll library\*.fuel
-  - if %cname%==msc unzip -v fuel-lang-msc64-bin.zip
+  - if %cname%==msc 7z a fuel-lang-msc64-bin.zip %APPVEYOR_BUILD_FOLDER%\CppLisp\x64\release\*.exe %APPVEYOR_BUILD_FOLDER%\CppLisp\x64\release\*.dll %APPVEYOR_BUILD_FOLDER%\CppLisp\x64\release\library\*.fuel
+  - if %cname%==msc 7z l fuel-lang-msc64-bin.zip
+  #- if %cname%==msc zip -u fuel-lang-msc64-bin.zip *.exe *.dll library\*.fuel
+  #- if %cname%==msc unzip -v fuel-lang-msc64-bin.zip
   # *** execute C++ unit tests with msc ***
   - if %cname%==msc vstest.console CppLispInterpreterTests.dll  
   - if %cname%==msc cd ..\..
@@ -53,8 +57,10 @@ build_script:
   - if %cname%==mingw copy ..\..\CppLispDebugger\release\FuelDebugger.dll
   - if %cname%==mingw mkdir Library
   - if %cname%==mingw copy ..\..\..\Library\fuellib.fuel Library
-  - if %cname%==mingw zip -u fuel-lang-mingw-bin.zip *.exe *.dll library\*.fuel
-  - if %cname%==mingw unzip -v fuel-lang-mingw-bin.zip
+  - if %cname%==mingw 7z a fuel-lang-mingw-bin.zip %APPVEYOR_BUILD_FOLDER%\CppLisp\release\*.exe %APPVEYOR_BUILD_FOLDER%\CppLisp\release\*.dll %APPVEYOR_BUILD_FOLDER%\CppLisp\release\library\*.fuel
+  - if %cname%==mingw 7z l fuel-lang-mingw-bin.zip
+  #- if %cname%==mingw zip -u fuel-lang-mingw-bin.zip *.exe *.dll library\*.fuel
+  #- if %cname%==mingw unzip -v fuel-lang-mingw-bin.zip
   - if %cname%==mingw fuel.exe -v
   - if %cname%==mingw cd ..
   # *** unit tests for C++ with mingw ***
@@ -71,8 +77,10 @@ build_script:
   - if %cname%==csc MsBuild.exe /m /property:Configuration="Release" CsLisp.sln   
   - if %cname%==csc cd bin\release
   - if %cname%==csc fuel -v
-  - if %cname%==csc zip -u fuel-lang-cs-bin.zip *.exe *.dll *.config library\*.fuel
-  - if %cname%==csc unzip -v fuel-lang-cs-bin.zip
+  - if %cname%==csc 7z a fuel-lang-cs-bin.zip %APPVEYOR_BUILD_FOLDER%\CppLisp\bin\release\*.exe %APPVEYOR_BUILD_FOLDER%\CppLisp\bin\release\*.dll %APPVEYOR_BUILD_FOLDER%\CppLisp\bin\release\library\*.fuel
+  - if %cname%==csc 7z l fuel-lang-cs-bin.zip
+  #- if %cname%==csc zip -u fuel-lang-cs-bin.zip *.exe *.dll *.config library\*.fuel
+  #- if %cname%==csc unzip -v fuel-lang-cs-bin.zip
   #- if %cname%==csc cd ..\..\..\
   #- if %cname%==csc cd CsLispUnitTests
   #- if %cname%==csc cd bin\release
