@@ -40,6 +40,7 @@ build_script:
   - if %cname%==msc fuel -v
   - if %cname%==msc 7z a fuel-lang-msc64-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll Library\fuellib.fuel
   - if %cname%==msc 7z l fuel-lang-msc64-bin.zip
+  - if %cname%==msc appveyor PushArtifact fuel-lang-msc64-bin.zip
   # *** execute C++ unit tests with msc ***
   - if %cname%==msc vstest.console CppLispInterpreterTests.dll  
   - if %cname%==msc cd ..\..
@@ -55,6 +56,7 @@ build_script:
   - if %cname%==mingw copy ..\..\..\Library\fuellib.fuel Library
   - if %cname%==mingw 7z a fuel-lang-mingw-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll Library\fuellib.fuel
   - if %cname%==mingw 7z l fuel-lang-mingw-bin.zip
+  - if %cname%==msc appveyor PushArtifact fuel-lang-mingw-bin.zip
   - if %cname%==mingw fuel.exe -v
   - if %cname%==mingw cd ..
   - cd ..
@@ -74,6 +76,7 @@ build_script:
   - if %cname%==csc fuel -v
   - if %cname%==csc 7z a fuel-lang-cs-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll FuelCompiler.dll Library\fuellib.fuel
   - if %cname%==csc 7z l fuel-lang-cs-bin.zip
+  - if %cname%==msc appveyor PushArtifact fuel-lang-cs-bin.zip
   #- if %cname%==csc cd ..\..\..\
   #- if %cname%==csc cd CsLispUnitTests
   #- if %cname%==csc cd bin\Release
