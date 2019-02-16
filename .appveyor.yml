@@ -53,11 +53,11 @@ build_script:
   - if %cname%==mingw copy ..\..\CppLispDebugger\release\FuelDebugger.dll
   - if %cname%==mingw mkdir Library
   - if %cname%==mingw copy ..\..\..\Library\fuellib.fuel Library
-  - dir
   - if %cname%==mingw 7z a fuel-lang-mingw-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll Library\fuellib.fuel
   - if %cname%==mingw 7z l fuel-lang-mingw-bin.zip
   - if %cname%==mingw fuel.exe -v
   - if %cname%==mingw cd ..
+  - cd ..
   # *** unit tests for C++ with mingw ***
   - cd QtLispInterpreterUnitTests
   - if %cname%==mingw qmake QtLispInterpreterUnitTests.pro 
