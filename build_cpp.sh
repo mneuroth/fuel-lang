@@ -5,12 +5,13 @@ else
     qmake -r CppLisp.pro
 fi
 make -j 4
+ls -lrt
 cd CppLisp
-#ls -lrt
-cp ../../CppLispInterpreter/libFuelInterpreter.*
-cp ../../CppLispDebugger/libFuelDebugger.*
+ls -lrt
+cp ../CppLispInterpreter/libFuelInterpreter.*
+cp ../CppLispDebugger/libFuelDebugger.*
 mkdir Library
-cp ../../../Library/fuellib.fuel Library
+cp ../../Library/fuellib.fuel Library
 zip -u fuel-lang-unix-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/*.fuel
 unzip -v fuel-lang-unix-bin.zip
 #cp fuel ../CppLispInterpreter
