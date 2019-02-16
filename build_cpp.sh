@@ -7,9 +7,15 @@ fi
 make -j 4
 cd CppLisp
 #ls -lrt
-cp fuel ../CppLispInterpreter
-cd ..
-cd CppLispInterpreter
+cp ..\..\CppLispInterpreter\libFuelInterpreter.*
+cp ..\..\CppLispDebugger\libFuelDebugger.*
+mkdir Library
+cp ..\..\..\Library\fuellib.fuel Library
+zip -u fuel-lang-unix-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library\*.fuel
+unzip -v fuel-lang-unix-bin.zip
+#cp fuel ../CppLispInterpreter
+#cd ..
+#cd CppLispInterpreter
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ./fuel -v
 ./fuel  -e "(println (platform))"
