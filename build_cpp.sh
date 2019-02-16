@@ -13,6 +13,7 @@ cp ../CppLispDebugger/libFuelDebugger.*
 mkdir Library
 cp ../../Library/fuellib.fuel Library
 zip -u fuel-lang-unix-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/*.fuel
+ls -lrt
 unzip -v fuel-lang-unix-bin.zip
 #cp fuel ../CppLispInterpreter
 #cd ..
