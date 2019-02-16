@@ -33,15 +33,11 @@ install:
 
 build_script:
   - echo %APPVEYOR_BUILD_FOLDER%
-  - cd 
   - echo %cname%
   # *** build C++ with msc ***
   - cd CppLisp
-  - dir
   - if %cname%==msc MsBuild.exe /m /property:Configuration="Release" CppLisp.sln   
   - if %cname%==msc cd x64\release
-  - dir
-  - cd
   - if %cname%==msc fuel -v
   - if %cname%==msc 7z a fuel-lang-msc64-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll Library\fuellib.fuel
   - if %cname%==msc 7z l fuel-lang-msc64-bin.zip
@@ -55,7 +51,6 @@ build_script:
   - if %cname%==mingw qmake -r CppLisp.pro 
   - if %cname%==mingw %make% -j 4
   - cd CppLisp
-  - cd
   - if %cname%==mingw cd release
   - if %cname%==mingw copy ..\..\CppLispInterpreter\release\FuelInterpreter.dll
   - if %cname%==mingw copy ..\..\CppLispDebugger\release\FuelDebugger.dll
@@ -79,7 +74,6 @@ build_script:
   
   # *** build C# with msc (and execute unit tests) ***
   - cd CsLisp
-  - cd 
   - if %cname%==csc MsBuild.exe /m /property:Configuration="Release" CsLisp.sln   
   - if %cname%==csc cd bin\Release
   - if %cname%==csc fuel -v

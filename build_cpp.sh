@@ -20,7 +20,7 @@ unzip -v fuel-lang-unix-bin.zip
 #cd CppLispInterpreter
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ./fuel -v
-./fuel  -e "(println (platform))"
+./fuel -e "(println (platform))"
 cd ..
 cd QtLispInterpreterUnitTests
 if [[ $CXX == clang* ]]; then
