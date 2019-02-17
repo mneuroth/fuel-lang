@@ -121,10 +121,10 @@ matrix:
       - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a CMakeLists.txt
       - make -j 4
       - ls -lrt
-      - cp ../CppLispInterpreter/libFuelInterpreter.* .
-      - cp ../CppLispDebugger/libFuelDebugger.* .
+      - cp CppLispInterpreter/libFuelInterpreter.* .
+      - cp CppLispDebugger/libFuelDebugger.* .
       - mkdir Library
-      - cp ../../Library/fuellib.fuel Library
+      - cp ../Library/fuellib.fuel Library
       - zip -u fuel-lang-android-arm-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
       - unzip -v fuel-lang-android-arm-bin.zip
       #- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./CppLispInterpreter:./CppLispDebugger
