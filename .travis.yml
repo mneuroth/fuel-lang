@@ -117,7 +117,8 @@ matrix:
       - cd CppLisp
       #- cmake CMakeLists.txt
       #- make -j 4
-      - ls -lrt
+      #- ls -lrt
+      # build version for arm
       - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a CMakeLists.txt
       - make -j 4
       - ls -lrt
@@ -127,10 +128,20 @@ matrix:
       - cp ../Library/fuellib.fuel Library
       - zip -u fuel-lang-android-arm-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
       - unzip -v fuel-lang-android-arm-bin.zip
-      #- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./CppLispInterpreter:./CppLispDebugger
-      #- ./fuel -v
-      #- ./fuel -e "(println (platform))"
-      #- ./fuel
+      - ls -lrt
+      # build version for x86
+      - make clean
+      - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86 CMakeLists.txt
+      - make -j 4
+      - ls -lrt
+      - cp CppLispInterpreter/libFuelInterpreter.* .
+      - cp CppLispDebugger/libFuelDebugger.* .
+      #- mkdir Library
+      - cp ../Library/fuellib.fuel Library
+      - zip -u fuel-lang-android-x86-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
+      - unzip -v fuel-lang-android-x86-bin.zip
+      - ls -lrt
+      
     
     - os: osx
       language: cpp
