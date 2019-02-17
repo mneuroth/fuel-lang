@@ -77,6 +77,8 @@ namespace CsLisp
 
         private static double Tolerance { get; set; }
 
+        public LispVariant CachedFunction { get; set; }
+
         public LispUnQuoteModus IsUnQuoted { get; set; }
 
         public object Value { get; set; }

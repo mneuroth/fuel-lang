@@ -234,11 +234,21 @@ namespace CsLisp
         {
             object result;
 
+            LispVariant elemAsVariant = elem as LispVariant;
+            if (elemAsVariant != null && elemAsVariant.CachedFunction != null)
+            {
+                return elemAsVariant.CachedFunction;
+            }
             var name = elem.ToString();
             LispScope foundClosureScope;
             // first try to resolve in this scope
             if (TryGetValue(name, out result))
             {
+                LispVariant resultAsVariant = result as LispVariant;
+                if (elemAsVariant != null && resultAsVariant != null && resultAsVariant.IsFunction)
+                {
+                    elemAsVariant.CachedFunction = resultAsVariant;
+                }
             }
             // then try to resolve in closure chain scope(s)
             else if (IsInClosureChain(name, out foundClosureScope, out result))
@@ -248,6 +258,11 @@ namespace CsLisp
             else if (GlobalScope != null &&
                      GlobalScope.TryGetValue(name, out result))
             {
+                LispVariant resultAsVariant = result as LispVariant;
+                if (elemAsVariant != null && resultAsVariant != null && resultAsVariant.IsFunction)
+                {
+                    elemAsVariant.CachedFunction = resultAsVariant;
+                }
             }
             // then try to resolve in scope of loaded modules
             else if (LispEnvironment.IsInModules(name, GlobalScope))
