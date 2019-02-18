@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 project (fuel)
 
+set (CMAKE_CXX_STANDARD 11)
+
 include_directories(
     ../CppLispInterpreter
     ../CppLispDebugger
@@ -41,5 +43,7 @@ add_executable(fuel FuelMain.cpp
 ../CppLispInterpreter/fuel.cpp
 ../CppLispDebugger/Debugger.cpp
 )
+
+target_link_libraries(fuel FuelInterpreter ${CMAKE_DL_LIBS})
 
 install(TARGETS fuel DESTINATION bin)
