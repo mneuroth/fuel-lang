@@ -46,6 +46,7 @@ namespace CsLisp
         public static List<object> ResolveArgsInScopes(LispScope scope, IEnumerable<object> astAsList, bool compile)
         {
             var astWithResolvedValues = new List<object>();
+            var firstElement = astAsList.FirstOrDefault();
             bool? isSpecialForm = null;
             foreach (var elem in astAsList)
             {
@@ -56,7 +57,7 @@ namespace CsLisp
                 }
                 else
                 {
-                    resolvedElem = scope.ResolveInScopes(elem);
+                    resolvedElem = scope.ResolveInScopes(elem, elem == firstElement);
                 }
                 astWithResolvedValues.Add(resolvedElem);
 
@@ -105,7 +106,7 @@ namespace CsLisp
                 // evaluate the value for the symbol
                 if (item.IsSymbol)
                 {
-                    item = new LispVariant(scope.ResolveInScopes(item));
+                    item = new LispVariant(scope.ResolveInScopes(item, false));
                     return item;
                 }
                 else if (item.IsList && !item.IsNil)

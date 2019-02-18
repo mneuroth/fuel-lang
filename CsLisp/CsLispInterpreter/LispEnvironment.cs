@@ -1726,6 +1726,18 @@ namespace CsLisp
         public static LispVariant fn_form(object[] args, LispScope scope)
         {
             var name = (string)scope.UserData;
+            //if (name == null && args != null && args.Length>0) 
+            //{
+            //    IEnumerable<object> arglist = args[0] as IEnumerable<object>;
+            //    if (arglist != null)
+            //    {
+            //        LispVariant vari = arglist.First() as LispVariant;
+            //        if (vari != null)
+            //        {
+            //            name = $"lambda in line {vari.Token.LineNo}";
+            //        }
+            //    }                
+            //}
             var moduleName = scope.ModuleName;
             var userDoc = scope.UserDoc;
             var signature = userDoc != null ? userDoc.Item1 : null;

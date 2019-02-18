@@ -202,67 +202,38 @@ namespace CsLisp
         }
 
         /// <summary>
-        /// Determines whether the given name is available in the closure chain.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="closureScopeFound">The closure scope found.</param>
-        /// <param name="value">The found value.</param>
-        /// <returns>True if name was found.</returns>
-        private bool IsInClosureChain(string name, out LispScope closureScopeFound, out object value)
-        {
-            if (ClosureChain != null)
-            {
-                if (ClosureChain.TryGetValue(name, out value))
-                {
-                    closureScopeFound = ClosureChain;
-                    return true;
-                }
-                return ClosureChain.IsInClosureChain(name, out closureScopeFound, out value);
-            }
-
-            closureScopeFound = null;
-            value = null;
-            return false;
-        }
-
-        /// <summary>
         /// Resolves the given element in this scope.
         /// </summary>
         /// <param name="elem">The element.</param>
         /// <returns>Resolved value or null</returns>
-        public object ResolveInScopes(object elem)
+        public object ResolveInScopes(object elem, bool isFirst)
         {
             object result;
 
+            // try to access the cached function value (speed optimization)
             LispVariant elemAsVariant = elem as LispVariant;
             if (elemAsVariant != null && elemAsVariant.CachedFunction != null)
             {
                 return elemAsVariant.CachedFunction;
-            }
+            }            
+
             var name = elem.ToString();
             LispScope foundClosureScope;
             // first try to resolve in this scope
             if (TryGetValue(name, out result))
             {
-                //LispVariant resultAsVariant = result as LispVariant;
-                //if (elemAsVariant != null && resultAsVariant != null && resultAsVariant.IsFunction)
-                //{
-                //    elemAsVariant.CachedFunction = resultAsVariant;
-                //}
-            }
-            // then try to resolve in closure chain scope(s)
-            else if (IsInClosureChain(name, out foundClosureScope, out result))
-            {
+                UpdateFunctionCache(elemAsVariant, result, isFirst);
             }
             // then try to resolve in global scope
             else if (GlobalScope != null &&
                      GlobalScope.TryGetValue(name, out result))
             {
-                //LispVariant resultAsVariant = result as LispVariant;
-                //if (elemAsVariant != null && resultAsVariant != null && resultAsVariant.IsFunction)
-                //{
-                //    elemAsVariant.CachedFunction = resultAsVariant;
-                //}
+                UpdateFunctionCache(elemAsVariant, result, isFirst);
+            }
+            // then try to resolve in closure chain scope(s)
+            else if (IsInClosureChain(name, out foundClosureScope, out result))
+            {
+                UpdateFunctionCache(elemAsVariant, result, isFirst);
             }
             // then try to resolve in scope of loaded modules
             else if (LispEnvironment.IsInModules(name, GlobalScope))
@@ -446,6 +417,43 @@ namespace CsLisp
         #endregion
 
         #region private methods
+
+        /// <summary>
+        /// Determines whether the given name is available in the closure chain.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="closureScopeFound">The closure scope found.</param>
+        /// <param name="value">The found value.</param>
+        /// <returns>True if name was found.</returns>
+        private bool IsInClosureChain(string name, out LispScope closureScopeFound, out object value)
+        {
+            if (ClosureChain != null)
+            {
+                if (ClosureChain.TryGetValue(name, out value))
+                {
+                    closureScopeFound = ClosureChain;
+                    return true;
+                }
+                return ClosureChain.IsInClosureChain(name, out closureScopeFound, out value);
+            }
+
+            closureScopeFound = null;
+            value = null;
+            return false;
+        }
+
+        private static void UpdateFunctionCache(LispVariant elemAsVariant, object value, bool isFirst)
+        {
+            LispVariant valueAsVariant = value as LispVariant;
+            if (isFirst && elemAsVariant != null && valueAsVariant != null && valueAsVariant.IsFunction)
+            {
+                //if (elemAsVariant.CachedFunction != null)
+                //{
+                //    throw new LispException("Cache already set !!!");
+                //}
+                elemAsVariant.CachedFunction = valueAsVariant;
+            }
+        }
 
         private static string ExtractModuleName(string moduleName)
         {
