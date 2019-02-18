@@ -44,6 +44,6 @@ add_executable(fuel FuelMain.cpp
 ../CppLispDebugger/Debugger.cpp
 )
 
-target_link_libraries(fuel FuelInterpreter ${CMAKE_DL_LIBS})
+target_link_libraries(fuel ${CMAKE_DL_LIBS})
 
 install(TARGETS fuel DESTINATION bin)
