@@ -85,7 +85,7 @@ void * SimpleGetProcAddress(void * hDllModule, const char * sProcName)
 
 static void * g_hDebuggerDLL = 0;
 
-#if !defined(UNIT_TEST) && !defined(WITH_STATIC_DEBUGGER)
+#if defined(UNIT_TEST) || defined(WITH_STATIC_DEBUGGER)
 extern "C" CppLisp::ILispDebugger * create_debugger();
 #endif
 
