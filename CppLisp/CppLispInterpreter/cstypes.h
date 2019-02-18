@@ -82,6 +82,15 @@ namespace CppLisp
 			return std::vector<T>::front();
 		}
 
+		inline const T FirstOrDefault() const
+		{
+			if (std::vector<T>::size() == 0)
+			{
+				return T();
+			}
+			return First();
+		}
+
 		inline const T & Last() const
 		{
 			return std::vector<T>::back();

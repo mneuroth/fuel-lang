@@ -121,7 +121,9 @@ namespace CppLisp
 		/*private*/ static double Tolerance; //{ get; set; }
 
     public:
-        /*public*/ LispUnQuoteModus IsUnQuoted; //{ get; private set; }
+		/*public*/ std::shared_ptr<LispVariant> CachedFunction; //{ get; set; }
+		
+		/*public*/ LispUnQuoteModus IsUnQuoted; //{ get; private set; }
 
         /*public*/ std::shared_ptr<object> Value; //{ get; set; }
 

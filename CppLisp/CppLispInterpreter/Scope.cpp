@@ -65,9 +65,31 @@ namespace CppLisp
 		return false;
 	}
 
-	std::shared_ptr<object> LispScope::ResolveInScopes(std::shared_ptr<object> elem)
+	static void UpdateFunctionCache(LispVariant & elemAsVariant, std::shared_ptr<object> value, bool isFirst)
+	{
+		if (value->IsLispVariant())
+		{
+			std::shared_ptr<LispVariant> valueAsVariant = value->ToLispVariant();
+			if (isFirst && valueAsVariant->IsFunction())
+			{
+				elemAsVariant.CachedFunction = valueAsVariant;
+			}
+		}
+	}
+
+	std::shared_ptr<object> LispScope::ResolveInScopes(std::shared_ptr<object> elem, bool isFirst)
 	{
 		std::shared_ptr<object> result;
+
+		// try to access the cached function value (speed optimization)
+		//if (elem->IsLispVariant())
+		//{
+		//	LispVariant & elemAsVariant = elem->ToLispVariantNotConstRef();
+		//	if (elemAsVariant.CachedFunction.get() != 0)
+		//	{
+		//		return std::make_shared<object>(*(elemAsVariant.CachedFunction));
+		//	}
+		//}
 
 		var name = elem->ToString();
 		std::shared_ptr<LispScope> foundClosureScope;
@@ -76,16 +98,19 @@ namespace CppLisp
 		if (item != end())
 		{
 			result = item->second;
-		}
-		// then try to resolve in closure chain scope(s)
-		else if (IsInClosureChain(name, foundClosureScope))
-		{
-			result = (*foundClosureScope)[name];
+//			UpdateFunctionCache(elem->ToLispVariantNotConstRef(), result, isFirst);
 		}
 		// then try to resolve in global scope
 		else if (GlobalScope != null && GlobalScope->ContainsKey(name))
 		{
 			result = (*GlobalScope)[name];
+//			UpdateFunctionCache(elem->ToLispVariantNotConstRef(), result, isFirst);
+		}
+		// then try to resolve in closure chain scope(s)
+		else if (IsInClosureChain(name, foundClosureScope))
+		{
+			result = (*foundClosureScope)[name];
+//			UpdateFunctionCache(elem->ToLispVariantNotConstRef(), result, isFirst);
 		}
 		// then try to resolve in scope of loaded modules
 		else if (LispEnvironment::IsInModules(name, GlobalScope))

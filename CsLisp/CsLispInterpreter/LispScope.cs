@@ -205,6 +205,7 @@ namespace CsLisp
         /// Resolves the given element in this scope.
         /// </summary>
         /// <param name="elem">The element.</param>
+        /// <param name="isFirst">Is the element the first one in the list.</param>
         /// <returns>Resolved value or null</returns>
         public object ResolveInScopes(object elem, bool isFirst)
         {

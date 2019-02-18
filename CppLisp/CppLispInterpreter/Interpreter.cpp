@@ -30,6 +30,7 @@ namespace CppLisp
 	std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispInterpreter::ResolveArgsInScopes(std::shared_ptr<LispScope> scope, std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astAsList, bool compile)
 	{
 		std::shared_ptr<IEnumerable<std::shared_ptr<object>>> astWithResolvedValues = std::make_shared<IEnumerable<std::shared_ptr<object>>>(astAsList->Count());
+		std::shared_ptr<object> firstElement = astAsList->FirstOrDefault();
 		std::shared_ptr<bool> isSpecialForm = null;
 		int i = 0;
 		for (var elem : *astAsList)
@@ -41,7 +42,7 @@ namespace CppLisp
 			}
 			else
 			{
-				resolvedElem = scope->ResolveInScopes(elem);
+				resolvedElem = scope->ResolveInScopes(elem, elem == firstElement);
 			}
 			(*astWithResolvedValues)[i++] = resolvedElem;
 
@@ -84,7 +85,7 @@ namespace CppLisp
 			// evaluate the value for the symbol
 			if (item.IsSymbol())
 			{
-				return std::make_shared<LispVariant>(scope->ResolveInScopes(std::make_shared<object>(item)));
+				return std::make_shared<LispVariant>(scope->ResolveInScopes(std::make_shared<object>(item), false));
 			}
 			else if (item.IsList() && !item.IsNil())
 			{
