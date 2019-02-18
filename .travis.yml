@@ -141,6 +141,16 @@ matrix:
       - zip -u fuel-lang-android-x86-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
       - unzip -v fuel-lang-android-x86-bin.zip
       - ls -lrt
+      # build version without shared libraries for arm
+      - cd CppFuel
+      - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a CMakeLists.txt
+      - make -j 4
+      - ls -lrt
+      - mkdir Library
+      - cp ../../Library/fuellib.fuel Library
+      - zip -u fuel-lang-single-android-arm-bin.zip fuel Library/fuellib.fuel
+      - unzip -v fuel-lang-single-android-arm-bin.zip
+      - ls -lrt
       
     
     - os: osx
