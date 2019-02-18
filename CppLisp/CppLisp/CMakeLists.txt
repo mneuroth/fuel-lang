@@ -4,6 +4,8 @@ project (fuel)
 
 set (CMAKE_CXX_STANDARD 11)
 
+add_compile_definitions(WITH_STATIC_DEBUGGER)
+
 include_directories(
     ../CppLispInterpreter
     ../CppLispDebugger

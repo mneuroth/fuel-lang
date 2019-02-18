@@ -331,7 +331,7 @@ namespace CppLisp
 	{
 		std::shared_ptr<ILispDebugger> dbg = 0;
 
-#ifndef UNIT_TEST
+#if !defined(UNIT_TEST) && !defined(WITH_STATIC_DEBUGGER)
 		typedef ILispDebugger * (*fcnGetDebugger)();
 
 		if (g_hDebuggerDLL == 0)
