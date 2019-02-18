@@ -151,6 +151,18 @@ matrix:
       - zip -u fuel-lang-single-android-arm-bin.zip fuel Library/fuellib.fuel
       - unzip -v fuel-lang-single-android-arm-bin.zip
       - ls -lrt
+      # build version without shared libraries for x86
+      - make clean
+      - cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86 CMakeLists.txt
+      - make -j 4
+      - ls -lrt
+      #- mkdir Library
+      #- cp ../../Library/fuellib.fuel Library
+      - strip fuel
+      - ls -lrt
+      - zip -u fuel-lang-single-android-x86-bin.zip fuel Library/fuellib.fuel
+      - unzip -v fuel-lang-single-android-x86-bin.zip
+      - ls -lrt
       
     
     - os: osx
