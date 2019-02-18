@@ -2,6 +2,11 @@ cmake_minimum_required (VERSION 2.6)
 
 project (fuel)
 
+include_directories(
+    ../CppLispInterpreter
+    ../CppLispDebugger
+)
+
 add_executable(fuel FuelMain.cpp
 ../CppLispInterpreter/csobject.h
 ../CppLispInterpreter/csstring.h
