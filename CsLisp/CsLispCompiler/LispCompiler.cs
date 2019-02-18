@@ -74,7 +74,7 @@ namespace CsLisp
         public /*static*/ CompilerResults CompileCsCodeToAssembly(string csCode, string outputFileName, bool debug = false)
         {
             var provOptions = new Dictionary<string, string>();
-            provOptions.Add("CompilerVersion", "v4.0");
+            provOptions.Add("CompilerVersion", "v3.5");
 
             var codeProvider = new CSharpCodeProvider(provOptions);
             var parameters = new CompilerParameters();
