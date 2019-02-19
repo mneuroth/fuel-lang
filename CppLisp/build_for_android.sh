@@ -1,4 +1,4 @@
-# exampe of usage: > ./build_for_android.sh /home/user/programs/android/ndk/android-ndk-r16b armeabi-v7a
+# exampe of usage: > ./build_for_android.sh /home/min65/Dokumente/android-ndk-r19b/ armeabi-v7a
 # ABI are: armeabi, armeabi-v7a, arm64-v8a, x86, x86_64
 export ANDROID_NDK_HOME=$1
 export ANDROID_ABI=$2
