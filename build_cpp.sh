@@ -24,7 +24,7 @@ cp ../CppLispDebugger/libFuelDebugger.* .
 mkdir Library
 cp ../../Library/fuellib.fuel Library
 zip -u fuel-lang-$PLATFORM-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/*.fuel
-#unzip -v fuel-lang-$PLATFORM-bin.zip
+unzip -v fuel-lang-$PLATFORM-bin.zip
 
 # *** very simple start and exit test for the fuel application ***
 #=================================================================

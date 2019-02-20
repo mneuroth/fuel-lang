@@ -16,6 +16,7 @@ matrix:
           - qttools5-dev-tools
       script:
       - ./build_cpp.sh linux-clang
+      - ls -lrt
     
     - os: linux
       language: cpp
@@ -30,6 +31,7 @@ matrix:
           - qttools5-dev-tools
       script:
       - ./build_cpp.sh linux-gcc
+      - ls -lrt
     
     - os: linux
       language: cpp
@@ -49,6 +51,7 @@ matrix:
       - ./fuel -v
       - ./fuel -e "(println (platform))"
       - ./fuel
+      - ls -lrt
     
     - os: linux
       language: csharp
@@ -59,6 +62,7 @@ matrix:
           - ubuntu-toolchain-r-test
       script:
       - ./build_cs.sh
+      - ls -lrt
     
     - os: linux
       language: android
@@ -73,11 +77,11 @@ matrix:
             - build-tools-26.0.2
             - android-26
       before_install:
-        - export WORKING_DIR=`pwd`
-        - rm -fr $WORKING_DIR/android-ndk-r16b
-        - curl -L http://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip -O
-        - unzip -oq android-ndk-r16b-linux-x86_64.zip
-        - rm android-ndk-r16b-linux-x86_64.zip
+        #- export WORKING_DIR=`pwd`
+        #- rm -fr $WORKING_DIR/android-ndk-r16b
+        #- curl -L http://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip -O
+        #- unzip -oq android-ndk-r16b-linux-x86_64.zip
+        #- rm android-ndk-r16b-linux-x86_64.zip
         - curl -L https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4.tar.gz -O
         - tar -xvzf cmake-3.13.4.tar.gz
         - ls -lrt
@@ -89,9 +93,9 @@ matrix:
         - sudo make install
         - export PATH=$PATH:/usr/local/bin
         - cd ..
-        - export ANDROID_NDK_HOME=$WORKING_DIR/android-ndk-r16b
-        - export ANDROID_NDK=$WORKING_DIR/android-ndk-r16b
-        - export PATH=$PATH:${ANDROID_NDK_HOME}
+        #- export ANDROID_NDK_HOME=$WORKING_DIR/android-ndk-r16b
+        #- export ANDROID_NDK=$WORKING_DIR/android-ndk-r16b
+        #- export PATH=$PATH:${ANDROID_NDK_HOME}
         - echo y | sdkmanager "ndk-bundle"
         - echo y | sdkmanager "cmake;3.6.4111459"
         - echo y | sdkmanager "lldb;3.1"
@@ -100,56 +104,16 @@ matrix:
       script:
       - cd CppLisp
       - echo $ANDROID_NDK_HOME
+      - ls -lrt $ANDROID_NDK_HOME
       # build version for arm
-      #- cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a CMakeLists.txt
-      #- make -j 4
-      #- ls -lrt
-      #- cp CppLispInterpreter/libFuelInterpreter.* .
-      #- cp CppLispDebugger/libFuelDebugger.* .
-      #- mkdir Library
-      #- cp ../Library/fuellib.fuel Library
-      #- zip -u fuel-lang-android-arm-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
-      #- unzip -v fuel-lang-android-arm-bin.zip
       - ./build_for_android.sh $ANDROID_NDK_HOME armeabi-v7a
       - ls -lrt
       - ls -lrt CppLisp
       # build version for x86
       - make clean
-      #- cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86 CMakeLists.txt
-      #- make -j 4
-      #- ls -lrt
-      #- cp CppLispInterpreter/libFuelInterpreter.* .
-      #- cp CppLispDebugger/libFuelDebugger.* .
-      ##- mkdir Library
-      ##- cp ../Library/fuellib.fuel Library
-      #- zip -u fuel-lang-android-x86-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
-      #- unzip -v fuel-lang-android-x86-bin.zip
       - ./build_for_android.sh $ANDROID_NDK_HOME x86
       - ls -lrt
-      - ls -lrt CppLisp
-      # build version without shared libraries for arm
-      #- cd CppLisp
-      #- cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a CMakeLists.txt
-      #- make -j 4
-      #- ls -lrt
-      #- mkdir Library
-      #- cp ../../Library/fuellib.fuel Library
-      #- zip -u fuel-lang-single-android-arm-bin.zip fuel Library/fuellib.fuel
-      #- unzip -v fuel-lang-single-android-arm-bin.zip
-      #- ls -lrt
-      # build version without shared libraries for x86
-      #- make clean
-      #- cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86 CMakeLists.txt
-      #- make -j 4
-      #- ls -lrt
-      #- mkdir Library
-      #- cp ../../Library/fuellib.fuel Library
-      #- strip fuel
-      #- ls -lrt
-      #- zip -u fuel-lang-single-android-x86-bin.zip fuel Library/fuellib.fuel
-      #- unzip -v fuel-lang-single-android-x86-bin.zip
-      #- ls -lrt
-      
+      - ls -lrt CppLisp      
     
     - os: osx
       language: cpp
@@ -160,12 +124,14 @@ matrix:
       - export PATH=/usr/local/opt/qt/bin:$PATH
       script:
       - ./build_cpp.sh mac-clang
+      - ls -lrt
   
     - os: osx
       language: csharp
       compiler: mono
       script:
       - ./build_cs.sh
+      - ls -lrt
   
     - os: windows
       language: cpp
@@ -182,6 +148,7 @@ matrix:
       - cd ContinousIntgration
       - ./fuel.exe -v
       - ./fuel  -e "(println (platform))"
+      - dir
   
 install:
 - "[ $CXX = g++ ] && export CXX=g++-6 || true"
