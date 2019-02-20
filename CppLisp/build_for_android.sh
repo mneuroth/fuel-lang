@@ -10,6 +10,7 @@ ANDROID_NDK_HOME=$1
 ANDROID_ABI=$2
 echo *** Build fuel with shared libraries ***
 cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=$ANDROID_ABI CMakeLists.txt
+make clean
 make -j 4
 cp CppLispInterpreter/libFuelInterpreter.* .
 cp CppLispDebugger/libFuelDebugger.* .
@@ -20,6 +21,7 @@ zip -u fuel-lang-android-$ANDROID_ABI-bin.zip fuel libFuelInterpreter.* libFuelD
 echo *** Build fuel with shared libraries ***
 cd CppLisp
 cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=$ANDROID_ABI CMakeLists.txt
+make clean
 make -j 4
 mkdir Library
 cp ../../Library/fuellib.fuel Library
