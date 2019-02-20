@@ -196,7 +196,7 @@ FUEL is also available for native C++ for all platforms supporting a C++11 compi
 FUEL was successfully compiled on Windows, Android, Linux (including the Raspberry Pi) and Mac OS X. 
 
 * Windows [![Build status](https://ci.appveyor.com/api/projects/status/s700taf5bv7dwt5f?svg=true)](https://ci.appveyor.com/project/mneuroth/fuel-lang)
-* MacOS and Linux [![Build Status](https://travis-ci.org/mneuroth/fuel-lang.svg?branch=master)](https://travis-ci.org/mneuroth/fuel-lang)
+* MacOS, Linux and Android [![Build Status](https://travis-ci.org/mneuroth/fuel-lang.svg?branch=master)](https://travis-ci.org/mneuroth/fuel-lang)
   
 
 License
