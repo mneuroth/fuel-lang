@@ -279,8 +279,9 @@ namespace CppLisp
 		/// </summary>
 		/// <param name="name">The name.</param>
 		/// <param name="closureScopeFound">The closure scope found.</param>
+		/// <param name="pValue">The pointer to return the value.</param>
 		/// <returns>True if name was found.</returns>
-		/*private*/ bool IsInClosureChain(const string & name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound);
+		/*private*/ bool IsInClosureChain(const string & name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound, std::shared_ptr<object> * pValue = 0);
 
 		/*private*/ void ProcessMetaScope(const string & metaScope, /*Action<KeyValuePair<string, std::shared_ptr<object>>>*/std::function<void(KeyValuePair<string, std::shared_ptr<object>>)> action);
 

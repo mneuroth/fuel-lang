@@ -192,9 +192,15 @@ namespace CppLisp
 			return keys;
 		}
 
-		inline bool ContainsKey(const K & key) const
+		inline bool ContainsKey(const K & key, V * pValue = 0) const
 		{
-			return std::map<K, V>::find(key) != std::map<K, V>::end();
+			auto iter = std::map<K, V>::find(key);
+			bool bFound = iter != std::map<K, V>::end();
+			if (bFound && (pValue != 0))
+			{
+				*pValue = iter->second;
+			}
+			return bFound;
 		}
 
 		inline bool ContainsValue(const V & value) const

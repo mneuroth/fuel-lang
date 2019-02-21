@@ -98,7 +98,7 @@ namespace CppLisp
 		}
 		else
 		{
-			astAsList = ast->ToList();
+			*astAsList = ast->ToListRef();
 		}
 
 		if (astAsList->Count() == 0)
@@ -147,7 +147,7 @@ namespace CppLisp
 		}
 
 		// for debugging: update the current line number at the current scope
-		var currentToken = ((LispVariant)(astAsList->First())).Token;
+		var currentToken = astAsList->First()->ToLispVariantRef().Token;
 		scope->CurrentToken = currentToken != null ? currentToken : scope->CurrentToken;
 
 		// resolve values via local and global scope
@@ -177,10 +177,10 @@ namespace CppLisp
 			// process statemens like this: `,@l  with l = (1 2 3)
 			if (result->IsLispVariant())
 			{
-				std::shared_ptr<LispVariant> variant = result->ToLispVariant();
-				if (variant->IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing && variant->IsList())
+				const LispVariant & variant = result->ToLispVariantRef();
+				if (variant.IsUnQuoted == LispUnQuoteModus::_UnQuoteSplicing && variant.IsList())
 				{
-					var lst = variant->ListValueRef();
+					var lst = variant.ListValueRef();
 					arguments.resize(arguments.size() + lst.size() - 1);
 					for(var elem : lst)
 					{

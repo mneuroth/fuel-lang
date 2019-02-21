@@ -50,17 +50,17 @@ namespace CppLisp
 		Output = /*Console.Out*/outp != null ? outp : std::make_shared<TextWriter>();
 	}
 
-	bool LispScope::IsInClosureChain(const string & name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound)
+	bool LispScope::IsInClosureChain(const string & name, /*out*/ std::shared_ptr<LispScope> & closureScopeFound, std::shared_ptr<object> * pValue)
 	{
 		closureScopeFound = null;
 		if (ClosureChain != null)
 		{
-			if (ClosureChain->ContainsKey(name))
+			if (ClosureChain->ContainsKey(name, pValue))
 			{
 				closureScopeFound = ClosureChain;
 				return true;
 			}
-			return ClosureChain->IsInClosureChain(name, closureScopeFound);
+			return ClosureChain->IsInClosureChain(name, closureScopeFound, pValue);
 		}
 		return false;
 	}
@@ -93,6 +93,7 @@ namespace CppLisp
 
 		var name = elem->ToString();
 		std::shared_ptr<LispScope> foundClosureScope;
+		std::shared_ptr<object> value;
 		// first try to resolve in this scope
 		auto item = find(name);
 		if (item != end())
@@ -101,15 +102,17 @@ namespace CppLisp
 //			UpdateFunctionCache(elem->ToLispVariantNotConstRef(), result, isFirst);
 		}
 		// then try to resolve in global scope
-		else if (GlobalScope != null && GlobalScope->ContainsKey(name))
+		else if (GlobalScope != null && GlobalScope->ContainsKey(name, &value))
 		{
-			result = (*GlobalScope)[name];
+			//result = (*GlobalScope)[name];
+			result = value;
 //			UpdateFunctionCache(elem->ToLispVariantNotConstRef(), result, isFirst);
 		}
 		// then try to resolve in closure chain scope(s)
-		else if (IsInClosureChain(name, foundClosureScope))
+		else if (IsInClosureChain(name, foundClosureScope, &value))
 		{
-			result = (*foundClosureScope)[name];
+			//result = (*foundClosureScope)[name];
+			result = value;
 //			UpdateFunctionCache(elem->ToLispVariantNotConstRef(), result, isFirst);
 		}
 		// then try to resolve in scope of loaded modules
