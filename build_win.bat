@@ -4,7 +4,7 @@ cd CsLisp
 MsBuild.exe /m /property:Configuration="Release" /t:Clean;Build CsLisp.sln   
 cd bin\release
 fuel -v
-%PACK_EXE% a fuel-lang-csharp-bin.zip fuel.exe fuel.exe.config FuelInterpreter.dll FuelDebugger.dll FuelCompiler.dll Library\fuellib.fuel
+%PACK_EXE% a fuel-lang-csharp-bin.zip fuel.* fuel.exe.config FuelInterpreter.* FuelDebugger.* FuelCompiler.* Library\fuellib.fuel
 %PACK_EXE% l fuel-lang-csharp-bin.zip
 dir 
 cd ..\..

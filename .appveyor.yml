@@ -70,7 +70,7 @@ build_script:
   - if %cname%==csc MsBuild.exe /m /property:Configuration="Release" CsLisp.sln   
   - if %cname%==csc cd bin\Release
   - if %cname%==csc fuel -v
-  - if %cname%==csc 7z a fuel-lang-cs-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll FuelCompiler.dll Library\fuellib.fuel
+  - if %cname%==csc 7z a fuel-lang-cs-bin.zip fuel.* fuel.exe.config FuelInterpreter.* FuelDebugger.* FuelCompiler.* Library\fuellib.fuel
   - if %cname%==csc 7z l fuel-lang-cs-bin.zip
   - if %cname%==csc appveyor PushArtifact fuel-lang-cs-bin.zip
   - cd ..
