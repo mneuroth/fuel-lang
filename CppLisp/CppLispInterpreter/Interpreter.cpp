@@ -172,7 +172,7 @@ namespace CppLisp
 		{
 			var needEvaluation = (arrAstWithResolvedValues[i]->IsList() /*is IEnumerable<object>*/) && !functionWrapper.IsSpecialForm();
 
-			var result = needEvaluation ? std::make_shared<object>(*EvalAst(arrAstWithResolvedValues[i], scope)) : arrAstWithResolvedValues[i];
+			var result = needEvaluation ? EvalAst(arrAstWithResolvedValues[i], scope)->Value : arrAstWithResolvedValues[i];
 
 			// process statemens like this: `,@l  with l = (1 2 3)
 			if (result->IsLispVariant())
