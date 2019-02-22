@@ -243,6 +243,52 @@ namespace CsLisp
 
         #region public methods of environment
 
+        public static LispVariant FuelFuncWrapper0<TResult>(object[] args, LispScope scope, string name, Func<TResult> func)
+        {
+            CheckArgs(name, 0, args, scope);
+
+            var result = func();
+
+            LispVariant tempResult = result as LispVariant;
+            return tempResult ?? new LispVariant(result);
+        }
+
+        public static LispVariant FuelFuncWrapper1<T1, TResult>(object[] args, LispScope scope, string name, Func<T1, TResult> func)
+        {
+            CheckArgs(name, 1, args, scope);
+
+            var arg1 = (T1)args[0];
+            var result = func(arg1);
+
+            LispVariant tempResult = result as LispVariant;
+            return tempResult ?? new LispVariant(result);
+        }
+
+        public static LispVariant FuelFuncWrapper2<T1, T2, TResult>(object[] args, LispScope scope, string name, Func<T1, T2, TResult> func)
+        {
+            CheckArgs(name, 2, args, scope);
+
+            var arg1 = (T1)args[0];
+            var arg2 = (T2)args[1];
+            var result = func(arg1, arg2);
+
+            LispVariant tempResult = result as LispVariant;
+            return tempResult ?? new LispVariant(result);
+        }
+
+        public static LispVariant FuelFuncWrapper3<T1, T2, T3, TResult>(object[] args, LispScope scope, string name, Func<T1, T2, T3, TResult> func)
+        {
+            CheckArgs(name, 3, args, scope);
+
+            var arg1 = (T1)args[0];
+            var arg2 = (T2)args[1];
+            var arg3 = (T3)args[2];
+            var result = func(arg1, arg2, arg3);
+
+            LispVariant tempResult = result as LispVariant;
+            return tempResult ?? new LispVariant(result);
+        }
+
         public static bool IsInModules(string funcName, LispScope scope)
         {
             object value;
@@ -449,6 +495,8 @@ namespace CsLisp
 
         private static LispVariant Fuel(object[] args, LispScope scope)
         {
+            CheckArgs("fuel", 0, args, scope);
+
             var text = new StringBuilder();
             text.Append(string.Format("fuel version {0} from {1}", Lisp.Version, Lisp.Date));
             return new LispVariant(text.ToString());
@@ -456,6 +504,8 @@ namespace CsLisp
 
         private static LispVariant Copyright(object[] args, LispScope scope)
         {
+            CheckArgs("copyright", 0, args, scope);
+
             var text = new StringBuilder();
             text.Append(string.Format("Copyright: {0} {1}", Lisp.License, Lisp.LicenseUrl));
             return new LispVariant(text.ToString());
@@ -463,6 +513,8 @@ namespace CsLisp
 
         private static LispVariant Help(object[] args, LispScope scope)
         {
+            CheckArgs("help", 0, args, scope);
+
             var helpText = new StringBuilder();
             helpText.Append("available functions:\n");
             foreach (var cmd in scope.Keys)
@@ -520,6 +572,8 @@ namespace CsLisp
 
         private static LispVariant Break(object[] args, LispScope scope)
         {
+            CheckArgs("break", 0, args, scope);
+
             scope.GlobalScope.Output.WriteLine("break -> call stack:");
             scope.DumpStack(scope.GetCallStackSize());
             var debugger = scope.GlobalScope.Debugger;
@@ -536,6 +590,8 @@ namespace CsLisp
 
         private static LispVariant Vars(object[] args, LispScope scope)
         {
+            CheckArgs("vars", 0, args, scope);
+
             scope.GlobalScope.Output.WriteLine("variables:");
             scope.DumpVars();
             return new LispVariant();
@@ -543,19 +599,13 @@ namespace CsLisp
 
         private static LispVariant DelVar(object[] args, LispScope scope)
         {
-            CheckArgs("delvar", 1, args, scope);
-
-            var name = ((LispVariant)args[0]);
-            var ok = scope.Remove(name.ToString());
-            return new LispVariant(ok);
+            return FuelFuncWrapper1<LispVariant, bool>(args, scope, "delvar", (arg1) => scope.Remove(arg1.ToString()));
         }
 
         private static LispVariant NeedLValue(object[] args, LispScope scope)
         {
-            CheckArgs("need-l-value", 0, args, scope);
-
-            return new LispVariant(scope.NeedsLValue);
-        }        
+            return FuelFuncWrapper0<bool>(args, scope, "need-l-value", () => scope.NeedsLValue);
+        }
 
         private static LispVariant TracePrint(object[] args, LispScope scope)
         {
@@ -572,19 +622,22 @@ namespace CsLisp
 
         private static LispVariant CurrentTickCount(object[] args, LispScope scope)
         {
-            var value = Environment.TickCount;
-            return new LispVariant(value);
+            return FuelFuncWrapper0<int>(args, scope, "tickcount", () => Environment.TickCount);
         }
 
         private static LispVariant Sleep(object[] args, LispScope scope)
         {
-            var timeInMs = ((LispVariant)args[0]).ToInt();
-            Thread.Sleep(timeInMs);
-            return new LispVariant();
+            return FuelFuncWrapper1<LispVariant, LispVariant>(args, scope, "sleep", (arg1) =>
+            {
+                Thread.Sleep(arg1.ToInt());
+                return new LispVariant();
+            });
         }
 
         private static LispVariant Datetime(object[] args, LispScope scope)
         {
+            CheckArgs("date-time", 0, args, scope);
+
             var year = DateTime.Now.Year;
             var month = DateTime.Now.Month;
             var day = DateTime.Now.Day;
@@ -728,18 +781,12 @@ namespace CsLisp
 
         public static LispVariant GetType(object[] args, LispScope scope)
         {
-            CheckArgs("type", 1, args, scope);
-
-            var item = ((LispVariant)args[0]);
-            return new LispVariant((int)item.Type);
+            return FuelFuncWrapper1<LispVariant, int>(args, scope, "type", (arg1) => (int)arg1.Type);
         }
 
         public static LispVariant GetTypeString(object[] args, LispScope scope)
         {
-            CheckArgs("typestr", 1, args, scope);
-
-            var item = ((LispVariant)args[0]);
-            return new LispVariant(item.TypeString);
+            return FuelFuncWrapper1<LispVariant, string>(args, scope, "typestr", (arg1) => arg1.TypeString);
         }
 
         public static LispVariant Print(object[] args, LispScope scope)
@@ -758,18 +805,16 @@ namespace CsLisp
 
         public static LispVariant Flush(object[] args, LispScope scope)
         {
-            CheckArgs("flush", 0, args, scope);
-
-            scope.GlobalScope.Output.Flush();
-            return new LispVariant();
+            return FuelFuncWrapper0<LispVariant>(args, scope, "flush", () =>
+            {
+                scope.GlobalScope.Output.Flush();
+                return new LispVariant();
+            });
         }
 
         public static LispVariant ReadLine(object[] args, LispScope scope)
         {
-            CheckArgs("readline", 0, args, scope);
-
-            var text = scope.GlobalScope.Input.ReadLine();
-            return new LispVariant(text);
+            return FuelFuncWrapper0<string>(args, scope, "readline", () => scope.GlobalScope.Input.ReadLine());
         }
 
         public static LispVariant ParseInteger(object[] args, LispScope scope)
@@ -832,7 +877,7 @@ namespace CsLisp
         {
             CheckArgs("float", 1, args, scope);
 
-            var value = (LispVariant) args[0];
+            var value = (LispVariant)args[0];
             if (value.IsInt)
             {
                 return new LispVariant((double)value.IntValue);
@@ -923,37 +968,22 @@ namespace CsLisp
 
         public static LispVariant Replace(object[] args, LispScope scope)
         {
-            CheckArgs("replace", 3, args, scope);
-
-            var value = ((LispVariant)args[0]).ToString();
-            var search = ((LispVariant)args[1]).ToString();
-            var replace = ((LispVariant)args[2]).ToString();
-            value = value.Replace(search, replace);
-            return new LispVariant(value);
+            return FuelFuncWrapper3<LispVariant, LispVariant, LispVariant, string>(args, scope, "replace", (arg1, arg2, arg3) => arg1.ToString().Replace(arg2.ToString(), arg3.ToString()));
         }
 
         public static LispVariant Trim(object[] args, LispScope scope)
         {
-            CheckArgs("trim", 1, args, scope);
-
-            var value = ((LispVariant)args[0]).ToString();
-            return new LispVariant(value.Trim());
+            return FuelFuncWrapper1<object, string>(args, scope, "trim", arg1 => arg1.ToString().Trim());
         }
 
         public static LispVariant LowerCase(object[] args, LispScope scope)
         {
-            CheckArgs("lower-case", 1, args, scope);
-
-            var value = ((LispVariant)args[0]).ToString();
-            return new LispVariant(value.ToLower());
+            return FuelFuncWrapper1<object, string>(args, scope, "lower-case", arg1 => arg1.ToString().ToLower());
         }
 
         public static LispVariant UpperCase(object[] args, LispScope scope)
         {
-            CheckArgs("upper-case", 1, args, scope);
-
-            var value = ((LispVariant)args[0]).ToString();
-            return new LispVariant(value.ToUpper());
+            return FuelFuncWrapper1<object, string>(args, scope, "upper-case", arg1 => arg1.ToString().ToUpper());
         }
 
         public static LispVariant Addition(object[] args, LispScope scope)
@@ -997,40 +1027,37 @@ namespace CsLisp
 
         public static LispVariant Not(object[] args, LispScope scope)
         {
-            CheckArgs("not", 1, args, scope);
-
-            var arg1 = (LispVariant)args[0];
-            return new LispVariant(!arg1.BoolValue);
+            return FuelFuncWrapper1<LispVariant, bool>(args, scope, "not", arg1 => !arg1.ToBool());
         }
 
         public static LispVariant LessTest(object[] args, LispScope scope)
         {
-            return CompareOperation(args, (l, r) => new LispVariant(l < r), scope);
+            return CompareOperation(args, (l, r) => new LispVariant(l < r), scope, "<");
         }
 
         public static LispVariant GreaterTest(object[] args, LispScope scope)
         {
-            return CompareOperation(args, (l, r) => new LispVariant(l > r), scope);
+            return CompareOperation(args, (l, r) => new LispVariant(l > r), scope, ">");
         }
 
         public static LispVariant LessEqualTest(object[] args, LispScope scope)
         {
-            return CompareOperation(args, (l, r) => new LispVariant(l <= r), scope);
+            return CompareOperation(args, (l, r) => new LispVariant(l <= r), scope, "<=");
         }
 
         public static LispVariant GreaterEqualTest(object[] args, LispScope scope)
         {
-            return CompareOperation(args, (l, r) => new LispVariant(l >= r), scope);
+            return CompareOperation(args, (l, r) => new LispVariant(l >= r), scope, ">=");
         }
 
         public static LispVariant EqualTest(object[] args, LispScope scope)
         {
-            return CompareOperation(args, (l, r) => new LispVariant(LispVariant.EqualOp(l, r)), scope);
+            return CompareOperation(args, (l, r) => new LispVariant(LispVariant.EqualOp(l, r)), scope, "==");
         }
 
         public static LispVariant NotEqualTest(object[] args, LispScope scope)
         {
-            return CompareOperation(args, (l, r) => new LispVariant(!LispVariant.EqualOp(l, r)), scope);
+            return CompareOperation(args, (l, r) => new LispVariant(!LispVariant.EqualOp(l, r)), scope, "!=");
         }
 
         public static LispVariant CreateList(object[] args, LispScope scope)
@@ -1288,10 +1315,7 @@ namespace CsLisp
 
         public static LispVariant Symbol(object[] args, LispScope scope)
         {
-            CheckArgs(Sym, 1, args, scope);
-
-            var symbol = args[0].ToString();
-            return new LispVariant(LispType.Symbol, symbol);
+            return FuelFuncWrapper1<LispVariant, LispVariant>(args, scope, Sym, (arg1) => new LispVariant(LispType.Symbol, arg1.ToString()));
         }
 
         public static LispVariant ConvertToString(object[] args, LispScope scope)
@@ -1314,17 +1338,12 @@ namespace CsLisp
 
         public static LispVariant ArgsCountFcn(object[] args, LispScope scope)
         {
-            CheckArgs("argscount", 0, args, scope);
-
-            return new LispVariant(((LispVariant)scope[ArgsMeta]).ListValue.Count());
+            return FuelFuncWrapper0<int>(args, scope, "argscount", () => ((LispVariant)scope[ArgsMeta]).ListValue.Count());
         }
 
         public static LispVariant ArgsFcn(object[] args, LispScope scope)
         {
-            CheckArgs("args", 0, args, scope);
-
-            var array = ((LispVariant)scope[ArgsMeta]).ListValue.ToArray();
-            return new LispVariant(array);
+            return FuelFuncWrapper0(args, scope, "args", () => ((LispVariant)scope[ArgsMeta]).ListValue.ToArray());
         }
 
         public static LispVariant ArgFcn(object[] args, LispScope scope)
@@ -1396,46 +1415,36 @@ namespace CsLisp
 
         public static LispVariant MakeDict(object[] args, LispScope scope)
         {
-            CheckArgs("make-dict", 0, args, scope);
-
-            return new LispVariant(LispType.NativeObject, new Dictionary<object, object>());
+            return FuelFuncWrapper0<LispVariant>(args, scope, "make-dict", () => new LispVariant(LispType.NativeObject, new Dictionary<object, object>()));
         }
 
         public static LispVariant DictSet(object[] args, LispScope scope)
         {
-            CheckArgs("dict-set", 3, args, scope);
-
-            var dict = (LispVariant)args[0];
-            var key = (LispVariant)args[1];
-            var value = (LispVariant)args[2];
-            var nativeDict = dict.Value as Dictionary<object, object>;
-            nativeDict[key.Value] = value;
-
-            return value;
+            return FuelFuncWrapper3<LispVariant, LispVariant, LispVariant, LispVariant>(args, scope, "dict-set", (arg1, arg2, arg3) =>
+            {
+                var nativeDict = arg1.Value as Dictionary<object, object>;
+                nativeDict[arg2.Value] = arg3;
+                return arg3;
+            });
         }
 
         public static LispVariant DictGet(object[] args, LispScope scope)
         {
-            CheckArgs("dict-get", 2, args, scope);
-
-            var dict = (LispVariant)args[0];
-            var key = (LispVariant)args[1];
-            var nativeDict = dict.Value as Dictionary<object, object>;
-            var result = nativeDict.ContainsKey(key.Value) ? nativeDict[key.Value] : new LispVariant();
-
-            return (LispVariant)result;
+            return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "dict-get", (arg1, arg2) =>
+            {
+                var nativeDict = arg1.Value as Dictionary<object, object>;
+                return nativeDict.ContainsKey(arg2.Value) ? (LispVariant)nativeDict[arg2.Value] : new LispVariant();
+            });
         }
 
         public static LispVariant DictRemove(object[] args, LispScope scope)
         {
-            CheckArgs("dict-remove", 2, args, scope);
-
-            var dict = (LispVariant)args[0];
-            var key = (LispVariant)args[1];
-            var nativeDict = dict.Value as Dictionary<object, object>;
-            var ok = nativeDict.Remove(key.Value);
-
-            return new LispVariant(ok);
+            return FuelFuncWrapper2<LispVariant, LispVariant, bool>(args, scope, "dict-remove", (arg1, arg2) =>
+            {
+                var nativeDict = arg1.Value as Dictionary<object, object>;
+                var ok = nativeDict.Remove(arg2.Value);
+                return ok;
+            });
         }
 
         public static LispVariant DictKeys(object[] args, LispScope scope)
@@ -1455,37 +1464,32 @@ namespace CsLisp
 
         public static LispVariant DictClear(object[] args, LispScope scope)
         {
-            CheckArgs("dict-clean", 1, args, scope);
-
-            var dict = (LispVariant)args[0];
-            var nativeDict = dict.Value as Dictionary<object, object>;
-            nativeDict.Clear();
-
-            return new LispVariant();
+            return FuelFuncWrapper1<LispVariant, LispVariant>(args, scope, "dict-clean", (arg1) => 
+            {
+                var nativeDict = arg1.Value as Dictionary<object, object>;
+                nativeDict.Clear();
+                return new LispVariant();
+            });
         }
 
         public static LispVariant DictContainsKey(object[] args, LispScope scope)
         {
-            CheckArgs("dict-contains-key", 2, args, scope);
-
-            var dict = (LispVariant)args[0];
-            var key = (LispVariant)args[1];
-            var nativeDict = dict.Value as Dictionary<object, object>;
-            var result = nativeDict.ContainsKey(key.Value);
-
-            return new LispVariant(result);
+            return FuelFuncWrapper2<LispVariant, LispVariant, bool>(args, scope, "dict-contains-key", (arg1, arg2) =>
+            {
+                var nativeDict = arg1.Value as Dictionary<object, object>;
+                var ok = nativeDict.ContainsKey(arg2.Value);
+                return ok;
+            });
         }
 
         public static LispVariant DictContainsValue(object[] args, LispScope scope)
         {
-            CheckArgs("dict-contains-value", 2, args, scope);
-
-            var dict = (LispVariant)args[0];
-            var value = (LispVariant)args[1];
-            var nativeDict = dict.Value as Dictionary<object, object>;
-            var result = nativeDict.ContainsValue(value);
-
-            return new LispVariant(result);
+            return FuelFuncWrapper2<LispVariant, LispVariant, bool>(args, scope, "dict-contains-value", (arg1, arg2) =>
+            {
+                var nativeDict = arg1.Value as Dictionary<object, object>;
+                var ok = nativeDict.ContainsValue(arg2);
+                return ok;
+            });
         }
 
         #endregion
@@ -1584,9 +1588,7 @@ namespace CsLisp
 
         public static LispVariant quote_form(object[] args, LispScope scope)
         {
-            CheckArgs(Quote, 1, args, scope);
-
-            return new LispVariant(args[0]);
+            return FuelFuncWrapper1<object, LispVariant>(args, scope, Quote, arg1 => new LispVariant(arg1));
         }
 
         private static object ProcessQuotedSExpression(IEnumerable<object> expr, LispScope scope, out bool splicing)
@@ -1660,16 +1662,12 @@ namespace CsLisp
 
         public static LispVariant unquote_form(object[] args, LispScope scope)
         {
-            CheckArgs(UnQuote, 1, args, scope);
-
-            return new LispVariant(args[0]);
+            return FuelFuncWrapper1<object, LispVariant>(args, scope, UnQuote, arg1 => new LispVariant(arg1));
         }
 
         public static LispVariant unquotesplicing_form(object[] args, LispScope scope)
         {
-            CheckArgs(UnQuoteSplicing, 1, args, scope);
-
-            return new LispVariant(args[0]);
+            return FuelFuncWrapper1<object, LispVariant>(args, scope, UnQuoteSplicing, arg1 => new LispVariant(arg1));
         }
 
         public static LispVariant if_form(object[] args, LispScope scope)
@@ -2129,14 +2127,9 @@ namespace CsLisp
             return result;
         }
 
-        private static LispVariant CompareOperation(object[] args, Func<LispVariant, LispVariant, LispVariant> op, LispScope scope)
+        private static LispVariant CompareOperation(object[] args, Func<LispVariant, LispVariant, LispVariant> op, LispScope scope, string name)
         {
-            CheckArgs("compare-op", 2, args, scope);
-
-            var arg1 = (LispVariant)args[0];
-            var arg2 = (LispVariant)args[1];
-            LispVariant result = op(arg1, arg2);
-            return result;
+            return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, name, (arg1, arg2) => op(arg1, arg2));
         }
 
         private static object CreateFunction(Func<object[], LispScope, LispVariant> func, string signature = null, string documentation = null, bool isBuiltin = true, bool isSpecialForm = false, bool isEvalInExpand = false, string moduleName = Builtin)

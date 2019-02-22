@@ -29,8 +29,8 @@ using namespace CppLisp;
 
 const string Lisp::ProgramName = "fuel";
 const string Lisp::Name = "FUEL(isp)";
-const string Lisp::Version = "v0.99.3";
-const string Lisp::Date = "12.1.2019";
+const string Lisp::Version = "v0.99.4";
+const string Lisp::Date = "22.2.2019";
 const string Lisp::Copyright = "(C) by Michael Neuroth";
 const string Lisp::Platform = "C++";
 const string Lisp::Info = Lisp::Name + " is a fast usable embeddable lisp interpreter";

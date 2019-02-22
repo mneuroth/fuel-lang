@@ -96,6 +96,30 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_MainFileWithWrongCommandLineOption()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "--blub" };
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.StartsWith("Error: unknown option(s) --blub"));
+            }
+        }
+
+        [TestMethod]
+        public void Test_MainFileWithMoreThanOneLibraryOption()
+        {
+            using (ConsoleRedirector cr = new ConsoleRedirector())
+            {
+                var args = new[] { "-l=.", "-l=some/path" };
+                LispMainHelper.MainExtended(args, Console.Out, Console.In);
+                string s = cr.ToString().Trim();
+                Assert.IsTrue(s.StartsWith("Error: only one library path is supported"));
+            }
+        }
+
+        [TestMethod]
         [DeploymentItem(@"..\..\..\Scripts\simple.fuel")]
         public void Test_MainFile()
         {
@@ -421,7 +445,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("  8    --> 	   (* x x (f x))"));
                 Assert.IsTrue(s.Contains("  4 B      	   (+ x 1)"));
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
-                Assert.IsTrue(s.Contains("FUEL(isp) v0.99.3 (for .NET/C#) from 12.1.2019, (C) by Michael Neuroth"));
+                Assert.IsTrue(s.Contains($"FUEL(isp) {Lisp.Version} (for .NET/C#) from {Lisp.Date}, (C) by Michael Neuroth"));
                 Assert.IsTrue(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
             }
         }

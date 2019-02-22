@@ -65,8 +65,8 @@ namespace CsLisp
         public const string ProgramName = "fuel";
 
         public const string Name = "FUEL(isp)";
-        public const string Version = "v0.99.3";
-        public const string Date = "12.1.2019";
+        public const string Version = "v0.99.4";
+        public const string Date = "22.2.2019";
         public const string Copyright = "(C) by Michael Neuroth";
 
         public const string Platform = ".NET/C#";

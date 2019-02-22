@@ -24,6 +24,7 @@
  * */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -259,12 +260,28 @@ namespace CsLisp
         /// <summary>
         /// Dump a given (recursive) list.
         /// </summary>
-        /// <param name="astAsList">A list.</param>
+        /// <param name="listAsObject">A list.</param>
         /// <returns>String representing the list.</returns>
-        public static string DumpList(object astAsList)
+        public static string DumpList(object listAsObject)
         {
             string ret = "(";
-            IEnumerable<object> list = astAsList as IEnumerable<object>;
+            ret += DumpEnumerable(listAsObject, ret);
+            ret += ")";
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Dump a given enumerable.
+        /// </summary>
+        /// <param name="container">A enumerable</param>
+        /// <param name="separator">The separator string.</param>
+        /// <returns>String representing the enumeration</returns>
+        public static string DumpEnumerable(object container, string separator = ",")
+        {
+            string ret = string.Empty;
+
+            IEnumerable list = container as IEnumerable;
             if (list != null)
             {
                 foreach (var elem in list)
@@ -277,10 +294,10 @@ namespace CsLisp
                     {
                         ret += elem.ToString();
                     }
-                    ret += ",";
+
+                    ret += separator;
                 }
             }
-            ret += ")";
 
             return ret;
         }

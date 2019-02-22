@@ -24,6 +24,7 @@
  * */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -32,6 +33,17 @@ namespace CsLisp
 {
     public class LispMainHelper
     {
+        private static bool ContainsOptionAndRemove(List<string> args, string option)
+        {
+            if (args.Contains(option))
+            {
+                args.Remove(option);
+                return true;
+            }
+
+            return false;
+        }
+
         public static void MainExtended(string[] args, TextWriter output, TextReader input)
         {
             if (args.Length == 0)
@@ -39,6 +51,8 @@ namespace CsLisp
                 Usage(output);
                 return;
             }
+
+            List<string> allArgs = args.ToList();
 
             string script = null;
             var loadFiles = true;
@@ -49,47 +63,49 @@ namespace CsLisp
             var showCompileOutput = false;
             var measureTime = false;
             var lengthyErrorOutput = false;
+            var interactiveLoop = false;
+            var startDebugger = false;
             var result = new LispVariant();
             var startTickCount = Environment.TickCount;
             var debugger = TryGetDebugger();
 
-            if (args.Contains("-m"))
+            if (ContainsOptionAndRemove(allArgs, "-m"))
             {
                 measureTime = true;
             }
-            if (args.Contains("-v"))
+            if (ContainsOptionAndRemove(allArgs, "-v"))
             {
                 output.WriteLine(Lisp.ProgramName + " " + Lisp.Version + " from " + Lisp.Date);
                 return;
             }
-            if (args.Contains("-h"))
+            if (ContainsOptionAndRemove(allArgs, "-h"))
             {
                 Usage(output);
                 return;
             }
-            if (args.Contains("--doc"))
+            if (ContainsOptionAndRemove(allArgs, "--doc"))
             {
                 script = "(println (doc))";
                 loadFiles = false;
             }
-            if (args.Contains("--html"))
+            if (ContainsOptionAndRemove(allArgs, "--html"))
             {
                 script = "(println (htmldoc))";
                 loadFiles = false;
             }
-            if (args.Contains("--macro-expand"))
+            if (ContainsOptionAndRemove(allArgs, "--macro-expand"))
             {
                 macroExpand = true;
             }
-            if (args.Contains("-x"))
+            if (ContainsOptionAndRemove(allArgs, "-x"))
             {
                 lengthyErrorOutput = true;
             }
-            if (args.Contains("-t"))
+            if (ContainsOptionAndRemove(allArgs, "-t"))
             {
                 trace = true;
             }
-            if (args.Contains("-e"))
+            if (ContainsOptionAndRemove(allArgs, "-e"))
             {
                 script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
                 loadFiles = false;
@@ -97,16 +113,25 @@ namespace CsLisp
             var libPath = args.Where(v => v.StartsWith("-l=")).Select(v => v).ToArray();
             if (libPath.Length > 0)
             {
-                string libraryPath = libPath.First().Substring(3);
-                LispUtils.LibraryPath = libraryPath;
+                if (libPath.Length == 1)
+                {
+                    string libraryPath = libPath.First().Substring(3);
+                    LispUtils.LibraryPath = libraryPath;
+                    allArgs.Remove(libPath.First());
+                }
+                else
+                {
+                    output.WriteLine("Error: only one library path is supported");
+                    return;
+                }
             }
 
             // handle options for compiler
-            if (args.Contains("-c"))
+            if (ContainsOptionAndRemove(allArgs, "-c"))
             {
                 compile = true;
             }
-            if (args.Contains("-s"))
+            if (ContainsOptionAndRemove(allArgs, "-s"))
             {
                 showCompileOutput = true;
             }
@@ -114,15 +139,37 @@ namespace CsLisp
             // handle options for debugger
             if (debugger != null)
             {
+                if (ContainsOptionAndRemove(allArgs, "-i"))
+                {
+                    interactiveLoop = true;
+                }
+                if (ContainsOptionAndRemove(allArgs, "-d"))
+                {
+                    startDebugger = true;
+                }
+            }
+
+            var scriptFiles = LispUtils.GetScriptFilesFromProgramArgs(args);
+
+            // check if all command line options could be consumed
+            allArgs = allArgs.Where(x => !scriptFiles.Contains(x)).ToList();    // remove script files from option list
+            if (allArgs.Count > 0)
+            {
+                output.WriteLine($"Error: unknown option(s) {LispUtils.DumpEnumerable(allArgs, " ")}");
+                return;
+            }
+
+            if (debugger != null)
+            {
                 debugger.SetInputOutputStreams(output, input);
-                if (args.Contains("-i"))
+                if (interactiveLoop)
                 {
                     InteractiveLoopHeader(output);
                     debugger.InteractiveLoop(startedFromMain: true, tracing: trace);
                     loadFiles = false;
                     wasDebugging = true;
                 }
-                if (args.Contains("-d"))
+                if (startDebugger)
                 {
                     var fileName = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
                     // process -e option if script is given via command line
@@ -144,8 +191,6 @@ namespace CsLisp
 
             if (loadFiles)
             {
-                var scriptFiles = LispUtils.GetScriptFilesFromProgramArgs(args);
-
                 foreach (var fileName in scriptFiles)
                 {
                     script = LispUtils.ReadFileOrEmptyString(fileName);

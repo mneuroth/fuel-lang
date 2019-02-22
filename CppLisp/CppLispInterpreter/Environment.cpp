@@ -162,6 +162,17 @@ static void CheckOptionalArgs(const string & name, size_t minCount, size_t maxCo
 	}
 }
 
+template <class T1, class T2>
+static std::shared_ptr<LispVariant> FuelFuncWrapper1(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & func_name, std::function<T2(T1)> func)
+{
+	CheckArgs(func_name, 1, args, scope);
+
+	const T1 & a1 = ToType<T1>(args[0]->ToLispVariantRef());
+	const T2 & result = func(a1);
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
+}
+
 /* not needed yet...
 static const std::vector<std::shared_ptr<object>> GetCallArgs(const std::vector<std::shared_ptr<object>> & args)
 {
@@ -762,10 +773,7 @@ static std::shared_ptr<LispVariant> Replace(const std::vector<std::shared_ptr<ob
 
 static std::shared_ptr<LispVariant> Trim(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("trim", 1, args, scope);
-
-	var value = ((LispVariant)args[0]).ToString();
-	return std::make_shared<LispVariant>(std::make_shared<object>(value.Trim()));
+	return FuelFuncWrapper1<string, string>(args, scope, "trim", [](const string & arg1) -> string { return arg1.Trim();  });
 }
 
 static std::shared_ptr<LispVariant> LowerCase(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -2064,34 +2072,6 @@ string LispEnvironment::GetLispType(std::shared_ptr<object> obj)
 	return obj->GetTypeName();
 }
 
-int f(int val)
-{
-	return val * val;
-}
-
-template <class T1, class T2>
-static std::shared_ptr<LispVariant> fuel_func_wrapper_f(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
-{
-	CheckArgs("f", 1, args, scope);
-
-	const LispVariant & val = args[0]->ToLispVariantRef();
-	T2 i = ToType<T2>(val);
-	T1 result = f(i);
-
-	return std::make_shared<LispVariant>(std::make_shared<object>(result));
-}
-
-template <class T1, class T2>
-static std::shared_ptr<LispVariant> fuel_func_wrapper_1_arg(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, std::function<T1(T2)> func, const string & func_name)
-{
-	CheckArgs(func_name, 1, args, scope);
-
-	T2 a1 = ToType<T2>(args[0]->ToLispVariantRef());
-	T1 result = func(a1);
-
-	return std::make_shared<LispVariant>(std::make_shared<object>(result));
-}
-
 std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 {
 	std::shared_ptr<LispScope> scope = std::make_shared<LispScope>(MainScope);
@@ -2100,9 +2080,6 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[Macros] = std::make_shared<object>(LispScope(Macros, scope));
 	(*scope)[Tracebuffer] = std::make_shared<object>(""); // new StringBuilder();
 	(*scope)[Traceon] = std::make_shared<object>(false);
-
-	(*scope)["wrapper_f"] = CreateFunction(fuel_func_wrapper_f<int, int>, "(wrapper_f val)", "Test wrapper function.");
-	(*scope)["wrapper_ff"] = CreateFunction([](const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope) -> std::shared_ptr<LispVariant> { return fuel_func_wrapper_1_arg<int, int>(args, scope, f, "wrapper_ff"); }, "(wrapper_f val)", "Test wrapper function.");
 
 	(*scope)["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
 	(*scope)["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");

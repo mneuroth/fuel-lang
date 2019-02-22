@@ -401,7 +401,7 @@ namespace QtLispUnitTests
 				QVERIFY(s.Contains("  8    --> 	   (* x x (f x))"));
 				QVERIFY(s.Contains("  4 B      	   (+ x 1)"));
 				QVERIFY(s.Contains("FUEL(isp)-DBG> Really delete all breakpoints? (y/n)"));
-				QVERIFY(s.Contains("FUEL(isp) v0.99.3 (for C++) from 12.1.2019, (C) by Michael Neuroth"));
+				QVERIFY(s.Contains("FUEL(isp) " + Lisp::Version + " (for C++) from " + Lisp::Date + ", (C) by Michael Neuroth"));
 				QVERIFY(s.Contains("FUEL(isp) is a fast usable embeddable lisp interpreter"));
 			}
 		}
