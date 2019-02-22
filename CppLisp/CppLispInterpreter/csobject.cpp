@@ -322,12 +322,6 @@ namespace CppLisp
 	{
 		switch (m_Type)
 		{
-			case __Undefined:
-				return "Undefined";
-			case __Nil:
-				return "Nil";
-			case __Bool:
-				return m_Data.b ? "true" : "false";
 			case __Int:
 				return std::to_string(m_Data.i);
 			case __Double:
@@ -335,6 +329,12 @@ namespace CppLisp
 			case __String:
 				return *(m_Data.pString);
 // TODO --> implement ToString() for more data types
+			case __Bool:
+				return m_Data.b ? "true" : "false";
+			case __Undefined:
+				return "Undefined";
+			case __Nil:
+				return "Nil";
 			case __List:
 				{
 					string result;
