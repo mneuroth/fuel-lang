@@ -806,25 +806,25 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_MacrosEvaluateNested)
     {
-        const string macroExpandScript = "(do\
-        (define-macro-eval first-macro\
-            (a b)\
-            (do\
-                (println first-macro)\
-                (def i 1)\
-                (+ a b i)\
-            )\
-        )\
-\
-        (define-macro-eval second-macro\
-            (x y)\
-            (do\
-                (println second-macro)\
-                (* x y (first-macro (+ x 1) (+ y 2)))\
-            )\
-        )\
-\
-        (def m (second-macro 4 3))\
+        const string macroExpandScript = "(do\n\
+        (define-macro-eval first-macro\n\
+            (a b)\n\
+            (do\n\
+                (println first-macro)\n\
+                (def i 1)\n\
+                (+ a b i)\n\
+            )\n\
+        )\n\
+\n\
+        (define-macro-eval second-macro\n\
+            (x y)\n\
+            (do\n\
+                (println second-macro)\n\
+                (* x y (first-macro (+ x 1) (+ y 2)))\n\
+            )\n\
+        )\n\
+\n\
+        (def m (second-macro 4 3))\n\
     )";
 
         //using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -842,25 +842,25 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_MacrosEvaluateRecursive)
     {
-        const string macroExpandScript = "(do\
-        (define-macro-eval first-macro\
-            (a b)\
-            (do\
-                (println first-macro)\
-                (def i 1)\
-                (+ a b i)\
-            )\
-        )\
-\
-        (define-macro-eval second-macro\
-            (x y)\
-            (do\
-                (println second-macro)\
-                (* x y (first-macro x (+ y 4)))\
-            )\
-        )\
-\
-        (def m (second-macro 4 3))\
+        const string macroExpandScript = "(do\n\
+        (define-macro-eval first-macro\n\
+            (a b)\n\
+            (do\n\
+                (println first-macro)\n\
+                (def i 1)\n\
+                (+ a b i)\n\
+            )\n\
+        )\n\
+\n\
+        (define-macro-eval second-macro\n\
+            (x y)\n\
+            (do\n\
+                (println second-macro)\n\
+                (* x y (first-macro x (+ y 4)))\n\
+            )\n\
+        )\n\
+\n\
+        (def m (second-macro 4 3))\n\
     )";
 
         //using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -878,25 +878,25 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_MacrosEvaluateDoubleMacroCall)
     {
-        const string macroExpandScript = "(do\
-        (define-macro-eval first-macro\
-            (a b)\
-            (do\
-                (println first-macro)\
-                (def i 1)\
-                (+ a b i)\
-            )\
-        )\
-\
-        (define-macro-eval second-macro\
-            (x y)\
-            (do\
-                (println second-macro)\
-                (* x y)\
-            )\
-        )\
-\
-        (def m (second-macro 4 (first-macro 6 3)))\
+        const string macroExpandScript = "(do\n\
+        (define-macro-eval first-macro\n\
+            (a b)\n\
+            (do\n\
+                (println first-macro)\n\
+                (def i 1)\n\
+                (+ a b i)\n\
+            )\n\
+        )\n\
+\n\
+        (define-macro-eval second-macro\n\
+            (x y)\n\
+            (do\n\
+                (println second-macro)\n\
+                (* x y)\n\
+            )\n\
+        )\n\
+\n\
+        (def m (second-macro 4 (first-macro 6 3)))\n\
     )";
 
         //using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -924,23 +924,23 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_MacrosExpand2)
     {
-        const string macroExpandScript = "(do\
-            (define-macro-expand first-macro\
-                (a b)\
-                '(do\
-                    (def i 1)\
-                    (+ a b i)\
-                 )\
-            )\
-\
-            (define-macro-expand second-macro\
-                (x y)\
-                '(do\
-                    (* x y (first-macro x y))\
-                 )\
-            )\
-\
-            (def m (second-macro 4 3))\
+        const string macroExpandScript = "(do\n\
+            (define-macro-expand first-macro\n\
+                (a b)\n\
+                '(do\n\
+                    (def i 1)\n\
+                    (+ a b i)\n\
+                 )\n\
+            )\n\
+\n\
+            (define-macro-expand second-macro\n\
+                (x y)\n\
+                '(do\n\
+                    (* x y (first-macro x y))\n\
+                 )\n\
+            )\n\
+\n\
+            (def m (second-macro 4 3))\n\
         )";
 #ifdef ENABLE_COMPILE_TIME_MACROS
         std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
@@ -952,46 +952,46 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_MacrosExpandDefineStruct)
     {
-        const string macroExpandScript = "(do\
-(define-macro-eval dotimes (counterinfo statements)\
-  (do\
-    (def (first 'counterinfo) 0)\
-    (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))\
-      (do\
-         (eval 'statements)\
-         (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))\
-      )\
-    )\
-  )\
-)\
-\
-(define-macro-eval defstruct (name) \
-(do \
-\
-  (eval\
-     (list 'defn (sym (+ \"make-\" name)) (cdr (quoted-macro-args)) \
-              `(list ,(sym (+ \"#\" name)) ,@(cdr(quoted-macro-args))) \
-     )\
-  )\
-\
-  (eval\
-     (list 'defn (sym (+ \"is-\" name \"-p\")) '(data)	\
-        `(and(== (type data) 6) (== (first data) ,(sym (+ \"#\" name)))) \
-     ) \
-  )\
-\
-  (dotimes (i (- (len (quoted-macro-args)) 1)) \
-    (eval\
-          (list 'defn (sym (+ \"get-\" name \"-\" (str (nth (+ i 1) (quoted-macro-args))))) '(data) \
-             `(nth (+ ,i 1) data) \
-        )\
-    )\
-  )\
-)\
-)\
-\
-(defstruct point x y)\
-(def p (make-point 2 3))\
+        const string macroExpandScript = "(do\n\
+(define-macro-eval dotimes (counterinfo statements)\n\
+  (do\n\
+    (def (first 'counterinfo) 0)\n\
+    (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))\n\
+      (do\n\
+         (eval 'statements)\n\
+         (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))\n\
+      )\n\
+    )\n\
+  )\n\
+)\n\
+\n\
+(define-macro-eval defstruct (name) \n\
+(do \n\
+\n\
+  (eval\n\
+     (list 'defn (sym (+ \"make-\" name)) (cdr (quoted-macro-args)) \n\
+              `(list ,(sym (+ \"#\" name)) ,@(cdr(quoted-macro-args))) \n\
+     )\n\
+  )\n\
+\n\
+  (eval\n\
+     (list 'defn (sym (+ \"is-\" name \"-p\")) '(data)	\n\
+        `(and(== (type data) 6) (== (first data) ,(sym (+ \"#\" name)))) \n\
+     ) \n\
+  )\n\
+\n\
+  (dotimes (i (- (len (quoted-macro-args)) 1)) \n\
+    (eval\n\
+          (list 'defn (sym (+ \"get-\" name \"-\" (str (nth (+ i 1) (quoted-macro-args))))) '(data) \n\
+             `(nth (+ ,i 1) data) \n\
+        )\n\
+    )\n\
+  )\n\
+)\n\
+)\n\
+\n\
+(defstruct point x y)\n\
+(def p (make-point 2 3))\n\
 )";
 #ifdef ENABLE_COMPILE_TIME_MACROS
                 {
@@ -1087,25 +1087,25 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_MacrosExpandDoubleMacroCall)
     {
-        const string macroExpandScript = "(do\
-            (define-macro-expand first-macro\
-                (a b)\
-                '(do\
-                    (println first-macro)\
-                    (def i 1)\
-                    (+ a b i)\
-                 )\
-            )\
-\
-            (define-macro-expand second-macro\
-                (x y)\
-                '(do\
-                    (println second-macro)\
-                    (* x y)\
-                 )\
-            )\
-\
-            (def m (second-macro 4 (first-macro 6 3)))\
+        const string macroExpandScript = "(do\n\
+            (define-macro-expand first-macro\n\
+                (a b)\n\
+                '(do\n\
+                    (println first-macro)\n\
+                    (def i 1)\n\
+                    (+ a b i)\n\
+                 )\n\
+            )\n\
+\n\
+            (define-macro-expand second-macro\n\
+                (x y)\n\
+                '(do\n\
+                    (println second-macro)\n\
+                    (* x y)\n\
+                 )\n\
+            )\n\
+\n\
+            (def m (second-macro 4 (first-macro 6 3)))\n\
         )";
 
 #ifdef ENABLE_COMPILE_TIME_MACROS
@@ -2527,19 +2527,19 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_NestedMacroExpand)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(do\
-            (define-macro-expand setqq (symbol value)\
-                '(setf symbol value)\
-            )\
-\
-            (define-macro-expand begin (sequence)\
-               (list 'do `,@(quoted-macro-args))\
-            )\
-\
-                (begin\
-                  (def x 42)\
-                  (setqq x 4)\
-                  (println x)\
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do\n\
+            (define-macro-expand setqq (symbol value)\n\
+                '(setf symbol value)\n\
+            )\n\
+\n\
+            (define-macro-expand begin (sequence)\n\
+               (list 'do `,@(quoted-macro-args))\n\
+            )\n\
+\n\
+                (begin\n\
+                  (def x 42)\n\
+                  (setqq x 4)\n\
+                  (println x)\n\
                 ))");
         QVERIFY(result->IsString());
         QCOMPARE("4", result->ToString().c_str());

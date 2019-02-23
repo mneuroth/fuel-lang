@@ -202,19 +202,19 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_Eval4)
         {
-            const string script = "(do  \
-                                      (defn defstructfunc (name)  \
-                                        (do \
-                                          (def structsym (sym (+ \"#\" name))) \
-                                          (list 'defn (sym (+ \"make-\" name)) (cdr (args))  \
-                                              `(list ,structsym ,@(cdr(args))) \
-                                          ) \
-                                        ) \
-                                      ) \
- \
-                                      (def f (defstructfunc point x y z)) \
-                                      (eval f) \
-                                      (def p (make-point 1 2 3)) \
+            const string script = "(do  \n\
+                                      (defn defstructfunc (name)  \n\
+                                        (do \n\
+                                          (def structsym (sym (+ \"#\" name))) \n\
+                                          (list 'defn (sym (+ \"make-\" name)) (cdr (args))  \n\
+                                              `(list ,structsym ,@(cdr(args))) \n\
+                                          ) \n\
+                                        ) \n\
+                                      ) \n\
+ \n\
+                                      (def f (defstructfunc point x y z)) \n\
+                                      (eval f) \n\
+                                      (def p (make-point 1 2 3)) \n\
                                     )";
 			std::shared_ptr<LispVariant> result = Lisp::Eval(script);
             QCOMPARE(true, result->IsList());
@@ -223,18 +223,18 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_Eval5)
         {
-            const string script = "(do \
-                                      (defn defsimplefunc ()  \
-                                        (do \
-                                          (list 'defn 'simplefunc '(a b)  \
-                                              '(+ a b) \
-                                          ) \
-                                        ) \
-                                      ) \
- \
-                                      (def f (defsimplefunc)) \
-                                      (eval f) \
-                                      (def p (simplefunc 1 2))  \
+            const string script = "(do \n\
+                                      (defn defsimplefunc () \n\
+                                        (do \n\
+                                          (list 'defn 'simplefunc '(a b) \n\
+                                              '(+ a b) \n\
+                                          ) \n\
+                                        ) \n\
+                                      ) \n\
+ \n\
+                                      (def f (defsimplefunc)) \n\
+                                      (eval f) \n\
+                                      (def p (simplefunc 1 2)) \n\
                                     )";
 			std::shared_ptr<LispVariant> result = Lisp::Eval(script);
             QCOMPARE(true, result->IsInt());
@@ -573,25 +573,25 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_MacrosEvaluateNested)
 		{
-			const string macroExpandScript = "(do\
-			(define-macro-eval first-macro\
-				(a b)\
-				(do\
-					(println first-macro)\
-					(def i 1)\
-					(+ a b i)\
-				)\
-			)\
-\
-			(define-macro-eval second-macro\
-				(x y)\
-			    (do\
-					(println second-macro)\
-					(* x y (first-macro (+ x 1) (+ y 2)))\
-				)\
-			)\
-\
-			(def m (second-macro 4 3))\
+			const string macroExpandScript = "(do\n\
+			(define-macro-eval first-macro\n\
+				(a b)\n\
+				(do\n\
+					(println first-macro)\n\
+					(def i 1)\n\
+					(+ a b i)\n\
+				)\n\
+			)\n\
+\n\
+			(define-macro-eval second-macro\n\
+				(x y)\n\
+			    (do\n\
+					(println second-macro)\n\
+					(* x y (first-macro (+ x 1) (+ y 2)))\n\
+				)\n\
+			)\n\
+\n\
+			(def m (second-macro 4 3))\n\
 		)";
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -609,25 +609,25 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_MacrosEvaluateRecursive)
 		{
-			const string macroExpandScript = "(do\
-			(define-macro-eval first-macro\
-				(a b)\
-				(do\
-					(println first-macro)\
-					(def i 1)\
-					(+ a b i)\
-				)\
-			)\
-\
-			(define-macro-eval second-macro\
-				(x y)\
-				(do\
-					(println second-macro)\
-					(* x y (first-macro x (+ y 4)))\
-				)\
-			)\
-\
-			(def m (second-macro 4 3))\
+			const string macroExpandScript = "(do\n\
+			(define-macro-eval first-macro\n\
+				(a b)\n\
+				(do\n\
+					(println first-macro)\n\
+					(def i 1)\n\
+					(+ a b i)\n\
+				)\n\
+			)\n\
+\n\
+			(define-macro-eval second-macro\n\
+				(x y)\n\
+				(do\n\
+					(println second-macro)\n\
+					(* x y (first-macro x (+ y 4)))\n\
+				)\n\
+			)\n\
+\n\
+			(def m (second-macro 4 3))\n\
 		)";
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -645,25 +645,25 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_MacrosEvaluateDoubleMacroCall)
 		{
-			const string macroExpandScript = "(do\
-			(define-macro-eval first-macro\
-				(a b)\
-				(do\
-					(println first-macro)\
-					(def i 1)\
-					(+ a b i)\
-				)\
-			)\
-\
-			(define-macro-eval second-macro\
-				(x y)\
-				(do\
-					(println second-macro)\
-					(* x y)\
-				)\
-			)\
-\
-			(def m (second-macro 4 (first-macro 6 3)))\
+			const string macroExpandScript = "(do\n\
+			(define-macro-eval first-macro\n\
+				(a b)\n\
+				(do\n\
+					(println first-macro)\n\
+					(def i 1)\n\
+					(+ a b i)\n\
+				)\n\
+			)\n\
+\n\
+			(define-macro-eval second-macro\n\
+				(x y)\n\
+				(do\n\
+					(println second-macro)\n\
+					(* x y)\n\
+				)\n\
+			)\n\
+\n\
+			(def m (second-macro 4 (first-macro 6 3)))\n\
 		)";
 
 			//using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -691,23 +691,23 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_MacrosExpand2)
 		{
-			const string macroExpandScript = "(do\
-				(define-macro-expand first-macro\
-					(a b)\
-					'(do\
-						(def i 1)\
-						(+ a b i)\
-					 )\
-				)\
-\
-				(define-macro-expand second-macro\
-					(x y)\
-					'(do\
-						(* x y (first-macro x y))\
-					 )\
-				)\
-\
-				(def m (second-macro 4 3))\
+			const string macroExpandScript = "(do\n\
+				(define-macro-expand first-macro\n\
+					(a b)\n\
+					'(do\n\
+						(def i 1)\n\
+						(+ a b i)\n\
+					 )\n\
+				)\n\
+\n\
+				(define-macro-expand second-macro\n\
+					(x y)\n\
+					'(do\n\
+						(* x y (first-macro x y))\n\
+					 )\n\
+				)\n\
+\n\
+				(def m (second-macro 4 3))\n\
 			)";
 #ifdef ENABLE_COMPILE_TIME_MACROS
 			std::shared_ptr<LispVariant> result = Lisp::Eval(macroExpandScript);
@@ -719,46 +719,47 @@ namespace QtLispUnitTests
 
         TEST_METHOD(Test_MacrosExpandDefineStruct)
 		{
-			const string macroExpandScript = "(do\
-  (define-macro-eval dotimes (counterinfo statements)\
-      (do\
-        (def (first 'counterinfo) 0)\
-        (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))\
-          (do\
-             (eval 'statements)\
-             (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))\
-          )\
-        )\
-      )\
-  )\
- \
-    (define-macro-eval defstruct (name) \
-    (do \
- \
-      (eval\
-         (list 'defn (sym (+ \"make-\" name)) (cdr (quoted-macro-args)) \
-                  `(list ,(sym (+ \"#\" name)) ,@(cdr(quoted-macro-args))) \
-         )\
-      )\
- \
-	  (eval\
-         (list 'defn (sym (+ \"is-\" name \"-p\")) '(data)	\
-            `(and(== (type data) 6) (== (first data) ,(sym (+ \"#\" name)))) \
-         ) \
-	  )\
- \
-	  (dotimes (i (- (len (quoted-macro-args)) 1)) \
-        (eval\
-              (list 'defn (sym (+ \"get-\" name \"-\" (str (nth (+ i 1) (quoted-macro-args))))) '(data) \
-			     `(nth (+ ,i 1) data) \
-            )\
-        )\
-      )\
-	)\
-  )\
-  \
-  (defstruct point x y)\
-  (def p (make-point 2 3))\
+			const string macroExpandScript = "(do \n\
+\n\
+	(define-macro-eval dotimes (counterinfo statements)\n\
+      (do\n\
+        (def (first 'counterinfo) 0)\n\
+        (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))\n\
+          (do\n\
+             (eval 'statements)\n\
+             (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))\n\
+          )\n\
+        )\n\
+      )\n\
+  )\n\
+ \n\
+    (define-macro-eval defstruct (name)\n\
+    (do \n\
+ \n\
+      (eval\n\
+         (list 'defn (sym (+ \"make-\" name)) (cdr (quoted-macro-args)) \n\
+                  `(list ,(sym (+ \"#\" name)) ,@(cdr(quoted-macro-args))) \n\
+         )\n\
+      )\n\
+ \n\
+	  (eval\n\
+         (list 'defn (sym (+ \"is-\" name \"-p\")) '(data)	\n\
+            `(and(== (type data) 6) (== (first data) ,(sym (+ \"#\" name)))) \n\
+         ) \n\
+	  )\n\
+ \n\
+	  (dotimes (i (- (len (quoted-macro-args)) 1)) \n\
+        (eval\n\
+              (list 'defn (sym (+ \"get-\" name \"-\" (str (nth (+ i 1) (quoted-macro-args))))) '(data) \n\
+			     `(nth (+ ,i 1) data) \n\
+            )\n\
+        )\n\
+      )\n\
+	)\n\
+  )\n\
+  \n\
+  (defstruct point x y)\n\
+  (def p (make-point 2 3))\n\
 )";
 #ifdef ENABLE_COMPILE_TIME_MACROS
 					{
@@ -774,25 +775,25 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_MacrosExpandNested)
 		{
-			const string macroExpandScript = "(do\
-				(define-macro-expand first-macro\
-					(a b)\
-					'(do\
-						(println first-macro)\
-						(def i 1)\
-						(+ a b i)\
-					 )\
-				)\
-\
-				(define-macro-expand second-macro\
-					(x y)\
-					'(do\
-						(println second-macro)\
-							(* x y (first-macro (+ x 1) (+ y 2)))\
-						)\
-					 )\
-\
-				(def m (second-macro 4 3))\
+			const string macroExpandScript = "(do\n\
+				(define-macro-expand first-macro\n\
+					(a b)\n\
+					'(do\n\
+						(println first-macro)\n\
+						(def i 1)\n\
+						(+ a b i)\n\
+					 )\n\
+				)\n\
+\n\
+				(define-macro-expand second-macro\n\
+					(x y)\n\
+					'(do\n\
+						(println second-macro)\n\
+							(* x y (first-macro (+ x 1) (+ y 2)))\n\
+						)\n\
+					 )\n\
+\n\
+				(def m (second-macro 4 3))\n\
 			)";
 
 #ifdef ENABLE_COMPILE_TIME_MACROS
@@ -854,25 +855,25 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_MacrosExpandDoubleMacroCall)
 		{
-			const string macroExpandScript = "(do\
-				(define-macro-expand first-macro\
-					(a b)\
-					'(do\
-						(println first-macro)\
-						(def i 1)\
-						(+ a b i)\
-					 )\
-				)\
-\
-				(define-macro-expand second-macro\
-					(x y)\
-					'(do\
-						(println second-macro)\
-						(* x y)\
-					 )\
-				)\
-\
-				(def m (second-macro 4 (first-macro 6 3)))\
+			const string macroExpandScript = "(do\n\
+				(define-macro-expand first-macro\n\
+					(a b)\n\
+					'(do\n\
+						(println first-macro)\n\
+						(def i 1)\n\
+						(+ a b i)\n\
+					 )\n\
+				)\n\
+\n\
+				(define-macro-expand second-macro\n\
+					(x y)\n\
+					'(do\n\
+						(println second-macro)\n\
+						(* x y)\n\
+					 )\n\
+				)\n\
+\n\
+				(def m (second-macro 4 (first-macro 6 3)))\n\
 			)";
 
 #ifdef ENABLE_COMPILE_TIME_MACROS
@@ -1063,7 +1064,6 @@ namespace QtLispUnitTests
 
 		TEST_METHOD(Test_Closure4)
 		{
-// TODO working...
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (defn g (x) (do (+ x 2))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
 			QCOMPARE(13, result->ToInt());
 		}
