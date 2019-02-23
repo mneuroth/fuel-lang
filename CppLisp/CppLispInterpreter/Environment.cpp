@@ -357,18 +357,12 @@ static std::shared_ptr<LispVariant> Vars(const std::vector<std::shared_ptr<objec
 
 static std::shared_ptr<LispVariant> DelVar(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("delvar", 1, args, scope);
-
-	var name = ((LispVariant)args[0]);
-	var ok = scope->Remove(name.ToString());
-	return std::make_shared<LispVariant>(std::make_shared<object>(ok));
+	return FuelFuncWrapper1<LispVariant, bool>(args, scope, "delvar", [scope](const LispVariant &arg1) -> bool { return scope->Remove(arg1.ToString()); });
 }
 
 static std::shared_ptr<LispVariant> NeedLValue(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("need-l-value", 0, args, scope);
-
-	return std::make_shared<LispVariant>(std::make_shared<object>(scope->NeedsLValue));
+	return FuelFuncWrapper0<bool>(args, scope, "need-l-value", [scope]() -> bool { return scope->NeedsLValue; });
 }
 
 static std::shared_ptr<LispVariant> TracePrint(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -416,10 +410,9 @@ namespace CppLisp
 	}
 }
 
-static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
+static std::shared_ptr<LispVariant> CurrentTickCount(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	var value = (int)GetTickCount();
-	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+	return FuelFuncWrapper0<int>(args, scope, "tickcount", []() -> int { return (int)GetTickCount(); });
 }
 
 static std::shared_ptr<LispVariant> _Sleep(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
@@ -597,18 +590,12 @@ static std::shared_ptr<LispVariant> Return(const std::vector<std::shared_ptr<obj
 
 static std::shared_ptr<LispVariant> GetType(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("type", 1, args, scope);
-
-	var item = ((LispVariant)args[0]);
-	return std::make_shared<LispVariant>(std::make_shared<object>((int)item.Type));
+	return FuelFuncWrapper1<LispVariant, int>(args, scope, "type", [](const LispVariant & arg1) -> int { return (int)arg1.Type; });
 }
 
 static std::shared_ptr<LispVariant> GetTypeString(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("typestr", 1, args, scope);
-
-	var item = ((LispVariant)args[0]);
-	return std::make_shared<LispVariant>(std::make_shared<object>(item.TypeString()));
+	return FuelFuncWrapper1<LispVariant, string>(args, scope, "typestr", [](const LispVariant & arg1) -> string { return arg1.TypeString(); });
 }
 
 static std::shared_ptr<LispVariant> Print(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -635,10 +622,7 @@ static std::shared_ptr<LispVariant> Flush(const std::vector<std::shared_ptr<obje
 
 static std::shared_ptr<LispVariant> ReadLine(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("readline", 0, args, scope);
-
-	var text = scope->GlobalScope->Input->ReadLine();
-	return std::make_shared<LispVariant>(std::make_shared<object>(text));
+	return FuelFuncWrapper0<string>(args, scope, "readline", [scope]() -> string { return scope->GlobalScope->Input->ReadLine(); });
 }
 
 static std::shared_ptr<LispVariant> ParseInteger(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -804,6 +788,9 @@ static std::shared_ptr<LispVariant> Replace(const std::vector<std::shared_ptr<ob
 	const string & replace = args[2]->ToString();
 	value = value.Replace(search, replace);
 	return std::make_shared<LispVariant>(std::make_shared<object>(value));
+
+	//return FuelFuncWrapper3<LispVariant, LispVariant, LispVariant, string>(args, scope, "replace", (arg1, arg2, arg3) = > arg1.ToString().Replace(arg2.ToString(), arg3.ToString()));
+	//return FuelFuncWrapper3<string, string, string>(args, scope, "trim", [](const string & arg1) -> string { return arg1.Trim();  });
 }
 
 static std::shared_ptr<LispVariant> Trim(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -885,10 +872,7 @@ static std::shared_ptr<LispVariant> Modulo(const std::vector<std::shared_ptr<obj
 
 static std::shared_ptr<LispVariant> Not(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("not", 1, args, scope);
-
-	var arg1 = (LispVariant)args[0];
-	return std::make_shared<LispVariant>(std::make_shared<object>(!arg1.BoolValue()));
+	return FuelFuncWrapper1<LispVariant, bool>(args, scope, "not", [](const LispVariant & arg1) -> bool { return !arg1.BoolValue(); });
 }
 
 static std::shared_ptr<LispVariant> LessTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
