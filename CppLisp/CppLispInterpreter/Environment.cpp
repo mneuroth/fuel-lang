@@ -183,6 +183,31 @@ static std::shared_ptr<LispVariant> FuelFuncWrapper1(const std::vector<std::shar
 	return std::make_shared<LispVariant>(std::make_shared<object>(result));
 }
 
+template <class T1, class T2, class T3>
+static std::shared_ptr<LispVariant> FuelFuncWrapper2(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & func_name, std::function<T3(T1,T2)> func)
+{
+	CheckArgs(func_name, 2, args, scope);
+
+	const T1 & a1 = ToType<T1>(args[0]->ToLispVariantRef());
+	const T2 & a2 = ToType<T2>(args[1]->ToLispVariantRef());
+	const T3 & result = func(a1, a2);
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
+}
+
+template <class T1, class T2, class T3, class T4>
+static std::shared_ptr<LispVariant> FuelFuncWrapper2(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & func_name, std::function<T4(T1, T2, T3)> func)
+{
+	CheckArgs(func_name, 3, args, scope);
+
+	const T1 & a1 = ToType<T1>(args[0]->ToLispVariantRef());
+	const T2 & a2 = ToType<T2>(args[1]->ToLispVariantRef());
+	const T3 & a3 = ToType<T3>(args[2]->ToLispVariantRef());
+	const T4 & result = func(a1, a2);
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
+}
+
 /* not needed yet...
 static const std::vector<std::shared_ptr<object>> GetCallArgs(const std::vector<std::shared_ptr<object>> & args)
 {
@@ -364,7 +389,7 @@ static std::shared_ptr<LispVariant> GetTracePrint(const std::vector<std::shared_
 #else
 //#include <sys/sysinfo.h>
 #include <sys/time.h>
-// see https://www.c-plusplus.net/forum/topic/153559/gettickcount-für-linux
+// see https://www.c-plusplus.net/forum/topic/153559/gettickcount-fuer-linux
 uint64_t GetTickCount(void)
 {
 	struct timeval tv;
@@ -788,18 +813,12 @@ static std::shared_ptr<LispVariant> Trim(const std::vector<std::shared_ptr<objec
 
 static std::shared_ptr<LispVariant> LowerCase(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("lower-case", 1, args, scope);
-
-	var value = ((LispVariant)args[0]).ToString();
-	return std::make_shared<LispVariant>(std::make_shared<object>(value.ToLower()));
+	return FuelFuncWrapper1<string, string>(args, scope, "lower-case", [](const string & arg1) -> string { return arg1.ToLower();  });
 }
 
 static std::shared_ptr<LispVariant> UpperCase(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("upper-case", 1, args, scope);
-
-	var value = ((LispVariant)args[0]).ToString();
-	return std::make_shared<LispVariant>(std::make_shared<object>(value.ToUpper()));
+	return FuelFuncWrapper1<string, string>(args, scope, "upper-case", [](const string & arg1) -> string { return arg1.ToUpper();  });
 }
 
 static std::shared_ptr<LispVariant> ArithmetricOperation(const std::vector<std::shared_ptr<object>> & args, std::function<std::shared_ptr<LispVariant>(std::shared_ptr<LispVariant>, std::shared_ptr<LispVariant>)> op)
@@ -819,14 +838,9 @@ static std::shared_ptr<LispVariant> ArithmetricOperation(const std::vector<std::
 	return result;
 }
 
-static std::shared_ptr<LispVariant> CompareOperation(const std::vector<std::shared_ptr<object>> & args, std::function<std::shared_ptr<LispVariant>(const LispVariant &, const LispVariant &)> op, std::shared_ptr<LispScope> scope)
+static std::shared_ptr<LispVariant> CompareOperation(const std::vector<std::shared_ptr<object>> & args, std::function<bool(const LispVariant &, const LispVariant &)> op, std::shared_ptr<LispScope> scope, const string & name)
 {
-	CheckArgs("compare-op", 2, args, scope);
-
-	const LispVariant & arg1 = args[0]->ToLispVariantRef();
-	const LispVariant & arg2 = args[1]->ToLispVariantRef();
-	std::shared_ptr<LispVariant> result = op(arg1, arg2);
-	return result;
+	return FuelFuncWrapper2<LispVariant, LispVariant, bool>(args, scope, name, [op](const LispVariant & arg1, const LispVariant & arg2) -> bool { return op(arg1, arg2); });
 }
 
 static std::shared_ptr<LispVariant> Addition(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
@@ -879,32 +893,32 @@ static std::shared_ptr<LispVariant> Not(const std::vector<std::shared_ptr<object
 
 static std::shared_ptr<LispVariant> LessTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(l < r)); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> bool { return l < r; }, scope, "<");
 }
 
 static std::shared_ptr<LispVariant> GreaterTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(l > r)); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> bool { return l > r; }, scope, ">");
 }
 
 static std::shared_ptr<LispVariant> LessEqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(l <= r)); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> bool { return l <= r; }, scope, "<=");
 }
 
 static std::shared_ptr<LispVariant> GreaterEqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(l >= r)); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> bool { return l >= r; }, scope, ">=");
 }
 
 static std::shared_ptr<LispVariant> EqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(LispVariant::EqualOp(l, r))); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> bool { return LispVariant::EqualOp(l, r); }, scope, "==");
 }
 
 static std::shared_ptr<LispVariant> NotEqualTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(std::make_shared<object>(!LispVariant::EqualOp(l, r))); }, scope);
+	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> bool { return !LispVariant::EqualOp(l, r); }, scope, "!=");
 }
 
 static std::shared_ptr<LispVariant> CreateList(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> /*scope*/)
