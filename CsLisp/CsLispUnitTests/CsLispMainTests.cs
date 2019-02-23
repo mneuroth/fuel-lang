@@ -421,7 +421,7 @@ namespace LispUnitTests
                 Assert.IsTrue(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
                 Assert.IsTrue(s.Contains("a --> 42                                       : Int")); // locals / globals                               
                 Assert.IsTrue(s.Contains("(def a 42)")); // code
-                Assert.IsTrue(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs                    
+                Assert.IsTrue(s.Contains("print --> function (print expr1 expr2 ...)         : Function  : module=<builtin>")); // funcs                    
             }
         }
 

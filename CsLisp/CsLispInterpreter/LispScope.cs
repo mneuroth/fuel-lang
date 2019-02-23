@@ -243,6 +243,11 @@ namespace CsLisp
             }
             else
             {
+                // activate this code if symbols must be resolved in parameter evaluation --> (println blub)
+                //if (elemAsVariant != null && elemAsVariant.IsSymbol && name != "fuellib")
+                //{
+                //    throw new LispException($"Could not resolve symbol {name}");
+                //}
                 result = elem;
             }
 

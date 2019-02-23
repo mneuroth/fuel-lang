@@ -299,6 +299,12 @@ private Q_SLOTS:
         QCOMPARE("hello\nworld", result->ToString().c_str());
     }
 
+    TEST_METHOD(Test_PrintLnUnknownSymbol)
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println blub))");
+        QCOMPARE("blub", result->ToString().c_str());
+    }
+
     TEST_METHOD(Test_PrintTrace)
     {
         std::shared_ptr<LispVariant> result = Lisp::Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))");
@@ -596,19 +602,19 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_ListPush1)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push z l))");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push 'z l))");
         QCOMPARE("(z a b c)", result->ToString().c_str());
     }
 
     TEST_METHOD(Test_ListPush2)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push z l 2))");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push 'z l 2))");
         QCOMPARE("(a b z c)", result->ToString().c_str());
     }
 
     TEST_METHOD(Test_ListPush3)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push z l 2) (print l))");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b c)) (push 'z l 2) (print l))");
         QCOMPARE("(a b z c)", result->ToString().c_str());
     }
 
@@ -690,11 +696,11 @@ private Q_SLOTS:
         QCOMPARE(true, result->BoolValue());
         result = Lisp::Eval("(do (def a 42) (== a ()))");
         QCOMPARE(false, result->BoolValue());
-        result = Lisp::Eval("(do (def a blub) (def b nix) (== a b))");
+        result = Lisp::Eval("(do (def a 'blub) (def b 'nix) (== a b))");
         QCOMPARE(false, result->BoolValue());
-        result = Lisp::Eval("(do (def a blub) (def b blub) (== a b))");
+        result = Lisp::Eval("(do (def a 'blub) (def b 'blub) (== a b))");
         QCOMPARE(true, result->BoolValue());
-        result = Lisp::Eval("(do (def a blub) (def b blub) (== a b))");
+        result = Lisp::Eval("(do (def a 'blub) (def b 'blub) (== a b))");
         QCOMPARE(true, result->BoolValue());
         result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 2 3 4)) (== a b))");
         QCOMPARE(false, result->BoolValue());
@@ -702,7 +708,7 @@ private Q_SLOTS:
         QCOMPARE(true, result->BoolValue());
         result = Lisp::Eval("(do (def a (list 1 2 3)) (def b (list 1 (sym 2) 3)) (== a b))");
         QCOMPARE(false, result->BoolValue());
-        result = Lisp::Eval("(do (def a blub) (def b nix) (!= a b))");
+        result = Lisp::Eval("(do (def a 'blub) (def b 'nix) (!= a b))");
         QCOMPARE(true, result->BoolValue());
         result = Lisp::Eval("(do (def a 7) (def b 7) (!= a b))");
         QCOMPARE(false, result->BoolValue());
@@ -1457,14 +1463,14 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_Symbol)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(sym a)");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(sym 'a)");
         QVERIFY(result->IsSymbol());
         QCOMPARE("a", result->StringValue().c_str());
     }
 
     TEST_METHOD(Test_Str)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(str abc)");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(str 'abc)");
         QVERIFY(result->IsString());
         QCOMPARE("abc", result->StringValue().c_str());
     }
@@ -1853,7 +1859,7 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_Type4)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(type aSymbol)");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(type 'aSymbol)");
         QVERIFY(result->IsInt());
         QCOMPARE(8, result->IntValue());
     }
@@ -2155,7 +2161,7 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_Reverse)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l (list 1 2 b \"nix\" 4.5)) (print (reverse l)))");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l (list 1 2 'b \"nix\" 4.5)) (print (reverse l)))");
         QVERIFY(result->IsString());
         QCOMPARE("(4.500000 \"nix\" b 2 1)", result->StringValue().c_str());
     }
@@ -2183,7 +2189,7 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_Search3)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search b l))");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search 'b l))");
         QVERIFY(result->IsInt());
         QCOMPARE(1, result->IntValue());
     }
@@ -2204,7 +2210,7 @@ private Q_SLOTS:
 
     TEST_METHOD(Test_Search6)
     {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search nix l))");
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search 'nix l))");
         QVERIFY(result->IsInt());
         QCOMPARE(-1, result->IntValue());
     }
@@ -2946,7 +2952,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
             QVERIFY(s.Contains("a --> 42                                       : Int")); // locals / globals
             QVERIFY(s.Contains("(def a 42)")); // code
-            QVERIFY(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs
+            QVERIFY(s.Contains("print --> function (print expr1 expr2 ...)         : Function  : module=<builtin>")); // funcs
         }
     }
 /*

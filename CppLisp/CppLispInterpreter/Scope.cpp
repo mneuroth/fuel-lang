@@ -122,6 +122,11 @@ namespace CppLisp
 		}
 		else
 		{
+			// activate this code if symbols must be resolved in parameter evaluation --> (println blub)
+			//if (elem->IsLispVariant() && elem->ToLispVariantRef().IsSymbol() && name != "fuellib")
+            //{
+            //    throw LispException("Could not resolve symbol " + name);
+            //}
 			result = elem;
 		}
 

@@ -66,6 +66,12 @@ namespace QtLispUnitTests
 			QCOMPARE("hello\nworld", result->ToString().c_str());
 		}
 
+		TEST_METHOD(Test_PrintLnUnknownSymbol)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println blub))");
+			QCOMPARE("blub", result->ToString().c_str());
+		}
+
 		TEST_METHOD(Test_PrintTrace)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))");

@@ -375,7 +375,7 @@ namespace CsLisp
             scope["typestr"] = CreateFunction(GetTypeString, "(typestr expr)", "Returns a readable string representing the type of the value of the expression.");
             scope["nop"] = CreateFunction(Nop, "(nop)", "Does nothing (no operation).");
             scope["return"] = CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function.");
-            scope["print"] = CreateFunction(Print, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
+            scope["print"] = CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
             scope["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
             scope["flush"] = CreateFunction(Flush, "(flush)", "Flushes the output to the console.");
             scope["readline"] = CreateFunction(ReadLine, "(readline)", "Reads a line from the console input.");

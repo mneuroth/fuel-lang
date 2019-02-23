@@ -370,7 +370,7 @@ namespace QtLispUnitTests
 				QVERIFY(s.Contains("-->    1 name=<main>                              lineno=3    module=command-line")); // stack
 				QVERIFY(s.Contains("a --> 42                                       : Int")); // locals / globals                               
 				QVERIFY(s.Contains("(def a 42)")); // code
-				QVERIFY(s.Contains("print --> function (println expr1 expr2 ...)       : Function  : module=<builtin>")); // funcs                    
+				QVERIFY(s.Contains("print --> function (print expr1 expr2 ...)         : Function  : module=<builtin>")); // funcs                    
 			}
 		}
 

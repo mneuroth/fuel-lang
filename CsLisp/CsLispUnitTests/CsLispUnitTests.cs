@@ -59,6 +59,14 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        //[ExpectedException(typeof(LispException))]
+        public void Test_PrintLnUnknownSymbol()
+        {
+            LispVariant result = Lisp.Eval("(do (println blub))");
+            Assert.AreEqual("blub", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_PrintTrace()
         {
             LispVariant result = Lisp.Eval("(do (trace #t) (println \"hello world\") (println (+ 9 8)) (gettrace))");
@@ -397,21 +405,21 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_ListPush1()
         {
-            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push z l))");
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push 'z l))");
             Assert.AreEqual("(z a b c)", result.ToString());
         }
 
         [TestMethod]
         public void Test_ListPush2()
         {
-            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push z l 2))");
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push 'z l 2))");
             Assert.AreEqual("(a b z c)", result.ToString());
         }
 
         [TestMethod]
         public void Test_ListPush3()
         {
-            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push z l 2) (print l))");
+            LispVariant result = Lisp.Eval("(do (def l '(a b c)) (push 'z l 2) (print l))");
             Assert.AreEqual("(a b z c)", result.ToString());
         }
 
@@ -482,11 +490,11 @@ namespace LispUnitTests
             Assert.AreEqual(true, result.BoolValue);
             result = Lisp.Eval("(do (def a 42) (== a ()))");
             Assert.AreEqual(false, result.BoolValue);
-            result = Lisp.Eval("(do (def a blub) (def b nix) (== a b))");
+            result = Lisp.Eval("(do (def a 'blub) (def b 'nix) (== a b))");
             Assert.AreEqual(false, result.BoolValue);
-            result = Lisp.Eval("(do (def a blub) (def b blub) (== a b))");
+            result = Lisp.Eval("(do (def a 'blub) (def b 'blub) (== a b))");
             Assert.AreEqual(true, result.BoolValue);
-            result = Lisp.Eval("(do (def a blub) (def b blub) (== a b))");
+            result = Lisp.Eval("(do (def a 'blub) (def b 'blub) (== a b))");
             Assert.AreEqual(true, result.BoolValue);
             result = Lisp.Eval("(do (def a (list 1 2 3)) (def b (list 2 3 4)) (== a b))");
             Assert.AreEqual(false, result.BoolValue);
@@ -494,7 +502,7 @@ namespace LispUnitTests
             Assert.AreEqual(true, result.BoolValue);
             result = Lisp.Eval("(do (def a (list 1 2 3)) (def b (list 1 (sym 2) 3)) (== a b))");
             Assert.AreEqual(false, result.BoolValue);
-            result = Lisp.Eval("(do (def a blub) (def b nix) (!= a b))");
+            result = Lisp.Eval("(do (def a 'blub) (def b 'nix) (!= a b))");
             Assert.AreEqual(true, result.BoolValue);
             result = Lisp.Eval("(do (def a 7) (def b 7) (!= a b))");
             Assert.AreEqual(false, result.BoolValue);
@@ -1310,7 +1318,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Symbol()
         {
-            LispVariant result = Lisp.Eval("(sym a)");
+            LispVariant result = Lisp.Eval("(sym 'a)");
             Assert.IsTrue(result.IsSymbol);
             Assert.AreEqual("a", result.StringValue);
         }
@@ -1318,7 +1326,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Str()
         {
-            LispVariant result = Lisp.Eval("(str abc)");
+            LispVariant result = Lisp.Eval("(str 'abc)");
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("abc", result.StringValue);
         }
@@ -1498,7 +1506,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Type4()
         {
-            LispVariant result = Lisp.Eval("(type aSymbol)");
+            LispVariant result = Lisp.Eval("(type 'aSymbol)");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(8, result.IntValue);
         }
@@ -1962,7 +1970,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Reverse()
         {
-            LispVariant result = Lisp.Eval("(do (def l (list 1 2 b \"nix\" 4.5)) (print (reverse l)))");
+            LispVariant result = Lisp.Eval("(do (def l (list 1 2 'b \"nix\" 4.5)) (print (reverse l)))");
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("(4.5 \"nix\" b 2 1)", result.StringValue);
         }
@@ -1994,7 +2002,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Search3()
         {
-            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search b l))");
+            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search 'b l))");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(1, result.IntValue);
         }
@@ -2018,7 +2026,7 @@ namespace LispUnitTests
         [TestMethod]
         public void Test_Search6()
         {
-            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search nix l))");
+            LispVariant result = Lisp.Eval("(do (def l '(a b 4 d 5.234 \"blub\")) (search 'nix l))");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(-1, result.IntValue);
         }
