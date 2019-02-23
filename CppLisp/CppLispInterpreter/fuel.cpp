@@ -103,6 +103,18 @@ namespace CppLisp
 
 	uint64_t Environment_GetTickCount(void);
 
+    static bool ContainsOptionAndRemove(std::vector<string> & args, const string & option)
+	{
+		var iter = std::find(args.begin(), args.end(), option);
+		if (iter != args.end())
+		{
+			args.erase(iter);
+			return true;
+		}
+
+		return false;
+	}
+
 	bool Contains(const std::vector<string> & container, const string & search)
 	{
 		return std::find(container.begin(), container.end(), search) != container.end();
@@ -130,6 +142,8 @@ namespace CppLisp
 			return;
 		}
 
+		std::vector<string> allArgs = args;
+
 		string script = /*null*/string::Empty;
 		var loadFiles = true;
 		var trace = false;
@@ -139,47 +153,49 @@ namespace CppLisp
 		//var showCompileOutput = false;
 		var measureTime = false;
 		var lengthyErrorOutput = false;
+		var interactiveLoop = false;
+		var startDebugger = false;
 		var result = std::make_shared<LispVariant>();
 		var startTickCount = /*Environment.TickCount*/Environment_GetTickCount();
 		var debugger = TryGetDebugger();
 
-		if (Contains(args, "-m"))
+		if (ContainsOptionAndRemove(allArgs, "-m"))
 		{
 			measureTime = true;
 		}
-		if (Contains(args, "-v"))
+		if (ContainsOptionAndRemove(allArgs, "-v"))
 		{
 			output->WriteLine(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date);
 			return;
 		}
-		if (Contains(args, "-h"))
+		if (ContainsOptionAndRemove(allArgs, "-h"))
 		{
 			Usage(output);
 			return;
 		}
-		if (Contains(args, "--doc"))
+		if (ContainsOptionAndRemove(allArgs, "--doc"))
 		{
 			script = "(println (doc))";
 			loadFiles = false;
 		}
-		if (Contains(args, "--html"))
+		if (ContainsOptionAndRemove(allArgs, "--html"))
 		{
 			script = "(println (htmldoc))";
 			loadFiles = false;
 		}
-		if (Contains(args, "--macro-expand"))
+		if (ContainsOptionAndRemove(allArgs, "--macro-expand"))
 		{
 			macroExpand = true;
 		}
-		if (Contains(args, "-x"))
+		if (ContainsOptionAndRemove(allArgs, "-x"))
 		{
 			lengthyErrorOutput = true;
 		}
-		if (Contains(args, "-t"))
+		if (ContainsOptionAndRemove(allArgs, "-t"))
 		{
 			trace = true;
 		}
-		if (Contains(args, "-e"))
+		if (ContainsOptionAndRemove(allArgs, "-e"))
 		{
 			script = /*LispUtils.*/GetScriptFilesFromProgramArgs(args)[0]/*.FirstOrDefault()*/;
 			loadFiles = false;
@@ -188,32 +204,74 @@ namespace CppLisp
 		var libPath = std::vector<string>(std::find_if(args.begin(), args.end(), [](const string & v) -> bool { return v.StartsWith("-l="); }), args.end());
 		if (libPath.size() > 0)
 		{
-			string libraryPath = libPath.front().Substring(3);
-			LispUtils_LibraryPath = libraryPath;
+			if (libPath.size() == 1)
+			{
+				string libraryPath = libPath.front().Substring(3);
+				LispUtils_LibraryPath = libraryPath;
+				ContainsOptionAndRemove(allArgs, *(libPath.begin()));
+			}
+			else
+			{
+				output->WriteLine("Error: only one library path is supported");
+				return;
+			}
 		}
 
 		// handle options for compiler
-		//if (Contains(args, "-c"))
+		//if (ContainsOptionAndRemove(allArgs, "-c"))
 		//{
 		//	compile = true;
 		//}
-		//if (Contains(args, "-s"))
+		//if (ContainsOptionAndRemove(allArgs, "-s"))
 		//{
 		//	showCompileOutput = true;
 		//}
 
-		// handle options for debugger
+			// handle options for debugger
+		if (debugger != null)
+		{
+			if (ContainsOptionAndRemove(allArgs, "-i"))
+			{
+				interactiveLoop = true;
+			}
+			if (ContainsOptionAndRemove(allArgs, "-d"))
+			{
+				startDebugger = true;
+			}
+		}
+
+		var scriptFiles = /*LispUtils.*/GetScriptFilesFromProgramArgs(args);
+
+		// check if all command line options could be consumed
+		//allArgs = allArgs.Where(x = > !scriptFiles.Contains(x)).ToList();    // remove script files from option list
+		for (var scriptName : scriptFiles)
+		{
+			ContainsOptionAndRemove(allArgs, scriptName);
+		}
+		if (allArgs.size() > 0)
+		{
+			string unknownOptions;
+			var iter = allArgs.begin();
+			while (iter != allArgs.end())
+			{
+				unknownOptions += *iter + " ";
+				++iter;
+			}
+			output->WriteLine("Error: unknown option(s) " + unknownOptions);	// {LispUtils.DumpEnumerable(allArgs, " ")}
+			return;
+		}
+
 		if (debugger != null)
 		{
 			debugger->SetInputOutputStreams(output, input);
-			if (Contains(args, "-i"))
+			if (interactiveLoop)
 			{
 				InteractiveLoopHeader(output);
 				debugger->InteractiveLoop(null, null, /*startedFromMain:*/ true, /*tracing :*/ trace, output, input);
 				loadFiles = false;
 				wasDebugging = true;
 			}
-			if (Contains(args, "-d"))
+			if (startDebugger)
 			{
 				//var fileName = /*LispUtils.*/GetScriptFilesFromProgramArgs(args)./*FirstOrDefault()*/front();
 				var scriptFiles = GetScriptFilesFromProgramArgs(args);
@@ -237,8 +295,6 @@ namespace CppLisp
 
 		if (loadFiles)
 		{
-			var scriptFiles = /*LispUtils.*/GetScriptFilesFromProgramArgs(args);
-
 			for (var fileName : scriptFiles)
 			{
 				script = /*LispUtils.*/ReadFileOrEmptyString(fileName);

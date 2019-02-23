@@ -106,8 +106,8 @@ namespace CppLisp
 	public:
 		string();
 		string(const char * txt);
-		string(char ch);
-		string(const string & txt);
+        string(char ch);
+        string(const string & txt);
 		string(const std::string & txt);
 
 		inline size_t Length() const

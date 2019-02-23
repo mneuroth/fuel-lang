@@ -131,7 +131,7 @@ namespace CppLisp
 			typename IEnumerable<T>::iterator iter = std::vector<T>::begin();
 			for (int i = 0; i < index; i++)
 			{
-				iter++;
+				++iter;
 			}
 			if (iter != std::vector<T>::end())
 			{
@@ -212,7 +212,7 @@ namespace CppLisp
 				{
 					return true;
 				}
-				iter++;
+				++iter;
 			}
 			return false;
 		}

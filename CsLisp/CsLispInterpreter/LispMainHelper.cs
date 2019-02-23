@@ -33,17 +33,6 @@ namespace CsLisp
 {
     public class LispMainHelper
     {
-        private static bool ContainsOptionAndRemove(List<string> args, string option)
-        {
-            if (args.Contains(option))
-            {
-                args.Remove(option);
-                return true;
-            }
-
-            return false;
-        }
-
         public static void MainExtended(string[] args, TextWriter output, TextReader input)
         {
             if (args.Length == 0)
@@ -117,7 +106,7 @@ namespace CsLisp
                 {
                     string libraryPath = libPath.First().Substring(3);
                     LispUtils.LibraryPath = libraryPath;
-                    allArgs.Remove(libPath.First());
+                    ContainsOptionAndRemove(allArgs, libPath.First());
                 }
                 else
                 {
@@ -231,6 +220,17 @@ namespace CsLisp
         }
 
         #region private methods
+
+        private static bool ContainsOptionAndRemove(List<string> args, string option)
+        {
+            if (args.Contains(option))
+            {
+                args.Remove(option);
+                return true;
+            }
+
+            return false;
+        }
 
         private static void Usage(TextWriter output)
         {

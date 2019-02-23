@@ -162,6 +162,16 @@ static void CheckOptionalArgs(const string & name, size_t minCount, size_t maxCo
 	}
 }
 
+template <class T1>
+static std::shared_ptr<LispVariant> FuelFuncWrapper0(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & func_name, std::function<T1()> func)
+{
+	CheckArgs(func_name, 0, args, scope);
+
+	const T1 & result = func();
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(result));
+}
+
 template <class T1, class T2>
 static std::shared_ptr<LispVariant> FuelFuncWrapper1(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope, const string & func_name, std::function<T2(T1)> func)
 {
@@ -1215,10 +1225,7 @@ static std::shared_ptr<LispVariant> ConvertToString(const std::vector<std::share
 
 static std::shared_ptr<LispVariant> ArgsCountFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
-	CheckArgs("argscount", 0, args, scope);
-
-	size_t cnt = (*scope)[ArgsMeta]->ToListRef().Count();
-	return std::make_shared<LispVariant>(std::make_shared<object>((int)cnt));
+	return FuelFuncWrapper0<int>(args, scope, "argscount", [scope]() -> int { return (int)(*scope)[ArgsMeta]->ToListRef().Count();  });
 }
 
 static std::shared_ptr<LispVariant> ArgsFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)

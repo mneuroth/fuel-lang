@@ -375,6 +375,11 @@ namespace CppLisp
             return r <= *this;
         }
 
+        inline operator std::string() const
+        {
+            return ToString();
+        }
+
 		/*public*/ static bool EqualOp(const LispVariant & l, const LispVariant & r);
 
         //#endregion
@@ -391,10 +396,15 @@ namespace CppLisp
     };
 
 	template <class T>
-    T ToType(const LispVariant & variant)
-	{
-		return (T)variant;
-	}
+    inline T ToType(const LispVariant & variant)
+    {
+        return static_cast<T>(variant);
+    }
+    template <>
+    inline string ToType<string>(const LispVariant & variant)
+    {
+        return variant.ToString();
+    }
 }
 
 #endif
