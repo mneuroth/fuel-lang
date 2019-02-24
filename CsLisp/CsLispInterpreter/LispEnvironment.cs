@@ -1027,7 +1027,7 @@ namespace CsLisp
 
         public static LispVariant Not(object[] args, LispScope scope)
         {
-            return FuelFuncWrapper1<LispVariant, bool>(args, scope, "not", arg1 => !arg1.ToBool());
+            return FuelFuncWrapper1<LispVariant, bool>(args, scope, "not", (arg1) => !arg1.ToBool());
         }
 
         public static LispVariant LessTest(object[] args, LispScope scope)

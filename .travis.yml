@@ -112,6 +112,16 @@ matrix:
       - export PATH=/usr/local/opt/qt/bin:$PATH
       script:
       - ./build_cpp.sh mac-clang
+      - ls -lrt
+      - ls -lrt CppLisp/CppLisp
+      deploy:
+        provider: releases
+        api_key:
+          secure: 40f7851bfd7ca8e4b210972ff210e69edf95719a
+        file: CppLisp/CppLisp/fuel-lang-mac-clang-bin.zip
+        skip_cleanup: true
+        on:
+          tags: true
   
     - os: osx
       language: csharp
