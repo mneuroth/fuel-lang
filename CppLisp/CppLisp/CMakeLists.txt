@@ -50,3 +50,8 @@ add_executable(fuel FuelMain.cpp
 target_link_libraries(fuel ${CMAKE_DL_LIBS})
 
 install(TARGETS fuel DESTINATION bin)
+
+add_custom_command(TARGET fuel POST_BUILD
+            COMMAND "${ANDROID_TOOLCHAIN_PREFIX}strip" -g -S -d --strip-debug --verbose
+            fuel
+            COMMENT "Strip debug symbols done on final binary.")
