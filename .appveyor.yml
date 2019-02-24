@@ -82,7 +82,7 @@ deploy:
   release: fuel-lang-v$(appveyor_build_version)
   provider: GitHub
   auth_token:
-    secure: 40f7851bfd7ca8e4b210972ff210e69edf95719a
+    secure: b8ae367f0cc076626cdda57623edf4c789986ca8
   artifact: fuel-lang-%cname%-bin.zip 
   draft: false
   prerelease: false

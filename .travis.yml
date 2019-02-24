@@ -105,7 +105,7 @@ matrix:
       deploy:
         provider: releases
         api_key:
-          secure: 40f7851bfd7ca8e4b210972ff210e69edf95719a
+          secure: b8ae367f0cc076626cdda57623edf4c789986ca8
         file: 
           - CppLisp/CppLisp/fuel-lang-single-android-armeabi-v7a-bin.zip
           - CppLisp/fuel-lang-android-armeabi-v7a-bin.zip
@@ -127,7 +127,7 @@ matrix:
       deploy:
         provider: releases
         api_key:
-          secure: 40f7851bfd7ca8e4b210972ff210e69edf95719a
+          secure: b8ae367f0cc076626cdda57623edf4c789986ca8
         file: CppLisp/CppLisp/fuel-lang-mac-clang-bin.zip
         skip_cleanup: true
         on:
