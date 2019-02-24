@@ -79,11 +79,14 @@ build_script:
   - cd ..
       
 deploy:
-  provider: releases
-  api_key:
+  release: fuel-lang-v$(appveyor_build_version)
+  provider: GitHub
+  auth_token:
     secure: 40f7851bfd7ca8e4b210972ff210e69edf95719a
-  file:
-     fuel-lang-%cname%-bin.zip 
-  skip_cleanup: true
+  artifact: fuel-lang-%cname%-bin.zip 
+  draft: false
+  prerelease: false
   on:
-    tags: true  
+    branch: master                 
+    APPVEYOR_REPO_TAG: true        
+    
