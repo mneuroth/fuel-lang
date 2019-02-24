@@ -87,6 +87,6 @@ deploy:
   draft: false
   prerelease: false
   on:
-    branch: master                 
+    #branch: master                 
     APPVEYOR_REPO_TAG: true        
     
