@@ -79,7 +79,6 @@ build_script:
   - cd ..
       
 deploy:
-  release: fuel-lang-v$(appveyor_build_version)
   provider: GitHub
   auth_token:
     secure: wDEI4YGtqf1MiuNbtiv/zZ+rfuEmfO/PxfRfZC5gjtFDez3qDk6Vv9+auWwTstyZ
