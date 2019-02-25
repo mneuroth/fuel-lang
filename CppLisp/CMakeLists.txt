@@ -20,6 +20,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Android")
     add_custom_command(TARGET fuel POST_BUILD
             COMMAND "${ANDROID_TOOLCHAIN_PREFIX}strip" -g -S -d --strip-debug --verbose
             fuel
-            COMMENT "Strip debug symbols done on final binary.")
+            COMMENT "Strip debug symbols done on final fuel binary.")
 endif()
             

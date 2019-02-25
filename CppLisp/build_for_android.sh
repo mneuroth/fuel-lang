@@ -16,7 +16,6 @@ cp CppLispInterpreter/libFuelInterpreter.* .
 cp CppLispDebugger/libFuelDebugger.* .
 mkdir Library
 cp ../Library/fuellib.fuel Library
-#strip fuel
 zip -u fuel-lang-android-$ANDROID_ABI-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
 echo *** Build fuel without shared libraries ***
 cd CppLisp
@@ -25,6 +24,5 @@ make clean
 make -j 4
 mkdir Library
 cp ../../Library/fuellib.fuel Library
-#strip fuel
 zip -u fuel-lang-single-android-$ANDROID_ABI-bin.zip fuel Library/fuellib.fuel
 cd ..
