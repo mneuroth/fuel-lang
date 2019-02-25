@@ -19,3 +19,10 @@ add_library(FuelDebugger SHARED ${fuel_debugger_src})
 target_link_libraries(FuelDebugger FuelInterpreter)
 
 install(TARGETS FuelDebugger DESTINATION lib)
+
+if (CMAKE_SYSTEM_NAME MATCHES "Android")
+    add_custom_command(TARGET FuelDebugger POST_BUILD
+            COMMAND "${ANDROID_TOOLCHAIN_PREFIX}strip" -g -S -d --strip-debug --verbose
+            libFuelDebugger.so
+            COMMENT "Strip debug symbols done on final FuelDebugger binary.")
+endif()
