@@ -18,7 +18,7 @@ mkdir Library
 cp ../Library/fuellib.fuel Library
 strip fuel
 zip -u fuel-lang-android-$ANDROID_ABI-bin.zip fuel libFuelInterpreter.* libFuelDebugger.* Library/fuellib.fuel
-echo *** Build fuel with shared libraries ***
+echo *** Build fuel without shared libraries ***
 cd CppLisp
 cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=$ANDROID_ABI CMakeLists.txt
 make clean
