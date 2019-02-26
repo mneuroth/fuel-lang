@@ -612,6 +612,37 @@ static std::shared_ptr<LispVariant> PrintLn(const std::vector<std::shared_ptr<ob
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
+static std::shared_ptr<LispVariant>  Format(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckOptionalArgs("format", 1, 6, args, scope);
+
+	string formatedResult = string::Empty;
+	var formatStr = args[0]->ToString();
+	var argCount = args.size() - 1;
+	switch(argCount)
+	{
+	    case 0:
+	        formatedResult = string::Format(formatStr);
+	        break;
+	    case 1:
+	        formatedResult = string::Format(formatStr, args[1]->ToString());
+	        break;
+	    case 2:
+	        formatedResult = string::Format(formatStr, args[1]->ToString(), args[2]->ToString());
+	        break;
+	    case 3:
+	        formatedResult = string::Format(formatStr, args[1]->ToString(), args[2]->ToString(), args[3]->ToString());
+	        break;
+	    case 4:
+	        formatedResult = string::Format(formatStr, args[1]->ToString(), args[2]->ToString(), args[3]->ToString(), args[4]->ToString());
+	        break;
+	    case 5:
+	        formatedResult = string::Format(formatStr, args[1]->ToString(), args[2]->ToString(), args[3]->ToString(), args[4]->ToString(), args[5]->ToString());
+	        break;
+	}
+	return std::make_shared<LispVariant>(std::make_shared<object>(formatedResult));
+}
+
 static std::shared_ptr<LispVariant> Flush(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	CheckArgs("flush", 0, args, scope);
@@ -2120,6 +2151,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["return"] = CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function.");
 	(*scope)["print"] = CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
 	(*scope)["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
+	(*scope)["format"] = CreateFunction(Format, "(format format-str expr1 expr2 ...)", "Formats the content of the format string with the values of the given expressions and returns a string.");
 	(*scope)["flush"] = CreateFunction(Flush, "(flush)", "Flushes the output to the console.");
 	(*scope)["readline"] = CreateFunction(ReadLine, "(readline)", "Reads a line from the console input.");
 

@@ -24,6 +24,7 @@
 * */
 
 #include "csstring.h"
+#include "Exception.h"
 
 #include <cctype>
 #include <algorithm>
@@ -114,19 +115,25 @@ namespace CppLisp
 		return txt.size() == 0;
 	}
 
-	string string::ReplaceIn(const string & temp, const string & findText, const string & arg)
+	string string::ReplaceIn(const string & temp, const string & findText, const string & arg, bool & found)
 	{
 		auto pos = temp.find(findText);
 		string ret = temp;
 		if (pos != std::string::npos)
 		{
 			ret = ret.replace(pos, findText.size(), arg);
+			found = true;
+		}
+		else
+		{
+			found = false;
 		}
 		return ret;
 	}
 
-	string string::ReplaceInWithFill(const string & temp, const string & findText, const string & arg)
+	string string::ReplaceInWithFill(const string & temp, const string & findText, const string & arg, bool & found)
 	{
+		found = false;
 		string ret = temp;
 		auto pos = ret.find(findText);
 		if (pos != std::string::npos)
@@ -140,11 +147,13 @@ namespace CppLisp
 				{
 					int count = l - (int)arg.size();
 					ret = ret.replace(pos, pos2 - pos + 1, std::string(count > 0 ? count : 0, ' ') + arg);
+					found = true;
 				}
 				else
 				{
 					int count = abs(l) - (int)arg.size();
 					ret = ret.replace(pos, pos2 - pos + 1, arg + std::string(count > 0 ? count : 0, ' '));
+					found = true;
 				}
 			}
 		}
@@ -153,17 +162,59 @@ namespace CppLisp
 
 	string string::Format(const string & txt, const string & arg1, const string & arg2, const string & arg3, const string & arg4, const string & arg5)
 	{
+		const string ERR_MSG = "Not enough items for format string: " + txt;
+		bool found;
 		string temp = txt;
-		temp = ReplaceIn(temp, "{0}", arg1);
-		temp = ReplaceInWithFill(temp, "{0,", arg1);
-		temp = ReplaceIn(temp, "{1}", arg2);
-		temp = ReplaceInWithFill(temp, "{1,", arg2);
-		temp = ReplaceIn(temp, "{2}", arg3);
-		temp = ReplaceInWithFill(temp, "{2,", arg3);
-		temp = ReplaceIn(temp, "{3}", arg4);
-		temp = ReplaceInWithFill(temp, "{3,", arg4);
-		temp = ReplaceIn(temp, "{4}", arg5);
-		temp = ReplaceInWithFill(temp, "{4,", arg5);
+		temp = ReplaceIn(temp, "{0}", arg1, found);
+		if (found && arg1 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceInWithFill(temp, "{0,", arg1, found);
+		if (found && arg1 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceIn(temp, "{1}", arg2, found);
+		if (found && arg2 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceInWithFill(temp, "{1,", arg2, found);
+		if (found && arg2 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceIn(temp, "{2}", arg3, found);
+		if (found && arg3 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceInWithFill(temp, "{2,", arg3, found);
+		if (found && arg3 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceIn(temp, "{3}", arg4, found);
+		if (found && arg4 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceInWithFill(temp, "{3,", arg4, found);
+		if (found && arg4 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceIn(temp, "{4}", arg5, found);
+		if (found && arg5 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
+		temp = ReplaceInWithFill(temp, "{4,", arg5, found);
+		if (found && arg5 == NULL_STRING)
+		{
+			throw LispException(ERR_MSG);
+		}
 		return temp;
 	}
 

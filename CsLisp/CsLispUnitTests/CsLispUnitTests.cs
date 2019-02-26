@@ -2387,5 +2387,22 @@ namespace LispUnitTests
             Assert.IsTrue(result.IsString);
             Assert.AreEqual("4", result.ToString());
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(LispException))]
+        public void Test_FormatStr0()
+        {
+            LispVariant result = Lisp.Eval("(do (println (format \"Hello int={0} double={1} str={2}\")))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("Hello int= double= str=", result.ToString());
+        }
+
+        [TestMethod]
+        public void Test_FormatStr1()
+        {
+            LispVariant result = Lisp.Eval("(do (println (format \"Hello int={0} double={1} str={2}\" 42 2.3456 \"world\")))");
+            Assert.IsTrue(result.IsString);
+            Assert.AreEqual("Hello int=42 double=2.3456 str=world", result.ToString());
+        }
     }
 }

@@ -89,7 +89,6 @@ namespace QtLispUnitTests
 			QVERIFY(LispTokenType::Double == resultAsArray[4]->Type);
 			QCOMPARE("asdf blub", resultAsArray[5]->ToString().c_str());
 			QVERIFY(LispTokenType::String == resultAsArray[5]->Type);
-			bool o = (bool)*(resultAsArray[6]->Value);
 			QCOMPARE(false, (bool)*(resultAsArray[6]->Value));
 			QVERIFY(LispTokenType::False == resultAsArray[6]->Type);
 			QCOMPARE(")", resultAsArray[7]->ToString().c_str());

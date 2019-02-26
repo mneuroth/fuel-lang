@@ -84,6 +84,8 @@
 //}
 //#endif
 
+#define NULL_STRING "##<NULL>##"
+
 namespace CppLisp
 {
 	inline std::string & do_replace(std::string & s, const std::string & searchTxt, const std::string & replaceTxt)
@@ -173,9 +175,9 @@ namespace CppLisp
 		std::vector<string> Split(const string & seperator) const;
 
 		static bool IsNullOrEmpty(const string & txt);
-		static string ReplaceIn(const string & temp, const string & findText, const string & arg);
-		static string ReplaceInWithFill(const string & temp, const string & findText, const string & arg);
-		static string Format(const string & txt, const string & arg1, const string & arg2 = "", const string & arg3 = "", const string & arg4 = "", const string & arg5 = "");
+		static string ReplaceIn(const string & temp, const string & findText, const string & arg, bool & found);
+		static string ReplaceInWithFill(const string & temp, const string & findText, const string & arg, bool & found);
+		static string Format(const string & txt, const string & arg1 = NULL_STRING, const string & arg2 = NULL_STRING, const string & arg3 = NULL_STRING, const string & arg4 = NULL_STRING, const string & arg5 = NULL_STRING);
 		static int CompareOrdinal(const string & a, const string & b);
 
 		const static string Empty;

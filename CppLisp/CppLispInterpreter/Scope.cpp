@@ -307,7 +307,7 @@ namespace CppLisp
 							Output->WriteLine("{0,20} --> {1}", key, value.FunctionValue().Signature);
 							if (!string::IsNullOrEmpty(info))
 							{
-								Output->WriteLine("{0,20}     {1}", "", info);
+								Output->WriteLine("{0,20}     {1}", " ", info);
 							}
 						}
 						else

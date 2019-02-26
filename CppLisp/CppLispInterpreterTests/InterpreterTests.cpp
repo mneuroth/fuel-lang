@@ -2316,6 +2316,30 @@ namespace QtLispUnitTests
 			QCOMPARE("4", result->ToString().c_str());
 		}
 
+		TEST_METHOD(Test_FormatStr0)
+		{
+			try
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println (format \"Hello int={0} double={1} str={2}\")))");
+				QVERIFY(false);
+			}
+			catch (const CppLisp::LispException &)
+			{
+				QVERIFY(true);
+			}
+			catch (...)
+			{
+				QVERIFY(false);
+			}
+		}
+
+		TEST_METHOD(Test_FormatStr1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println (format \"Hello int={0} double={1} str={2}\" 42 2.3456 \"world\")))");
+			QVERIFY(result->IsString());
+			QCOMPARE("Hello int=42 double=2.345600 str=world", result->ToString().c_str());
+		}
+
 		// TODO / NOT IMPLEMENTED:
 		// Test_CreateNative
 		// Test_RegisterNativeObjects

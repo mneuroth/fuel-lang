@@ -377,6 +377,7 @@ namespace CsLisp
             scope["return"] = CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function.");
             scope["print"] = CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console.");
             scope["println"] = CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output.");
+            scope["format"] = CreateFunction(Format, "(format format-str expr1 expr2 ...)", "Formats the content of the format string with the values of the given expressions and returns a string.");
             scope["flush"] = CreateFunction(Flush, "(flush)", "Flushes the output to the console.");
             scope["readline"] = CreateFunction(ReadLine, "(readline)", "Reads a line from the console input.");
 
@@ -801,6 +802,29 @@ namespace CsLisp
             var text = GetStringRepresentation(args, scope);
             scope.GlobalScope.Output.WriteLine(text);
             return new LispVariant(text);
+        }
+
+        public static LispVariant Format(object[] args, LispScope scope)
+        {
+            CheckOptionalArgs("format", 1, 6, args, scope);
+
+            string formatedResult = string.Empty;
+            var formatStr = ((LispVariant)args[0]).ToString();
+            object[] valueArgs = new object[args.Count() - 1];
+            Array.Copy(args, 1, valueArgs, 0, args.Count()-1);
+            try
+            {
+                formatedResult = string.Format(formatStr, valueArgs);
+            }
+            catch(ArgumentNullException)
+            {
+                throw new LispException($"Not enough items for format string: {formatStr}");
+            }
+            catch(FormatException)
+            {
+                throw new LispException($"Invalid format string: {formatStr}");
+            }
+            return new LispVariant(formatedResult);
         }
 
         public static LispVariant Flush(object[] args, LispScope scope)
