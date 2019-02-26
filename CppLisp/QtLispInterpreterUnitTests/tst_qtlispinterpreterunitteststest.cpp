@@ -179,7 +179,6 @@ private Q_SLOTS:
         QVERIFY(LispTokenType::Double == resultAsArray[4]->Type);
         QCOMPARE("asdf blub", resultAsArray[5]->ToString().c_str());
         QVERIFY(LispTokenType::String == resultAsArray[5]->Type);
-        /*bool o =*/ (bool)*(resultAsArray[6]->Value);
         QCOMPARE(false, (bool)*(resultAsArray[6]->Value));
         QVERIFY(LispTokenType::False == resultAsArray[6]->Type);
         QCOMPARE(")", resultAsArray[7]->ToString().c_str());
@@ -2549,6 +2548,30 @@ private Q_SLOTS:
                 ))");
         QVERIFY(result->IsString());
         QCOMPARE("4", result->ToString().c_str());
+    }
+
+    TEST_METHOD(Test_FormatStr0)
+    {
+        try
+        {
+            std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println (format \"Hello int={0} double={1} str={2}\")))");
+            QVERIFY(false);
+        }
+        catch (const CppLisp::LispException &)
+        {
+            QVERIFY(true);
+        }
+        catch (...)
+        {
+            QVERIFY(false);
+        }
+    }
+
+    TEST_METHOD(Test_FormatStr1)
+    {
+        std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println (format \"Hello int={0} double={1} str={2}\" 42 2.3456 \"world\")))");
+        QVERIFY(result->IsString());
+        QCOMPARE("Hello int=42 double=2.345600 str=world", result->ToString().c_str());
     }
 
     // TODO / NOT IMPLEMENTED:
