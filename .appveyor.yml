@@ -51,9 +51,6 @@ build_script:
   - if %cname%==mingw copy ..\..\CppLispDebugger\release\FuelDebugger.dll
   - if %cname%==mingw mkdir Library
   - if %cname%==mingw copy ..\..\..\Library\fuellib.fuel Library
-  - if %cname%==mingw dir c:\qt\tools\mingw530_32
-  - if %cname%==mingw dir c:\qt\tools\mingw530_32\bin
-  - if %cname%==mingw dir c:\qt\tools\mingw530_32\bin\libstdc*
   - if %cname%==mingw copy c:\qt\tools\mingw530_32\bin\libwinpthread-1.dll .
   - if %cname%==mingw copy c:\qt\tools\mingw530_32\bin\libgcc_s_dw2-1.dll .
   - if %cname%==mingw copy c:\qt\tools\mingw530_32\bin\libstdc*.dll .
