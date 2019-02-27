@@ -109,9 +109,9 @@ matrix:
         api_key:
           secure: Ant/0i6hAVbNLNeYMiD0/uqS4HRgdT1b2mVsu8MGppxXGmhAn5Pb+Dv7xRaRiXTuympjI7WHtXDapQsHnMKNWXlv8lizSojVzvzNalh+V8+sn20p7WIXz6QBVy5Fba6CGRm+0EOyYc//leIZMBAENlRXIGKz39ShSl76Z2NwMSRVlLTybnuE716J9xbB/1YzdADE3N4jxF+xd7BnKiPJF9pTQUdgBpFLG9pAVkzKVRsplN+lmysVK1Iwow0z44RqZPSMvFHJLI5IdHgUQ90uDkh5Hnt2WgzonQod3Uy3nKJ3GW58FFoMkzoupA8ySWiJLIfOMNZ47VUE6/6sHRNlpF+g3EEXjKur0HYl488LT0c1yvUtWZUUQeIqW6j5BlCrTCa38Gz1M6I1AH2/NsUeZQ2/4aUAoIpOjyiKOrwdBHKQyPvVlpDxBcpzqRc6a0qlTOkSlWGp83+T7qYatq1pnc56NinUHyePWVheWGQT3WWplaYPflXYMlqNIUmdHz4FUomtFpM8tFzizOhjfLbveF4Od1m0ETLLjIRs1V7IstYW2LXov2yMNSsyAZ3hT2f1K0092U7kfnJisFOClHaA+INZ4KcpXYk0QRqGcBXUR3YN9cfO/qSXUElKmkAnBR3AoJY0CRQ6x7l9NGZi5tVyVKLyxAFyCUcRyZSHL/V3Hck=
         file: 
-          - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-single-android-armeabi-v7a-bin.zip
+          - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-android-single-armeabi-v7a-bin.zip
           - $FUEL_DEPLOY_ROOT/fuel-lang-android-armeabi-v7a-bin.zip
-          - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-single-android-x86-bin.zip
+          - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-android-single-x86-bin.zip
           - $FUEL_DEPLOY_ROOT/fuel-lang-android-x86-bin.zip       
         skip_cleanup: true
         on:

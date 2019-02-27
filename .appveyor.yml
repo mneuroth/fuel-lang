@@ -51,7 +51,10 @@ build_script:
   - if %cname%==mingw copy ..\..\CppLispDebugger\release\FuelDebugger.dll
   - if %cname%==mingw mkdir Library
   - if %cname%==mingw copy ..\..\..\Library\fuellib.fuel Library
-  - if %cname%==mingw 7z a fuel-lang-win-%cname%-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll Library\fuellib.fuel
+  - if %cname%==mingw copy c:\qt\tools\mingw530_32\bin\libstdc++-6.dll .
+  - if %cname%==mingw copy c:\qt\tools\mingw530_32\bin\libwinpthread-1.dll .
+  - if %cname%==mingw copy c:\qt\tools\mingw530_32\bin\libgcc_s_dw2-1.dll .
+  - if %cname%==mingw 7z a fuel-lang-win-%cname%-bin.zip fuel.exe FuelInterpreter.dll FuelDebugger.dll libstdc++-6.dll libwinpthread-1.dll libgcc_s_dw2-1.dll Library\fuellib.fuel
   - if %cname%==mingw 7z l fuel-lang-win-%cname%-bin.zip
   - if %cname%==mingw appveyor PushArtifact fuel-lang-win-%cname%-bin.zip
   - if %cname%==mingw copy fuel-lang-win-%cname%-bin.zip ..\..\..
