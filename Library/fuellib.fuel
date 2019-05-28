@@ -195,7 +195,7 @@
              )
              (do 
                (setf code (append code (list (arg-list-with-obj-expression 'obj argcount))))             
-               (setf code (append code (list (create-call-expression 'call netName obj argcount))))
+               (setf code (append code (list (create-call-expression 'call netName 'obj argcount))))
              )
           )
           ;(println "---->" code)

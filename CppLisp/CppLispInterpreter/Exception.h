@@ -39,6 +39,10 @@ namespace CppLisp
 	class LispToken;
 	class object;
 
+	class DLLEXPORT _ExportForMscDummyMap : std::map<string, std::shared_ptr<object>>
+	{
+	};
+
 	// **********************************************************************
 	/// <summary>
     /// Exception for the FUEL lisp interpreter
@@ -51,7 +55,7 @@ namespace CppLisp
 		//std::map<string, object> Data;
 		
 		/// <summary>
-        /// Initializes a new instance of the <see cref="LispException"/> class.
+        /// Initialize s a new instance of the <see cref="LispException"/> class.
         /// </summary>
         /// <param name="text">The text.</param>
         /// <param name="scope">The scope.</param>
@@ -71,7 +75,7 @@ namespace CppLisp
 
 		std::map<string, std::shared_ptr<object>> Data;
 
-		string ToString() const
+    	string ToString() const
 		{
 			return "EXCEPTION: " + Message;
 		}

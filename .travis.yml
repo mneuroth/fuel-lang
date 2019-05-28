@@ -97,9 +97,19 @@ matrix:
       - ./build_for_android.sh $ANDROID_NDK_HOME armeabi-v7a
       - ls -lrt
       - ls -lrt CppLisp
+      # build version for arm64
+      - make clean
+      - ./build_for_android.sh $ANDROID_NDK_HOME arm64-v8a
+      - ls -lrt
+      - ls -lrt CppLisp
       # build version for x86
       - make clean
       - ./build_for_android.sh $ANDROID_NDK_HOME x86
+      - ls -lrt
+      - ls -lrt CppLisp  
+      # build version for x86_64
+      - make clean
+      - ./build_for_android.sh $ANDROID_NDK_HOME x86_64
       - ls -lrt
       - ls -lrt CppLisp  
       - pwd
@@ -111,8 +121,12 @@ matrix:
         file: 
           - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-android-single-armeabi-v7a-bin.zip
           - $FUEL_DEPLOY_ROOT/fuel-lang-android-armeabi-v7a-bin.zip
+          - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-android-single-arm64-v8a-bin.zip
+          - $FUEL_DEPLOY_ROOT/fuel-lang-android-arm64-v8a-bin.zip
           - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-android-single-x86-bin.zip
           - $FUEL_DEPLOY_ROOT/fuel-lang-android-x86-bin.zip       
+          - $FUEL_DEPLOY_ROOT/CppLisp/fuel-lang-android-single-x86_64-bin.zip
+          - $FUEL_DEPLOY_ROOT/fuel-lang-android-x86_64-bin.zip       
         skip_cleanup: true
         on:
           tags: true
