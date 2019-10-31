@@ -219,7 +219,7 @@ namespace CsLisp
             }            
 
             var name = elem.ToString();
-            LispScope foundClosureScope;
+            LispScope foundClosureScope = null;
             // first try to resolve in this scope
             if (TryGetValue(name, out result))
             {
@@ -232,23 +232,29 @@ namespace CsLisp
                 UpdateFunctionCache(elemAsVariant, result, isFirst);
             }
             // then try to resolve in closure chain scope(s)
-            else if (IsInClosureChain(name, out foundClosureScope, out result))
-            {
-                UpdateFunctionCache(elemAsVariant, result, isFirst);
-            }
-            // then try to resolve in scope of loaded modules
-            else if (LispEnvironment.IsInModules(name, GlobalScope))
-            {
-                result = LispEnvironment.GetFunctionInModules(name, GlobalScope);
-            }
             else
             {
-                // activate this code if symbols must be resolved in parameter evaluation --> (println blub)
-                //if (elemAsVariant != null && elemAsVariant.IsSymbol && name != "fuellib")
-                //{
-                //    throw new LispException($"Could not resolve symbol {name}");
-                //}
-                result = elem;
+                var res = IsInClosureChain(name, /*out*/ foundClosureScope, /*out*/ result);
+                foundClosureScope = res.Item2;
+                result = res.Item3;
+                if (res.Item1)
+                {
+                    UpdateFunctionCache(elemAsVariant, result, isFirst);
+                }
+                // then try to resolve in scope of loaded modules
+                else if (LispEnvironment.IsInModules(name, GlobalScope))
+                {
+                    result = LispEnvironment.GetFunctionInModules(name, GlobalScope);
+                }
+                else
+                {
+                    // activate this code if symbols must be resolved in parameter evaluation --> (println blub)
+                    //if (elemAsVariant != null && elemAsVariant.IsSymbol && name != "fuellib")
+                    //{
+                    //    throw new LispException($"Could not resolve symbol {name}");
+                    //}
+                    result = elem;
+                }
             }
 
             return result;
@@ -265,25 +271,30 @@ namespace CsLisp
         /// <exception cref="LispException">Symbol  + symbolName +  not found</exception>
         public void SetInScopes(string symbolName, object value)
         {
-            LispScope foundClosureScope;
-            object val;
+            LispScope foundClosureScope = null;
+            object val = null;
             if (!string.IsNullOrEmpty(symbolName))
             {
                 if (ContainsKey(symbolName))
                 {
                     this[symbolName] = value;
                 }
-                else if (IsInClosureChain(symbolName, out foundClosureScope, out val))
-                {
-                    foundClosureScope[symbolName] = value;
-                }
-                else if (GlobalScope != null && GlobalScope.ContainsKey(symbolName))
-                {
-                    GlobalScope[symbolName] = value;
-                }
                 else
                 {
-                    throw new LispException("Symbol " + symbolName + " not found", this);
+                    var result = IsInClosureChain(symbolName, /*out*/ foundClosureScope, /*out*/ val);
+                    foundClosureScope = result.Item2;
+                    if (result.Item1)
+                    {
+                        foundClosureScope[symbolName] = value;
+                    }
+                    else if (GlobalScope != null && GlobalScope.ContainsKey(symbolName))
+                    {
+                        GlobalScope[symbolName] = value;
+                    }
+                    else
+                    {
+                        throw new LispException("Symbol " + symbolName + " not found", this);
+                    }
                 }
             }
         }
@@ -431,21 +442,21 @@ namespace CsLisp
         /// <param name="closureScopeFound">The closure scope found.</param>
         /// <param name="value">The found value.</param>
         /// <returns>True if name was found.</returns>
-        private bool IsInClosureChain(string name, out LispScope closureScopeFound, out object value)
+        private Tuple<bool,LispScope,object> IsInClosureChain(string name, /*out*/ LispScope closureScopeFound, /*out*/ object value)
         {
             if (ClosureChain != null)
             {
                 if (ClosureChain.TryGetValue(name, out value))
                 {
                     closureScopeFound = ClosureChain;
-                    return true;
+                    return new Tuple<bool,LispScope,object>(true, closureScopeFound, value);
                 }
-                return ClosureChain.IsInClosureChain(name, out closureScopeFound, out value);
+                return ClosureChain.IsInClosureChain(name, /*out*/ closureScopeFound, /*out*/ value);
             }
 
             closureScopeFound = null;
             value = null;
-            return false;
+            return new Tuple<bool, LispScope, object>(false, closureScopeFound, value);
         }
 
         private static void UpdateFunctionCache(LispVariant elemAsVariant, object value, bool isFirst)

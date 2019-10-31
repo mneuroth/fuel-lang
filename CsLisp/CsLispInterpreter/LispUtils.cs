@@ -135,11 +135,11 @@ namespace CsLisp
 		static LispUtils()
 		{
 			LibraryPath = string.Empty;
-#if ENABLE_COMPILE_TIME_MACROS
+//#if ENABLE_COMPILE_TIME_MACROS
 		    IsCompileTimeMacroEnabled = true;
-#else
-		    IsCompileTimeMacroEnabled = false;
-#endif
+//#else
+//		    IsCompileTimeMacroEnabled = false;
+//#endif
 		}
 
 		#endregion
@@ -250,11 +250,11 @@ namespace CsLisp
         /// <param name="code">The code.</param>
         /// <param name="offset">The position offset created by the decorated code.</param>
         /// <returns>Decorated code.</returns>
-        public static string DecorateWithBlock(string code, out int offset)
+        public static Tuple<string, int> DecorateWithBlock(string code, /*out*/ int offset)
         {
             const string block = "(do ";
             offset = block.Length;
-            return block + code + "\n)";
+            return new Tuple<string,int>(block + code + "\n)", offset);
         }
 
         /// <summary>

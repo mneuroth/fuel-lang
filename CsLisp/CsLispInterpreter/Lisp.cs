@@ -98,14 +98,16 @@ namespace CsLisp
             currentScope.ModuleName = moduleName;
             currentScope.Tracing = tracing;            
             RegisterNativeObjects(nativeItems, currentScope);
-            int offset;
-            string code = LispUtils.DecorateWithBlock(lispCode, out offset);
+            int offset = 0;
+            Tuple<string,int> resultTuple = LispUtils.DecorateWithBlock(lispCode, /*out*/ offset);
+            var code = resultTuple.Item1;
+            offset = resultTuple.Item2;
             var ast = LispParser.Parse(code, offset, currentScope);
-#if ENABLE_COMPILE_TIME_MACROS 
+//#if ENABLE_COMPILE_TIME_MACROS 
             var expandedAst = LispInterpreter.ExpandMacros(ast, currentScope);
-#else
-            var expandedAst = ast;
-#endif
+//#else
+//            var expandedAst = ast;
+//#endif
             LispVariant result = null;
             if (onlyMacroExpand)
             {

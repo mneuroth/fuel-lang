@@ -50,8 +50,10 @@ namespace CsLisp
         public /*static*/ LispVariant CompileToCsCode(string code)
         {
             var globalScope = LispEnvironment.CreateDefaultScope();
-            int offset;
-            code = LispUtils.DecorateWithBlock(code, out offset);
+            int offset = 0;
+            var result = LispUtils.DecorateWithBlock(code, /*out*/ offset);
+            code = result.Item1;
+            offset = result.Item2;
             var ast = LispParser.Parse(code, offset, globalScope);
             //var expandedAst = ExpandMacros(ast, globalScope);
             var compileResult = Compile(ast, globalScope, "        ", "__return__", "scope");

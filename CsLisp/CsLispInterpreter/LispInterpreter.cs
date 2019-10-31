@@ -153,7 +153,8 @@ namespace CsLisp
 
                     bool anyMacroReplaced = false;
                     var runtimeMacro = (LispMacroRuntimeEvaluate)macro;
-                    var expression = ReplaceFormalArgumentsInExpression(runtimeMacro.FormalArguments, astAsList, runtimeMacro.Expression, scope, ref anyMacroReplaced);
+                    var result = ReplaceFormalArgumentsInExpression(runtimeMacro.FormalArguments, astAsList, runtimeMacro.Expression, scope, /*ref*/ anyMacroReplaced);
+                    var expression = result.Item1;
 
                     return EvalAst(expression, scope);
                 }
@@ -230,31 +231,32 @@ namespace CsLisp
             return functionWrapper.Function(arguments, scope);
         }
 
-#if ENABLE_COMPILE_TIME_MACROS 
+//#if ENABLE_COMPILE_TIME_MACROS 
 
         public static object ExpandMacros(object ast, LispScope globalScope)
         {
-            object result = ast;
-            bool anyMacroReplaced;
+            var result = new Tuple<object, bool>(ast, false);
+            bool anyMacroReplaced = result.Item2;
             do
             {
                 anyMacroReplaced = false;
-                result = ExpandMacros(result, globalScope, ref anyMacroReplaced);
+                result = ExpandMacros(result.Item1, globalScope, /*ref*/ anyMacroReplaced);
+                anyMacroReplaced = result.Item2;
             } while (anyMacroReplaced);
-            return result;
+            return result.Item1;
         }
 
-        private static object ExpandMacros(object ast, LispScope globalScope, ref bool anyMacroReplaced)
+        private static Tuple<object, bool> ExpandMacros(object ast, LispScope globalScope, /*ref*/ bool anyMacroReplaced)
         {
             if (ast == null || ast is LispVariant)
             {
-                return ast;
+                return new Tuple<object, bool>(ast, anyMacroReplaced);
             }
 
             var astAsList = ((IEnumerable<object>)ast).ToList();
             if (astAsList.Count == 0)
             {
-                return ast;
+                return new Tuple<object, bool>(ast, anyMacroReplaced);
             }
 
             // compile time macro: process define-macro statements ==> call special form, this will add macro to global scope as side effect
@@ -274,7 +276,7 @@ namespace CsLisp
 
                     // compile time macros definitions will be removed from code in expand macro phase
                     // because only the side effect above is needed for further macro replacements
-                    return null;
+                    return new Tuple<object, bool>(null, anyMacroReplaced);
                 }
             }
 
@@ -286,9 +288,12 @@ namespace CsLisp
                 {
                     anyMacroReplaced = true;
                     var macroExpand = (LispMacroCompileTimeExpand)macro;
-                    var astWithReplacedArguments = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, globalScope, ref anyMacroReplaced).ToList();   // PATCH
-                    // process recursive macro expands (do not wrap list as LispVariant at this point)
-                    return ConvertLispVariantListToListIfNeeded(EvalAst(astWithReplacedArguments, globalScope));
+                    var result = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, globalScope, /*ref*/ anyMacroReplaced); //.ToList();   // PATCH
+                    var astWithReplacedArguments = result.Item1.ToList();
+                    anyMacroReplaced = result.Item2;
+                                                                                                                                                                                                     // process recursive macro expands (do not wrap list as LispVariant at this point)
+                    var expAst = ConvertLispVariantListToListIfNeeded(EvalAst(astWithReplacedArguments, globalScope));
+                    return new Tuple<object, bool>(expAst, anyMacroReplaced);
                 }
             }
 
@@ -305,12 +310,13 @@ namespace CsLisp
                 }
             }
 
-            return expandedAst;
+            return new Tuple<object, bool>(expandedAst, anyMacroReplaced);
         }
-#endif
+
+//#endif
 
         #endregion
-        
+
         #region private methods
 
         private static object ConvertLispVariantListToListIfNeeded(object something)
@@ -349,9 +355,10 @@ namespace CsLisp
             return new LispBreakpointPosition(-1, -1, -1);
         }
 
-        private static IEnumerable<object> ReplaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, bool macroArgsReplace, ref bool replacedAnything)
+        private static Tuple<IEnumerable<object>,bool> ReplaceSymbolWithValueInExpression(LispVariant symbol, object symbolValue, IEnumerable<object> expression, bool macroArgsReplace, /*ref*/ bool replacedAnything)
         {
             var ret = new List<object>();
+            var retVal = new Tuple<IEnumerable<object>, bool>(ret,replacedAnything);
             foreach(var elem in expression)
             {
                 // is the current element the symbol which should be replaced? --> Yes
@@ -367,11 +374,13 @@ namespace CsLisp
                         ret.Add(symbolValue);
                     }
                     replacedAnything = true;
+                    retVal = new Tuple<IEnumerable<object>, bool>(ret,replacedAnything);
                 }
                 // is it an expression? --> recursive call
                 else if (LispEnvironment.IsExpression(elem))
                 {
-                    IEnumerable<object> temp = ReplaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(elem)/*.ToArray()*/, macroArgsReplace, ref replacedAnything);
+                    var result = ReplaceSymbolWithValueInExpression(symbol, symbolValue, LispEnvironment.GetExpression(elem)/*.ToArray()*/, macroArgsReplace, /*ref*/ replacedAnything);
+                    IEnumerable<object> temp = result.Item1;
                     ret.Add(temp);
                 }
                 // current element is not the symbol which should by replaced !
@@ -380,41 +389,46 @@ namespace CsLisp
                     ret.Add(elem);
                 }
             }
-            return ret;
+            return retVal;
         }
 
-        private static IEnumerable<object> ReplaceFormalArgumentsInExpression(IEnumerable<object> formalArguments, IList<object> astAsList, IEnumerable<object> expression, LispScope scope, ref bool anyMacroReplaced)
+        private static Tuple<IEnumerable<object>,bool> ReplaceFormalArgumentsInExpression(IEnumerable<object> formalArguments, IList<object> astAsList, IEnumerable<object> expression, LispScope scope, /*ref*/ bool anyMacroReplaced)
         {
             // replace (quoted-macro-args) --> '(<real_args>)
             int i = 1;
             bool replaced = false;
             IEnumerable<object> realArguments = astAsList.Skip(1).ToList();
             List<object> quotedRealArguments = new List<object>() { new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments };
-            expression = ReplaceSymbolWithValueInExpression(new LispVariant(LispType.Symbol, "quoted-macro-args"), quotedRealArguments, expression, true, ref replaced);
+            var result = ReplaceSymbolWithValueInExpression(new LispVariant(LispType.Symbol, "quoted-macro-args"), quotedRealArguments, expression, true, /*ref*/ replaced);
+            expression = result.Item1;
+            replaced = result.Item2;
 
             foreach (var formalArgument in formalArguments)
             {
-                object value;
+                Tuple<object,bool> value;
                 if (astAsList[i] is IEnumerable<object>)
                 {
-                    value = ExpandMacros(astAsList[i], scope, ref anyMacroReplaced);
-                    if (value is LispVariant)
+                    value = ExpandMacros(astAsList[i], scope, anyMacroReplaced);
+                    anyMacroReplaced = value.Item2;
+                    if (value.Item1 is LispVariant)
                     {
-                        var vairantValue = value as LispVariant;
+                        var vairantValue = value.Item1 as LispVariant;
                         if (vairantValue.IsList)
                         {
-                            value = vairantValue.ListValue;
+                            value = new Tuple<object, bool>(vairantValue.ListValue,anyMacroReplaced);
                         }
                     }
                 }
                 else
                 {
-                    value = new LispVariant(astAsList[i]);
+                    value = new Tuple<object, bool>(new LispVariant(astAsList[i]),anyMacroReplaced);
                 }
-                expression = ReplaceSymbolWithValueInExpression((LispVariant)formalArgument, value, expression, false, ref anyMacroReplaced);
+                result = ReplaceSymbolWithValueInExpression((LispVariant)formalArgument, value.Item1, expression, false, /*ref*/ anyMacroReplaced);
+                expression = result.Item1;
+                anyMacroReplaced = result.Item2;
                 i++;
             }
-            return expression;
+            return new Tuple<IEnumerable<object>, bool>(expression,anyMacroReplaced);
         }
 
         private static bool IsSymbol(object elem)

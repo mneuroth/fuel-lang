@@ -65,16 +65,16 @@ namespace CsLisp
                 moduleName = scope.ModuleName;
             }
 
-            ParseTokens(moduleName, tokens, 0, ref parseResult, isToplevel: true);
+            var result = ParseTokens(moduleName, tokens, 0, /*ref*/ parseResult, isToplevel: true);
 
-            return parseResult;
+            return result.Item2;
         }
 
         #endregion
 
         #region private methods
 
-        private static int ParseTokens(string moduleName, IList<LispToken> tokens, int startIndex, ref object parseResult, bool isToplevel)
+        private static Tuple<int,object> ParseTokens(string moduleName, IList<LispToken> tokens, int startIndex, /*ref*/ object parseResult, bool isToplevel)
         {
             int i;
             List<object> current = null;
@@ -104,7 +104,7 @@ namespace CsLisp
                             throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
                         }
                         parseResult = current;
-                        return i;
+                        return new Tuple<int, object>(i, parseResult);
                     }
                 }
                 else if (token.Type == LispTokenType.Quote || token.Type == LispTokenType.QuasiQuote)
@@ -113,7 +113,9 @@ namespace CsLisp
                     quote.Add(new LispVariant(LispType.Symbol, token.Type == LispTokenType.Quote ? LispEnvironment.Quote : LispEnvironment.Quasiquote));
 
                     object quotedList = null;
-                    i = ParseTokens(moduleName, tokens, i + 1, ref quotedList, isToplevel: false);
+                    var result = ParseTokens(moduleName, tokens, i + 1, /*ref*/ quotedList, isToplevel: false);
+                    i = result.Item1;
+                    quotedList = result.Item2;
                     quote.Add(quotedList);
 
                     if (current != null)
@@ -128,7 +130,9 @@ namespace CsLisp
                     unquote.Add(new LispVariant(LispType.Symbol, token.Type == LispTokenType.UnQuote ? LispEnvironment.UnQuote : LispEnvironment.UnQuoteSplicing));
 
                     object quotedList = null;
-                    i = ParseTokens(moduleName, tokens, i + 1, ref quotedList, isToplevel: false);
+                    var result = ParseTokens(moduleName, tokens, i + 1, /*ref*/ quotedList, isToplevel: false);
+                    i = result.Item1;
+                    quotedList = result.Item2;
                     unquote.Add(quotedList);
 
                     if (current != null)
@@ -138,7 +142,7 @@ namespace CsLisp
                     else
                     {
                         parseResult = unquote;
-                        return i;
+                        return new Tuple<int, object>(i, parseResult);
                     }
                 }
                 else if (token.Type == LispTokenType.Comment)
@@ -150,7 +154,7 @@ namespace CsLisp
                     if(!isToplevel && current == null)
                     {
                         parseResult = new LispVariant(token);
-                        return i;
+                        return new Tuple<int, object>(i, parseResult);
                     }
                     if (current == null)
                     {
@@ -167,7 +171,7 @@ namespace CsLisp
             }
 
             parseResult = current;
-            return i;
+            return new Tuple<int, object>(i, parseResult);
         }
 
         private static bool OnlyCommentTokensFrom(IList<LispToken> tokens, int i)

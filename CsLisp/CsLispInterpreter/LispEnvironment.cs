@@ -213,9 +213,9 @@ namespace CsLisp
         private const string ReduceFcn = "reduce";
         private const string DefineMacro = "define-macro";      // == define-macro-eval
         private const string DefineMacroEval = "define-macro-eval";
-#if ENABLE_COMPILE_TIME_MACROS 
+//#if ENABLE_COMPILE_TIME_MACROS 
         private const string DefineMacroExpand = "define-macro-expand";
-#endif
+//#endif
         private const string Lambda = "lambda";
         private const string Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
         private const string Traceon = MetaTag + "traceon" + MetaTag;
@@ -291,15 +291,15 @@ namespace CsLisp
 
         public static bool IsInModules(string funcName, LispScope scope)
         {
-            object value;
-            return FindFunctionInModules(funcName, scope, out value);
+            object value = null;
+            return FindFunctionInModules(funcName, scope, /*out*/ value).Item1;
         }
 
         public static object GetFunctionInModules(string funcName, LispScope scope)
         {
-            object result;
-            FindFunctionInModules(funcName, scope, out result);
-            return result;         
+            object result = null;
+            var ret = FindFunctionInModules(funcName, scope, /*out*/ result);
+            return ret.Item2;         
         }
 
         public static bool IsMacro(object funcName, LispScope scope)
@@ -469,10 +469,10 @@ namespace CsLisp
             scope[DefineMacro] = CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", isSpecialForm: true);
             // run time evaluation for macros: 
             scope[DefineMacroEval] = CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", isSpecialForm: true);
-#if ENABLE_COMPILE_TIME_MACROS 
+//#if ENABLE_COMPILE_TIME_MACROS 
             // compile time expand for macros:
             scope[DefineMacroExpand] = CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", isSpecialForm: true, isEvalInExpand: true);
-#endif
+//#endif
 
             scope[Quote] = CreateFunction(quote_form, "(quote expr)", "Returns expression without evaluating it.", isSpecialForm: true);
             scope[Quasiquote] = CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", isSpecialForm: true);
@@ -1590,7 +1590,7 @@ namespace CsLisp
             return null;
         }
 
-#if ENABLE_COMPILE_TIME_MACROS 
+//#if ENABLE_COMPILE_TIME_MACROS 
 
         // (define-macro-expand name (args) (expression))
         private static LispVariant definemacroexpand_form(object[] args, LispScope scope)
@@ -1608,14 +1608,14 @@ namespace CsLisp
             return null;
         }
 
-#endif
+//#endif
 
         public static LispVariant quote_form(object[] args, LispScope scope)
         {
             return FuelFuncWrapper1<object, LispVariant>(args, scope, Quote, arg1 => new LispVariant(arg1));
         }
 
-        private static object ProcessQuotedSExpression(IEnumerable<object> expr, LispScope scope, out bool splicing)
+        private static Tuple<object,bool> ProcessQuotedSExpression(IEnumerable<object> expr, LispScope scope, /*out*/ bool splicing)
         {
             List<object> result = new List<object>();
 
@@ -1633,7 +1633,7 @@ namespace CsLisp
                         var evalResult = LispInterpreter.EvalAst(item2, scope);
                         splicing = variant.ToString() == UnQuoteSplicing;
                         evalResult.IsUnQuoted = splicing ? LispUnQuoteModus.UnQuoteSplicing : LispUnQuoteModus.UnQuote;
-                        return evalResult;
+                        return new Tuple<object, bool>(evalResult, splicing);
                     }
                 }
                 result.Add(item1);
@@ -1646,7 +1646,9 @@ namespace CsLisp
                     if (itm is IEnumerable<object>)
                     {
                         bool tempSplicing = false; ;
-                        var res = ProcessQuotedSExpression(itm as IEnumerable<object>, scope, out tempSplicing);
+                        var resultVal = ProcessQuotedSExpression(itm as IEnumerable<object>, scope, /*out*/ tempSplicing);
+                        var res = resultVal.Item1;
+                        tempSplicing = resultVal.Item2;
                         if (tempSplicing)
                         {
                             LispVariant variant = (LispVariant)res;
@@ -1663,7 +1665,7 @@ namespace CsLisp
                     }
                 }
             }
-            return result;
+            return new Tuple<object, bool>(result, splicing);
         }
 
         public static LispVariant quasiquote_form(object[] args, LispScope scope)
@@ -1679,7 +1681,8 @@ namespace CsLisp
             else if(expression is IEnumerable<object>)
             {
                 bool splicing = false;
-                return new LispVariant(ProcessQuotedSExpression(expression as IEnumerable<object>, scope, out splicing));
+                var result = ProcessQuotedSExpression(expression as IEnumerable<object>, scope, /*out*/ splicing);
+                return new LispVariant(result.Item1);
             }
             return new LispVariant(expression);
         }
@@ -2112,27 +2115,27 @@ namespace CsLisp
             return value;
         }
 
-        private static object UnQuoteIfNeeded(object item, out bool isSplicing, LispScope scope)
-        {
-            isSplicing = false;
-            if (item is LispVariant)
-            {
-                var value = item as LispVariant;
-                if (value.IsUnQuoted == LispUnQuoteModus.UnQuote || value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing)
-                {
-                    isSplicing = value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing;
-                    if (value.IsList)
-                    {
-                        return LispInterpreter.EvalAst(value.ListValue, scope);
-                    }
-                    else
-                    {
-                        return scope[value.StringValue];
-                    }
-                }
-            }
-            return item;
-        }
+        //private static object UnQuoteIfNeeded(object item, out bool isSplicing, LispScope scope)
+        //{
+        //    isSplicing = false;
+        //    if (item is LispVariant)
+        //    {
+        //        var value = item as LispVariant;
+        //        if (value.IsUnQuoted == LispUnQuoteModus.UnQuote || value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing)
+        //        {
+        //            isSplicing = value.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing;
+        //            if (value.IsList)
+        //            {
+        //                return LispInterpreter.EvalAst(value.ListValue, scope);
+        //            }
+        //            else
+        //            {
+        //                return scope[value.StringValue];
+        //            }
+        //        }
+        //    }
+        //    return item;
+        //}
 
         private static LispVariant ArithmetricOperation(IEnumerable<object> args, Func<LispVariant, LispVariant, LispVariant> op)
         {
@@ -2322,7 +2325,7 @@ namespace CsLisp
             return false;
         }
 
-        private static bool FindFunctionInModules(string funcName, LispScope scope, out object foundValue)
+        private static Tuple<bool,object> FindFunctionInModules(string funcName, LispScope scope, /*out*/ object foundValue)
         {
             foundValue = null;
             var importedModules = (LispScope)scope.GlobalScope[Modules];
@@ -2333,10 +2336,10 @@ namespace CsLisp
                 if (module.TryGetValue(funcName, out val))
                 {
                     foundValue = val;
-                    return true;
+                    return new Tuple<bool, object>(true, foundValue);
                 }
             }
-            return false;
+            return new Tuple<bool, object>(false, foundValue);
         }
 
         private static object[] GetCallArgs(object[] args)

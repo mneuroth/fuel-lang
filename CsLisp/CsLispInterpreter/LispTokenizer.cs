@@ -213,24 +213,26 @@ namespace CsLisp
 
         private static int ProcessComment(string code, int i, int lineCount, char ch, Action<string, int, int> addToken)
         {
-            int newIndex;
-            var comment = string.Empty + ch + GetRestOfLine(code, i + 1, out newIndex);
+            int newIndex = 0;
+            var result = GetRestOfLine(code, i + 1, /*out*/ newIndex);
+            newIndex = result.Item2;
+            var comment = string.Empty + ch + result.Item1;
             addToken(comment, i, lineCount);
             i = newIndex;
             return i;
         }
 
-        private static string GetRestOfLine(string code, int i, out int newIndex)
+        private static Tuple<string, int> GetRestOfLine(string code, int i, /*out*/ int newIndex)
         {
             var rest = code.Substring(i);
             var pos = rest.IndexOf("\n", StringComparison.InvariantCulture);
             if (pos > 0)
             {
                 newIndex = i + pos;
-                return rest.Substring(0, pos+1);
+                return new Tuple<string, int>(rest.Substring(0, pos+1), newIndex);
             }
             newIndex = i + rest.Length -1;
-            return rest;
+            return new Tuple<string, int>(rest, newIndex);
         }
 
         #endregion
