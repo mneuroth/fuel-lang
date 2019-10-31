@@ -26,8 +26,62 @@
 ;;====================================
 
 (do
-    
-  ;; foreach looop  
+   
+  ;; return #t if script runs on a .NET platform
+  (defn isNET ()
+    (== (nth 1 (platform)) ".NET")
+  )
+
+  ;; return #t if script runs on a native C++ platform
+  (defn isCpp ()
+    (== (nth 1 (platform)) "C++")
+  )
+
+  ;; return the secod element of a list or a string
+  (defn second (l)
+      (first (cdr l))
+  )
+
+  ;; return the length of a list or a string 
+  (defn length (l)
+      (len l)
+  )
+
+  ;; returns the length of a string  
+  (defn strlen (s)
+      (len s)
+  )
+
+  ;; returns index or position of key if the key is found in the list or string
+  (defn find (key _list)
+    (do
+        (def i 0)
+        (while (< i (len _list))
+           (do
+               (if (== key (nth i _list))
+                  (return i)
+               )
+               (setf i (+ i 1))
+           )
+        )
+        (return -1)
+    )
+  )
+
+  ;; implement dotimes function: example: (dotimes (c 10) (println c))
+  (define-macro-eval dotimes (counterinfo statements)
+      (do
+        (def (first 'counterinfo) 0)
+        (while (eval (list < (first 'counterinfo) (nth 1 'counterinfo)))
+          (do
+             (eval 'statements)
+             (setf (first 'counterinfo) (eval (list + (first 'counterinfo) 1)))
+          )
+        )
+      )
+  )
+
+  ;; foreach loop  
   (defn foreach (container fcn) 
      (do 
 	   (def __i 0)
@@ -158,15 +212,18 @@
         )     
   )
   
-  ;; create the standard library for fuel
-  
-  (evalstr (create-native "Math" "System.Math"))
-  (evalstr (create-native "File" "System.IO.File"))
-  (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
-  (evalstr (create-native "Directory" "System.IO.Directory"))
-  (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
-  (evalstr (create-native "Array" "System.Object[]"))
-  (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
+  ;; create the standard library for fuel on .NET platforms
+  (if (isNET)
+	(do
+	  (evalstr (create-native "Math" "System.Math"))
+	  (evalstr (create-native "File" "System.IO.File"))
+	  (evalstr (create-native "FileInfo" "System.IO.FileInfo"))
+	  (evalstr (create-native "Directory" "System.IO.Directory"))
+	  (evalstr (create-native "List" "System.Collections.Generic.List`1[[System.Object]]"))
+	  (evalstr (create-native "Array" "System.Object[]"))
+	  (evalstr (create-native "Dict" "System.Collections.Generic.Dictionary`2[[System.Object],[System.Object]]"))
+	)
+  )
   
 ;  (evalstr "(defn yyy (x) (+ x x x))")
 ;  (eval '(defn xxx (x) (+ x x x)))

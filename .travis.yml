@@ -5,6 +5,7 @@ matrix:
     - os: linux
       language: cpp
       compiler: clang
+      name: Linux qmake clang
       addons:
         apt:
           sources:
@@ -20,6 +21,7 @@ matrix:
     - os: linux
       language: cpp
       compiler: gcc
+      name: Linux qmake gcc
       addons:
         apt:
           sources:
@@ -34,6 +36,7 @@ matrix:
     - os: linux
       language: cpp
       compiler: gcc/cmake
+      name: Linux cmake
       addons:
         apt:
           sources:
@@ -54,6 +57,7 @@ matrix:
     - os: linux
       language: csharp
       compiler: mono
+      name: Linux csharp
       addons:
         apt:
           sources:
@@ -64,6 +68,7 @@ matrix:
     - os: linux
       language: android
       compiler: gcc/cmake
+      name: Android cmake
       addons:
         apt:
           packages:
@@ -134,6 +139,7 @@ matrix:
     - os: osx
       language: cpp
       compiler: clang
+      name: Mac osx clang
       before_install:
       - brew update
       - brew install qt
@@ -152,12 +158,14 @@ matrix:
     - os: osx
       language: csharp
       compiler: mono
+      name: Mac osx csharp
       script:
       - ./build_cs.sh
   
     - os: windows
       language: cpp
       compiler: cl
+      name: Windows cl
       env:
       - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"      
       script:
