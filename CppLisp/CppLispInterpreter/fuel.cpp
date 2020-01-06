@@ -34,12 +34,8 @@
 #include <windows.h>
 #define FUEL_DEBUGGER_NAME "FuelDebugger.dll"
 
-#elif defined( __linux__ ) || defined( __APPLE__ )
-#include <dlfcn.h>			// fuer: 
-
 #elif defined( __linux__ )
 #define FUEL_DEBUGGER_NAME "libFuelDebugger.so"
-
 
 #elif defined( __APPLE__ )
 #define FUEL_DEBUGGER_NAME "libFuelDebugger.dylib"
@@ -53,6 +49,10 @@
 #else 
 #error no valid platform defined
 
+#endif
+
+#if defined( __linux__ ) || defined( __APPLE__ )
+#include <dlfcn.h>			// fuer: 
 #endif
 
 void * SimpleLoadLibrary(const char * sDllName)
