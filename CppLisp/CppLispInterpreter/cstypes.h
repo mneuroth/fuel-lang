@@ -26,14 +26,14 @@
 #ifndef _CSTYPES_H
 #define _CSTYPES_H
 
+#include "csstring.h"
+#include "Exception.h"
+
 #include <vector>
 #include <map>
 #include <tuple>
 #include <functional>
 #include <memory>
-
-#include "csstring.h"
-#include "Exception.h"
 
 #define ENABLE_COMPILE_TIME_MACROS
 

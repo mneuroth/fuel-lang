@@ -26,6 +26,10 @@
 #ifndef _CSSTRING_H
 #define _CSSTRING_H
 
+#if defined( ARDUINO_ARCH_ESP32 )
+#define _GLIBCXX_USE_C99
+#endif
+
 #include <string.h>
 #include <string>
 #include <vector>

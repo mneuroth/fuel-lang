@@ -117,7 +117,7 @@ namespace CppLisp
 		{
 		}
 
-		explicit object(const object & other);
+		/*explicit*/ object(const object & other);
 
 		explicit object(const std::string & text)
 			: m_Type(ObjectType::__String)

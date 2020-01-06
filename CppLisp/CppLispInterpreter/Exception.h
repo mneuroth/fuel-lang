@@ -28,10 +28,10 @@
 
  //using System;
 
-#include "cstypes.h"
 #include "csstring.h"
 
 #include <map>
+#include <memory>
 
 namespace CppLisp
 {

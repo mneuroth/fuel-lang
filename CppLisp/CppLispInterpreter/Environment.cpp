@@ -444,20 +444,27 @@ static std::shared_ptr<LispVariant> Datetime(const std::vector<std::shared_ptr<o
 	return result;
 }
 
-#ifdef _WIN32
+#if defined( _WIN32 )
 #define _OS_STRING	"WIN"
-#endif
 
-#ifdef __OS2__
+#elif defined( __OS2__ )
 #define _OS_STRING	"OS2"
-#endif
 
-#if defined( __linux__ )
+#elif defined( __linux__ )
 #define _OS_STRING	"UNIX"
-#endif
 
-#if defined( __APPLE__ )
+#elif defined( __APPLE__ )
 #define _OS_STRING	"MACOSX"
+
+#elif defined( __PIC32MX__ )
+#define _OS_STRING	"PIC32MX"
+
+#elif defined( ARDUINO_ARCH_ESP32 )
+#define _OS_STRING	"ESP32"
+
+#else
+#error no valid platform defined
+
 #endif
 
 static std::shared_ptr<LispVariant> Platform(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
@@ -1657,7 +1664,7 @@ static std::shared_ptr<LispVariant> if_form(const std::vector<std::shared_ptr<ob
 	}
 
 	var passed = LispInterpreter::EvalAst(args[0], scope)->BoolValue();
-	var elseCode = args.size() > 2 ? args[2] : null;
+	var elseCode = args.size() > 2 ? args[2] : null; // PATCH for PIC32MX ? std::make_shared<object>(null);
 	return LispInterpreter::EvalAst(passed ? args[1] : elseCode, scope);
 }
 

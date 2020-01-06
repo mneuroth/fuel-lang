@@ -30,21 +30,29 @@
 
 #include "fuel.h"
 
-#ifdef _WIN32
+#if defined( _WIN32 )
 #include <windows.h>
 #define FUEL_DEBUGGER_NAME "FuelDebugger.dll"
-#endif
 
-#if defined( __linux__ ) || defined( __APPLE__ )
+#elif defined( __linux__ ) || defined( __APPLE__ )
 #include <dlfcn.h>			// fuer: 
-#endif
 
-#if defined( __linux__ )
+#elif defined( __linux__ )
 #define FUEL_DEBUGGER_NAME "libFuelDebugger.so"
-#endif
 
-#if defined( __APPLE__ )
+
+#elif defined( __APPLE__ )
 #define FUEL_DEBUGGER_NAME "libFuelDebugger.dylib"
+
+#elif defined( __PIC32MX__ )
+#define FUEL_DEBUGGER_NAME "libFuelDebugger.so"
+
+#elif defined( ARDUINO_ARCH_ESP32 )
+#define FUEL_DEBUGGER_NAME "libFuelDebugger.so"
+
+#else 
+#error no valid platform defined
+
 #endif
 
 void * SimpleLoadLibrary(const char * sDllName)
