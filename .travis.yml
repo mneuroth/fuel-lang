@@ -79,16 +79,16 @@ matrix:
             - build-tools-26.0.2
             - android-26
       before_install:
-        - curl -L https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4.tar.gz -O
-        - tar -xvzf cmake-3.13.4.tar.gz
-        - cd cmake-3.13.4
-        - ./configure
-        - make -j 8
-        - sudo apt remove cmake
-        - sudo apt remove cmake-data
-        - sudo make install
-        - export PATH=$PATH:/usr/local/bin
-        - cd ..
+        #- curl -L https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4.tar.gz -O
+        #- tar -xvzf cmake-3.13.4.tar.gz
+        #- cd cmake-3.13.4
+        #- ./configure
+        #- make -j 8
+        #- sudo apt remove cmake
+        #- sudo apt remove cmake-data
+        #- sudo make install
+        #- export PATH=$PATH:/usr/local/bin
+        #- cd ..
         - echo y | sdkmanager "ndk-bundle"
         - echo y | sdkmanager "cmake;3.6.4111459"
         #- echo y | sdkmanager "lldb;3.1"
