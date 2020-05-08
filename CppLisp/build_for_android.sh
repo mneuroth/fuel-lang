@@ -24,5 +24,5 @@ make clean
 make -j 4
 mkdir Library
 cp ../../Library/fuellib.fuel Library
-zip -u fuel-lang-single-android-$ANDROID_ABI-bin.zip fuel Library/fuellib.fuel
+zip -u fuel-lang-android-single-$ANDROID_ABI-bin.zip fuel Library/fuellib.fuel
 cd ..
