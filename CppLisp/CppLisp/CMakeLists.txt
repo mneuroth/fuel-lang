@@ -47,6 +47,8 @@ add_executable(fuel FuelMain.cpp
 ../CppLispDebugger/Debugger.cpp
 )
 
+set_target_properties(fuel PROPERTIES LINK_FLAGS_RELEASE -s)
+
 target_link_libraries(fuel ${CMAKE_DL_LIBS})
 
 install(TARGETS fuel DESTINATION bin)
