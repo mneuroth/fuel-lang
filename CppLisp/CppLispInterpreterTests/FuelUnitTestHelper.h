@@ -27,6 +27,7 @@
 #define _FUELUNITTESTHELPER_H
 
 #define QCOMPARE Assert::AreEqual
+#define QCOMPAREDOUBLE Assert::AreEqual
 #define QVERIFY  Assert::IsTrue
 
 #endif

@@ -392,7 +392,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 42) (push z l 2))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -439,7 +439,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 5) (def a (pop l)) (print a l))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1058,7 +1058,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (defn g (x) (do (+ x 2 i))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1114,7 +1114,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (call-static \"System.IO.File\" NotExistingFunction \"dummy\"))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1174,7 +1174,7 @@ namespace QtLispUnitTests
 				QCOMPARE(10, result->ToInt());
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1247,7 +1247,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(map 4 '(1 2 3))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1264,7 +1264,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(map (lambda (x) (+ x 1)) 4)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1281,7 +1281,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(reduce \"blub\" '(1 2 3) 0)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1298,7 +1298,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(reduce (lambda (x y) (+ x y))  \"test\" 0)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1315,7 +1315,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(setf a 2.0)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1332,7 +1332,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(println \"hello\"))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1349,7 +1349,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("((println \"hello\")");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1366,7 +1366,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(blub 1 2 3)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1383,7 +1383,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(not a 2.0)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1400,7 +1400,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(> 2.0)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1417,7 +1417,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(> 2.0 5 234)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1434,7 +1434,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(setf a 2.0) asdf");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1451,7 +1451,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(def 1 2)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1468,7 +1468,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (def a 2) blub (setf a 5))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1485,7 +1485,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(if #t 1 2 3)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1502,7 +1502,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(unknown-fcn 1 2 3)");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1519,7 +1519,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (println 2)))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1536,7 +1536,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do ( (println 2))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1553,7 +1553,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("blub (do (println 2))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1570,7 +1570,7 @@ namespace QtLispUnitTests
 				Lisp::Eval("(do (println 2)) asfd");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1765,7 +1765,7 @@ namespace QtLispUnitTests
 					std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a (readline 1)) (println a)", scope);
 					QVERIFY(false);
 				}
-				catch (const CppLisp::LispException &)
+				catch (const CppLisp::LispExceptionBase &)
 				{
 					QVERIFY(true);
 				}
@@ -1830,7 +1830,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -1989,7 +1989,7 @@ namespace QtLispUnitTests
 				QCOMPARE(-1, result->IntValue());
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -2058,7 +2058,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a \"nix\") (- a))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -2323,7 +2323,7 @@ namespace QtLispUnitTests
 				std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println (format \"Hello int={0} double={1} str={2}\")))");
 				QVERIFY(false);
 			}
-			catch (const CppLisp::LispException &)
+			catch (const CppLisp::LispExceptionBase &)
 			{
 				QVERIFY(true);
 			}
@@ -2338,6 +2338,66 @@ namespace QtLispUnitTests
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println (format \"Hello int={0} double={1} str={2}\" 42 2.3456 \"world\")))");
 			QVERIFY(result->IsString());
 			QCOMPARE("Hello int=42 double=2.345600 str=world", result->ToString().c_str());
+		}
+
+		const double EPSILON = 1e-8;
+
+		TEST_METHOD(Test_Math1)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(Math-Sin (Math-Pi))");
+			QCOMPAREDOUBLE(0.0, result->ToDouble(), EPSILON);
+		}
+
+		TEST_METHOD(Test_Math2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(Math-Sin (/ (Math-Pi) 2.0))");
+			QCOMPAREDOUBLE(1.0, result->ToDouble(), EPSILON);
+		}
+
+		TEST_METHOD(Test_Math3)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(Math-Cos (Math-Pi))");
+			QCOMPAREDOUBLE(-1.0, result->ToDouble(), EPSILON);
+		}
+
+		TEST_METHOD(Test_Math4)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(Math-Tan (* (Math-Pi) 0.25))");
+			QCOMPAREDOUBLE(1.0, result->ToDouble(), EPSILON);
+		}
+
+		TEST_METHOD(Test_MathError1)
+		{
+			try
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(Math-Tan 1.2 3.4)");
+				QVERIFY(false);
+			}
+			catch (const CppLisp::LispExceptionBase &)
+			{
+				QVERIFY(true);
+			}
+			catch (...)
+			{
+				QVERIFY(false);
+			}
+		}
+
+		TEST_METHOD(Test_MathError2)
+		{
+			try
+			{
+				std::shared_ptr<LispVariant> result = Lisp::Eval("(Math-Sin)");
+				QVERIFY(false);
+			}
+			catch (const CppLisp::LispExceptionBase &)
+			{
+				QVERIFY(true);
+			}
+			catch (...)
+			{
+				QVERIFY(false);
+			}
 		}
 
 		// TODO / NOT IMPLEMENTED:

@@ -24,6 +24,7 @@
 * */
 
 #include "Variant.h"
+#include "Exception.h"
 #include "cstypes.h"
 
 #include <math.h>
@@ -560,14 +561,14 @@ namespace CppLisp
 
     LispException LispVariant::CreateInvalidCastException(const string & name, const string & msg) const
 	{
-		var exception = /*new*/ LispException(string::Format("Invalid cast for {2}, value={1} {0}", msg, StringValue(), name));
+		var exception = /*new*/ LispException(string::Format("Invalid cast for {2}, value={1} {0}", msg, StringValue(), name), 0);
 		exception.AddTokenInfos(Token);
 		return exception;
 	}
 
 	LispException LispVariant::CreateInvalidOperationException(const string & operation, const LispVariant & l, const LispVariant & r)
 	{
-		var exception = /*new*/ LispException(string::Format(NoOperatorForTypes, operation, l.Type, r.Type));
+		var exception = /*new*/ LispException(string::Format(NoOperatorForTypes, operation, l.Type, r.Type), 0);
 		exception.AddTokenInfos(l.Token);
 		return exception;
 	}

@@ -24,7 +24,7 @@
 * */
 
 #include "csstring.h"
-#include "Exception.h"
+#include "csexception.h"
 
 #include <cctype>
 #include <algorithm>
@@ -168,52 +168,52 @@ namespace CppLisp
 		temp = ReplaceIn(temp, "{0}", arg1, found);
 		if (found && arg1 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceInWithFill(temp, "{0,", arg1, found);
 		if (found && arg1 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceIn(temp, "{1}", arg2, found);
 		if (found && arg2 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceInWithFill(temp, "{1,", arg2, found);
 		if (found && arg2 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceIn(temp, "{2}", arg3, found);
 		if (found && arg3 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceInWithFill(temp, "{2,", arg3, found);
 		if (found && arg3 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceIn(temp, "{3}", arg4, found);
 		if (found && arg4 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceInWithFill(temp, "{3,", arg4, found);
 		if (found && arg4 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceIn(temp, "{4}", arg5, found);
 		if (found && arg5 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		temp = ReplaceInWithFill(temp, "{4,", arg5, found);
 		if (found && arg5 == NULL_STRING)
 		{
-			throw LispException(ERR_MSG);
+			throw LispExceptionBase(ERR_MSG);
 		}
 		return temp;
 	}

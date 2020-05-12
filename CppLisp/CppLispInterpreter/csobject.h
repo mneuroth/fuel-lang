@@ -28,6 +28,26 @@
 
 #include "cstypes.h"
 
+#if defined( __PIC32MX__ )
+namespace std
+{
+	inline string to_string(double val)
+	{
+		return std::to_string((long double)val);
+	}
+
+	inline string to_string(int val)
+	{
+		return std::to_string((_Longlong)val);
+	}
+
+	inline string to_string(size_t val)
+	{
+		return std::to_string((_Longlong)val);
+	}
+}
+#endif
+
 namespace CppLisp
 {
 	class LispVariant;

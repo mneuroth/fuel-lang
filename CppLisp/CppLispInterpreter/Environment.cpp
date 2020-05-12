@@ -24,6 +24,7 @@
 * */
 
 #include "Scope.h"
+#include "Exception.h"
 #include "Interpreter.h"
 #include "Lisp.h"
 
@@ -35,7 +36,11 @@
 
 #include <ctime>
 
+#include <cmath>
+
 using namespace CppLisp;
+
+const double PI = 3.141592653589793238463;
 
 const string If = "if";
 const string While = "while";
@@ -273,6 +278,8 @@ static std::shared_ptr<LispVariant> Copyright(const std::vector<std::shared_ptr<
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
+#ifndef _DISABLE_DEBUGGER
+
 static std::shared_ptr<LispVariant> Help(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> scope)
 {
 	string helpText; // var helpText = new StringBuilder();
@@ -359,6 +366,8 @@ static std::shared_ptr<LispVariant> DelVar(const std::vector<std::shared_ptr<obj
 {
 	return FuelFuncWrapper1<LispVariant, bool>(args, scope, "delvar", [scope](const LispVariant &arg1) -> bool { return scope->Remove(arg1.ToString()); });
 }
+
+#endif
 
 static std::shared_ptr<LispVariant> NeedLValue(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
@@ -675,7 +684,7 @@ static std::shared_ptr<LispVariant> ParseInteger(const std::vector<std::shared_p
 		value = std::stoi(s, &idx);
 		if (idx < s.size())
 		{
-			throw LispException("format error");
+			throw LispExceptionBase("format error");
 		}
 	}
 	catch (...)
@@ -794,7 +803,7 @@ static std::shared_ptr<LispVariant> Search(const std::vector<std::shared_ptr<obj
 	}
 	else
 	{
-		throw LispException("search not supported for type " + string((int)args[1]->GetType()));
+		throw LispExceptionBase("search not supported for type " + string((int)args[1]->GetType()));
 	}
 	return std::make_shared<LispVariant>(std::make_shared<object>((int)foundPos));
 }
@@ -887,7 +896,7 @@ static std::shared_ptr<LispVariant> Subtraction(const std::vector<std::shared_pt
 		{
 			return std::make_shared<LispVariant>(std::make_shared<object>(-value.DoubleValue()));
 		}
-		throw LispException(string::Format("Unary operator - not available for {0}", value.TypeString()));
+		throw LispExceptionBase(string::Format("Unary operator - not available for {0}", value.TypeString()));
 	}
 
 	return ArithmetricOperation(args, [](std::shared_ptr<LispVariant> l, std::shared_ptr<LispVariant> r) -> std::shared_ptr<LispVariant> { return std::make_shared<LispVariant>(*l - *r); });
@@ -1164,7 +1173,7 @@ static std::shared_ptr<LispVariant> Push(const std::vector<std::shared_ptr<objec
 	}
 	else
 	{
-		throw LispException(string("push not supported for type ") + LispEnvironment::GetLispType(args[1]));
+		throw LispExceptionBase(string("push not supported for type ") + LispEnvironment::GetLispType(args[1]));
 	}
 }
 
@@ -1187,7 +1196,7 @@ static std::shared_ptr<LispVariant> Pop(const std::vector<std::shared_ptr<object
 	}
 	else
 	{
-		throw LispException(string("pop not supported for type ") + LispEnvironment::GetLispType(args[0]));
+		throw LispExceptionBase(string("pop not supported for type ") + LispEnvironment::GetLispType(args[0]));
 	}
 }
 
@@ -1282,7 +1291,7 @@ static std::shared_ptr<LispVariant> ArgFcn(const std::vector<std::shared_ptr<obj
 	{
 		return std::make_shared<LispVariant>(array[index]);
 	}
-	throw LispException(string::Format("Index out of range in args function (index={0} max={1})", std::to_string(index), std::to_string((int)array.size())));
+	throw LispExceptionBase(string::Format("Index out of range in args function (index={0} max={1})", std::to_string(index), std::to_string((int)array.size())));
 }
 
 static std::shared_ptr<LispVariant> ApplyFcn(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
@@ -1694,7 +1703,11 @@ static std::shared_ptr<LispVariant> do_form(const std::vector<std::shared_ptr<ob
 	{
 		if (!(statement->IsIEnumerableOfObject() || statement->IsList() /*is IEnumerable<object>*/) || ((statement->IsLispVariant()) && (statement->ToLispVariantRef().IsList())))
 		{
-			throw LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariantRef().Token, scope->ModuleName, scope->DumpStackToString());
+			string sStack;
+#ifndef _DISABLE_DEBUGGER
+			sStack = scope->DumpStackToString();
+#endif
+			throw LispException("List expected in do", /*((LispVariant)statement).Token*/statement->ToLispVariantRef().Token, scope->ModuleName, sStack);
 		}
 		result = LispInterpreter::EvalAst(statement, scope);
 		if (scope->IsInReturn)
@@ -1792,7 +1805,7 @@ std::shared_ptr<LispVariant> fn_form(const std::vector<std::shared_ptr<object>> 
 			// forward a debugger stop exception to stop the debugger loop
 			throw exc;
 		}
-		catch (LispException & ex)
+		catch (LispExceptionBase & ex)
 		{
 			// add the stack info and module name to the data of the exception
 // TODO --> implement for debugger
@@ -2051,7 +2064,11 @@ std::shared_ptr<IEnumerable<std::shared_ptr<object>>> LispEnvironment::CheckForL
 	}
 	if (!value.IsList())
 	{
-		throw LispException("No list in " + functionName, scope->GetPreviousToken(((LispVariant)listObj).Token), scope->ModuleName, scope->DumpStackToString());
+		string sStack;
+#ifndef _DISABLE_DEBUGGER
+		sStack = scope->DumpStackToString();
+#endif
+		throw LispException("No list in " + functionName, scope->GetPreviousToken(((LispVariant)listObj).Token), scope->ModuleName, sStack);
 	}
 	return value.ListValue();
 }
@@ -2105,6 +2122,120 @@ std::shared_ptr<LispVariant> FileWriteAllText(const std::vector<std::shared_ptr<
 	return std::make_shared<LispVariant>(std::make_shared<object>(WriteTextFile(fileName, content)));
 }
 
+std::shared_ptr<LispVariant> Math_function(const std::string & name, std::function<double(double)> fcn, const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs(name, 1, args, scope);
+
+	var val = args[0]->ToLispVariantRef().ToDouble();
+	return std::make_shared<LispVariant>(std::make_shared<object>(fcn(val)));
+}
+
+std::shared_ptr<LispVariant> Math_pi(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("Math-Pi", 0, args, scope);
+
+	return std::make_shared<LispVariant>(std::make_shared<object>(PI));
+}
+
+std::shared_ptr<LispVariant> Math_sin(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Sin", [](double x) { return sin(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_sinh(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Sinh", [](double x) { return sinh(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_asin(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Asin", [](double x) { return asin(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_cos(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Cos", [](double x) { return cos(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_cosh(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Cosh", [](double x) { return cosh(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_acos(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Acos", [](double x) { return acos(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_tan(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Tan", [](double x) { return tan(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_tanh(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Tanh", [](double x) { return tanh(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_atan(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Atan", [](double x) { return atan(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_exp(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Exp", [](double x) { return exp(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_log(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Log", [](double x) { return log(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_log10(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Log10", [](double x) { return log10(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_sqrt(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Sqrt", [](double x) { return sqrt(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_round(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Round", [](double x) { return round(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_truncate(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Truncated", [](double x) { return trunc(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_abs(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Abs", [](double x) { return fabs(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_floor(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Floor", [](double x) { return floor(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_ceiling(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	return Math_function("Math-Ceiling", [](double x) { return ceil(x); }, args, scope);
+}
+
+std::shared_ptr<LispVariant> Math_pow(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
+{
+	CheckArgs("Math-Pow", 2, args, scope);
+
+	var val1 = args[0]->ToLispVariantRef().ToDouble();
+	var val2 = args[1]->ToLispVariantRef().ToDouble();
+	return std::make_shared<LispVariant>(std::make_shared<object>(pow(val1, val2)));
+}
+
 string LispEnvironment::GetLispType(std::shared_ptr<object> obj)
 {
 	if (obj->IsLispVariant())
@@ -2126,6 +2257,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 
 	(*scope)["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
 	(*scope)["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
+#ifndef _DISABLE_DEBUGGER
 	(*scope)["help"] = CreateFunction(Help, "(help)", "Returns and shows the available builtin functions.");
 	(*scope)["doc"] = CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s).");
 	(*scope)["searchdoc"] = CreateFunction(SearchDocumentation, "(searchdoc name ...)", "Returns and shows the documentation of functions containing name(s).");
@@ -2133,10 +2265,11 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["break"] = CreateFunction(Break, "(break)", "Sets a breakpoint in the code.");
 	(*scope)["vars"] = CreateFunction(Vars, "(vars)", "Returns a dump of all variables.");
 	(*scope)["delvar"] = CreateFunction(DelVar, "(delvar name)", "Deletes a local variable with the given name and returns a success flag.");
-	(*scope)["need-l-value"] = CreateFunction(NeedLValue, "(need-l-value)", "Returns #t if a l-value is needed as return value of the current function.");
 	(*scope)["trace"] = CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off.");
 	(*scope)["gettrace"] = CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output.");
-    (*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
+#endif
+	(*scope)["need-l-value"] = CreateFunction(NeedLValue, "(need-l-value)", "Returns #t if a l-value is needed as return value of the current function.");
+	(*scope)["import"] = CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code.");
 	(*scope)["tickcount"] = CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times.");
 	(*scope)["sleep"] = CreateFunction(_Sleep, "(sleep time-in-ms)", "Sleeps the given number of milliseconds.");
 	(*scope)["date-time"] = CreateFunction(Datetime, "(date-time)", "Returns a list with informations about the current date and time: (year month day hours minutes seconds).");
@@ -2189,7 +2322,6 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
 	(*scope)["<="] = CreateFunction(LessEqualTest, "(<= expr1 expr2)", "Returns #t if value of expression1 is equal or smaller than value of expression2 and returns #f otherwiese.");
 	(*scope)[">="] = CreateFunction(GreaterEqualTest, "(>= expr1 expr2)", "Returns #t if value of expression1 is equal or larger than value of expression2 and returns #f otherwiese.");
-
 	
 	(*scope)["equal"] = CreateFunction(EqualTest, "(equal expr1 expr2)", "Returns #t if value of expression1 is equal with value of expression2 and returns #f otherwiese.");
 	(*scope)["="] = CreateFunction(EqualTest, "(= expr1 expr2)", "see: equal");
@@ -2278,6 +2410,30 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["File-Exists"] = CreateFunction(FileExits, "(File-Exists name)", "Returns #t if the file exists, otherwise returns #f.");
 	(*scope)["File-ReadAllText"] = CreateFunction(FileReadAllText, "(File-ReadAllText name)", "Returns the content of the file with name.");
 	(*scope)["File-WriteAllText"] = CreateFunction(FileWriteAllText, "(File-WriteAllText name content)", "Writes the content to the file with name.");
+
+	// math functions
+	(*scope)["Math-Pi"] = CreateFunction(Math_pi, "(Math-Pi)", "Returns the pi value");
+	(*scope)["Math-Sin"] = CreateFunction(Math_sin, "(Math-Sin expr)", "Returns sin value of expr");
+	(*scope)["Math-Sinh"] = CreateFunction(Math_sinh, "(Math-Sinh expr)", "Returns sinh value of expr");
+	(*scope)["Math-Asin"] = CreateFunction(Math_asin, "(Math-Asin expr)", "Returns asin value of expr");
+	(*scope)["Math-Cos"] = CreateFunction(Math_cos, "(Math-Cos expr)", "Returns cos value of expr");
+	(*scope)["Math-Cosh"] = CreateFunction(Math_cosh, "(Math-Cosh expr)", "Returns cosh value of expr");
+	(*scope)["Math-Acos"] = CreateFunction(Math_acos, "(Math-Acos expr)", "Returns acos value of expr");
+	(*scope)["Math-Tan"] = CreateFunction(Math_tan, "(Math-Tan expr)", "Returns tan value of expr");
+	(*scope)["Math-Tanh"] = CreateFunction(Math_tanh, "(Math-Tanh expr)", "Returns tanh value of expr");
+	(*scope)["Math-Atan"] = CreateFunction(Math_atan, "(Math-Atan expr)", "Returns atan value of expr");
+	(*scope)["Math-Exp"] = CreateFunction(Math_exp, "(Math-Exp expr)", "Returns exp value of expr");
+	(*scope)["Math-Log"] = CreateFunction(Math_log, "(Math-Log expr)", "Returns log value of expr");
+	(*scope)["Math-Log10"] = CreateFunction(Math_log10, "(Math-Log10 expr)", "Returns log value of expr");
+	(*scope)["Math-Sqrt"] = CreateFunction(Math_sqrt, "(Math-Sqrt expr)", "Returns sqrt value of expr");
+	(*scope)["Math-Round"] = CreateFunction(Math_round, "(Math-Round expr)", "Returns rounded value of expr");
+	(*scope)["Math-Truncate"] = CreateFunction(Math_truncate, "(Math-Truncate expr)", "Returns truncated value of expr");
+	(*scope)["Math-Abs"] = CreateFunction(Math_abs, "(Math-Abs expr)", "Returns absolute value of expr");
+	(*scope)["Math-Floor"] = CreateFunction(Math_floor, "(Math-Floor expr)", "Returns floor value of expr");
+	(*scope)["Math-Ceiling"] = CreateFunction(Math_ceiling, "(Math-Ceiling expr)", "Returns ceiling value of expr");
+	(*scope)["Math-Pow"] = CreateFunction(Math_pow, "(Math-Pow expr1 expr2)", "Returns power of expr1 with expr2 value of expr");
+
+// TODO: implement C# classes in C++: Array, Dict, List, File, FileInfo, Directory
 
 	scope->PrivateInitForCpp();
 

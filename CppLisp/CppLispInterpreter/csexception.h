@@ -23,37 +23,28 @@
 *
 * */
 
-#ifndef _FUEL_H
-#define _FUEL_H
-
-#include "csstring.h"
-#include "Utils.h"
-#include "Lisp.h"
-#include "DebuggerInterface.h"
-
-extern "C" DLLEXPORT int fuel_main(int argc, char *argv[]);
+#ifndef _CSEXCEPTION_H
+#define _CSEXCEPTION_H
 
 namespace CppLisp
 {
 	/// <summary>
-	/// Fast Usable Embeddable Lisp Interpreter and Compiler (FUEL).
+	/// Exception for the FUEL lisp interpreter
 	/// </summary>
-	 /*public*/ class DLLEXPORT Fuel
+	/*public*/ class DLLEXPORT LispExceptionBase //: Exception
 	{
 	public:
-		/*public*/ static void Main(std::vector<string> args);
-		/*public*/ static void MainExtended(std::vector<string> args, std::shared_ptr<TextWriter> output, std::shared_ptr<TextReader> input);
+		string Message;
 
-	private:
-		//#region private methods
+		LispExceptionBase(const string & text)
+			: Message(text)
+		{
+		}
 
-#ifndef _DISABLE_DEBUGGER
-		/*private*/ static void Usage(std::shared_ptr<TextWriter> output);
-		/*private*/ static void InteractiveLoopHeader(std::shared_ptr<TextWriter> output);
-		/*private*/ static std::shared_ptr<ILispDebugger> TryGetDebugger();
-#endif
-
-		//#endregion
+		string ToString() const
+		{
+			return "EXCEPTION: " + Message;
+		}
 	};
 }
 

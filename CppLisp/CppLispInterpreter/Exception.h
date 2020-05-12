@@ -29,6 +29,7 @@
  //using System;
 
 #include "csstring.h"
+#include "csexception.h"
 
 #include <map>
 #include <memory>
@@ -47,10 +48,10 @@ namespace CppLisp
 	/// <summary>
     /// Exception for the FUEL lisp interpreter
     /// </summary>
-    /*public*/ class DLLEXPORT LispException //: Exception
+    /*public*/ class DLLEXPORT LispException : public LispExceptionBase
     {
 	public:
-		string Message;
+		//string Message;
 
 		//std::map<string, object> Data;
 		
@@ -59,7 +60,7 @@ namespace CppLisp
         /// </summary>
         /// <param name="text">The text.</param>
         /// <param name="scope">The scope.</param>
-		/*public*/ LispException(const string & text, LispScope * scope = 0);
+		/*public*/ LispException(const string & text, LispScope * scope /*= 0*/);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LispException" /> class.
@@ -74,11 +75,6 @@ namespace CppLisp
 		void AddTokenInfos(std::shared_ptr<LispToken> token);
 
 		std::map<string, std::shared_ptr<object>> Data;
-
-    	string ToString() const
-		{
-			return "EXCEPTION: " + Message;
-		}
 	};
 
 	// **********************************************************************
@@ -86,7 +82,7 @@ namespace CppLisp
 	{
 	public:
 		LispStopDebuggerException(const string & text = "")
-			: /*base*/LispException(text)
+			: /*base*/LispException(text, 0)
 		{
 		}
 	};

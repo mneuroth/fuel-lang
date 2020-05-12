@@ -144,11 +144,13 @@ namespace CppLisp
 
 	void Fuel::MainExtended(std::vector<string> args, std::shared_ptr<TextWriter> output, std::shared_ptr<TextReader> input)
 	{
+#ifndef _DISABLE_DEBUGGER
 		if (args.size() == 0)
 		{
 			Usage(output);
 			return;
 		}
+#endif
 
 		std::vector<string> allArgs = args;
 
@@ -165,6 +167,7 @@ namespace CppLisp
 		var startDebugger = false;
 		var result = std::make_shared<LispVariant>();
 		var startTickCount = /*Environment.TickCount*/Environment_GetTickCount();
+#ifndef _DISABLE_DEBUGGER
 		var debugger = TryGetDebugger();
 
 		if (ContainsOptionAndRemove(allArgs, "-m"))
@@ -173,7 +176,7 @@ namespace CppLisp
 		}
 		if (ContainsOptionAndRemove(allArgs, "-v"))
 		{
-			output->WriteLine(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date);
+			output->WriteLine(Lisp::ProgramName + " " + Lisp::Version + " from " + Lisp::Date + " compiled with " + Lisp::GetCompilerInfo());
 			return;
 		}
 		if (ContainsOptionAndRemove(allArgs, "-h"))
@@ -191,6 +194,7 @@ namespace CppLisp
 			script = "(println (htmldoc))";
 			loadFiles = false;
 		}
+#endif
 		if (ContainsOptionAndRemove(allArgs, "--macro-expand"))
 		{
 			macroExpand = true;
@@ -235,6 +239,7 @@ namespace CppLisp
 		//	showCompileOutput = true;
 		//}
 
+#ifndef _DISABLE_DEBUGGER
 			// handle options for debugger
 		if (debugger != null)
 		{
@@ -247,6 +252,7 @@ namespace CppLisp
 				startDebugger = true;
 			}
 		}
+#endif
 
 		var scriptFiles = /*LispUtils.*/GetScriptFilesFromProgramArgs(args);
 
@@ -269,6 +275,7 @@ namespace CppLisp
 			return;
 		}
 
+#ifndef _DISABLE_DEBUGGER
 		if (debugger != null)
 		{
 			debugger->SetInputOutputStreams(output, input);
@@ -300,6 +307,7 @@ namespace CppLisp
 				wasDebugging = true;
 			}
 		}
+#endif
 
 		if (loadFiles)
 		{
@@ -344,6 +352,7 @@ namespace CppLisp
 		DisconnectDebugger();
 	}
 
+#ifndef _DISABLE_DEBUGGER
 	void Fuel::Usage(std::shared_ptr<TextWriter> output)
 	{
 		/*LispUtils.*/ShowAbout(output);
@@ -361,6 +370,7 @@ namespace CppLisp
 		output->WriteLine("  -m          : measure execution time");
 		output->WriteLine("  -t          : enable tracing");
 		output->WriteLine("  -x          : exhaustive error output");
+#ifndef _DISABLE_DEBUGGER
 		if (TryGetDebugger() != null)
 		{
 			output->WriteLine("  -i          : interactive shell");
@@ -371,6 +381,7 @@ namespace CppLisp
 			output->WriteLine();
 			output->WriteLine("Info: no debugger support installed !");
 		}
+#endif
 		//if (TryGetCompiler() != null)
 		//{
 		//	output->WriteLine("  -c          : compile program");
@@ -416,6 +427,9 @@ namespace CppLisp
 		
 		return dbg;
 	}
+
+#endif
+
 };
 
 extern "C" int fuel_main(int argc, char *argv[])

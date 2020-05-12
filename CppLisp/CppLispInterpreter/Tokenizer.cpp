@@ -24,6 +24,7 @@
 * */
 
 #include "Tokenizer.h"
+#include "Exception.h"
 
 namespace CppLisp
 {
@@ -191,7 +192,7 @@ namespace CppLisp
 		case '\\':
 			return '\\';
 		}
-		throw LispException(string::Format(string("Invalid character after backslash {0}"), string(ch)));
+		throw LispExceptionBase(string::Format(string("Invalid character after backslash {0}"), string(ch)));
 	}
 
 	size_t LispTokenizer::ProcessComment(const string & code, size_t i, size_t lineCount, char ch, /*Action<string, size_t, size_t>*/std::function<void(const string &, size_t, size_t)> addToken)

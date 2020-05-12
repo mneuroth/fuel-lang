@@ -30,11 +30,16 @@ namespace CppLisp
 {
 	LispException::LispException(const string & text, LispScope * scope)
 		//: base(text)
+		: LispExceptionBase(text)
 	{
 		Message = text;
 		if (scope != 0)
 		{
-			AddModuleNameAndStackInfos(scope->ModuleName, scope->DumpStackToString());
+			string sStack;
+#ifndef _DISABLE_DEBUGGER
+			sStack = scope->DumpStackToString();
+#endif
+			AddModuleNameAndStackInfos(scope->ModuleName, sStack);
 			AddTokenInfos(scope->CurrentToken);
 		}
 		else 
@@ -46,6 +51,7 @@ namespace CppLisp
 
 	LispException::LispException(const string & text, std::shared_ptr<LispToken> token, const string & moduleName, const string & stackInfo)
 		//: base(text)
+		: LispExceptionBase(text)
 	{
 		Message = text;
 		AddModuleNameAndStackInfos(moduleName, stackInfo);

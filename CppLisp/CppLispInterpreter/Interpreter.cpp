@@ -24,6 +24,7 @@
 * */
 
 #include "Interpreter.h"
+#include "Exception.h"
 
 namespace CppLisp
 {
@@ -56,7 +57,7 @@ namespace CppLisp
 					const LispFunctionWrapper & firstElem = first->ToLispVariantRef().FunctionValue();
 					valIsSpecialForm = firstElem.IsSpecialForm();
 				}
-				catch (LispException exc)
+				catch (LispExceptionBase exc)
 				{
 					if (!compile)
 					{
@@ -143,7 +144,7 @@ namespace CppLisp
 			//    return new LispVariant();
 			//}
 
-			throw LispException("Unexpected macro modus!");
+			throw LispExceptionBase("Unexpected macro modus!");
 		}
 
 		// for debugging: update the current line number at the current scope
@@ -159,11 +160,13 @@ namespace CppLisp
 		// normal evaluation...
 		const LispFunctionWrapper & functionWrapper = function->ToLispVariantRef().FunctionValue();
 
+#ifndef _DISABLE_DEBUGGER
 		// trace current function (if tracing is enabled)
 		if (scope->GlobalScope->Tracing)
 		{
 			scope->GlobalScope->Output->WriteLine("--> {0}", astAsList->First()->ToString());
 		}
+#endif
 
 		// evaluate arguments, but allow recursive lists
 		std::vector<std::shared_ptr<object>> arguments(astWithResolvedValues->Count() - 1); // = new object[astWithResolvedValues->Count() - 1];
@@ -196,12 +199,14 @@ namespace CppLisp
 			arguments[i - 1] = result;
 		}
 
+#ifndef _DISABLE_DEBUGGER
 		// debugger processing
 		var debugger = scope->GlobalScope->Debugger;
 		if (debugger != null && debugger->NeedsBreak(scope, GetPosInfo(astAsList->First()/*[0]*/)))
 		{
 			debugger->InteractiveLoop(scope, astAsList);
 		}
+#endif
 
 		// call the function with the arguments
 		return functionWrapper.Function(arguments, scope);

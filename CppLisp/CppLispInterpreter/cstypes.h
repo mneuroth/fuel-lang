@@ -27,7 +27,6 @@
 #define _CSTYPES_H
 
 #include "csstring.h"
-#include "Exception.h"
 
 #include <vector>
 #include <map>
@@ -162,6 +161,7 @@ namespace CppLisp
 			return true;
 		}
 
+#ifndef _DISABLE_DEBUGGER
 		// for debugging...
 		string DumpList() const
 		{
@@ -173,7 +173,7 @@ namespace CppLisp
 			}
 			return ret + ")";
 		}
-
+#endif
 	};
 
 	// **********************************************************************

@@ -24,6 +24,7 @@
 * */
 
 #include "Parser.h"
+#include "Exception.h"
 
 #include <stack>
 

@@ -235,6 +235,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="csexception.h" />
     <ClInclude Include="csobject.h" />
     <ClInclude Include="csstring.h" />
     <ClInclude Include="cstypes.h" />

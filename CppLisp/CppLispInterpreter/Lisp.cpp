@@ -24,13 +24,15 @@
 * */
 
 #include "Lisp.h"
+#include "Exception.h"
 
 using namespace CppLisp;
 
 const string Lisp::ProgramName = "fuel";
 const string Lisp::Name = "FUEL(isp)";
 const string Lisp::Version = "v0.99.4";
-const string Lisp::Date = "22.2.2019";
+const string Lisp::Date = "12.5.2020";
+
 const string Lisp::Copyright = "(C) by Michael Neuroth";
 const string Lisp::Platform = "C++";
 const string Lisp::Info = Lisp::Name + " is a fast usable embeddable lisp interpreter";
@@ -45,6 +47,67 @@ namespace CppLisp
 		const string block = "(do ";
 		offset = block.Length();
 		return block + code + "\n)";
+	}
+
+	string Lisp::GetCompilerInfo()
+	{
+		string info;
+#if defined(__GNUC__) || defined(__clang__)
+		info += "GCC v";
+		info += std::to_string(__GNUC__);
+		info += ".";
+		info += std::to_string(__GNUC_MINOR__);
+		info += ".";
+		info += std::to_string(__GNUC_PATCHLEVEL__);
+#if defined(__i386__)
+		// IA-32
+		info += ", x86 32Bit";
+#elif defined(__x86_64__)
+		// AMD64
+		info += ", x86 64Bit";
+#elif defined(__arm__)
+		info += ", arm 32Bit";
+#elif defined(__aarch64__)
+		info += ", arm 64Bit";
+#else
+# error Unsupported architecture
+#endif
+#elif defined(__clang__)
+		info += "clang v";
+		info += std::to_string(__clang_major__);
+		info += ".";
+		info += std::to_string(__clang_minor__);
+#if defined(__i386__)
+		// IA-32
+		info += ", x86 32Bit";
+#elif defined(__x86_64__)
+		// AMD64
+		info += ", x86 64Bit";
+#elif defined(__arm__)
+		info += ", arm 32Bit";
+#elif defined(__aarch64__)
+		info += ", arm 64Bit";
+#else
+# error Unsupported architecture
+#endif
+#endif
+#ifdef __EMSCRIPTEN__
+		info += ", EMSCRIPTEN";
+#endif
+#ifdef _MSC_VER
+		info += "Microsoft C++ v";
+		info += std::to_string(_MSC_VER);
+#if defined(_WIN64)
+		// AMD64
+		info += ", 64Bit";
+#elif defined(_WIN32)
+		// IA-32
+		info += ", 32Bit";
+#else
+# error Unsupported architecture
+#endif
+#endif
+		return info;
 	}
 
 	std::shared_ptr<LispVariant> Lisp::Eval(const string & lispCode, std::shared_ptr<LispScope> scope/*= null*/, const string & moduleName/*= null*/, bool tracing/*, Dictionary<string, object> nativeItems = null*/, std::shared_ptr<TextWriter> outp, std::shared_ptr<TextReader> inp, bool onlyMacroExpand)
@@ -111,6 +174,10 @@ namespace CppLisp
 					outp->WriteLine(errMsg);
 				}
 			}
+			result = LispVariant::CreateErrorValue(exc.Message);
+		}
+		catch (LispExceptionBase exc)
+		{
 			result = LispVariant::CreateErrorValue(exc.Message);
 		}
 		return result;

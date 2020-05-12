@@ -24,6 +24,7 @@
 * */
 
 #include "Scope.h"
+#include "Exception.h"
 #include "Interpreter.h"
 
 namespace CppLisp
@@ -184,6 +185,8 @@ namespace CppLisp
 		return i;
 	}
 
+#ifndef _DISABLE_DEBUGGER
+
 	void LispScope::DumpStack(int currentLevel)
 	{
 		string stackInfo = DumpStackToString(currentLevel);
@@ -241,6 +244,8 @@ namespace CppLisp
 		Output->WriteLine("</body>");
 		Output->WriteLine("</html>");
 	}
+
+#endif
 
 	string LispScope::GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(const string &, const string &)> select)
 	{

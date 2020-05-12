@@ -229,6 +229,7 @@ namespace CppLisp
 
 		/*public*/ int GetCallStackSize() const;
 
+#ifndef _DISABLE_DEBUGGER
 		/*public*/ void DumpStack(int currentLevel = -1);
 
 		/*public*/ string DumpStackToString(int currentLevel = -1);
@@ -266,6 +267,7 @@ namespace CppLisp
         {
 			ProcessMetaScope(LispEnvironment::Modules, [this](KeyValuePair<string, std::shared_ptr<object>> mod) -> void { return Output->WriteLine(mod.Key); });
         }
+#endif
 
 		/*public*/ string GetFunctionsHelpFormated(const string & functionName, /*Func<string, string, bool>*/std::function<bool(const string &, const string &)> select = null);
 

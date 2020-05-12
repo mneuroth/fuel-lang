@@ -90,6 +90,8 @@ namespace CppLisp
 
 		//#region evaluation
 
+		static string GetCompilerInfo();
+		
 		/// <summary>
 		/// Evals the specified lisp code.
 		/// An exception may occure if the lisp code is invalid.

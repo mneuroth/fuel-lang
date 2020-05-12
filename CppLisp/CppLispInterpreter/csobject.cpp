@@ -24,6 +24,7 @@
 * */
 
 #include "csobject.h"
+#include "Exception.h"
 #include "Variant.h"
 #include "Scope.h"
 #include "Token.h"
@@ -499,7 +500,7 @@ namespace CppLisp
 		{
 			return *(m_Data.pFunctionWrapper);
 		}
-		throw LispException("Invalid cast to lisp function wrapper.");
+		throw LispExceptionBase("Invalid cast to lisp function wrapper.");
 	}
 
 	const IEnumerable<std::shared_ptr<object>> & object::ToEnumerableOfObjectRef() const

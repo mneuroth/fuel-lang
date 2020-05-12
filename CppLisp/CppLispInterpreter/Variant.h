@@ -35,6 +35,7 @@
 #include "csstring.h"
 #include "cstypes.h"
 #include "csobject.h"
+#include "Exception.h"
 #include "Token.h"
 #include "Tokenizer.h"
 

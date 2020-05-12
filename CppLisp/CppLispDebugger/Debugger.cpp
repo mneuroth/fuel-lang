@@ -25,6 +25,7 @@
 
 #include "Debugger.h"
 #include "Lisp.h"
+#include "Exception.h"
 
 #include "cstypes.h"
 #include "csstring.h"
@@ -104,6 +105,7 @@ namespace CppLisp
 			{
 				/*LispUtils.*/ShowAbout(debugger->Output);
 			}
+#ifndef _DISABLE_DEBUGGER
 			else if (cmd.Equals("funcs"))
 			{
 				globalScope->DumpFunctions();
@@ -230,6 +232,7 @@ namespace CppLisp
 				bContinueWithNextStatement = true;
 				bRestart = true;
 			}
+#endif
 			else if (cmd.Equals("version") || cmd.Equals("ver"))
 			{
 				/*LispUtils::*/ShowVersion(debugger->Output);
@@ -242,7 +245,7 @@ namespace CppLisp
 					debugger->Output->WriteLine("result={0}", result->ToString());
 					interactiveScript += cmd + "\n";
 				}
-				catch (LispException & ex)
+				catch (LispExceptionBase & ex)
 				{
 					debugger->Output->WriteLine("Exception: " + ex.Message);
 				}
@@ -306,7 +309,7 @@ namespace CppLisp
 			{
 				bRestart = false;
 			}
-			catch (LispException & exception)
+			catch (LispExceptionBase & exception)
 			{
 				Output->WriteLine("\nException: {0}", exception.ToString());
 				// TODO --> implement...

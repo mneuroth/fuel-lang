@@ -28,7 +28,13 @@
 
 #if defined( ARDUINO_ARCH_ESP32 )
 #define _GLIBCXX_USE_C99
+#define _DISABLE_DEBUGGER
+#undef WITH_STATIC_DEBUGGER
 #endif
+// FOR TESTING
+//#define _DISABLE_DEBUGGER
+//#undef WITH_STATIC_DEBUGGER
+
 
 #include <string.h>
 #include <string>

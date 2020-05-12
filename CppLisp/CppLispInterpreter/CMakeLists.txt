@@ -8,6 +8,7 @@ file(GLOB fuel_interpreter_src
 csobject.h
 csstring.h
 cstypes.h
+csexception.h
 Token.h
 Tokenizer.h
 Parser.h

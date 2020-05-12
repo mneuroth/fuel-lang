@@ -30,6 +30,7 @@
 
 #include "../CppLispInterpreter/csstring.h"
 #include "../CppLispInterpreter/csobject.h"
+#include "../CppLispInterpreter/Exception.h"
 #include "../CppLispInterpreter/Variant.h"
 
 #include "FuelUnitTestHelper.h"
@@ -129,7 +130,7 @@ namespace QtLispUnitTests
 				QCOMPARE(4, value);      // will not be evaluated because of expected exception !
 				QVERIFY(false);
 			}
-			catch (LispException)
+			catch (LispExceptionBase)
 			{
 				QVERIFY(true);
 			}
