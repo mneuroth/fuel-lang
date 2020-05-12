@@ -176,7 +176,7 @@ namespace CppLisp
 		name += IsSpecialForm() ? " [special form]" : string::Empty;
 		name += separator;
 		string syntax = syntaxDecorator("Syntax: " + signature) + separator;
-		string doc = (!string::IsNullOrEmpty(Documentation) ? Documentation : "<not available>");
+		string doc = (!string::IsNullOrEmpty(Documentation) ? Documentation : ">not available<");
 		doc += separator;
 		return splitter + name + syntax + doc + "\n";
 	}

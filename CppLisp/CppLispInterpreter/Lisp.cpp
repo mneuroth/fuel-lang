@@ -157,8 +157,8 @@ namespace CppLisp
 			}
 // TODO --> implement stack trace for exception
 			var stackInfo = exc.Data["StackInfo"];
-			//Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : "<not available>");                if (verboseErrorOutput)
-			errMsg = string::Format("\nCallstack:\n{0}", stackInfo != null ? stackInfo->ToString() : "<not available>");
+			//Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : ">not available<");                if (verboseErrorOutput)
+			errMsg = string::Format("\nCallstack:\n{0}", stackInfo != null ? stackInfo->ToString() : ">not available<");
 			std::cout << errMsg << std::endl;
 			if (outp != null)
 			{

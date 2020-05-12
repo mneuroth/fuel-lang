@@ -19,6 +19,7 @@ HEADERS += \
         $$PWD/csobject.h \
         $$PWD/csstring.h \
         $$PWD/cstypes.h \
+        $$PWD/csexception.h \
         $$PWD/Interpreter.h \
         $$PWD/Token.h \
         $$PWD/Tokenizer.h \
