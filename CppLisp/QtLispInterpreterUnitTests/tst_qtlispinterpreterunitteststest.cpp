@@ -624,7 +624,7 @@ private Q_SLOTS:
             std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 42) (push z l 2))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -671,7 +671,7 @@ private Q_SLOTS:
             std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def l 5) (def a (pop l)) (print a l))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1291,7 +1291,7 @@ private Q_SLOTS:
             Lisp::Eval("(do (defn g (x) (do (+ x 2 i))) (defn f (x) (do (def i 7) (+ x 1 i (g 2)))) (println (f 1)))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1348,7 +1348,7 @@ private Q_SLOTS:
             Lisp::Eval("(do (call-static \"System.IO.File\" NotExistingFunction \"dummy\"))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1408,7 +1408,7 @@ private Q_SLOTS:
             QCOMPARE(10, result->ToInt());
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1481,7 +1481,7 @@ private Q_SLOTS:
             Lisp::Eval("(map 4 '(1 2 3))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1498,7 +1498,7 @@ private Q_SLOTS:
             Lisp::Eval("(map (lambda (x) (+ x 1)) 4)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1515,7 +1515,7 @@ private Q_SLOTS:
             Lisp::Eval("(reduce \"blub\" '(1 2 3) 0)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1532,7 +1532,7 @@ private Q_SLOTS:
             Lisp::Eval("(reduce (lambda (x y) (+ x y))  \"test\" 0)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1549,7 +1549,7 @@ private Q_SLOTS:
             Lisp::Eval("(setf a 2.0)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1566,7 +1566,7 @@ private Q_SLOTS:
             Lisp::Eval("(println \"hello\"))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1583,7 +1583,7 @@ private Q_SLOTS:
             Lisp::Eval("((println \"hello\")");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1600,7 +1600,7 @@ private Q_SLOTS:
             Lisp::Eval("(blub 1 2 3)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1617,7 +1617,7 @@ private Q_SLOTS:
             Lisp::Eval("(not a 2.0)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1634,7 +1634,7 @@ private Q_SLOTS:
             Lisp::Eval("(> 2.0)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1651,7 +1651,7 @@ private Q_SLOTS:
             Lisp::Eval("(> 2.0 5 234)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1668,7 +1668,7 @@ private Q_SLOTS:
             Lisp::Eval("(setf a 2.0) asdf");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1685,7 +1685,7 @@ private Q_SLOTS:
             Lisp::Eval("(def 1 2)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1702,7 +1702,7 @@ private Q_SLOTS:
             Lisp::Eval("(do (def a 2) blub (setf a 5))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1719,7 +1719,7 @@ private Q_SLOTS:
             Lisp::Eval("(if #t 1 2 3)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1736,7 +1736,7 @@ private Q_SLOTS:
             Lisp::Eval("(unknown-fcn 1 2 3)");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1753,7 +1753,7 @@ private Q_SLOTS:
             Lisp::Eval("(do (println 2)))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1770,7 +1770,7 @@ private Q_SLOTS:
             Lisp::Eval("(do ( (println 2))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1787,7 +1787,7 @@ private Q_SLOTS:
             Lisp::Eval("blub (do (println 2))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1804,7 +1804,7 @@ private Q_SLOTS:
             Lisp::Eval("(do (println 2)) asfd");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -1906,12 +1906,13 @@ private Q_SLOTS:
         QVERIFY(result->StringValue().Contains("Copyright: MIT-License"));
     }
 
-    TEST_METHOD(Test_Help)
-    {
-        std::shared_ptr<LispVariant> result = Lisp::Eval("(help)");
-        QVERIFY(result->IsString());
-        QVERIFY(result->StringValue().Contains("available functions:"));
-    }
+    // problems with output, because it is interpreted as xml
+    //TEST_METHOD(Test_Help)
+    //{
+    //    std::shared_ptr<LispVariant> result = Lisp::Eval("(help)");
+    //    QVERIFY(result->IsString());
+    //    QVERIFY(result->StringValue().Contains("available functions:"));
+    //}
 
     TEST_METHOD(Test_Import)
     //[DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
@@ -1999,7 +2000,7 @@ private Q_SLOTS:
                 std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a (readline 1)) (println a)", scope);
                 QVERIFY(false);
             }
-            catch (const CppLisp::LispException &)
+            catch (const CppLisp::LispExceptionBase &)
             {
                 QVERIFY(true);
             }
@@ -2064,7 +2065,7 @@ private Q_SLOTS:
             std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def s \"this is a string\") (slice s))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -2223,7 +2224,7 @@ private Q_SLOTS:
             QCOMPARE(-1, result->IntValue());
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -2292,7 +2293,7 @@ private Q_SLOTS:
             std::shared_ptr<LispVariant> result = Lisp::Eval("(do (def a \"nix\") (- a))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -2557,7 +2558,7 @@ private Q_SLOTS:
             std::shared_ptr<LispVariant> result = Lisp::Eval("(do (println (format \"Hello int={0} double={1} str={2}\")))");
             QVERIFY(false);
         }
-        catch (const CppLisp::LispException &)
+        catch (const CppLisp::LispExceptionBase &)
         {
             QVERIFY(true);
         }
@@ -2788,7 +2789,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("done"));
         }
     }
-
+/*
     TEST_METHOD(Test_MainInteractiveImport)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector("(import fuellib)\nmacros\nmodules\nfuncs\n"))
@@ -2809,7 +2810,8 @@ private Q_SLOTS:
             QVERIFY(s.Contains(ConvertToLocalDirectorySeperators("foreach --> function (foreach container fcn)         : Function  : module=.\\Library\\fuellib.fuel")));
         }
     }
-
+*/
+/*
     TEST_METHOD(Test_MainInteractiveDoc)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector("doc\ndoc if"))
@@ -2830,7 +2832,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("-------------------------------"));
         }
     }
-
+*/
     TEST_METHOD(Test_MainInteractiveSearchDoc)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector("searchdoc arg"))
@@ -2921,6 +2923,7 @@ private Q_SLOTS:
         }
     }
 */
+/*
     TEST_METHOD(Test_MainInteractive)
     {
         //using (var cr = new ConsoleRedirector("help\nfuncs\nbuiltins\nq\n"))
@@ -2944,7 +2947,8 @@ private Q_SLOTS:
             QVERIFY(s.Contains("define-macro --> function (define-macro name (arguments) statement) : Function  : module=<builtin>"));
         }
     }
-
+*/
+/*
     TEST_METHOD(Test_MainDebuggerExecute)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector("r\nhelp\nb 3\nb 4 (= a 42)\nr\nr\no\ns\nrestart\nv\nr\nb 3\nclear 3\nlist\nstack\nglobals\nlocals\ncode\nfuncs\nq\n"))
@@ -2978,6 +2982,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("print --> function (print expr1 expr2 ...)         : Function  : module=<builtin>")); // funcs
         }
     }
+*/
 /*
     TEST_METHOD(Test_DebugFile)
     {
@@ -3056,6 +3061,7 @@ private Q_SLOTS:
         }
     }
 */
+/*
     TEST_METHOD(Test_Documentation)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -3072,7 +3078,7 @@ private Q_SLOTS:
             QVERIFY(s.Contains("Syntax: (lambda (arguments) block)"));
         }
     }
-
+*/
     TEST_METHOD(Test_MainTestParserBracketsOutOfBalance)
     {
         //using (ConsoleRedirector cr = new ConsoleRedirector())
