@@ -42,11 +42,12 @@ const string Lisp::LicenseUrl = "http://opensource.org/licenses/MIT";
 
 namespace CppLisp
 {
-	/*public*/ static string DecorateWithBlock(string code, size_t & offset)
+    /*public*/ static string DecorateWithBlock(const string & code, size_t & offset)
 	{
 		const string block = "(do ";
+        const string blockEnd = "\n)";
 		offset = block.Length();
-		return block + code + "\n)";
+        return block + code + blockEnd;
 	}
 
 	string Lisp::GetCompilerInfo()
