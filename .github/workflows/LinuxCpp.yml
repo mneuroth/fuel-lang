@@ -26,6 +26,7 @@ jobs:
     - name: Compile the project
       run: |
         cd CppLisp
+        gcc -v
         cmake --version
         cmake CMakeLists.txt
         make -j 4
