@@ -195,8 +195,9 @@ FUEL can be used with mono environment under Linux and Mac OS X.
 FUEL is also available for native C++ for all platforms supporting a C++11 compiler.
 FUEL was successfully compiled on Windows, Android, Linux (including the Raspberry Pi) and Mac OS X. 
 
-* Windows [![Build status](https://ci.appveyor.com/api/projects/status/s700taf5bv7dwt5f?svg=true)](https://ci.appveyor.com/project/mneuroth/fuel-lang)
-* MacOS, Linux and Android [![Build Status](https://travis-ci.org/mneuroth/fuel-lang.svg?branch=master)](https://travis-ci.org/mneuroth/fuel-lang)
+* Appveyor: Windows [![Build status](https://ci.appveyor.com/api/projects/status/s700taf5bv7dwt5f?svg=true)](https://ci.appveyor.com/project/mneuroth/fuel-lang)
+* Travis: MacOS, Linux and Android [![Build Status](https://travis-ci.org/mneuroth/fuel-lang.svg?branch=master)](https://travis-ci.org/mneuroth/fuel-lang)
+* Github Actions: Linux Cs [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml), Linux C++ [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)
   
 
 License
