@@ -197,7 +197,7 @@ FUEL was successfully compiled on Windows, Android, Linux (including the Raspber
 
 * Appveyor: Windows [![Build status](https://ci.appveyor.com/api/projects/status/s700taf5bv7dwt5f?svg=true)](https://ci.appveyor.com/project/mneuroth/fuel-lang)
 * Travis: MacOS, Linux and Android [![Build Status](https://travis-ci.org/mneuroth/fuel-lang.svg?branch=master)](https://travis-ci.org/mneuroth/fuel-lang)
-* Github Actions: Linux Cs [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml), Linux C++ [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)
+* Github Actions: [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml) [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)
   
 
 License
@@ -206,7 +206,7 @@ FUEL is released under the MIT license:
 
 >  FUEL(isp) is a fast usable embeddable lisp interpreter.
 >  
->  Copyright (c) 2016-2019 Michael Neuroth
+>  Copyright (c) 2016-2023 Michael Neuroth
 >
 >  Permission is hereby granted, free of charge, to any person obtaining
 >  a copy of this software and associated documentation files (the "Software"),
