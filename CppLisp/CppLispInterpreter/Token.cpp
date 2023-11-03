@@ -25,6 +25,7 @@
 
 #include "Token.h"
 #include <string>
+#include <stdexcept>
 
 const CppLisp::string CppLisp::LispToken::StringStart = "\"";
 const CppLisp::string CppLisp::LispToken::QuoteConst = "'";
