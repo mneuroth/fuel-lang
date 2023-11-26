@@ -29,6 +29,7 @@ jobs:
         ls -lrt CsLisp/bin
         ls -lrt CsLisp/bin/ContinousIntgration
         cd CsLisp/bin/ContinousIntgration
+        chmod +x ./fuel.exe
         ./fuel.exe -v
         ./fuel.exe -e "(println (platform))"
         ./fuel.exe
