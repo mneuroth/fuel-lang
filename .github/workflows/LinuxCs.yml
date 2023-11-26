@@ -25,5 +25,6 @@ jobs:
         ls -lrt
         ./build_cs.sh
         ls -lrt
-        ls CsLisp
+        ls -lrt CsLisp
+        ls -lrt CsLisp/bin
         
