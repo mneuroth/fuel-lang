@@ -402,7 +402,7 @@ namespace CsLisp
             scope["div"] = CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ...");
             scope["/"] = CreateFunction(Division, "(/ expr1 expr2 ...)", "see: div");
             scope["mod"] = CreateFunction(Modulo, "(mod expr1 expr2)", "Returns value of modulo operation between expr1 and expr2");
-            scope["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: div");
+            scope["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: mod");
 
             scope["<"] = CreateFunction(LessTest, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese.");
             scope[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
@@ -1511,7 +1511,7 @@ namespace CsLisp
             return FuelFuncWrapper2<LispVariant, LispVariant, bool>(args, scope, "dict-contains-value", (arg1, arg2) =>
             {
                 var nativeDict = arg1.Value as Dictionary<object, object>;
-                var ok = nativeDict.ContainsValue(arg2);
+                var ok = nativeDict.ContainsValue(arg2.Value);
                 return ok;
             });
         }
@@ -1527,9 +1527,21 @@ namespace CsLisp
             {
                 bool value = LispInterpreter.EvalAst(arg, scope).BoolValue;
                 result = func(result, value);
-                if (!result)
+                if (initial)
                 {
-                    break;
+                    // process and
+                    if (!result)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    // process or
+                    if (result)
+                    {
+                        break;
+                    }
                 }
             }
             return new LispVariant(result);

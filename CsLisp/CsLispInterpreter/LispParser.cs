@@ -124,7 +124,7 @@ namespace CsLisp
                 else if (token.Type == LispTokenType.UnQuote || token.Type == LispTokenType.UnQuoteSplicing)
                 {
                     var unquote = new List<object>();
-                    LispUnQuoteModus unquotedModus = token.Type == LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing;
+                    //LispUnQuoteModus unquotedModus = token.Type == LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing;
                     unquote.Add(new LispVariant(LispType.Symbol, token.Type == LispTokenType.UnQuote ? LispEnvironment.UnQuote : LispEnvironment.UnQuoteSplicing));
 
                     object quotedList = null;

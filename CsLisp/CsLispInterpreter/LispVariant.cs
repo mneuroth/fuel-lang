@@ -351,7 +351,7 @@ namespace CsLisp
                 {
                     throw CreateInvalidCastException("list");
                 }
-                return  ((IEnumerable)Value).Cast<object>();
+                return ((IEnumerable)Value).Cast<object>();
             }
         }
 
