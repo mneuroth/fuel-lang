@@ -27,4 +27,9 @@ jobs:
         ls -lrt
         ls -lrt CsLisp
         ls -lrt CsLisp/bin
+        ls -lrt CsLisp/bin/ ContinousIntgration
+        cd CsLisp/bin/ ContinousIntgration
+        ./fuel -v
+        ./fuel -e "(println (platform))"
+        ./fuel
         
