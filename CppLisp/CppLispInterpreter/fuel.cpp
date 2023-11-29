@@ -186,12 +186,14 @@ namespace CppLisp
 		}
 		if (ContainsOptionAndRemove(allArgs, "--doc"))
 		{
-			script = "(println (doc))";
+			script = "(doc)";
+			trace = true;
 			loadFiles = false;
 		}
 		if (ContainsOptionAndRemove(allArgs, "--html"))
 		{
-			script = "(println (htmldoc))";
+			script = "(htmldoc)";
+			trace = true;
 			loadFiles = false;
 		}
 #endif
