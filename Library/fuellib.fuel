@@ -37,6 +37,11 @@
     (== (nth 1 (platform)) "C++")
   )
 
+  ;; return #t if script runs on a haxe platform
+  (defn isHaxe ()
+    (== (nth 1 (platform)) "haxe")
+  )
+
   ;; return the secod element of a list or a string
   (defn second (l)
       (first (cdr l))
