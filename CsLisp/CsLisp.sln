@@ -50,7 +50,6 @@ Global
 		{988693BD-974C-4391-8C48-CF294C32CF24}.Release|x86.ActiveCfg = Release|Any CPU
 		{988693BD-974C-4391-8C48-CF294C32CF24}.Release|x86.Build.0 = Release|Any CPU
 		{D2516D48-8BAD-46EA-80A1-AB7763B99EF4}.ContinousIntgration|Any CPU.ActiveCfg = ContinousIntgration|Any CPU
-		{D2516D48-8BAD-46EA-80A1-AB7763B99EF4}.ContinousIntgration|Any CPU.Build.0 = ContinousIntgration|Any CPU
 		{D2516D48-8BAD-46EA-80A1-AB7763B99EF4}.ContinousIntgration|x64.ActiveCfg = ContinousIntgration|Any CPU
 		{D2516D48-8BAD-46EA-80A1-AB7763B99EF4}.ContinousIntgration|x86.ActiveCfg = ContinousIntgration|Any CPU
 		{D2516D48-8BAD-46EA-80A1-AB7763B99EF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
