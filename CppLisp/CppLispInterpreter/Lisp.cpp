@@ -30,8 +30,8 @@ using namespace CppLisp;
 
 const string Lisp::ProgramName = "fuel";
 const string Lisp::Name = "FUEL(isp)";
-const string Lisp::Version = "v0.99.4";
-const string Lisp::Date = "12.5.2020";
+const string Lisp::Version = "v0.99.6";
+const string Lisp::Date = "16.12.2023";
 
 const string Lisp::Copyright = "(C) by Michael Neuroth";
 const string Lisp::Platform = "C++";

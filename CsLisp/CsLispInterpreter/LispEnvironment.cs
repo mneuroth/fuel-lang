@@ -402,7 +402,14 @@ namespace CsLisp
             scope["div"] = CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ...");
             scope["/"] = CreateFunction(Division, "(/ expr1 expr2 ...)", "see: div");
             scope["mod"] = CreateFunction(Modulo, "(mod expr1 expr2)", "Returns value of modulo operation between expr1 and expr2");
-            scope["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: mod");
+            scope["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: div");
+
+            scope["<<"] = CreateFunction(LeftShift, "(<< expr1 expr2)", "Integer left shift. Returns integer expression1 left shifted for expression2 binary digits.");
+            scope[">>"] = CreateFunction(RightShift, "(>> expr1 expr2)", "Integer right shift. Returns integer expression1 right shifted for expression2 binary digits.");
+            scope["|"] = CreateFunction(BinaryOr, "(| expr1 expr2)", "Binary or for integer numbers (bitwise or).");
+            scope["&"] = CreateFunction(BinaryAnd, "(& expr1 expr2)", "Binary and for integer numbers (bitwise and).");
+            scope["^"] = CreateFunction(BinaryXOr, "(^ expr1 expr2)", "Binary xor for integer numbers (bitwise xor).");
+            scope["~"] = CreateFunction(BinaryNot, "(~ expr1)", "Binary not for integer numbers (bitwise not).");
 
             scope["<"] = CreateFunction(LessTest, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese.");
             scope[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
@@ -456,7 +463,9 @@ namespace CsLisp
 
             // special forms
             scope[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", isSpecialForm: true);
+            scope["&&"] = CreateFunction(and_form, "(&& expr1 expr2 ...)", "See: and", isSpecialForm: true);
             scope[Or] = CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", isSpecialForm: true);
+            scope["||"] = CreateFunction(or_form, "(|| expr1 expr2 ...)", "See: or", isSpecialForm: true);
             scope[Def] = CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
             scope[Gdef] = CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
             scope[Setf] = CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", isSpecialForm: true);
@@ -1052,6 +1061,54 @@ namespace CsLisp
         public static LispVariant Not(object[] args, LispScope scope)
         {
             return FuelFuncWrapper1<LispVariant, bool>(args, scope, "not", (arg1) => !arg1.ToBool());
+        }
+
+        public static LispVariant LeftShift(object[] args, LispScope scope)
+        {
+            return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "left-shift", (arg1, arg2) =>
+            {
+                return new LispVariant(LispType.Int, arg1.ToInt() << arg2.ToInt());
+            });
+        }
+
+        public static LispVariant RightShift(object[] args, LispScope scope)
+        {
+            return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "right-shift", (arg1, arg2) =>
+            {
+                return new LispVariant(LispType.Int, arg1.IntValue >> arg2.IntValue);
+            });
+        }
+
+        public static LispVariant BinaryOr(object[] args, LispScope scope)
+        {
+            return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "binary-or", (arg1, arg2) =>
+            {
+                return new LispVariant(LispType.Int, arg1.IntValue | arg2.IntValue);
+            });
+        }
+
+        public static LispVariant BinaryAnd(object[] args, LispScope scope)
+        {
+            return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "binary-and", (arg1, arg2) =>
+            {
+                return new LispVariant(LispType.Int, arg1.IntValue & arg2.IntValue);
+            });
+        }
+
+        public static LispVariant BinaryXOr(object[] args, LispScope scope)
+        {
+            return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "binary-xor", (arg1, arg2) =>
+            {
+                return new LispVariant(LispType.Int, arg1.IntValue ^ arg2.IntValue);
+            });
+        }
+
+        public static LispVariant BinaryNot(object[] args, LispScope scope)
+        {
+            return FuelFuncWrapper1<LispVariant, LispVariant>(args, scope, "binary-not", (arg1) =>
+            {
+                return new LispVariant(LispType.Int, ~arg1.IntValue);
+            });
         }
 
         public static LispVariant LessTest(object[] args, LispScope scope)

@@ -455,6 +455,12 @@ namespace QtLispUnitTests
 			QCOMPARE("(#f #t #t #f #t)", result->ToString().c_str());
 		}
 
+		TEST_METHOD(Test_LogicalOperators2)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(list (&& #t #f) (&& #t #t) (|| #t #f) (|| #f #f) (|| #t #f #t))");
+			QCOMPARE("(#f #t #t #f #t)", result->ToString().c_str());
+		}
+
 		TEST_METHOD(Test_CompareOperators1)
 		{
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(list (= 1 2) (= 4 4) (== \"blub\" \"blub\") (== #t #f) (equal 3 4))");
@@ -2080,6 +2086,48 @@ namespace QtLispUnitTests
 			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (% 7.4 2.8))");
 			QVERIFY(result->IsDouble());
 			QCOMPARE("1.800000", std::to_string(result->DoubleValue()).c_str());
+		}
+
+		TEST_METHOD(Test_LeftShift)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (<< 4 2))");
+			QVERIFY(result->IsInt());
+			QCOMPARE("16", std::to_string(result->IntValue()).c_str());
+		}
+
+		TEST_METHOD(Test_RightShift)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (>> 33 1))");
+			QVERIFY(result->IsInt());
+			QCOMPARE("16", std::to_string(result->IntValue()).c_str());
+		}
+
+		TEST_METHOD(Test_BinaryOr)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (| 18 7))");
+			QVERIFY(result->IsInt());
+			QCOMPARE("23", std::to_string(result->IntValue()).c_str());
+		}
+
+		TEST_METHOD(Test_BinaryAnd)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (& 18 7))");
+			QVERIFY(result->IsInt());
+			QCOMPARE("2", std::to_string(result->IntValue()).c_str());
+		}
+
+		TEST_METHOD(Test_BinaryXOr)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (^ 13 6))");
+			QVERIFY(result->IsInt());
+			QCOMPARE("11", std::to_string(result->IntValue()).c_str());
+		}
+
+		TEST_METHOD(Test_BinaryNot)
+		{
+			std::shared_ptr<LispVariant> result = Lisp::Eval("(do (~ 256))");
+			QVERIFY(result->IsInt());
+			QCOMPARE("-257", std::to_string(result->IntValue()).c_str());
 		}
 
 		TEST_METHOD(Test_NotEnoughFunctionArguments)

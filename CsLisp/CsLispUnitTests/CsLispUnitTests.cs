@@ -482,6 +482,13 @@ namespace LispUnitTests
         }
 
         [TestMethod]
+        public void Test_LogicalOperators2()
+        {
+            LispVariant result = Lisp.Eval("(list (&& #t #f) (&& #t #t) (|| #t #f) (|| #f #f) (|| #t #f #t))");
+            Assert.AreEqual("(#f #t #t #f #t)", result.ToString());
+        }
+
+        [TestMethod]
         public void Test_CompareOperators1()
         {
             LispVariant result = Lisp.Eval("(list (= 1 2) (= 4 4) (== \"blub\" \"blub\") (== #t #f) (equal 3 4))");
@@ -2120,6 +2127,54 @@ namespace LispUnitTests
             LispVariant result = Lisp.Eval("(do (% 7.4 2.8))");
             Assert.IsTrue(result.IsDouble);
             Assert.AreEqual("1.8", result.DoubleValue.ToString(CultureInfo.InvariantCulture));
+        }
+
+        [TestMethod]
+        public void Test_LeftShift()
+        {
+            LispVariant result = Lisp.Eval("(do (<< 4 2))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual("16", result.IntValue.ToString(CultureInfo.InvariantCulture));
+        }
+
+        [TestMethod]
+        public void Test_RightShift()
+        {
+            LispVariant result = Lisp.Eval("(do (>> 33 1))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual("16", result.IntValue.ToString(CultureInfo.InvariantCulture));
+        }
+
+        [TestMethod]
+        public void Test_BinaryOr()
+        {
+            LispVariant result = Lisp.Eval("(do (| 18 7))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual("23", result.IntValue.ToString(CultureInfo.InvariantCulture));
+        }
+
+        [TestMethod]
+        public void Test_BinaryAnd()
+        {
+            LispVariant result = Lisp.Eval("(do (& 18 7))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual("2", result.IntValue.ToString(CultureInfo.InvariantCulture));
+        }
+
+        [TestMethod]
+        public void Test_BinaryXOr()
+        {
+            LispVariant result = Lisp.Eval("(do (^ 13 6))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual("11", result.IntValue.ToString(CultureInfo.InvariantCulture));
+        }
+
+        [TestMethod]
+        public void Test_BinaryNot()
+        {
+            LispVariant result = Lisp.Eval("(do (~ 256))");
+            Assert.IsTrue(result.IsInt);
+            Assert.AreEqual("-257", result.IntValue.ToString(CultureInfo.InvariantCulture));
         }
 
         [TestMethod]

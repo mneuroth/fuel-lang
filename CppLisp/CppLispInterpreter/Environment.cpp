@@ -922,6 +922,36 @@ static std::shared_ptr<LispVariant> Not(const std::vector<std::shared_ptr<object
 	return FuelFuncWrapper1<LispVariant, bool>(args, scope, "not", [](const LispVariant & arg1) -> bool { return !arg1.BoolValue(); });
 }
 
+static std::shared_ptr<LispVariant> LeftShift(const std::vector<std::shared_ptr<object>>& args, std::shared_ptr<LispScope> scope)
+{
+	return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "lef-shift", [](const LispVariant & arg1, const LispVariant & arg2) -> LispVariant { return LispVariant(LispType::_Int, std::make_shared<object>(arg1.IntValue() << arg2.IntValue())); });
+}
+
+static std::shared_ptr<LispVariant> RightShift(const std::vector<std::shared_ptr<object>>& args, std::shared_ptr<LispScope> scope)
+{
+	return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "right-shift", [](const LispVariant& arg1, const LispVariant& arg2) -> LispVariant { return LispVariant(LispType::_Int, std::make_shared<object>(arg1.IntValue() >> arg2.IntValue())); });
+}
+
+static std::shared_ptr<LispVariant> BinaryOr(const std::vector<std::shared_ptr<object>>& args, std::shared_ptr<LispScope> scope)
+{
+	return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "lef-shift", [](const LispVariant& arg1, const LispVariant& arg2) -> LispVariant { return LispVariant(LispType::_Int, std::make_shared<object>(arg1.IntValue() | arg2.IntValue())); });
+}
+
+static std::shared_ptr<LispVariant> BinaryAnd(const std::vector<std::shared_ptr<object>>& args, std::shared_ptr<LispScope> scope)
+{
+	return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "lef-shift", [](const LispVariant& arg1, const LispVariant& arg2) -> LispVariant { return LispVariant(LispType::_Int, std::make_shared<object>(arg1.IntValue() & arg2.IntValue())); });
+}
+
+static std::shared_ptr<LispVariant> BinaryXOr(const std::vector<std::shared_ptr<object>>& args, std::shared_ptr<LispScope> scope)
+{
+	return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "lef-shift", [](const LispVariant& arg1, const LispVariant& arg2) -> LispVariant { return LispVariant(LispType::_Int, std::make_shared<object>(arg1.IntValue() ^ arg2.IntValue())); });
+}
+
+static std::shared_ptr<LispVariant> BinaryNot(const std::vector<std::shared_ptr<object>>& args, std::shared_ptr<LispScope> scope)
+{
+	return FuelFuncWrapper1<LispVariant, LispVariant>(args, scope, "binary-not", [](const LispVariant& arg1) -> LispVariant { return LispVariant(LispType::_Int, std::make_shared<object>(~arg1.IntValue())); });
+}
+
 static std::shared_ptr<LispVariant> LessTest(const std::vector<std::shared_ptr<object>> & args, std::shared_ptr<LispScope> scope)
 {
 	return CompareOperation(args, [](const LispVariant & l, const LispVariant & r) -> bool { return l < r; }, scope, "<");
@@ -2330,6 +2360,12 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["mod"] = CreateFunction(Modulo, "(mod expr1 expr2)", "Returns value of modulo operation between expr1 and expr2");
 	(*scope)["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: mod");
 
+	(*scope)[">>"] = CreateFunction(RightShift, "(>> expr1 expr2)", "Integer right shift. Returns integer expression1 right shifted for expression2 binary digits.");
+	(*scope)["|"] = CreateFunction(BinaryOr, "(| expr1 expr2)", "Binary or for integer numbers (bitwise or).");
+	(*scope)["&"] = CreateFunction(BinaryAnd, "(& expr1 expr2)", "Binary and for integer numbers (bitwise and).");
+	(*scope)["^"] = CreateFunction(BinaryXOr, "(^ expr1 expr2)", "Binary xor for integer numbers (bitwise xor).");
+	(*scope)["~"] = CreateFunction(BinaryNot, "(~ expr1)", "Binary not for integer numbers (bitwise not).");
+
 	(*scope)["<"] = CreateFunction(LessTest, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese.");
 	(*scope)[">"] = CreateFunction(GreaterTest, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese.");
 	(*scope)["<="] = CreateFunction(LessEqualTest, "(<= expr1 expr2)", "Returns #t if value of expression1 is equal or smaller than value of expression2 and returns #f otherwiese.");
@@ -2381,7 +2417,9 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 
 	// special forms
 	(*scope)[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)["&&"] = CreateFunction(and_form, "(&& expr1 expr2 ...)", "See: and", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[Or] = CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
+	(*scope)["||"] = CreateFunction(or_form, "(|| expr1 expr2 ...)", "See: or", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[Def] = CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[Gdef] = CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
 	(*scope)[Setf] = CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
