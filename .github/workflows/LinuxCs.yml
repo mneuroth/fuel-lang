@@ -35,4 +35,8 @@ jobs:
         ./fuel.exe
     - name: Test
       run: |
+        ls -lrt
+        cd CsLisp
+        ls -lrt
         dotnet test --logger "trx;LogFileName=test_results.xml" --results-directory "./TestResults"
+        ls -lrt
