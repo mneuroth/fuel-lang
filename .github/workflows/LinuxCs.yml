@@ -35,4 +35,4 @@ jobs:
         ./fuel.exe
     - name: Test
       run: |
-        dotnet test --logger
+        dotnet test --logger "trx;LogFileName=test_results.xml" --results-directory "./TestResults"
