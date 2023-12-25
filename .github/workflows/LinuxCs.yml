@@ -33,4 +33,6 @@ jobs:
         ./fuel.exe -v
         ./fuel.exe -e "(println (platform))"
         ./fuel.exe
-        
+    - name: Test
+      run: |
+        dotnet test --logger
