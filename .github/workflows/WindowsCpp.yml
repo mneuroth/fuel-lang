@@ -32,8 +32,6 @@ jobs:
         cmake CMakeLists.txt
         cmake --build . --config Release
         dir
-        cd x64
-        dir 
         cd Release
         dir
         ./fuel -v
