@@ -45,9 +45,9 @@
 
 #ifdef _MSC_VER
 #ifdef _EXPORTING
-#define DLLEXPORT //__declspec(dllexport)
+#define DLLEXPORT __declspec(dllexport)
 #else
-#define DLLEXPORT //__declspec(dllimport)
+#define DLLEXPORT __declspec(dllimport)
 #endif
 #else
 #define DLLEXPORT

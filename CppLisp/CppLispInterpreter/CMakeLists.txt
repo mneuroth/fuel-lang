@@ -3,6 +3,9 @@ cmake_minimum_required (VERSION 3.1)
 project (FuelInterpreter)
 
 set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+add_compile_definitions(_EXPORTING=1)
 
 file(GLOB fuel_interpreter_src
 csobject.h
