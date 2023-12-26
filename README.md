@@ -195,7 +195,10 @@ FUEL can be used with mono environment under Linux and Mac OS X.
 FUEL is also available for native C++ for all platforms supporting a C++11 compiler.
 FUEL was successfully compiled on Windows, Android, Linux (including the Raspberry Pi) and Mac OS X. 
 
-* Github Actions: [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml) [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)[![Windows C#](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml/badge.svg)][![MacOS C#](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml/badge.svg)]
+* Github Actions: [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml) 
+                  [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)
+				  [![Windows C#](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml)
+				  [![MacOS C#](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml)
   
 
 License
