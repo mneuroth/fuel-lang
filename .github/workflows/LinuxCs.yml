@@ -23,31 +23,24 @@ jobs:
     - name: Build
       run: |
         ls -lrt
-        #./build_cs.sh
-        #ls -lrt
-        ls -lrt CsLisp
         cd CsLisp
         ls -lrt
-        dotnet build
+        dotnet build --configuration Release
         ls -lrt
         ls -lrt bin
-        #ls -lrt CsLisp/bin
-        #ls -lrt CsLisp/bin/ContinousIntgration
-        #cd CsLisp/bin/ContinousIntgration
         cd bin
         ls -lrt
-        ls -lrt Debug
-        ls -lrt Debug/net6.0
-        #chmod +x ./fuel.exe
-        ./Debug/net6.0/fuel -v
-        ./Debug/net6.0/fuel -e "(println (platform))"
-        ./Debug/net6.0/fuel
+        cd Release
+        ls -lrt
+        cd net6.0
+        ls -lrt
+        ./fuel -v
+        ./fuel -e "(println (platform))"
+        ./fuel
     - name: Test
       run: |
         ls -lrt
         cd CsLisp
         ls -lrt
-        #cd CsLispUnitTests
-        #ls -lrt
         dotnet test --logger "trx;LogFileName=test_results.xml" --results-directory "./TestResults"
         ls -lrt
