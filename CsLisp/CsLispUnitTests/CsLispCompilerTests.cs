@@ -34,6 +34,7 @@ namespace LispUnitTests
         private const string CompilerOutputFileName = "unittestoutput.exe";
         
         [TestMethod]
+        [Ignore]    // compiler currently not supported
         public void Test_Compiler()
         {
             var compiler = new LispCompiler();

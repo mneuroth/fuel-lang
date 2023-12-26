@@ -120,7 +120,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"../../../../Scripts\simple.fuel")]
+        [DeploymentItem(@"../../../../Scripts/simple.fuel")]
         public void Test_MainFile()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -133,7 +133,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"../../../../Scripts\error.fuel")]
+        [DeploymentItem(@"../../../../Scripts/error.fuel")]
         public void Test_MainFileError()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -148,7 +148,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"../../../../Scripts\error.fuel")]
+        [DeploymentItem(@"../../../../Scripts/error.fuel")]
         public void Test_MainFileErrorDetailed()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -316,6 +316,7 @@ namespace LispUnitTests
 
         [TestMethod]
         [DeploymentItem(@"../../../../TestData/simple.fuel")]
+        [Ignore]    // compiler currently not supported
         public void Test_Compile()
         {
             using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
@@ -368,6 +369,7 @@ namespace LispUnitTests
 
         [TestMethod]
         [DeploymentItem(@"../../../../TestData/controlflow.fuel")]
+        [Ignore]    // compiler currently not supported
         public void Test_Compile2()
         {
             // test offline with:
