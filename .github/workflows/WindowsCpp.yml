@@ -30,7 +30,8 @@ jobs:
         cl -v
         cmake --version
         cmake CMakeLists.txt
-        cmake --build . --config Release
+        cmake --build . 
+        rem --config Release
         dir
         cd x64
         dir 
