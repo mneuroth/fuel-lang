@@ -37,8 +37,9 @@ jobs:
         cd bin
         ls -lrt
         ls -lrt Debug
+        ls -lrt Debug/net6.0
         #chmod +x ./fuel.exe
-        ./Debug/fuel.exe -v
+        ./Debug/net6.0/fuel.exe -v
         #./fuel.exe -e "(println (platform))"
         #./fuel.exe
     - name: Test
