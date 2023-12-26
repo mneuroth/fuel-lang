@@ -24,6 +24,7 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
 
     # Compile the project
+    # cmake --build . --config Release
     - name: Compile the project
       run: |
         cd CppLisp
@@ -31,7 +32,6 @@ jobs:
         cmake --version
         cmake CMakeLists.txt
         cmake --build . 
-        rem --config Release
         dir
         cd x64
         dir 
