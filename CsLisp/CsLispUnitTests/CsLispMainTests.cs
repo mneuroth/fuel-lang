@@ -475,10 +475,11 @@ namespace LispUnitTests
                 var args = new[] { "-d", "test.fuel", "-l=." };
                 LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
+                Console.WriteLine(s);
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
-                Assert.IsTrue(s.Contains("#1   line=4     module=./testmodule.fuel         condition="));
+                Assert.IsTrue(s.Contains("#1   line=4     module=.\\testmodule.fuel         condition=") || s.Contains("#1   line=4     module=./testmodule.fuel         condition="));
                 Assert.IsTrue(s.Contains("       1 name=<main>                              lineno=4    module=test.fuel"));
-                Assert.IsTrue(s.Contains("-->    2 name=blub                                lineno=4    module=.\\testmodule.fuel"));
+                Assert.IsTrue(s.Contains("-->    2 name=blub                                lineno=4    module=.\\testmodule.fuel") || s.Contains("-->    2 name=blub                                lineno=4    module=./testmodule.fuel"));
                 Assert.IsTrue(s.Contains("x --> 8                                        : Int"));
             }
         }
