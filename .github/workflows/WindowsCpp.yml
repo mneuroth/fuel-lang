@@ -28,7 +28,6 @@ jobs:
     - name: Compile the project
       run: |
         cd CppLisp
-        cl -v
         cmake --version
         cmake CMakeLists.txt
         cmake --build .
