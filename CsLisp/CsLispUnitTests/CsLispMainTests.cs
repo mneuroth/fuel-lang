@@ -120,7 +120,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Scripts\simple.fuel")]
+        [DeploymentItem(@"..\..\..\..\Scripts\simple.fuel")]
         public void Test_MainFile()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -133,7 +133,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Scripts\error.fuel")]
+        [DeploymentItem(@"..\..\..\..\Scripts\error.fuel")]
         public void Test_MainFileError()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -148,7 +148,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Scripts\error.fuel")]
+        [DeploymentItem(@"..\..\..\..\Scripts\error.fuel")]
         public void Test_MainFileErrorDetailed()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -255,7 +255,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\multiprintln.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\multiprintln.fuel")]
         public void Test_MultiPrintLn()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -268,8 +268,8 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
-        [DeploymentItem(@"..\..\..\TestData\writereadfile.fuel")]
+        [DeploymentItem(@"..\..\..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"..\..\..\..\TestData\writereadfile.fuel")]
         public void Test_WriteAndReadFile()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -284,8 +284,8 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\Library\fuellib.fuel", "Library")]
-        [DeploymentItem(@"..\..\..\TestData\teststdlib.fuel")]
+        [DeploymentItem(@"..\..\..\..\..\Library\fuellib.fuel", "Library")]
+        [DeploymentItem(@"..\..\..\..\TestData\teststdlib.fuel")]
         public void Test_StdLibObjects()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -315,7 +315,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\simple.fuel")]
         public void Test_Compile()
         {
             using (/*ConsoleRedirector cr =*/ new ConsoleRedirector())
@@ -327,7 +327,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\simple.fuel")]
         public void Test_Profile()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -340,7 +340,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\simple.fuel")]
         public void Test_Trace()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -354,7 +354,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\simple.fuel")]
         public void Test_CompileOutput()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
@@ -367,7 +367,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\controlflow.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\controlflow.fuel")]
         public void Test_Compile2()
         {
             // test offline with:
@@ -426,7 +426,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\testdebugger.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\testdebugger.fuel")]
         public void Test_DebugFile()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector("b 4\nr\nl\nk\nlist\ndown\nk\nup\ncode\ndown\ncode\nclear\ny\nlist\nver\nabout"))
@@ -451,7 +451,7 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\simple.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\simple.fuel")]
         public void Test_DebugSetBreakpoints()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector("b \"module name\":4 (== a 4)\nlist"))
@@ -464,8 +464,8 @@ namespace LispUnitTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"..\..\..\TestData\test.fuel")]
-        [DeploymentItem(@"..\..\..\TestData\testmodule.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\test.fuel")]
+        [DeploymentItem(@"..\..\..\..\TestData\testmodule.fuel")]
         public void Test_DebugModule()
         {
             using (ConsoleRedirector cr = new ConsoleRedirector("b .\\testmodule.fuel:4\nlist\nr\nk\nl"))

@@ -36,8 +36,9 @@ jobs:
         #cd CsLisp/bin/ContinousIntgration
         cd bin
         ls -lrt
+        ls -lrt Debug
         #chmod +x ./fuel.exe
-        #./fuel.exe -v
+        ./Debug/fuel.exe -v
         #./fuel.exe -e "(println (platform))"
         #./fuel.exe
     - name: Test
