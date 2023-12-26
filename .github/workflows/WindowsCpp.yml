@@ -30,11 +30,11 @@ jobs:
         cd CppLisp
         cmake --version
         cmake CMakeLists.txt
-        cmake --build .
+        cmake --build . --config Release
         dir
         cd x64
         dir 
-        cd Debug
+        cd Release
         dir
         ./fuel -v
         ./fuel -e "(println (platform))"
