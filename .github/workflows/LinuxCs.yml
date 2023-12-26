@@ -39,9 +39,9 @@ jobs:
         ls -lrt Debug
         ls -lrt Debug/net6.0
         #chmod +x ./fuel.exe
-        ./Debug/net6.0/fuel.exe -v
-        #./fuel.exe -e "(println (platform))"
-        #./fuel.exe
+        ./Debug/net6.0/fuel -v
+        ./Debug/net6.0/fuel.exe -e "(println (platform))"
+        ./Debug/net6.0/fuel.exe
     - name: Test
       run: |
         ls -lrt
