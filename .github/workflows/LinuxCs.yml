@@ -47,7 +47,7 @@ jobs:
         ls -lrt
         cd CsLisp
         ls -lrt
-        cd CsLispUnitTests
-        ls -lrt
+        #cd CsLispUnitTests
+        #ls -lrt
         dotnet test --logger "trx;LogFileName=test_results.xml" --results-directory "./TestResults"
         ls -lrt
