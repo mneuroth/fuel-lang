@@ -38,9 +38,9 @@
 
 #ifdef _MSC_VER
 #ifdef _DBGEXPORTING
-#define DBGDLLEXPORT __declspec(dllexport)
+#define DBGDLLEXPORT //__declspec(dllexport)
 #else
-#define DBGDLLEXPORT __declspec(dllimport)
+#define DBGDLLEXPORT //__declspec(dllimport)
 #endif
 #else
 #define DBGDLLEXPORT
