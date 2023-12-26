@@ -1,90 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{988693BD-974C-4391-8C48-CF294C32CF24}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CsLisp</RootNamespace>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <StartupObject>CsLisp.Fuel</StartupObject>
     <AssemblyName>fuel</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ContinousIntgration|AnyCPU'">
-    <OutputPath>bin\ContinousIntgration\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Compile Remove="CsLispCompiler\**" />
+    <Compile Remove="CsLispDebugger\**" />
+    <Compile Remove="CsLispInterpreter\**" />
+    <Compile Remove="CsLispUnitTests\**" />
+    <Compile Remove="TestAppUsingFuel\**" />
+    <EmbeddedResource Remove="CsLispCompiler\**" />
+    <EmbeddedResource Remove="CsLispDebugger\**" />
+    <EmbeddedResource Remove="CsLispInterpreter\**" />
+    <EmbeddedResource Remove="CsLispUnitTests\**" />
+    <EmbeddedResource Remove="TestAppUsingFuel\**" />
+    <None Remove="CsLispCompiler\**" />
+    <None Remove="CsLispDebugger\**" />
+    <None Remove="CsLispInterpreter\**" />
+    <None Remove="CsLispUnitTests\**" />
+    <None Remove="TestAppUsingFuel\**" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Fuel.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <PackageReference Include="System.CodeDom" Version="8.0.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="..\Library\fuellib.fuel">
-      <Link>library\fuellib.fuel</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
+    <ProjectReference Include="CsLispInterpreter\CsLispInterpreter.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="CsLispInterpreter\CsLispInterpreter.csproj">
-      <Project>{0b260217-8e2e-4739-b446-489db70aae83}</Project>
-      <Name>CsLispInterpreter</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <Target Name="AfterBuild">
-    <Copy SourceFiles="$(ProjectDir)CsLispDebugger\bin\$(ConfigurationName)\FuelDebugger.dll" DestinationFolder="$(TargetDir)" />
-    <Copy SourceFiles="$(ProjectDir)CsLispDebugger\bin\$(ConfigurationName)\FuelDebugger.pdb" DestinationFolder="$(TargetDir)" />
-    <Copy SourceFiles="$(ProjectDir)CsLispCompiler\bin\$(ConfigurationName)\FuelCompiler.dll" DestinationFolder="$(TargetDir)" />
-    <Copy SourceFiles="$(ProjectDir)CsLispCompiler\bin\$(ConfigurationName)\FuelCompiler.pdb" DestinationFolder="$(TargetDir)" />
-  </Target>
+
 </Project>
