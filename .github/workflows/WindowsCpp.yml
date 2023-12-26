@@ -32,6 +32,8 @@ jobs:
         cmake CMakeLists.txt
         cmake --build . --config Release
         dir
+        cd x64
+        dir 
         ./fuel -v
         ./fuel -e "(println (platform))"
         ./fuel
