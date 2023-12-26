@@ -223,7 +223,7 @@ namespace LispUnitTests
                 string s = cr.ToString().Trim();
                 Console.WriteLine(s);
                 Assert.IsTrue(s.Contains(@"Library/fuellib.fuel") || s.Contains(@"Library\fuellib.fuel"));
-                Assert.IsTrue(s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=.\Library\fuellib.fuel"));
+                Assert.IsTrue(s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=.\Library\fuellib.fuel") || s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=./Library/fuellib.fuel"));
             }
         }
 
