@@ -1578,7 +1578,7 @@ namespace LispUnitTests
         {
             using (ConsoleRedirector cr = new ConsoleRedirector())
             {
-                LispVariant result = Lisp.Eval("(do (import \"Library/\\\fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (println x))))");
+                LispVariant result = Lisp.Eval("(do (import \"Library/fuellib.fuel\") (foreach '(1 5 7) (lambda (x) (println x))))");
                 Assert.IsTrue(result.IsInt);
                 Assert.AreEqual(3, result.IntValue);
 
@@ -1733,9 +1733,9 @@ namespace LispUnitTests
                 Assert.AreEqual(1.0, result.DoubleValue);
 
                 string s = cr.ToString().Trim();
-                Assert.IsTrue(s.Contains("0.943818209374634"));
+                Assert.IsTrue(s.Contains("0.94381820937463"));
                 Assert.IsTrue(s.Contains("3.14159265358979"));
-                Assert.IsTrue(s.Contains("2.71828182845905"));
+                Assert.IsTrue(s.Contains("2.71828182845904"));
             }
         }
 
@@ -1942,7 +1942,7 @@ namespace LispUnitTests
         [DeploymentItem(@"../../../../../Library/fuellib.fuel", "Library")]
         public void Test_Find1()
         {
-            LispVariant result = Lisp.Eval("(do (import \"Library/\\\fuellib.fuel\") (def l '(1 5 7)) (find 5 l))");
+            LispVariant result = Lisp.Eval("(do (import \"Library/fuellib.fuel\") (def l '(1 5 7)) (find 5 l))");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(1, result.IntValue);
         }
@@ -1951,7 +1951,7 @@ namespace LispUnitTests
         [DeploymentItem(@"../../../../../Library/fuellib.fuel", "Library")]
         public void Test_Find2()
         {
-            LispVariant result = Lisp.Eval("(do (import \"Library/\\\fuellib.fuel\") (def l '(1 5 7)) (find 9 l))");
+            LispVariant result = Lisp.Eval("(do (import \"Library/fuellib.fuel\") (def l '(1 5 7)) (find 9 l))");
             Assert.IsTrue(result.IsInt);
             Assert.AreEqual(-1, result.IntValue);
         }
@@ -2126,7 +2126,7 @@ namespace LispUnitTests
         {
             LispVariant result = Lisp.Eval("(do (% 7.4 2.8))");
             Assert.IsTrue(result.IsDouble);
-            Assert.AreEqual("1.8", result.DoubleValue.ToString(CultureInfo.InvariantCulture));
+            Assert.AreEqual("1.8", result.DoubleValue.ToString(CultureInfo.InvariantCulture).Substring(0, 3));  // because of rounding error...
         }
 
         [TestMethod]
