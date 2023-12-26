@@ -751,7 +751,7 @@ namespace CsLisp
                     // use std lib of fuel from builtin resources
                     if(orgModuleFileName=="fuellib")
                     {
-                        code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
+                        code = Encoding.UTF8.GetString(CsLispInterpreter.Properties.Resources.fuellib);
                     }
                     else
                     {
