@@ -31,11 +31,11 @@ jobs:
         cl -v
         cmake --version
         cmake CMakeLists.txt
-        cmake --build . 
+        cmake --build .
         dir
         cd x64
         dir 
-        cd Release
+        cd Debug
         dir
         ./fuel -v
         ./fuel -e "(println (platform))"
