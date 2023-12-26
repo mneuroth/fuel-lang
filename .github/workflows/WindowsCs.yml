@@ -33,9 +33,9 @@ jobs:
         dir
         cd net6.0
         dir
-        fuel -v
-        fuel -e "(println (platform))"
-        fuel
+        .\fuel.exe -v
+        .\fuel.exe -e "(println (platform))"
+        .\fuel.exe
     - name: Test
       run: |
         dir
