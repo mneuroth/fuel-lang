@@ -32,6 +32,9 @@ jobs:
         cmake CMakeLists.txt
         cmake --build . --config Release
         dir
+        dir CppLispInterpreter
+        dir CppLispInterpreter\Release
+        copy CppLispInterpreter\Release\FuelInterpreter.dll Release
         cd Release
         dir
         ./fuel -v
