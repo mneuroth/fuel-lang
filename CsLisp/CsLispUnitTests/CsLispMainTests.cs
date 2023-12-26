@@ -221,6 +221,7 @@ namespace LispUnitTests
                 var args = new[] { "-i" };
                 LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
+                Console.WriteLine(s);
                 Assert.IsTrue(s.Contains(@"Library/fuellib.fuel") || s.Contains(@"Library\fuellib.fuel"));
                 Assert.IsTrue(s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=.\Library\fuellib.fuel"));
             }
@@ -300,7 +301,7 @@ namespace LispUnitTests
                 //Assert.IsTrue(s.Contains(@"File= .\FuelDebugger.dll"));
                 //Assert.IsTrue(s.Contains(@"File= .\FuelInterpreter.dll"));
                 //Assert.IsTrue(s.Contains(@"File= .\fuel.exe"));
-                Assert.IsTrue(s.Contains(@"File= .\teststdlib.fuel"));
+                Assert.IsTrue(s.Contains(@"File= .\teststdlib.fuel") || s.Contains(@"File= ./teststdlib.fuel"));
                 Assert.IsTrue(s.Contains("ListCount= 4"));
                 Assert.IsTrue(s.Contains("item= {  }"));
                 Assert.IsTrue(s.Contains("newitem= 12"));
