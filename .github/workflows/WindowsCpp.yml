@@ -30,7 +30,7 @@ jobs:
         cl -v
         cmake --version
         cmake CMakeLists.txt
-        nmake
+        cmake --build . --config Release
         dir
         ./fuel -v
         ./fuel -e "(println (platform))"
