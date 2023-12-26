@@ -27,7 +27,6 @@ jobs:
         ls -lrt
         dotnet build --configuration Release
         ls -lrt
-        ls -lrt bin
         cd bin
         ls -lrt
         cd Release

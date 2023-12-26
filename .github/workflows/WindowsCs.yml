@@ -22,25 +22,24 @@ jobs:
         dotnet-version: 6.0.x
     - name: Build
       run: |
-        ls -lrt
+        dir
         cd CsLisp
-        ls -lrt
+        dir
         dotnet build --configuration Release
-        ls -lrt
-        ls -lrt bin
+        dir
         cd bin
-        ls -lrt
+        dir
         cd Release
-        ls -lrt
+        dir
         cd net6.0
-        ls -lrt
-        ./fuel -v
-        ./fuel -e "(println (platform))"
-        ./fuel
+        dir
+        fuel -v
+        fuel -e "(println (platform))"
+        fuel
     - name: Test
       run: |
-        ls -lrt
+        dir
         cd CsLisp
-        ls -lrt
+        dir
         dotnet test --logger "trx;LogFileName=test_results.xml" --results-directory "./TestResults"
-        ls -lrt
+        dir
