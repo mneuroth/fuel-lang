@@ -23,12 +23,16 @@ jobs:
     - name: Build
       run: |
         ls -lrt
-        ./build_cs.sh
-        ls -lrt
-        ls -lrt CsLisp
-        ls -lrt CsLisp/bin
-        ls -lrt CsLisp/bin/ContinousIntgration
-        cd CsLisp/bin/ContinousIntgration
+        #./build_cs.sh
+        #ls -lrt
+        #ls -lrt CsLisp
+        cd CsLisp
+        dotnet build
+        ls -lrt bin
+        #ls -lrt CsLisp/bin
+        #ls -lrt CsLisp/bin/ContinousIntgration
+        #cd CsLisp/bin/ContinousIntgration
+        cd bin
         chmod +x ./fuel.exe
         ./fuel.exe -v
         ./fuel.exe -e "(println (platform))"
