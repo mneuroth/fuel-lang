@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: microsoft/setup-cmake@v1.2.0
 
     # Compile the project
     # cmake --build . --config Release
