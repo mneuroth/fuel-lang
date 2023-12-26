@@ -1,0 +1,45 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: MacOS C#
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Build
+      run: |
+        ls -lrt
+        cd CsLisp
+        ls -lrt
+        dotnet build --configuration Release
+        ls -lrt
+        cd bin
+        ls -lrt
+        cd Release
+        ls -lrt
+        cd net6.0
+        ls -lrt
+        ./fuel -v
+        ./fuel -e "(println (platform))"
+        ./fuel
+    - name: Test
+      run: |
+        ls -lrt
+        cd CsLisp
+        ls -lrt
+        dotnet test --logger "trx;LogFileName=test_results.xml" --results-directory "./TestResults"
+        ls -lrt
