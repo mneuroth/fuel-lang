@@ -458,7 +458,7 @@ namespace CsLisp
             scope["dict-keys"] = CreateFunction(DictKeys, "(dict-keys dict)", "Returns all keys in the dictionary.");
             scope["dict-clear"] = CreateFunction(DictClear, "(dict-clear dict)", "Clears the dictionary.");
             scope["dict-contains-key"] = CreateFunction(DictContainsKey, "(dict-contains-key dict key)", "Returns #t if key is contained in dictionary, otherwise #f.");
-            scope["dict-contains-value"] = CreateFunction(DictContainsValue, "(dict-contains-value dict key)", "Returns #t if value is contained in dictionary, otherwise #f.");
+            scope["dict-contains-value"] = CreateFunction(DictContainsValue, "(dict-contains-value dict value)", "Returns #t if value is contained in dictionary, otherwise #f.");
             // ggf. setf support
 
             // special forms
@@ -1504,7 +1504,7 @@ namespace CsLisp
             return FuelFuncWrapper3<LispVariant, LispVariant, LispVariant, LispVariant>(args, scope, "dict-set", (arg1, arg2, arg3) =>
             {
                 var nativeDict = arg1.Value as Dictionary<object, object>;
-                nativeDict[arg2.Value] = arg3;
+                nativeDict[arg2.Value] = arg3.Value;
                 return arg3;
             });
         }
@@ -1514,7 +1514,7 @@ namespace CsLisp
             return FuelFuncWrapper2<LispVariant, LispVariant, LispVariant>(args, scope, "dict-get", (arg1, arg2) =>
             {
                 var nativeDict = arg1.Value as Dictionary<object, object>;
-                return nativeDict.ContainsKey(arg2.Value) ? (LispVariant)nativeDict[arg2.Value] : new LispVariant();
+                return nativeDict.ContainsKey(arg2.Value) ? /*(LispVariant)*/new LispVariant(nativeDict[arg2.Value]) : new LispVariant();
             });
         }
 

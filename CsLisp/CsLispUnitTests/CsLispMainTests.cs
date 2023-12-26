@@ -221,7 +221,6 @@ namespace LispUnitTests
                 var args = new[] { "-i" };
                 LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
-                Console.WriteLine(s);
                 Assert.IsTrue(s.Contains(@"Library/fuellib.fuel") || s.Contains(@"Library\fuellib.fuel"));
                 Assert.IsTrue(s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=.\Library\fuellib.fuel") || s.Contains(@"Dict-Remove --> function (Dict-Remove obj p0)            : Function  : module=./Library/fuellib.fuel"));
             }
@@ -476,7 +475,6 @@ namespace LispUnitTests
                 var args = new[] { "-d", "test.fuel", "-l=." };
                 LispMainHelper.MainExtended(args, Console.Out, Console.In);
                 string s = cr.ToString().Trim();
-                Console.WriteLine(s);
                 Assert.IsTrue(s.Contains("FUEL(isp)-DBG> Breakpoints:"));
                 Assert.IsTrue(s.Contains("#1   line=4     module=.\\testmodule.fuel         condition=") || s.Contains("#1   line=4     module=./testmodule.fuel         condition="));
                 Assert.IsTrue(s.Contains("       1 name=<main>                              lineno=4    module=test.fuel"));

@@ -2413,7 +2413,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["dict-keys"] = CreateFunction(DictKeys, "(dict-keys dict)", "Returns all keys in the dictionary.");
 	(*scope)["dict-clear"] = CreateFunction(DictClear, "(dict-clear dict)", "Clears the dictionary.");
 	(*scope)["dict-contains-key"] = CreateFunction(DictContainsKey, "(dict-contains-key dict key)", "Returns #t if key is contained in dictionary, otherwise #f.");
-	(*scope)["dict-contains-value"] = CreateFunction(DictContainsValue, "(dict-contains-value dict key)", "Returns #t if value is contained in dictionary, otherwise #f.");
+	(*scope)["dict-contains-value"] = CreateFunction(DictContainsValue, "(dict-contains-value dict value)", "Returns #t if value is contained in dictionary, otherwise #f.");
 
 	// special forms
 	(*scope)[And] = CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", /*isBuiltin:*/true, /*isSpecialForm:*/ true);
