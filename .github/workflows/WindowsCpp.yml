@@ -50,7 +50,7 @@ jobs:
         dir
         cd ..
         dir
-        msbuild CppLisp.sln
+        msbuild CppLisp.sln /property:Configuration=Release
         dir
         dir Release
         dir x64
