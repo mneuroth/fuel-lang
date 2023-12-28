@@ -49,7 +49,6 @@ jobs:
         ./fuel
         dir
         cd ..
-        cd ..
         dir
         msbuild fule.sln
         dir
