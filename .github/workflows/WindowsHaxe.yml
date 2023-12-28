@@ -1,0 +1,145 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI_Windows
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  create_release:
+
+    name: Prepare release
+    runs-on: windows-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+    - name: Checkout code
+      if: contains(github.ref, 'release')
+      uses: actions/checkout@v3
+    - name: Create Release
+      if: contains(github.ref, 'release')
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Output Release URL File
+      if: contains(github.ref, 'release')
+      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+    - name: Save Release URL File for publish
+      if: contains(github.ref, 'release')
+      uses: actions/upload-artifact@v1
+      with:
+        name: release_url
+        path: release_url.txt
+
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+    needs: create_release
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.3.3
+
+      # Install Haxe
+      - name: Install Haxe compiler
+        run: |          
+          haxe --version
+          haxelib install utest
+          haxelib install hxjava
+          haxelib install hxcpp
+          haxelib install hxcs
+          haxelib install hxnodejs
+          haxe
+          haxe --version
+
+      - name: Install 7Zip PowerShell Module
+        shell: powershell
+        run: Install-Module 7Zip4PowerShell -Force -Verbose
+        
+      # Compile the project
+      - name: Compile the project
+        run: |
+          cd HaxeLisp
+          haxe build.hxml
+          dir
+          dir src
+          dir bin
+          dir bin\fuel.java
+          dir bin\fuel.cpp
+          dir bin\fuel.cs
+          dir bin\fuel.cs\bin
+          java -jar ./bin/fuel.java/Fuel.jar -e "(+ 1 2 3)" -t
+          ./bin/fuel.cpp/Fuel -e "(+ 1 2 3)" -t
+          ./bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)" -t
+          python3 ./bin/fuel.py -e "(+ 1 2 3)" -t
+          dir
+          powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_binaries_java_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          powershell Compress-7Zip ".\bin\fuel.cpp\Fuel.exe" -ArchiveFileName "fuel_binaries_cpp_0.99.6.zip" -Format Zip
+          copy ".\bin\fuel.cpp\Fuel.exe" ".\bin\fuel.cpp\FuelCpp.exe"
+          powershell Compress-7Zip ".\bin\fuel.cpp\FuelCpp.exe" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -ArchiveFileName "fuel_binaries_cs_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          powershell Compress-7Zip ".\bin\fuel.py" -ArchiveFileName "fuel_binaries_py_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.py" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          powershell Compress-7Zip ".\bin\fuel.js" -ArchiveFileName "fuel_binaries_js_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.js" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          powershell Compress-7Zip ".\bin\fuel_node.js" -ArchiveFileName "fuel_binaries_js_node_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel_node.js" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          #zip fuel_binaries.zip ./bin/fuel.java/Fuel.jar ./bin/fuel.cpp/Fuel ./bin/fuel.cs/bin/Fuel.exe ./bin/fuel.py
+          #unzip -v fuel_binaries.zip
+          #dir
+
+      # Test the project
+      - name: Test the project
+        run: |
+          # use this command:
+          # haxe unittest.hxml
+          # or this:
+          cd HaxeLisp
+          cd src
+          haxe --interp --main Fuel
+          echo "====="
+          haxe --interp --class-path ..\tests --library utest --main FuelTest
+
+      - name: Upload Release Asset
+        if: contains(github.ref, 'release')
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: HaxeLisp/fuel_all_binaries_0.99.6.zip
+          asset_name: fuel_all_binaries_0.99.6.zip
+          asset_content_type: application/zip

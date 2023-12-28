@@ -1,0 +1,58 @@
+--class-path src
+--main Fuel
+
+--each
+
+--interp
+
+--next
+
+--js bin/fuel.js
+# --cmd node bin/fuel.js
+
+--next
+
+-lib hxnodejs
+-D node
+--js bin/fuel_node.js
+# --cmd node bin/fuel_node.js
+
+# --next 
+
+# --hl bin/fuel.hl
+# --cmd hl bin/fuel.hl -e "(+ 1 2 3)" 
+
+# --next
+
+# --neko bin/fuel.n
+# --cmd neko bin/fuel.n -e "(+ 1 2 3)" 
+
+--next
+
+--python bin/fuel.py
+#--cmd python3 bin/fuel.py -e "(float 1.234)" -t
+--cmd python3 bin/fuel.py -e "(def x 0.0) (typestr x)" -t
+#--cmd python3 bin/fuel.py -e "(+ 1 2 3)" -t
+
+--next
+
+--java bin/fuel.java
+# --cmd java -jar bin/fuel.java/Fuel.jar -e "(+ 1 2 3)"
+
+--next
+
+--cpp bin/fuel.cpp
+# --cmd bin/fuel.cpp/Fuel -e "(def x 1.0) (typestr x)" -t
+# --cmd bin/fuel.cpp/Fuel -e "(+ 1 2 3)"
+
+--next
+
+--cs bin/fuel.cs
+# --cmd bin/fuel.cs/bin/Fuel.exe -e "(float 1.234)" -t
+# --cmd bin/fuel.cs/bin/Fuel.exe -e "(def x 1.0) (typestr x)" -t
+# --cmd bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)"
+
+# --next
+
+# --lua bin/fuel.lua
+# --cmd lua bin/fuel.lua -e "(+ 1 2 3)"

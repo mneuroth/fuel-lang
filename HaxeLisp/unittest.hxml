@@ -1,0 +1,44 @@
+--class-path src
+--class-path tests
+--main FuelTest
+
+--each
+
+--interp
+--library utest
+
+# --next
+
+# --js bin/fueltest.js
+# --library utest
+# --cmd node bin/fueltest.js
+
+# --next
+
+# --neko bin/fueltest.n
+# --library utest
+# --cmd neko bin/fueltest.n 
+
+# --next
+
+# --python bin/fueltest.py
+# --library utest
+# --cmd python3 bin/fueltest.py
+
+# --next
+
+# --java bin/fueltest.java
+# --library utest
+# --cmd java -jar bin/fueltest.java/fueltest.jar
+
+# --next
+
+# --cpp bin/fueltest.cpp
+# --library utest
+# --cmd bin/fueltest.cpp/fueltest
+
+# --next
+
+# --cs bin/fueltest.cs
+# --library utest
+# --cmd bin/fueltest.cs/bin/fueltest.exe

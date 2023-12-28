@@ -1,0 +1,68 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI_MacOS
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: macos-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.3.3
+
+      # Install Haxe
+      - name: Install Haxe compiler
+        run: |
+          haxelib install utest
+          haxelib install hxjava
+          haxelib install hxcpp
+          haxelib install hxcs
+          haxelib install hxnodejs
+          haxe
+          haxe --version
+
+      # Compile the project
+      - name: Compile the project
+        run: |
+          cd HaxeLisp
+          haxe build.hxml
+          ls -lrt
+          ls -lrt src
+          ls -lrt bin
+          ls -lrt bin/fuel.java
+          ls -lrt bin/fuel.cpp
+          ls -lrt bin/fuel.cs
+          ls -lrt bin/fuel.cs/bin
+          java -jar ./bin/fuel.java/Fuel.jar -e "(+ 1 2 3)" -t
+          ./bin/fuel.cpp/Fuel -e "(+ 1 2 3)" -t
+          python3 ./bin/fuel.py -e "(+ 1 2 3)" -t
+
+      # Test the project
+      - name: Test the project
+        run: |
+          # use this command:
+          # haxe unittest.hxml
+          # or this:
+          cd HaxeLisp
+          cd src
+          haxe --interp --main Fuel
+          echo "====="
+          haxe --interp --class-path ../tests --library utest --main FuelTest
