@@ -52,3 +52,6 @@ jobs:
         dir
         msbuild CppLisp.sln
         dir
+        dir Release
+        dir x64
+        dir x64\Release
