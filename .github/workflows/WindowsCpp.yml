@@ -28,7 +28,7 @@ jobs:
 
     # Compile the project
     # cmake --build . --config Release
-    - name: Compile the project
+    - name: Compile the project with CMake
       run: |
         cd CppLisp
         cmake --version
@@ -50,6 +50,10 @@ jobs:
         dir
         cd ..
         dir
+
+    - name: Compile and test the project with MSBuild
+      run: |
+        cd CppLisp
         msbuild CppLisp.sln /property:Configuration=Release
         dir
         dir Release
@@ -58,3 +62,4 @@ jobs:
         cd x64
         cd Release
         vstest.console CppLispInterpreterTests.dll
+        dir
