@@ -55,3 +55,6 @@ jobs:
         dir Release
         dir x64
         dir x64\Release
+        cd x64
+        cd Release
+        vstest.console CppLispInterpreterTests.dll
