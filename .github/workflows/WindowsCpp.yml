@@ -35,7 +35,7 @@ jobs:
         dir Release
         dir x64
         dir x64\Release
-        dir CppLispInterpreterTests\Release
+        dir CppLispInterpreterTests
         dir CppLispInterpreter
         dir CppLispInterpreter\Release
         copy CppLispInterpreter\Release\FuelInterpreter.dll Release
@@ -44,4 +44,9 @@ jobs:
         ./fuel -v
         ./fuel -e "(println (platform))"
         ./fuel
+        dir
+        cd ..
+        cd ..
+        dir
+        msbuild fule.sln
         dir
