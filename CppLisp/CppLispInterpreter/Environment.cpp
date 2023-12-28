@@ -2361,6 +2361,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)["%"] = CreateFunction(Modulo, "(% expr1 expr2)", "see: mod");
 
 	(*scope)[">>"] = CreateFunction(RightShift, "(>> expr1 expr2)", "Integer right shift. Returns integer expression1 right shifted for expression2 binary digits.");
+	(*scope)["<<"] = CreateFunction(LeftShift, "(>> expr1 expr2)", "Integer left shift. Returns integer expression1 left shifted for expression2 binary digits.");
 	(*scope)["|"] = CreateFunction(BinaryOr, "(| expr1 expr2)", "Binary or for integer numbers (bitwise or).");
 	(*scope)["&"] = CreateFunction(BinaryAnd, "(& expr1 expr2)", "Binary and for integer numbers (bitwise and).");
 	(*scope)["^"] = CreateFunction(BinaryXOr, "(^ expr1 expr2)", "Binary xor for integer numbers (bitwise xor).");

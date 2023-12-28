@@ -32,6 +32,8 @@ jobs:
         cmake CMakeLists.txt
         cmake --build . --config Release
         dir
+        dir Release
+        dir x64
         dir CppLispInterpreter
         dir CppLispInterpreter\Release
         copy CppLispInterpreter\Release\FuelInterpreter.dll Release
