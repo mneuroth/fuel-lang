@@ -50,5 +50,5 @@ jobs:
         dir
         cd ..
         dir
-        msbuild fule.sln
+        msbuild CppLisp.sln
         dir
