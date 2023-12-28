@@ -1,8 +1,8 @@
 <img src="fuel.png" alt="fuel logo" height="128" >
 
 # fuel-lang == FUEL(isp)
-FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform and native C++). 
-FUEL is written in C# and C++.
+FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform and native C++ and since december 2023 also for [Haxe](https://haxe.org/)). 
+FUEL is written in C#, C++ and Haxe. All target platforms for Haxe are supported: JavaScript, Java, C++, C#, Python, Lua, PHP, Neko, HashLink.
 
 FUEL
 ----
@@ -198,12 +198,37 @@ FUEL was successfully compiled on Windows, Android, Linux (including the Raspber
 * Github Actions: 
     * Linux [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml) 
             [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)
+			[![Linux Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxHaxe.yml)
     * Windows [![Windows C#](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml)
 	          [![Windows C++](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCpp.yml)
+	          [![Windows Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsHaxe.yml)
 	* MacOS [![MacOS C#](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml)
            	[![MacOS C++](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCpp.yml)
+			[![MacOS Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSHaxe.yml)
 	        
-  
+Benchmarks
+----------
+
+Benchmark results on Windows 11 Dell XPS 17 with i7-11800H CPU (December 2023 with version 0.99.6):
+
+| Executable         | Platform            | benchmark.fuel [s] |
+|---                 |---                  |---                 |
+| Fuel.exe           | Windows C# native   |  0.8               |
+| Fuel.exe           | Windows C++ native  |  1.7               |
+|                    |                     |                    |
+| Fuel.exe           | Windows Haxe_C#     |  5.6               |
+| FuelCpp.exe        | Windows Haxe_C++    |  0.7               |
+| java -jar fuel.jar | Windows Haxe_Java   |  3.6               |
+| python fuel.py     | Windows Haxe_Python | 95.4               |
+| neko fuel.n        | Windows Haxe_Neko   | 30.0               |
+|                    |                     |                    |
+| Fuel.exe           | WSL Haxe_C#         |  5.7               |
+| FuelCpp.exe        | WSL Haxe_C++        |  1.3               |
+| java -jar fuel.jar | WSL Haxe_Java       |  5.1               |
+| node fuel.js       | WSL Haxe_JavaScript |  1.6               |
+| python fuel.py     | WSL Haxe_Python     | 87.5               |
+| neko fuel.n        | WSL Haxe_Neko       | 41.7               |
+| hl fuel.hl         | WSL Haxe_HashLink   |  6.4               |
 
 License
 -------
