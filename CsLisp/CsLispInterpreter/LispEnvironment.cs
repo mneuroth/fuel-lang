@@ -343,6 +343,7 @@ namespace CsLisp
 
             // infrastructure functions
             scope["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
+            scope["version"] = CreateFunction(Version, "(version)", "Returns the version of the fuel language.");
             scope["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
             scope["help"] = CreateFunction(Help, "(help)", "Returns and shows the available builtin functions.");
             scope["doc"] = CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s).");
@@ -509,6 +510,15 @@ namespace CsLisp
 
             var text = new StringBuilder();
             text.Append(string.Format("fuel version {0} from {1}", Lisp.Version, Lisp.Date));
+            return new LispVariant(text.ToString());
+        }
+
+        private static LispVariant Version(object[] args, LispScope scope)
+        {
+            CheckArgs("version", 0, args, scope);
+
+            var text = new StringBuilder();
+            text.Append(string.Format("{0}", Lisp.Version));
             return new LispVariant(text.ToString());
         }
 

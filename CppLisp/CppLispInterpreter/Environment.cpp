@@ -271,6 +271,13 @@ static std::shared_ptr<LispVariant> Fuel(const std::vector<std::shared_ptr<objec
 	return std::make_shared<LispVariant>(std::make_shared<object>(text));
 }
 
+static std::shared_ptr<LispVariant> Version(const std::vector<std::shared_ptr<object>>& /*args*/, std::shared_ptr<LispScope> /*scope*/)
+{
+	string text; // var text = new StringBuilder();
+	text.Append(string::Format("{0}", Lisp::Version));
+	return std::make_shared<LispVariant>(std::make_shared<object>(text));
+}
+
 static std::shared_ptr<LispVariant> Copyright(const std::vector<std::shared_ptr<object>> & /*args*/, std::shared_ptr<LispScope> /*scope*/)
 {
 	string text; // var text = new StringBuilder();
@@ -2298,6 +2305,7 @@ std::shared_ptr<LispScope> LispEnvironment::CreateDefaultScope()
 	(*scope)[Traceon] = std::make_shared<object>(false);
 
 	(*scope)["fuel"] = CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language.");
+	(*scope)["version"] = CreateFunction(Version, "(version)", "Returns the version of the fuel language.");
 	(*scope)["copyright"] = CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language.");
 #ifndef _DISABLE_DEBUGGER
 	(*scope)["help"] = CreateFunction(Help, "(help)", "Returns and shows the available builtin functions.");

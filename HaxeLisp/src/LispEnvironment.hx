@@ -190,6 +190,7 @@ class LispEnvironment {
         scope.set(Traceon, false);
 
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language."));
+        scope.set("version", CreateFunction(Version, "(version)", "Returns the version of the fuel language."));
         scope.set("copyright", CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language."));
         scope.set("help", CreateFunction(Help, "(help)", "Returns and shows the available builtin functions."));
         scope.set("doc", CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s)."));
@@ -363,7 +364,14 @@ class LispEnvironment {
 
         return LispVariant.forValue('fuel version ${LispEnvironment.FuelVersion} from ${LispEnvironment.FuelDate}');
     }
-    
+
+    private static function Version(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("version", 0, args, scope);
+
+        return LispVariant.forValue('${LispEnvironment.FuelVersion}');
+    }
+        
     private static function Copyright(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         CheckArgs("copyright", 0, args, scope);
