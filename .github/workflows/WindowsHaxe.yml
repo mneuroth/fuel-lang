@@ -134,8 +134,10 @@ jobs:
           #zip fuel_binaries.zip ./bin/fuel.java/Fuel.jar ./bin/fuel.cpp/Fuel ./bin/fuel.cs/bin/Fuel.exe ./bin/fuel.py
           #unzip -v fuel_binaries.zip
           #dir
+          git fetch --tags
+          git describe --tags --abbrev=0
           echo "Latest tag: $(git describe --tags --abbrev=0)"
-          set CURRENT_VERSION=$(git describe --tags --abbrev=0)
+          set CURRENT_VERSION="$(git describe --tags --abbrev=0)"
           echo %CURRENT_VERSION%
 
       # Test the project
