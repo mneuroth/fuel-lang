@@ -128,8 +128,8 @@ class LispEnvironment {
     public /*const*/static var Sym = "sym";
     public /*const*/static var Str = "str";
 
-    public /*const*/static var FuelVersion = "v0.99.4";
-    public /*const*/static var FuelDate = "11.11.2023";
+    //public /*const*/static var FuelVersion = "v0.99.4";
+    //public /*const*/static var FuelDate = "11.11.2023";
 
     public static function FuelFuncWrapper0<TResult>(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<TResult>*/ func:Dynamic):LispVariant
     {
@@ -362,14 +362,14 @@ class LispEnvironment {
     {
         CheckArgs("fuel", 0, args, scope);
 
-        return LispVariant.forValue('fuel version ${LispEnvironment.FuelVersion} from ${LispEnvironment.FuelDate}');
+        return LispVariant.forValue('fuel version ${Lisp.Version} from ${Lisp.Date}');
     }
 
     private static function Version(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         CheckArgs("version", 0, args, scope);
 
-        return LispVariant.forValue('${LispEnvironment.FuelVersion}');
+        return LispVariant.forValue('${Lisp.Version}');
     }
         
     private static function Copyright(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant

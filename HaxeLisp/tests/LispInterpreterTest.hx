@@ -31,7 +31,7 @@ class LispInterpreterTest extends utest.Test {
         var scope = LispEnvironment.CreateDefaultScope();
         var ast = LispParser.Parse("(fuel)");
         var result = LispInterpreter.EvalAst(ast, scope);
-        Assert.equals("fuel version v0.99.4 from 11.11.2023", result.Value);
+        Assert.equals("fuel version v0.99.6 from 16.12.2023", result.Value);
     }
     public function testInterpreter2() {
         var scope = LispEnvironment.CreateDefaultScope();
