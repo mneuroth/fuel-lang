@@ -189,7 +189,7 @@ The binary distribution of FUEL for the native C++ platform(s) consists of the f
   
 Platforms  
 ---------
-FUEL is developed with C# for the Microsoft --.NET version 3.5-- .NET 6.0 under Windows.
+FUEL is developed with C# for the Microsoft ~~.NET version 3.5~~ .NET 6.0 under Windows.
 FUEL can be used with mono environment under Linux and Mac OS X.
 
 FUEL is also available for native C++ for all platforms supporting a C++11 compiler.
