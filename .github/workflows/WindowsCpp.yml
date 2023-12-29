@@ -42,6 +42,9 @@ jobs:
         dir CppLispInterpreter
         dir CppLispInterpreter\Release
         copy CppLispInterpreter\Release\FuelInterpreter.dll Release
+        dir CppLispDebugger
+        dir CppLispDebugger\Release
+        copy CppLispDebugger\Release\FuelDebugger.dll Release
         cd Release
         dir
         ./fuel -v
