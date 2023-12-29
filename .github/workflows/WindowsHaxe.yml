@@ -135,9 +135,13 @@ jobs:
           #unzip -v fuel_binaries.zip
           #dir
           git fetch --tags
+          git rev-list --tags --max-count=1
+          set CURRENT_TAG="$(git rev-list --tags --max-count=1)"
+          echo %CURRENT_TAG%
+          git describe --tags %CURRENT_TAG%
           git describe --tags --abbrev=0
-          echo "Latest tag: $(git describe --tags --abbrev=0)"
-          set CURRENT_VERSION="$(git describe --tags --abbrev=0)"
+          echo "Latest tag: $(git describe --tags %CURRENT_TAG%)"
+          set CURRENT_VERSION="$(git describe --tags %CURRENT_TAG%)"
           echo %CURRENT_VERSION%
 
       # Test the project
