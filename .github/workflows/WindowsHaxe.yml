@@ -111,7 +111,7 @@ jobs:
           dir
           powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -ArchiveFileName "fuel_binaries_cs_0.99.6.zip" -Format Zip
           powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
-          copy ".\bin\fuel.cs\Fuel.exe" all_haxe_bins
+          copy ".\bin\fuel.cs\bin\Fuel.exe" all_haxe_bins
           dir
           powershell Compress-7Zip ".\bin\fuel.py" -ArchiveFileName "fuel_binaries_py_0.99.6.zip" -Format Zip
           powershell Compress-7Zip ".\bin\fuel.py" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
