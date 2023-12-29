@@ -96,29 +96,47 @@ jobs:
           ./bin/fuel.cpp/Fuel -e "(+ 1 2 3)" -t
           ./bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)" -t
           python3 ./bin/fuel.py -e "(+ 1 2 3)" -t
+          mkdir all_haxe_bins
+          mkdir all_haxe_bins\Library
+          copy "..\Library\fuellib.fuel" all_haxe_bins\Library
           dir
           powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_binaries_java_0.99.6.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
+          copy ".\bin\fuel.java\Fuel.jar" all_haxe_bins
           dir
           powershell Compress-7Zip ".\bin\fuel.cpp\Fuel.exe" -ArchiveFileName "fuel_binaries_cpp_0.99.6.zip" -Format Zip
           copy ".\bin\fuel.cpp\Fuel.exe" ".\bin\fuel.cpp\FuelCpp.exe"
-          powershell Compress-7Zip ".\bin\fuel.cpp\FuelCpp.exe" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          copy ".\bin\fuel.cpp\Fuel.exe" all_haxe_bins
+          powershell Compress-7Zip ".\bin\fuel.cpp\FuelCpp.exe" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
           dir
           powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -ArchiveFileName "fuel_binaries_cs_0.99.6.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
+          copy ".\bin\fuel.cs\Fuel.jar" all_haxe_bins
           dir
           powershell Compress-7Zip ".\bin\fuel.py" -ArchiveFileName "fuel_binaries_py_0.99.6.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.py" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.py" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
+          copy ".\bin\fuel.py" all_haxe_bins
           dir
           powershell Compress-7Zip ".\bin\fuel.js" -ArchiveFileName "fuel_binaries_js_0.99.6.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.js" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.js" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
+          copy ".\bin\fuel.js" all_haxe_bins
           dir
           powershell Compress-7Zip ".\bin\fuel_node.js" -ArchiveFileName "fuel_binaries_js_node_0.99.6.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel_node.js" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel_node.js" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
+          copy ".\bin\fuel_node.js" all_haxe_bins
+          dir
+          copy ".\bin\fuel.js" all_haxe_bins
+          powershell Compress-7Zip "..\Library\fuellib.fuel" -Append -ArchiveFileName "fuel_only_haxe_binaries_0.99.6.zip" -Format Zip
+          dir
+          dir all_haxe_bins
+          powershell Compress-7Zip ".\all_haxe_bins" -ArchiveFileName "fuel_all_haxe_binaries_0.99.6.zip" -Format Zip
           dir
           #zip fuel_binaries.zip ./bin/fuel.java/Fuel.jar ./bin/fuel.cpp/Fuel ./bin/fuel.cs/bin/Fuel.exe ./bin/fuel.py
           #unzip -v fuel_binaries.zip
           #dir
+          echo "Latest tag: $(git describe --tags --abbrev=0)"
+          set CURRENT_VERSION=$(git describe --tags --abbrev=0)
+          echo %CURRENT_VERSION%
 
       # Test the project
       - name: Test the project
@@ -140,6 +158,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: HaxeLisp/fuel_all_binaries_0.99.6.zip
-          asset_name: fuel_all_binaries_0.99.6.zip
+          asset_path: HaxeLisp/fuel_all_haxe_binaries_0.99.6.zip
+          asset_name: fuel_only_haxe_binaries_0.99.6.zip
           asset_content_type: application/zip

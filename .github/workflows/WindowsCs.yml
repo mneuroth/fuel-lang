@@ -27,6 +27,9 @@ jobs:
         dir
         dotnet build --configuration Release
         dir
+        dir CsLispDebugger
+        dir CsLispDebugger\bin\Release\net6.0
+        copy CsLispDebugger\bin\Release\net6.0\FuelDebugger.dll bin\Release\net6.0
         cd bin
         dir
         cd Release
