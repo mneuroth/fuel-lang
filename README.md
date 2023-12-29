@@ -1,8 +1,8 @@
 <img src="fuel.png" alt="fuel logo" height="128" >
 
 # fuel-lang == FUEL(isp)
-FUEL(isp) is a fast usable embeddable lisp interpreter (currently for the .NET platform and native C++ and since december 2023 also for [Haxe](https://haxe.org/)). 
-FUEL is written in C#, C++ and Haxe. All target platforms for Haxe are supported: JavaScript, Java, C++, C#, Python, Lua, PHP, Neko, HashLink.
+FUEL(isp) is a **F**ast **U**sable **E**mbeddable **L**isp interpreter (currently for the .NET platform and native C++ and since december 2023 also for the [Haxe](https://haxe.org/) environment). 
+FUEL is written in C#, C++ and Haxe. All target platforms of the Haxe environment are supported: JavaScript, Java, C++, C#, Python, Lua, PHP, Neko, HashLink.
 
 FUEL
 ----
@@ -147,17 +147,17 @@ look at the TestAppUsingFuel project.
 
 Compiling
 ---------
-To compile the C# version of fuel just open the solution file CsLisp/CsLisp.sln in
+To compile the C# version of fuel just open the solution file `CsLisp/CsLisp.sln` in
 Microsoft Visual Studio and build the solution.
 
-To compile the C++ version of fuel open the solution file CppLisp/CppLisp.sln in
+To compile the C++ version of fuel open the solution file `CppLisp/CppLisp.sln` in
 Microsoft Visual Studio and build the solution. Or use the qmake tool from [Qt](https://www.qt.io/):
 
     >cd CppLisp
     >qmake -r CppLisp.pro
     >make
     
-The CMake build tool is also supported:
+The [CMake](https://cmake.org/) build tool is also supported:
 
     >cd CppLisp
     >cmake CMakeLists.txt
@@ -189,22 +189,22 @@ The binary distribution of FUEL for the native C++ platform(s) consists of the f
   
 Platforms  
 ---------
-FUEL is developed with C# for the Microsoft .NET version 3.5 under Windows.
+FUEL is developed with C# for the Microsoft --.NET version 3.5-- .NET 6.0 under Windows.
 FUEL can be used with mono environment under Linux and Mac OS X.
 
 FUEL is also available for native C++ for all platforms supporting a C++11 compiler.
 FUEL was successfully compiled on Windows, Android, Linux (including the Raspberry Pi) and Mac OS X. 
 
 * Github Actions: 
-    * Linux [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml) 
-            [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)
-			[![Linux Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxHaxe.yml)
-    * Windows [![Windows C#](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml)
-	          [![Windows C++](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCpp.yml)
-	          [![Windows Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsHaxe.yml)
-	* MacOS [![MacOS C#](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml)
-           	[![MacOS C++](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCpp.yml)
-			[![MacOS Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSHaxe.yml)
+    * Linux: [![Linux C#](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCs.yml) 
+             [![Linux C++](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxCpp.yml)
+			 [![Linux Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/LinuxHaxe.yml)
+    * Windows: [![Windows C#](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCs.yml)
+	           [![Windows C++](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsCpp.yml)
+	           [![Windows Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/WindowsHaxe.yml)
+	* MacOS: [![MacOS C#](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCs.yml)
+           	 [![MacOS C++](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCpp.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSCpp.yml)
+			 [![MacOS Haxe](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSHaxe.yml/badge.svg)](https://github.com/mneuroth/fuel-lang/actions/workflows/MacOSHaxe.yml)
 	        
 Benchmarks
 ----------
