@@ -97,7 +97,7 @@ jobs:
           ./bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)" -t
           python3 ./bin/fuel.py -e "(+ 1 2 3)" -t
           python3 ./bin/fuel.py -e "(println (version))"
-          echo "::set-env name=CURRENT_TAG::$(powershell -command "python3 ./bin/fuel.py -e "(println (version))"")"
+          echo "::set-env name=CURRENT_TAG::$(powershell -command 'python3 ./bin/fuel.py -e "(println (version))"')"
           echo $env:CURRENT_TAG
           #set CURRENT_TAG="$(python3 ./bin/fuel.py -e \"(println (version))\")"
           #echo %CURRENT_TAG%
