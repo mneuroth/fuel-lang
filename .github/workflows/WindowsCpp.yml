@@ -51,10 +51,11 @@ jobs:
         copy CppLispDebugger\Release\FuelDebugger.dll Release
         mkdir Release\Library
         copy ..\Library\fuellib.fuel Release\Library
-        copy ..\LICENSE Release\Library
-        copy ..\README.md Release\Library
+        copy ..\LICENSE Release
+        copy ..\README.md Release
         cd Release
         dir
+        dir Library
         ./fuel -v
         ./fuel -e "(println (platform))"
         ./fuel
