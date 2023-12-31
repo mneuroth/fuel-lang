@@ -26,9 +26,13 @@ jobs:
     #    vs-version: 'latest'
     - uses: ilammy/msvc-dev-cmd@v1
 
-    # Compile the project
+    - name: Install 7Zip PowerShell Module
+      shell: powershell
+      run: Install-Module 7Zip4PowerShell -Force -Verbose
+
+    # Build the project
     # cmake --build . --config Release
-    - name: Compile the project with CMake
+    - name: Build the project with CMake
       run: |
         cd CppLisp
         cmake --version
@@ -45,16 +49,25 @@ jobs:
         dir CppLispDebugger
         dir CppLispDebugger\Release
         copy CppLispDebugger\Release\FuelDebugger.dll Release
+        mkdir Release\Library
+        copy ..\Library\fuellib.fuel Release\Library
+        copy ..\LICENSE Release\Library
+        copy ..\README.md Release\Library
         cd Release
         dir
         ./fuel -v
         ./fuel -e "(println (platform))"
         ./fuel
+        $result = &{./fuel -e "(println (version))"}
+        echo $result
+        $env:CURRENT_TAG = $result
+        cd ..
+        powershell Compress-7Zip ".\Release" -ArchiveFileName "fuel_cpp_binaries_$env:CURRENT_TAG.zip" -Format Zip
         dir
         cd ..
         dir
 
-    - name: Compile and test the project with MSBuild
+    - name: Build and test the project with MSBuild
       run: |
         cd CppLisp
         msbuild CppLisp.sln /property:Configuration=Release
