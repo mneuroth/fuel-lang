@@ -16,11 +16,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
-    - name: Build
+
+    - name: Install 7Zip PowerShell Module
+      shell: powershell
+      run: Install-Module 7Zip4PowerShell -Force -Verbose
+
+    - name: Build the project
       run: |
         dir
         cd CsLisp
@@ -30,6 +36,11 @@ jobs:
         dir CsLispDebugger
         dir CsLispDebugger\bin\Release\net6.0
         copy CsLispDebugger\bin\Release\net6.0\FuelDebugger.dll bin\Release\net6.0
+        copy CsLispCompiler\bin\Release\net6.0\FuelCompiler.dll bin\Release\net6.0
+        mkdir bin\Release\net6.0\Library
+        copy ..\Library\fuellib.fuel bin\Release\net6.0\Library
+        copy ..\LICENSE bin\Release\net6.0
+        copy ..\README.md bin\Release\net6.0
         cd bin
         dir
         cd Release
@@ -39,7 +50,14 @@ jobs:
         .\fuel.exe -v
         .\fuel.exe -e "(println (platform))"
         .\fuel.exe
-    - name: Test
+        $result = &{fuel.exe -e "(println (version))"}
+        echo $result
+        $env:CURRENT_TAG = $result
+        cd ..
+        powershell Compress-7Zip ".\net6.0" -ArchiveFileName "fuel_cs_binaries_$env:CURRENT_TAG.zip" -Format Zip
+        dir
+
+    - name: Test the project
       run: |
         dir
         cd CsLisp
