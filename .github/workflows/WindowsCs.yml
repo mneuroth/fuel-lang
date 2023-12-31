@@ -50,7 +50,7 @@ jobs:
         .\fuel.exe -v
         .\fuel.exe -e "(println (platform))"
         .\fuel.exe
-        $result = &{fuel.exe -e "(println (version))"}
+        $result = &{.\fuel.exe -e "(println (version))"}
         echo $result
         $env:CURRENT_TAG = $result
         cd ..
