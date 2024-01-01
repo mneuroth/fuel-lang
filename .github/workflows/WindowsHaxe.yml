@@ -154,8 +154,11 @@ jobs:
           haxe --interp --main Fuel
           echo "====="
           haxe --interp --class-path ..\tests --library utest --main FuelTest
+          ecb
+          echo "++++++++++++++++"
           echo $CURRENT_TAG
           echo $env:CURRENT_TAG
+          echon "done."
 
       - name: Upload Release Asset
         if: contains(github.ref, 'release')
