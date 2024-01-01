@@ -50,8 +50,7 @@ jobs:
         name: release_url
         path: release_url.txt
 
-  # This workflow contains a single job called "build"
-  build:
+  build_haxe:
     # The type of runner that the job will run on
     runs-on: windows-latest
     needs: create_release
@@ -164,3 +163,67 @@ jobs:
           asset_path: HaxeLisp/fuel_all_haxe_binaries_$env:CURRENT_TAG.zip
           asset_name: fuel_all_haxe_binaries_$env:CURRENT_TAG.zip
           asset_content_type: application/zip
+
+  build_cs:
+
+    runs-on: windows-latest
+    needs: create_release
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install 7Zip PowerShell Module
+        shell: powershell
+        run: Install-Module 7Zip4PowerShell -Force -Verbose
+          
+      # copied from WindowsCS.yml    
+      - name: Build C# release
+        if: contains(github.ref, 'release')
+        run: |
+          dir
+          cd CsLisp
+          dir
+          dotnet build --configuration Release
+          dir
+          dir CsLispDebugger
+          dir CsLispDebugger\bin\Release\net6.0
+          copy CsLispDebugger\bin\Release\net6.0\FuelDebugger.dll bin\Release\net6.0
+          copy CsLispCompiler\bin\Release\net6.0\FuelCompiler.dll bin\Release\net6.0
+          mkdir bin\Release\net6.0\Library
+          copy ..\Library\fuellib.fuel bin\Release\net6.0\Library
+          copy ..\LICENSE bin\Release\net6.0
+          copy ..\README.md bin\Release\net6.0
+          cd bin
+          dir
+          cd Release
+          dir
+          cd net6.0
+          dir
+          .\fuel.exe -v
+          .\fuel.exe -e "(println (platform))"
+          .\fuel.exe
+          $result = &{.\fuel.exe -e "(println (version))"}
+          echo $result
+          $env:CURRENT_TAG = $result
+          cd ..
+          powershell Compress-7Zip ".\net6.0" -ArchiveFileName "fuel_cs_binaries_$env:CURRENT_TAG.zip" -Format Zip
+          dir          
+ 
+      - name: Upload Release Asset
+        if: contains(github.ref, 'release')
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: HaxeLisp/fuel_cs_binaries_$env:CURRENT_TAG.zip
+          asset_name: fuel_cs_binaries_$env:CURRENT_TAG.zip
+          asset_content_type: application/zip
+
+ 
