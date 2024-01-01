@@ -232,49 +232,50 @@ jobs:
     needs: create_release
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/checkout@v3
+      - uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Install 7Zip PowerShell Module
-      shell: powershell
-      run: Install-Module 7Zip4PowerShell -Force -Verbose
+      - name: Install 7Zip PowerShell Module
+        shell: powershell
+        run: Install-Module 7Zip4PowerShell -Force -Verbose
 
-    # copied from WindowsCpp.yml    
-    - name: Build the project with CMake
-      run: |
-        cd CppLisp
-        cmake --version
-        cmake CMakeLists.txt
-        cmake --build . --config Release
-        dir
-        dir Release
-        dir x64
-        dir x64\Release
-        dir CppLispInterpreterTests
-        dir CppLispInterpreter
-        dir CppLispInterpreter\Release
-        copy CppLispInterpreter\Release\FuelInterpreter.dll Release
-        dir CppLispDebugger
-        dir CppLispDebugger\Release
-        copy CppLispDebugger\Release\FuelDebugger.dll Release
-        mkdir Release\Library
-        copy ..\Library\fuellib.fuel Release\Library
-        copy ..\LICENSE Release
-        copy ..\README.md Release
-        cd Release
-        dir
-        dir Library
-        ./fuel -v
-        ./fuel -e "(println (platform))"
-        ./fuel
-        $result = &{./fuel -e "(println (version))"}
-        echo $result
-        $env:CURRENT_TAG = $result
-        cd ..
-        powershell Compress-7Zip ".\Release" -ArchiveFileName "fuel_cpp_binaries_$env:CURRENT_TAG.zip" -Format Zip
-        dir
-        cd ..
-        dir
+      # copied from WindowsCpp.yml    
+      - name: Build the project with CMake
+        if: contains(github.ref, 'release')
+        run: |
+          cd CppLisp
+          cmake --version
+          cmake CMakeLists.txt
+          cmake --build . --config Release
+          dir
+          dir Release
+          dir x64
+          dir x64\Release
+          dir CppLispInterpreterTests
+          dir CppLispInterpreter
+          dir CppLispInterpreter\Release
+          copy CppLispInterpreter\Release\FuelInterpreter.dll Release
+          dir CppLispDebugger
+          dir CppLispDebugger\Release
+          copy CppLispDebugger\Release\FuelDebugger.dll Release
+          mkdir Release\Library
+          copy ..\Library\fuellib.fuel Release\Library
+          copy ..\LICENSE Release
+          copy ..\README.md Release
+          cd Release
+          dir
+          dir Library
+          ./fuel -v
+          ./fuel -e "(println (platform))"
+          ./fuel
+          $result = &{./fuel -e "(println (version))"}
+          echo $result
+          $env:CURRENT_TAG = $result
+          cd ..
+          powershell Compress-7Zip ".\Release" -ArchiveFileName "fuel_cpp_binaries_$env:CURRENT_TAG.zip" -Format Zip
+          dir
+          cd ..
+          dir
  
       - name: Upload Release Asset
         if: contains(github.ref, 'release')
