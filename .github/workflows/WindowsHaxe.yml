@@ -99,6 +99,9 @@ jobs:
           $result = &{python3 ./bin/fuel.py -e "(println (version))"}
           echo $result
           $env:CURRENT_TAG = $result
+          echo "CURRENT_TAG=$result" >> $GITHUB_ENV
+          echo $CURRENT_TAG
+          echo $env:CURRENT_TAG
           mkdir all_haxe_bins
           mkdir all_haxe_bins\Library
           copy "..\Library\fuellib.fuel" all_haxe_bins\Library
@@ -222,7 +225,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: CsLisp/fuel_cs_binaries_$env:CURRENT_TAG.zip
+          asset_path: CsLisp/bin/Release/fuel_cs_binaries_$env:CURRENT_TAG.zip
           asset_name: fuel_cs_binaries_$env:CURRENT_TAG.zip
           asset_content_type: application/zip
 
@@ -271,6 +274,9 @@ jobs:
           $result = &{./fuel -e "(println (version))"}
           echo $result
           $env:CURRENT_TAG = $result
+          echo "CURRENT_TAG=$result" >> $GITHUB_ENV
+          echo $CURRENT_TAG
+          echo $env:CURRENT_TAG
           cd ..
           powershell Compress-7Zip ".\Release" -ArchiveFileName "fuel_cpp_binaries_$env:CURRENT_TAG.zip" -Format Zip
           dir
@@ -281,6 +287,9 @@ jobs:
         if: contains(github.ref, 'release')
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
+        run: |
+          echo $CURRENT_TAG
+          echo $env:CURRENT_TAG
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
