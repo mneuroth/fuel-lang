@@ -81,6 +81,7 @@ jobs:
         
       # Build the project
       - name: Build the project
+        id: build_project
         run: |
           cd HaxeLisp
           haxe build.hxml
@@ -100,6 +101,7 @@ jobs:
           echo "......."
           echo $result
           $env:CURRENT_TAG = $result
+          echo "CURRENT_TAG=$result"
           echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
           echo $CURRENT_TAG
