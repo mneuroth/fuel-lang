@@ -100,7 +100,6 @@ jobs:
           $result = &{python3 ./bin/fuel.py -e "(println (version))"}
           echo "......."
           echo $result
-          $env:CURRENT_TAG = $result
           echo "CURRENT_TAG=$result"
           echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
