@@ -107,8 +107,11 @@ jobs:
           echo $CURRENT_TAG
           echo $env:CURRENT_TAG
           echo ">>> ${{env.CURRENT_TAG}}"
+          echo ">>>> ${{env:CURRENT_TAG}}"
+          echo ">>>>> ${CURRENT_TAG}"
           echo ">>>>>> $CURRENT_TAG"
           echo "CURRENT_TAG=$result" >> "$GITHUB_OUTPUT"
+          echo $GITHUB_OUTPUT
           echo ":::::::"
           mkdir all_haxe_bins
           mkdir all_haxe_bins\Library
