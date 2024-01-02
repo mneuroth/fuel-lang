@@ -100,7 +100,7 @@ jobs:
           $result = &{python3 ./bin/fuel.py -e "(println (version))"}
           echo "......."
           echo $result
-          echo "CURRENT_TAG=$result"
+          #echo "CURRENT_TAG=$result"
           echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
           #echo $CURRENT_TAG
@@ -228,7 +228,7 @@ jobs:
           .\fuel.exe
           $result = &{.\fuel.exe -e "(println (version))"}
           echo $result
-          $env:CURRENT_TAG = $result
+          #$env:CURRENT_TAG = $result
           cd ..
           powershell Compress-7Zip ".\net6.0" -ArchiveFileName "fuel_cs_binaries_$env:CURRENT_TAG.zip" -Format Zip
           dir          
@@ -290,10 +290,10 @@ jobs:
           ./fuel
           $result = &{./fuel -e "(println (version))"}
           echo $result
-          $env:CURRENT_TAG = $result
+          #$env:CURRENT_TAG = $result
           echo "CURRENT_TAG=$result" >> $GITHUB_ENV
-          echo $CURRENT_TAG
-          echo $env:CURRENT_TAG
+          #echo $CURRENT_TAG
+          #echo $env:CURRENT_TAG
           cd ..
           powershell Compress-7Zip ".\Release" -ArchiveFileName "fuel_cpp_binaries_$env:CURRENT_TAG.zip" -Format Zip
           dir
