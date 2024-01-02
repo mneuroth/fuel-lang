@@ -81,7 +81,7 @@ jobs:
         
       # Build the project
       - name: Build the project
-        id: build_project
+        #id: build_project
         run: |
           cd HaxeLisp
           haxe build.hxml
@@ -100,10 +100,11 @@ jobs:
           $result = &{python3 ./bin/fuel.py -e "(println (version))"}
           echo "......."
           echo $result
-          echo "CURRENT_TAG=$result"
-          #echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
+          $env:CURRENT_TAG = $result
+          #echo "CURRENT_TAG=$result"
+          echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
-          #echo $CURRENT_TAG
+          echo $CURRENT_TAG
           #echo ">>> ${{env.CURRENT_TAG}}"
           #echo ">>>>> ${{CURRENT_TAG}}"
           #echo ">>>>>> $CURRENT_TAG"
