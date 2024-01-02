@@ -100,14 +100,14 @@ jobs:
           $result = &{python3 ./bin/fuel.py -e "(println (version))"}
           echo "......."
           echo $result
-          #echo "CURRENT_TAG=$result"
-          echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
+          echo "CURRENT_TAG=$result"
+          #echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
           #echo $CURRENT_TAG
           #echo ">>> ${{env.CURRENT_TAG}}"
           #echo ">>>>> ${{CURRENT_TAG}}"
           #echo ">>>>>> $CURRENT_TAG"
-          echo "CURRENT_TAG=$result" >> "$GITHUB_OUTPUT"
+          #echo "CURRENT_TAG=$result" >> "$GITHUB_OUTPUT"
           echo ":::::::"
           mkdir all_haxe_bins
           mkdir all_haxe_bins\Library
@@ -152,8 +152,8 @@ jobs:
 
       # Test the project
       - name: Test the project
-        env:
-          CURRENT_TAG: ${{ steps.build_project.outputs.CURRENT_TAG }}
+        #env:
+        #  CURRENT_TAG: ${{ steps.build_project.outputs.CURRENT_TAG }}
         run: |
           # use this command:
           # haxe unittest.hxml
@@ -164,7 +164,7 @@ jobs:
           echo "====="
           haxe --interp --class-path ..\tests --library utest --main FuelTest
           echo "++++++++++++++++"
-          echo $CURRENT_TAG
+          #echo $CURRENT_TAG
           #echo $env:CURRENT_TAG
           echo $GITHUB_ENV
           #echo ">>> ${{env.CURRENT_TAG}}"
@@ -228,7 +228,7 @@ jobs:
           .\fuel.exe
           $result = &{.\fuel.exe -e "(println (version))"}
           echo $result
-          #$env:CURRENT_TAG = $result
+          $env:CURRENT_TAG = $result
           cd ..
           powershell Compress-7Zip ".\net6.0" -ArchiveFileName "fuel_cs_binaries_$env:CURRENT_TAG.zip" -Format Zip
           dir          
@@ -290,8 +290,8 @@ jobs:
           ./fuel
           $result = &{./fuel -e "(println (version))"}
           echo $result
-          #$env:CURRENT_TAG = $result
-          echo "CURRENT_TAG=$result" >> $GITHUB_ENV
+          $env:CURRENT_TAG = $result
+          #echo "CURRENT_TAG=$result" >> $GITHUB_ENV
           #echo $CURRENT_TAG
           #echo $env:CURRENT_TAG
           cd ..
