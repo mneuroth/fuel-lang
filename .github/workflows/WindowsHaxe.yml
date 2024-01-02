@@ -103,7 +103,7 @@ jobs:
           echo "CURRENT_TAG=$result"
           echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
-          echo $CURRENT_TAG
+          #echo $CURRENT_TAG
           echo ">>> ${{env.CURRENT_TAG}}"
           echo ">>>>> ${{CURRENT_TAG}}"
           echo ">>>>>> $CURRENT_TAG"
