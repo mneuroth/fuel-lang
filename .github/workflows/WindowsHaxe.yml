@@ -81,7 +81,6 @@ jobs:
         
       # Build the project
       - name: Build the project
-        #id: build_project
         run: |
           cd HaxeLisp
           haxe build.hxml
@@ -101,14 +100,11 @@ jobs:
           echo "......."
           echo $result
           $env:CURRENT_TAG = $result
-          #echo "CURRENT_TAG=$result"
           echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
           echo $CURRENT_TAG
-          #echo ">>> ${{env.CURRENT_TAG}}"
-          #echo ">>>>> ${{CURRENT_TAG}}"
-          #echo ">>>>>> $CURRENT_TAG"
-          #echo "CURRENT_TAG=$result" >> "$GITHUB_OUTPUT"
+          echo $env:CURRENT_TAG
+          echo ">>> ${{env.CURRENT_TAG}}"
           echo ":::::::"
           mkdir all_haxe_bins
           mkdir all_haxe_bins\Library
@@ -153,8 +149,6 @@ jobs:
 
       # Test the project
       - name: Test the project
-        #env:
-        #  CURRENT_TAG: ${{ steps.build_project.outputs.CURRENT_TAG }}
         run: |
           # use this command:
           # haxe unittest.hxml
@@ -165,10 +159,10 @@ jobs:
           echo "====="
           haxe --interp --class-path ..\tests --library utest --main FuelTest
           echo "++++++++++++++++"
-          #echo $CURRENT_TAG
-          #echo $env:CURRENT_TAG
+          echo $CURRENT_TAG
+          echo $env:CURRENT_TAG
           echo $GITHUB_ENV
-          #echo ">>> ${{env.CURRENT_TAG}}"
+          echo ">>> ${{env.CURRENT_TAG}}"
           echo "done."
 
       - name: Upload Release Asset
@@ -292,9 +286,9 @@ jobs:
           $result = &{./fuel -e "(println (version))"}
           echo $result
           $env:CURRENT_TAG = $result
-          #echo "CURRENT_TAG=$result" >> $GITHUB_ENV
-          #echo $CURRENT_TAG
-          #echo $env:CURRENT_TAG
+          echo "CURRENT_TAG=$result" >> $GITHUB_ENV
+          echo $CURRENT_TAG
+          echo $env:CURRENT_TAG
           cd ..
           powershell Compress-7Zip ".\Release" -ArchiveFileName "fuel_cpp_binaries_$env:CURRENT_TAG.zip" -Format Zip
           dir
