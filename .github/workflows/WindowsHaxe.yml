@@ -104,9 +104,9 @@ jobs:
           echo "CURRENT_TAG=$result" >> "$GITHUB_ENV"
           echo $GITHUB_ENV
           #echo $CURRENT_TAG
-          echo ">>> ${{env.CURRENT_TAG}}"
-          echo ">>>>> ${{CURRENT_TAG}}"
-          echo ">>>>>> $CURRENT_TAG"
+          #echo ">>> ${{env.CURRENT_TAG}}"
+          #echo ">>>>> ${{CURRENT_TAG}}"
+          #echo ">>>>>> $CURRENT_TAG"
           echo "CURRENT_TAG=$result" >> "$GITHUB_OUTPUT"
           echo ":::::::"
           mkdir all_haxe_bins
@@ -165,9 +165,9 @@ jobs:
           haxe --interp --class-path ..\tests --library utest --main FuelTest
           echo "++++++++++++++++"
           echo $CURRENT_TAG
-          echo $env:CURRENT_TAG
+          #echo $env:CURRENT_TAG
           echo $GITHUB_ENV
-          echo ">>> ${{env.CURRENT_TAG}}"
+          #echo ">>> ${{env.CURRENT_TAG}}"
           echo "done."
 
       - name: Upload Release Asset
