@@ -153,6 +153,8 @@ jobs:
 
       # Test the project
       - name: Test the project
+        env:
+          CURRENT_TAG: ${{ steps.build_project.outputs.CURRENT_TAG }}
         run: |
           # use this command:
           # haxe unittest.hxml
